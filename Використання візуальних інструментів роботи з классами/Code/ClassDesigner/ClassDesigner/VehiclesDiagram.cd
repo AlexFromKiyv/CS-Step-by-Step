@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="ClassDesigner.Vehile">
+    <Position X="4.75" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAQAAAAQAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Vehile.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ClassDesigner.Car">
+    <Position X="7" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAQAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Car.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
