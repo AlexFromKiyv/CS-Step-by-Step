@@ -127,14 +127,24 @@ public static string[] GetCommandLineArgs();
 1. В Solution Explorer на проекті правий клік > Open in Terminal
 2. В Terminal команда: dotnet run
 3. В Terminal команда: $LastExitCode (повинен бути 0)
-4. Змінимо код на    
+4. Змінимо код Program.cs    
 
 ```cs
-// Bad situation 
-return -1;
+Console.Write("Does this program work well?:(Y/N)");
+
+string? enteredString = Console.ReadLine();
+if (enteredString == "Y" || enteredString == "y")
+{
+    return 0;
+}
+else
+{
+    // Bad work 
+    return -1; 
+}
 ```
 5. В Terminal команда: dotnet run
-6. В Terminal команда: $LastExitCode (повинен бути -1)
+6. В Terminal команда: $LastExitCode (повинен вернути -1)
 
 Таку можливість можна використовувати в тестуванні.
 
