@@ -3,9 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33110.190
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleAppWithoutTopLevel", "ConsoleAppWithoutTopLevel\ConsoleAppWithoutTopLevel.csproj", "{65739281-42F9-4500-BAED-A7B8D22E619F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleAppWithoutTopLevel", "ConsoleAppWithoutTopLevel\ConsoleAppWithoutTopLevel.csproj", "{65739281-42F9-4500-BAED-A7B8D22E619F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleAppWithTopLevel", "ConsoleAppWithTopLevel\ConsoleAppWithTopLevel.csproj", "{3ED192D7-3463-4CF8-9B61-90CA905AE81E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleAppWithTopLevel", "ConsoleAppWithTopLevel\ConsoleAppWithTopLevel.csproj", "{3ED192D7-3463-4CF8-9B61-90CA905AE81E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GetParametersInApp", "GetParametersInApp\GetParametersInApp.csproj", "{245BB7B8-3895-4421-BDFC-A4528A7F7ED9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GetCodeErrorOutApp", "GetCodeErrorOutApp\GetCodeErrorOutApp.csproj", "{E4527979-7A76-4C04-9CAC-A6F655694334}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +25,14 @@ Global
 		{3ED192D7-3463-4CF8-9B61-90CA905AE81E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3ED192D7-3463-4CF8-9B61-90CA905AE81E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3ED192D7-3463-4CF8-9B61-90CA905AE81E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{245BB7B8-3895-4421-BDFC-A4528A7F7ED9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{245BB7B8-3895-4421-BDFC-A4528A7F7ED9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{245BB7B8-3895-4421-BDFC-A4528A7F7ED9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{245BB7B8-3895-4421-BDFC-A4528A7F7ED9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E4527979-7A76-4C04-9CAC-A6F655694334}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E4527979-7A76-4C04-9CAC-A6F655694334}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E4527979-7A76-4C04-9CAC-A6F655694334}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E4527979-7A76-4C04-9CAC-A6F655694334}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -114,11 +114,11 @@ public static string[] GetCommandLineArgs();
 
 # Поверненя кода помилки після виконання програми.
 
-Додамо в рішеня проект з назвою GetCodeErrorOutApp
- 
-Після виконанння програми ви можете побачити:
+Додамо в рішеня проект GetCodeErrorOutApp типу Console App.
 
-(process 7796) exited with code 0.
+Якшо його запустити в VS після виконанння програми ви можете помітити напис системи :
+
+... exited with code 0.
 
 За домовленностью якщо программа успішно відпрацювала ОС отримує код 0. В процессі розробки в деяких випадках вам треба передати код -1 шо означатиме шо шось пішло не так.
 
@@ -130,7 +130,7 @@ public static string[] GetCommandLineArgs();
 4. Змінимо код на    
 
 ```cs
-// Bad situation
+// Bad situation 
 return -1;
 ```
 5. В Terminal команда: dotnet run
