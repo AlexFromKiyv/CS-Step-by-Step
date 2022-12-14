@@ -7,9 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleAppWithoutTopLevel",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleAppWithTopLevel", "ConsoleAppWithTopLevel\ConsoleAppWithTopLevel.csproj", "{3ED192D7-3463-4CF8-9B61-90CA905AE81E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GetParametersInApp", "GetParametersInApp\GetParametersInApp.csproj", "{245BB7B8-3895-4421-BDFC-A4528A7F7ED9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GetParametersInApp", "GetParametersInApp\GetParametersInApp.csproj", "{245BB7B8-3895-4421-BDFC-A4528A7F7ED9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GetCodeErrorOutApp", "GetCodeErrorOutApp\GetCodeErrorOutApp.csproj", "{E4527979-7A76-4C04-9CAC-A6F655694334}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GetCodeErrorOutApp", "GetCodeErrorOutApp\GetCodeErrorOutApp.csproj", "{E4527979-7A76-4C04-9CAC-A6F655694334}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UsingSystemEnvironment", "UsingSystemEnvironment\UsingSystemEnvironment.csproj", "{2012B967-5B1C-4354-8EC1-D9F189DC6EA3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{E4527979-7A76-4C04-9CAC-A6F655694334}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E4527979-7A76-4C04-9CAC-A6F655694334}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E4527979-7A76-4C04-9CAC-A6F655694334}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2012B967-5B1C-4354-8EC1-D9F189DC6EA3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2012B967-5B1C-4354-8EC1-D9F189DC6EA3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2012B967-5B1C-4354-8EC1-D9F189DC6EA3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2012B967-5B1C-4354-8EC1-D9F189DC6EA3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
