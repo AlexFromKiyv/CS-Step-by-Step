@@ -112,6 +112,8 @@ public static string[] GetCommandLineArgs();
 ```
 У VS для цілей розробки можна вказати параметри запуску. На проекті правий клік > Properties > Debug > Open debug launch profiles UI
 
+Таким чином коли ви користуетесь top-level statamens всерівно система формуе метод який отримуе string[]  
+
 # Поверненя кода помилки після виконання програми.
 
 Додамо в рішеня проект GetCodeErrorOutApp типу Console App.
