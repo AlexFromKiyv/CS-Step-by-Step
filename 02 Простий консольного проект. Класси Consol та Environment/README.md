@@ -160,10 +160,10 @@ else
 Додамо в проект метод який показує можливості ввода вивода тексту
 ```cs
 UsingConsoleForInputOutputString();
-
 static void UsingConsoleForInputOutputString()
 {
     // Input string
+ 
     Console.Write("Enter name:");
     string? name = Console.ReadLine();
     Console.Write("What do you like?:");
@@ -172,13 +172,13 @@ static void UsingConsoleForInputOutputString()
     Console.Clear();
 
     //Output string
-    Console.WriteLine("Hi {0} !", name);
-    Console.Write($"You like {interests}.");
-    Console.WriteLine(" Ok!");
-}
+
+    Console.WriteLine("Hi {0} ! You like {1}", name, interests);
+    Console.WriteLine($"Hi {name} ! You like {interests}");
+} 
 ```
 
-Закоментуемо виклик методу
+Закоментуемо виклик методу.
 ```cs
 // UsingConsoleForInputOutputString();
 ``` 
@@ -199,12 +199,6 @@ static void UsingConsoleColor()
 }
 
 ``` 
-
-
-
-// Change echo color, just for fun.
-  ConsoleColor prevColor = Console.ForegroundColor;
-  Console.ForegroundColor = ConsoleColor.Yellow;
 
 
 
