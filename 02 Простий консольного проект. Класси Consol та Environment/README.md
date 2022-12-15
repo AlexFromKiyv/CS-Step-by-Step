@@ -150,21 +150,63 @@ else
 
 Таку можливість можна використовувати в тестуванні.
 
-# Можливості классу Console
+# Можливості класу Console
+Доступ до класу забезпечуе global using global::System; Тобто ми можемо звертатися до класу Consol де забадаемо.
+
+Додамо в рішеня проект UsingSystemConsole типу Console App.
 
 Більшість методів классу статичні і їх можна визивати Console.NameMethod(...);
 
-WriteLine
-ReadeLine
+Додамо в проект метод який показує можливості ввода вивода тексту
+```cs
+UsingConsoleForInputOutputString();
 
-if girl
+static void UsingConsoleForInputOutputString()
+{
+    // Input string
+    Console.Write("Enter name:");
+    string? name = Console.ReadLine();
+    Console.Write("What do you like?:");
+    string? interests = Console.ReadLine();
+
+    Console.Clear();
+
+    //Output string
+    Console.WriteLine("Hi {0} !", name);
+    Console.Write($"You like {interests}.");
+    Console.WriteLine(" Ok!");
+}
+```
+
+Закоментуемо виклик методу
+```cs
+// UsingConsoleForInputOutputString();
+``` 
+
+Додамо метод роботи з кольором.
+```cs
+UsingConsoleColor();
+static void UsingConsoleColor()
+{
+    ConsoleColor beginColor = Console.ForegroundColor;
+    Console.ForegroundColor = ConsoleColor.Red;
+    for (int i = 0; i < 20; i++)
+    {
+        Console.WriteLine("DANGER!!!");
+    }
+    Console.Beep();
+    Console.ForegroundColor = beginColor;
+}
+
+``` 
+
+
 
 // Change echo color, just for fun.
   ConsoleColor prevColor = Console.ForegroundColor;
   Console.ForegroundColor = ConsoleColor.Yellow;
 
 
-В методі WriteLine можна використовувати placeholders {0},{1}, 
 
 Formatting
 
@@ -197,10 +239,11 @@ Console.WriteLine("User name: "+Environment.UserName);
 
 В С# Console і console це різні речі. Можете спробувати поміняти і VS допоможе вам высправити помилку. 
 
-Ключові слова пишуться в нижньому регістрі: public, lock, class, dynamic
-Простори імен, типи та імена членів починаються (за домовленістю) з великої літери:
+ - Ключові слова пишуться в нижньому регістрі: public, lock, class, dynamic
+ - Простори імен, типи та імена членів починаються (за домовленістю) з великої літери:
 Console.WriteLine, System.Data
-VS допомогае правільно редагувати код. 
+
+VS та VSC допомогае правільно редагувати код. 
 
 
 
