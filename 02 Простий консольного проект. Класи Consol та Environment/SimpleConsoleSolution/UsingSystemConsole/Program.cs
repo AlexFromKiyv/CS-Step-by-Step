@@ -12,8 +12,9 @@ static void UsingConsoleForInputOutputString()
 
     //Output string
 
-    Console.WriteLine("Hi {0} ! You like {1}", name, interests);
-    Console.WriteLine($"Hi {name} ! You like {interests}");
+    Console.WriteLine("Hi {0}! {0} like {1}.", name, interests);
+    Console.WriteLine($"Hi {name}! {name} like {interests}.");
+    Console.WriteLine("Hi {1}! {1} like {0}.", interests, name );
 }
 
 //UsingConsoleColor();
