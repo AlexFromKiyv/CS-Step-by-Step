@@ -223,12 +223,21 @@ static void UsingNumericalFormatingForConsole()
 }
 ```
 
+Форматування можна виконувати над текстом не тільки для консолі.
+```cs
+UsingFormattingToGetStringObject();
+static void UsingFormattingToGetStringObject()
+{
+    string summ = string.Format($"{1000000:N} $");
 
+    Console.WriteLine(summ);
+}
+```
 
-
-Formatting
-
-
+Пошуковий запит:
+```
+.Net C# how formatting numeric
+```
 
 
 # Можливості класу System.Environment
@@ -262,7 +271,3 @@ Console.WriteLine("User name: "+Environment.UserName);
 Console.WriteLine, System.Data
 
 VS та VSC допомогае правільно редагувати код. 
-
-
-
-

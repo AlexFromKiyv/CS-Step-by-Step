@@ -30,7 +30,7 @@ static void UsingConsoleColor()
     Console.ForegroundColor = beginColor;
 }
 
-UsingNumericalFormatingForConsole();
+//UsingNumericalFormatingForConsole();
 
 static void UsingNumericalFormatingForConsole()
 {
@@ -45,4 +45,12 @@ static void UsingNumericalFormatingForConsole()
     Console.WriteLine($"For numerical format N: {0.025:N}");
     Console.WriteLine($"For numerical format N: {1000000:N}");
     Console.WriteLine($"Hexadecimal format X:{1000000:X}");
+}
+
+UsingFormattingToGetStringObject();
+static void UsingFormattingToGetStringObject()
+{
+    string summ = string.Format($"{1000000:N} $");
+
+    Console.WriteLine(summ);
 }
