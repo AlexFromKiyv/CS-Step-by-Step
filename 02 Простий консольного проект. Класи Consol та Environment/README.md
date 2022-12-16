@@ -200,6 +200,29 @@ static void UsingConsoleColor()
 }
 
 ``` 
+Закоментуемо виклик попереднього методу.
+
+Метод WriteLine дозволяє форматувати числові данні для виводу в консоль. 
+Додамо метод форматування чисел.
+```cs
+UsingNumericalFormatingForConsole();
+
+static void UsingNumericalFormatingForConsole()
+{
+    Console.WriteLine($"For money C: {10000.00023:C}"); // гривня покаже ?
+    Console.WriteLine($"For decimal D: {10023:D}");
+    Console.WriteLine($"For decimal D9: {10023:D7}");
+    Console.WriteLine($"For exponencial format E: {0.000025:E}");
+    Console.WriteLine($"For fixed-poind format F: {0.025:F}");
+    Console.WriteLine($"For fixed-poind format F3: {0.025:F3}");
+    Console.WriteLine($"For fixed and exponencial format G: {1000000:G}");
+    Console.WriteLine($"For fixed and exponencial format G: {0.00025:G}");
+    Console.WriteLine($"For numerical format N: {0.025:N}");
+    Console.WriteLine($"For numerical format N: {1000000:N}");
+    Console.WriteLine($"Hexadecimal format X:{1000000:X}");
+}
+```
+
 
 
 
