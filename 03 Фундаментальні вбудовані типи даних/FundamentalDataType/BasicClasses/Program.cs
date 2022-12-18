@@ -10,6 +10,7 @@ static void ExploringSystemObject()
     Console.WriteLine(obj.Equals(0));       
     Console.WriteLine(obj.GetType());       
     Console.WriteLine(obj.GetHashCode());
+ 
 
     Console.WriteLine();
     Console.WriteLine("int myInt = 100;----"); 
@@ -19,6 +20,7 @@ static void ExploringSystemObject()
     Console.WriteLine(myInt.Equals(100));
     Console.WriteLine(myInt.GetType());
     Console.WriteLine(myInt.GetHashCode());
+    Console.WriteLine($"int is ValueType: {myInt is ValueType}");
 
     Console.WriteLine();
     Console.WriteLine("string myString = \"Hi girl\";---");
@@ -28,10 +30,6 @@ static void ExploringSystemObject()
     Console.WriteLine(myString.Equals(100));
     Console.WriteLine(myString.GetType());
     Console.WriteLine(myString.GetHashCode());
-
-    Console.WriteLine(myString.Length);
-
-    Console.WriteLine($"int is ValueType: {myInt is ValueType}");
     Console.WriteLine($"string is ValueType: {myString is ValueType}");
 }
 
