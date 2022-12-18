@@ -6,7 +6,7 @@
 
 Щоб створити змінну треба вказати тип і назву. Краще зразу присвоїти значеня або вказати default.
 
-```
+```cs
 CreateVarable();
 
 static void CreateVarable()
