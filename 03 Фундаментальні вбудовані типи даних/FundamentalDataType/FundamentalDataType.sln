@@ -5,7 +5,9 @@ VisualStudioVersion = 17.4.33110.190
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CreateVariable", "CreateVariable\CreateVariable.csproj", "{7EBE9D60-A30B-4DAA-A815-8A84A0073501}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BasicClasses", "BasicClasses\BasicClasses.csproj", "{0FCBC43D-8DAD-4FEA-BE77-C3F83AD923C9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BasicClasses", "BasicClasses\BasicClasses.csproj", "{0FCBC43D-8DAD-4FEA-BE77-C3F83AD923C9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Numbers", "Numbers\Numbers.csproj", "{2CA3C066-7234-4CB4-82AD-5B5DF8A2D6F5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{0FCBC43D-8DAD-4FEA-BE77-C3F83AD923C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0FCBC43D-8DAD-4FEA-BE77-C3F83AD923C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0FCBC43D-8DAD-4FEA-BE77-C3F83AD923C9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2CA3C066-7234-4CB4-82AD-5B5DF8A2D6F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2CA3C066-7234-4CB4-82AD-5B5DF8A2D6F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2CA3C066-7234-4CB4-82AD-5B5DF8A2D6F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2CA3C066-7234-4CB4-82AD-5B5DF8A2D6F5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

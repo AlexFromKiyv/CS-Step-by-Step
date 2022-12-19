@@ -1,9 +1,4 @@
-# Числа
-
-Розглянемо які вбудовані типи можна викорустовувати для роботи з числами. Додамо проект Numbers з методом.
-```cs
-ExplorationOfNumbers();
-
+﻿ExplorationOfNumbers();
 static void ExplorationOfNumbers()
 {
     Console.WriteLine("int --------------");
@@ -44,4 +39,3 @@ static void ExplorationOfNumbers()
     Console.WriteLine("Min: " + decimal.MinValue);
     Console.WriteLine("Max: " + decimal.MaxValue);
 }
-```
