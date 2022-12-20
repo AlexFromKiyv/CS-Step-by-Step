@@ -108,8 +108,8 @@ static void ExplorationOfNumbers_3()
 З строки можно отримати змінну числового типу.
 
 ```cs
-GetNumbersFromString();
-static void GetNumbersFromString()
+UsingParse();
+static void UsingParse()
 {
     int myInt = int.Parse("100");
     double myDouble = double.Parse("100,23");

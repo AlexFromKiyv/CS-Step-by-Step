@@ -50,7 +50,7 @@ static void ExplorationOfNumbers_2()
 
 
 
-ExplorationOfNumbers_3();
+//ExplorationOfNumbers_3();
 static void ExplorationOfNumbers_3()
 {
     Console.WriteLine("int --------------");
@@ -93,8 +93,8 @@ static void ExplorationOfNumbers_3()
 
 }
 
-GetNumbersFromString();
-static void GetNumbersFromString()
+UsingParse();
+static void UsingParse()
 {
     int myInt = int.Parse("100");
     double myDouble = double.Parse("100,23");
