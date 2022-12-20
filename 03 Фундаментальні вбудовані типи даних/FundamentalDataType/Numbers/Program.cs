@@ -93,7 +93,7 @@ static void ExplorationOfNumbers_3()
 
 }
 
-UsingParse();
+//UsingParse();
 static void UsingParse()
 {
     int myInt = int.Parse("100");
@@ -103,4 +103,21 @@ static void UsingParse()
     Console.WriteLine($"{myInt} {myInt.GetType()}");
     Console.WriteLine($"{myDouble} {myDouble.GetType()}");
     Console.WriteLine($"{myDecimal} {myDecimal.GetType()}");
+}
+
+UsingTryParse();
+static void UsingTryParse()
+{
+    string myString = "83 kg";
+
+    bool resultParsing = int.TryParse(myString, out int myInt1);
+
+    Console.WriteLine($"Was parsing \"{myString}\" well?:{resultParsing} {myInt1}");
+
+
+    myString = "83";
+
+    resultParsing = int.TryParse(myString, out int myInt2);
+
+    Console.WriteLine($"Was parsing \"{myString}\" well?:{resultParsing} {myInt2}");
 }

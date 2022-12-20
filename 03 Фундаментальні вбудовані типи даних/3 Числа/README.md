@@ -105,7 +105,7 @@ static void ExplorationOfNumbers_3()
 
 # Метод Parse, TryParse
 
-З строки можно отримати змінну числового типу.
+З строки можно отримати змінну типу.
 
 ```cs
 UsingParse();
@@ -123,8 +123,24 @@ static void UsingParse()
 
 Але рядок може не відповідає типу. У такому разі існуе метод TryParse
 
+```cs
+UsingTryParse();
+static void UsingTryParse()
+{
+    string myString = "83 kg";
+
+    bool resultParsing = int.TryParse(myString, out int myInt1);
+
+    Console.WriteLine($"Was parsing \"{myString}\" well?:{resultParsing} {myInt1}");
 
 
+    myString = "83";
+
+    resultParsing = int.TryParse(myString, out int myInt2);
+
+    Console.WriteLine($"Was parsing \"{myString}\" well?:{resultParsing} {myInt2}");
+}
+```
 
 
 
