@@ -1,6 +1,7 @@
 # Числа
 
-Розглянемо які вбудовані типи можна викорустовувати для роботи з числами. Додамо проект Numbers з методом.
+System.Int32, System.Double, System.Decimal и т.д системні класи для роботи з числами.
+Розглянемо як їx можна викорустовувати для роботи з числами. Додамо проект Numbers з методом.
 ```cs
 static void ExplorationOfNumbers_1()
 {
@@ -101,6 +102,29 @@ static void ExplorationOfNumbers_3()
 }
 ```
 Треба зазначити що для типів <em> int, double </em> для відповідних літералів не треба суфіксів. Для <em>long</em> потрібен L, для <em>float</em> - F, для <em>decimal</em> - M
+
+# Метод Parse, TryParse
+
+З строки можно отримати змінну числового типу.
+
+```cs
+GetNumbersFromString();
+static void GetNumbersFromString()
+{
+    int myInt = int.Parse("100");
+    double myDouble = double.Parse("100,23");
+    decimal myDecimal = decimal.Parse("1001000000100,293");
+
+    Console.WriteLine($"{myInt} {myInt.GetType()}");
+    Console.WriteLine($"{myDouble} {myDouble.GetType()}");
+    Console.WriteLine($"{myDecimal} {myDecimal.GetType()}");
+}
+```
+
+Але рядок може не відповідає типу. У такому разі існуе метод TryParse
+
+
+
 
 
 

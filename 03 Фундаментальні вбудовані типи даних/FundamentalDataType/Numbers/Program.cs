@@ -92,3 +92,15 @@ static void ExplorationOfNumbers_3()
     Console.WriteLine("Max: " + decimal.MaxValue);
 
 }
+
+GetNumbersFromString();
+static void GetNumbersFromString()
+{
+    int myInt = int.Parse("100");
+    double myDouble = double.Parse("100,23");
+    decimal myDecimal = decimal.Parse("1001000000100,293");
+
+    Console.WriteLine($"{myInt} {myInt.GetType()}");
+    Console.WriteLine($"{myDouble} {myDouble.GetType()}");
+    Console.WriteLine($"{myDecimal} {myDecimal.GetType()}");
+}
