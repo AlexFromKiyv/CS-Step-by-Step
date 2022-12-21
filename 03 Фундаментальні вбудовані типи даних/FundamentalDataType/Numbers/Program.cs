@@ -1,4 +1,7 @@
-﻿//ExplorationOfNumbers_1();
+﻿using System.Numerics;
+//ExplorationOfNumbers_1();
+
+
 static void ExplorationOfNumbers_1()
 {
     var number1 = 100;
@@ -105,7 +108,7 @@ static void UsingParse()
     Console.WriteLine($"{myDecimal} {myDecimal.GetType()}");
 }
 
-UsingTryParse();
+//UsingTryParse();
 static void UsingTryParse()
 {
     string myString = "83 kg";
@@ -118,4 +121,22 @@ static void UsingTryParse()
     resultParsing = int.TryParse(myString, out int myInt2);
 
     Console.WriteLine($"Was parsing \"{myString}\" well?:{resultParsing} {myInt2}");
+}
+
+
+UsingBigInteger();
+
+static void UsingBigInteger()
+{
+    BigInteger myBigInt_1;
+    myBigInt_1= BigInteger.Parse("1111111111111111111111111111111111111111111111111111111");
+    Console.WriteLine(myBigInt_1);
+
+    BigInteger myBigInt_2;
+    myBigInt_2 = BigInteger.Parse("2222222222222222222222222222222222222222222222222222222");
+    Console.WriteLine(myBigInt_2);
+
+    Console.WriteLine(myBigInt_1*myBigInt_2);
+
+    Console.WriteLine($"Is ValueType?:{myBigInt_1 is ValueType}");
 }

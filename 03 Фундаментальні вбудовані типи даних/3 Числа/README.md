@@ -139,6 +139,27 @@ static void UsingTryParse()
     Console.WriteLine($"Was parsing \"{myString}\" well?:{resultParsing} {myInt2}");
 }
 ```
+В просторі імен System.Numerics; існуе типи для наукових розрахунків BigInteger який не обмежений.
+```cs
+
+UsingBigInteger();
+
+static void UsingBigInteger()
+{
+    BigInteger myBigInt_1;
+    myBigInt_1= BigInteger.Parse("1111111111111111111111111111111111111111111111111111111");
+    Console.WriteLine(myBigInt_1);
+
+    BigInteger myBigInt_2;
+    myBigInt_2 = BigInteger.Parse("2222222222222222222222222222222222222222222222222222222");
+    Console.WriteLine(myBigInt_2);
+
+    Console.WriteLine(myBigInt_1*myBigInt_2);
+
+    Console.WriteLine($"Is ValueType?:{myBigInt_1 is ValueType}");
+}
+
+``` 
 
 
 
