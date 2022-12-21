@@ -1,6 +1,6 @@
 # Дата та час
 
-Структури System.DateTime, System.TimeSpan допомогає працювати з змінними часу. Додамо проект Times.
+Структури System.DateTime, System.TimeSpan, допомогає працювати з змінними часу. Додамо проект Times.
 
  ```cs
 ExplorationOfDateTime();
@@ -23,3 +23,38 @@ static void ExplorationOfDateTime()
     Console.WriteLine($"{myDate.Day} {myDate.Month} {myDate.Year} {myDate.DayOfWeek}");
 }
  ```
+Крім того існують стрктури DateOnly, TimeOnly яку корисні при роботы с типами SQL Server Date / Time.
+
+```cs
+ExplorationOfDateOnlyTimeOnly();
+static void ExplorationOfDateOnlyTimeOnly()
+{
+    DateOnly myDate = new DateOnly(1945, 6, 22);
+    Console.WriteLine(myDate);
+
+    TimeOnly myTime = new TimeOnly(1, 30, 10);
+    Console.WriteLine(myTime);
+}
+```
+
+Структура TimeSpan дозволяє працювати з проміжком часу
+
+```cs
+ExplorationOfTimeSpan();
+
+static void ExplorationOfTimeSpan()
+{
+    TimeSpan myTimeSpan = new TimeSpan(5, 0, 0);
+    Console.WriteLine(myTimeSpan);
+
+    TimeOnly myTime = new TimeOnly(9, 0, 0);
+    Console.WriteLine(myTime);
+
+    Console.WriteLine(myTime.Add(myTimeSpan));
+
+    TimeSpan myShortTimeSpan = myTimeSpan.Subtract(new TimeSpan(4, 55, 0));
+    Console.WriteLine(myShortTimeSpan);
+}
+```
+
+ 
