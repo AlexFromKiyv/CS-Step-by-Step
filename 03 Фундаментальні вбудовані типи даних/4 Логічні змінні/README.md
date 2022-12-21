@@ -1,6 +1,6 @@
 # Логічні змінні
 
-Додамо проект Boolean з методом.
+System.Boolean скорочено bool допомогає працювати з логічними змінними. Додамо проект Boolean з методом.
 
 ```cs
 ExplorationOfBooleanType();

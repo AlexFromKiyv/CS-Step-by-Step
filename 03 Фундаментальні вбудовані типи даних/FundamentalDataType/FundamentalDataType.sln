@@ -11,7 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Numbers", "Numbers\Numbers.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Boolean", "Boolean\Boolean.csproj", "{042CB1F7-4F8B-48F9-9785-5CD3850A3762}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chars", "Chars\Chars.csproj", "{F1D657A5-2A4B-45AB-A37B-FB0D3E9A4020}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chars", "Chars\Chars.csproj", "{F1D657A5-2A4B-45AB-A37B-FB0D3E9A4020}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Times", "Times\Times.csproj", "{852F2CC1-7327-4063-8E0D-23FD11B80D96}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{F1D657A5-2A4B-45AB-A37B-FB0D3E9A4020}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F1D657A5-2A4B-45AB-A37B-FB0D3E9A4020}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F1D657A5-2A4B-45AB-A37B-FB0D3E9A4020}.Release|Any CPU.Build.0 = Release|Any CPU
+		{852F2CC1-7327-4063-8E0D-23FD11B80D96}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{852F2CC1-7327-4063-8E0D-23FD11B80D96}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{852F2CC1-7327-4063-8E0D-23FD11B80D96}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{852F2CC1-7327-4063-8E0D-23FD11B80D96}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
