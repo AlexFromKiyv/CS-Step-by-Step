@@ -121,21 +121,19 @@ static void UsingParse()
 }
 ```
 
-Але рядок може не відповідає типу. У такому разі існуе метод TryParse
+Але рядок може не відповідає типу. Для того щоб в консоль не викинувся виняток існуе метод TryParse
 
 ```cs
 UsingTryParse();
 static void UsingTryParse()
 {
     string myString = "83 kg";
-
     bool resultParsing = int.TryParse(myString, out int myInt1);
 
     Console.WriteLine($"Was parsing \"{myString}\" well?:{resultParsing} {myInt1}");
 
 
     myString = "83";
-
     resultParsing = int.TryParse(myString, out int myInt2);
 
     Console.WriteLine($"Was parsing \"{myString}\" well?:{resultParsing} {myInt2}");
