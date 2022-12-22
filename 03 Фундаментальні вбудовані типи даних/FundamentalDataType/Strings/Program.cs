@@ -23,7 +23,10 @@ static void Interpolation()
     string myString = string.Format("Name:{0} Weight:{1}",name,weight);
     Console.WriteLine(myString);
 
-    myString = string.Format($"Name:{name} Weight:{weight}");
+    myString = $"Name:{name} Weight:{weight}";
+    Console.WriteLine(myString);
+
+    myString = $"Name:{name.ToUpper()} Weight:{weight+=3}";
     Console.WriteLine(myString);
 }
 

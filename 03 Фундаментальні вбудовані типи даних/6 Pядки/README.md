@@ -30,11 +30,14 @@ static void Interpolation()
     string myString = string.Format("Name:{0} Weight:{1}",name,weight);
     Console.WriteLine(myString);
 
-    myString = string.Format($"Name:{name} Weight:{weight}");
+    myString = $"Name:{name} Weight:{weight}";
+    Console.WriteLine(myString);
+
+    myString = $"Name:{name.ToUpper()} Weight:{weight+=3}";
     Console.WriteLine(myString);
 }
 ```
-Таким чином можна вносити зміні в рядок.
+Таким чином можна вносити зміні і вирази в рядок. Зверніть увагу після методу ToUpper() нема ; Область в дужка не може бути використана для великої кількості коду. Для методу чи простого виразу.
 
 ```cs
 Concatination();
@@ -48,7 +51,6 @@ static void Concatination()
 }
 ``` 
 Таким чином можна об'єднувати рядки.
-
 
 ```cs
 Escapes();
