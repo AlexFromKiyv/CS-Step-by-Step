@@ -65,5 +65,21 @@ static void Escapes()
 }
 ```
 Escape символи дозволяють по різному виводити текст а також додати ситемны звуки. Оскільки перехіду на нову строку відповідають різні символи в різних ОС иноді краше викорасти Environment.NewLine.
+```cs
+Verbatim();
+
+static void Verbatim()
+{
+    string myString = @"D:\Documents\";
+    Console.WriteLine(myString);
+
+    myString =@"How      
+    are
+       you?";
+    Console.WriteLine(myString);
+}
+```
+Додаваня <em>@<em> виключає escape символи і робить рядок таким як він є. Це корисно наприклад для шляху до теки. 
+
 
 

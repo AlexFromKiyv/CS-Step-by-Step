@@ -14,7 +14,7 @@ static void ExplorationOfStrings_1()
     Console.WriteLine(myString);
 }
 
-Interpolation();
+//Interpolation();
 static void Interpolation()
 {
     string name = "Julia";
@@ -49,4 +49,17 @@ static void Escapes()
     Console.WriteLine("Text{0}{0}",Environment.NewLine);
     Console.WriteLine("\"New text\"");
     Console.WriteLine("\a");
+}
+
+Verbatim();
+
+static void Verbatim()
+{
+    string myString = @"D:\Documents\";
+    Console.WriteLine(myString);
+
+    myString =@"How      
+    are
+       you?";
+    Console.WriteLine(myString);
 }
