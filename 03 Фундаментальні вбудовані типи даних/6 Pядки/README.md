@@ -21,6 +21,22 @@ static void ExplorationOfStrings_1()
 Як ми бачимо тип не є ValueType і тому зним ведется робота як з об'єктом. Крім того треба зазначити шо метод <em>Replace</em> не заминює <em>myString</em> а створює нову.
 
 ```cs
+Interpolation();
+static void Interpolation()
+{
+    string name = "Julia";
+    int weight = 65;
+
+    string myString = string.Format("Name:{0} Weight:{1}",name,weight);
+    Console.WriteLine(myString);
+
+    myString = string.Format($"Name:{name} Weight:{weight}");
+    Console.WriteLine(myString);
+}
+```
+Таким чином можна вносити зміні в рядок.
+
+```cs
 Concatination();
 static void Concatination()
 {
@@ -32,6 +48,7 @@ static void Concatination()
 }
 ``` 
 Таким чином можна об'єднувати рядки.
+
 
 ```cs
 Escapes();

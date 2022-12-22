@@ -14,6 +14,19 @@ static void ExplorationOfStrings_1()
     Console.WriteLine(myString);
 }
 
+Interpolation();
+static void Interpolation()
+{
+    string name = "Julia";
+    int weight = 65;
+
+    string myString = string.Format("Name:{0} Weight:{1}",name,weight);
+    Console.WriteLine(myString);
+
+    myString = string.Format($"Name:{name} Weight:{weight}");
+    Console.WriteLine(myString);
+}
+
 //Concatination();
 static void Concatination()
 {
@@ -24,7 +37,7 @@ static void Concatination()
     Console.WriteLine(myString3);
 }
 
-Escapes();
+//Escapes();
 static void Escapes()
 {
     Console.WriteLine("Code\tName\tPrice");
