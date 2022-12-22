@@ -1,8 +1,4 @@
-# Рядки
-
-System.String скорочено string допомогає працювати з рядками. Додамо проект Strings
-```cs
-ExplorationOfStrings_1();
+﻿ExplorationOfStrings_1();
 
 static void ExplorationOfStrings_1()
 {
@@ -16,4 +12,3 @@ static void ExplorationOfStrings_1()
     Console.WriteLine($"To uppper:{myString.ToUpper()}");
     Console.WriteLine($"Replace \" girl!\":{myString.Replace(" girl!"," !")}");
 }
-```
