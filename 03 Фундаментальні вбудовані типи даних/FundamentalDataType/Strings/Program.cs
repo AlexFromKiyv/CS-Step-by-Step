@@ -64,9 +64,9 @@ static void Verbatim()
     Console.WriteLine(myString);
 }
 
-//StringComparison();
+//StringsComparison();
 
-static void StringComparison()
+static void StringsComparison()
 {
     string string1 = "Hi";
     string string2 = "HI";
@@ -80,7 +80,7 @@ static void StringComparison()
     Console.WriteLine($" string1.Equals(string2) {string1.Equals(string2)}");
 }
 
-ChangeStringsBeforeComparison();
+//ChangeStringsBeforeComparison();
 
 static void ChangeStringsBeforeComparison()
 {
@@ -88,4 +88,24 @@ static void ChangeStringsBeforeComparison()
     string enteredString = "men";
 
     Console.WriteLine(myString.ToUpper() == enteredString.ToUpper());
+}
+
+ComparationWithCustomize();
+
+static void ComparationWithCustomize()
+{
+    string s1 = "girl";
+    string s2 = "GIRL";
+
+    Console.WriteLine($"s1:{s1} s2:{s2} \n\r");
+    Console.WriteLine($"s1.Equals(s2) : {s1.Equals(s2)}");
+    Console.WriteLine($"s1.Equals(s2,StringComparison.OrdinalIgnoreCase) : {s1.Equals(s2,StringComparison.OrdinalIgnoreCase)}");
+    Console.WriteLine($"s1.Equals(s2,StringComparison.InvariantCultureIgnoreCase) : {s1.Equals(s2, StringComparison.InvariantCultureIgnoreCase)}");
+
+    Console.WriteLine($"s1.Equals(s2, StringComparison.OrdinalIgnoreCase): {s1.Equals(s2, StringComparison.OrdinalIgnoreCase)}");
+    Console.WriteLine($"s1.Equals(s2, StringComparison.InvariantCultureIgnoreCase): {s1.Equals(s2, StringComparison.InvariantCultureIgnoreCase)}");
+    Console.WriteLine();
+    Console.WriteLine($"s1.IndexOf(\"I\"): {s1.IndexOf("I")}");
+    Console.WriteLine($"s1.IndexOf(\"I\",StringComparison.OrdinalIgnoreCase)}}: {s1.IndexOf("I",StringComparison.OrdinalIgnoreCase)}");
+    Console.WriteLine($"s1.IndexOf(\"I\",StringComparison.InvariantCultureIgnoreCase)}}: {s1.IndexOf("I", StringComparison.InvariantCultureIgnoreCase)}");
 }

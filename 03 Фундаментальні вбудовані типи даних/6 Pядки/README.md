@@ -94,9 +94,9 @@ static void Verbatim()
 Хоча рядки відносяться до reference(посилання) типів і в стеку зберігаеться посилання на об'єкт в купі оператори порівняння не порівнюють посилання а порівнюють складових об'єктів рядків.
 Тобто для рядків оператори <em> == , != </em> перевизначені.
 ```cs
-StringComparison();
+//StringsComparison();
 
-static void StringComparison()
+static void StringsComparison()
 {
     string string1 = "Hi";
     string string2 = "HI";
@@ -124,4 +124,29 @@ static void ChangeStringsBeforeComparison()
     Console.WriteLine(myString.ToUpper() == enteredString.ToUpper());
 }
 ```
-Коли регистр не обовязково враховоуовати при порівнянні можно перевести рядок в верхній регістр. Але це може понизити продуктивність при велмких рядках і невдачу при різних культурах.
+Коли регистр не обовязково враховоуовати при порівнянні можно перевести рядок в верхній регістр. Але це може понизити продуктивність при великих рядках і невдачу при різних культурах.
+
+Крашим варіантом робити програму не чутливою для регістра і культури використати перегружені варіант методів порівняння Equals і IndexOf
+
+```cs
+ComparationWithCustomize();
+
+static void ComparationWithCustomize()
+{
+    string s1 = "girl";
+    string s2 = "GIRL";
+
+    Console.WriteLine($"s1:{s1} s2:{s2} \n\r");
+    Console.WriteLine($"s1.Equals(s2) : {s1.Equals(s2)}");
+    Console.WriteLine($"s1.Equals(s2,StringComparison.OrdinalIgnoreCase) : {s1.Equals(s2,StringComparison.OrdinalIgnoreCase)}");
+    Console.WriteLine($"s1.Equals(s2,StringComparison.InvariantCultureIgnoreCase) : {s1.Equals(s2, StringComparison.InvariantCultureIgnoreCase)}");
+
+    Console.WriteLine($"s1.Equals(s2, StringComparison.OrdinalIgnoreCase): {s1.Equals(s2, StringComparison.OrdinalIgnoreCase)}");
+    Console.WriteLine($"s1.Equals(s2, StringComparison.InvariantCultureIgnoreCase): {s1.Equals(s2, StringComparison.InvariantCultureIgnoreCase)}");
+    Console.WriteLine();
+    Console.WriteLine($"s1.IndexOf(\"I\"): {s1.IndexOf("I")}");
+    Console.WriteLine($"s1.IndexOf(\"I\",StringComparison.OrdinalIgnoreCase)}}: {s1.IndexOf("I",StringComparison.OrdinalIgnoreCase)}");
+    Console.WriteLine($"s1.IndexOf(\"I\",StringComparison.InvariantCultureIgnoreCase)}}: {s1.IndexOf("I", StringComparison.InvariantCultureIgnoreCase)}");
+}
+```
+
