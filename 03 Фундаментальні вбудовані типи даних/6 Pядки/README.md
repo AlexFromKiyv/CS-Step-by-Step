@@ -149,4 +149,22 @@ static void ComparationWithCustomize()
     Console.WriteLine($"s1.IndexOf(\"I\",StringComparison.InvariantCultureIgnoreCase)}}: {s1.IndexOf("I", StringComparison.InvariantCultureIgnoreCase)}");
 }
 ```
+Таким чином можно зробити незалежність від регістру і культури.
 
+Тип string добре підходить для збереженя наприклад Фамілії та Імені чи серійного номера. Але коли мова іде про великі абзаци тексту то тут цей тип може бути не єффективним.
+
+```cs
+StringInHeap();
+static void StringInHeap()
+{
+    string myString = "Hi girl!"; // first object in heap
+    Console.WriteLine(myString);
+    
+    Console.WriteLine(myString.ToUpper()); // second object in heap
+    Console.WriteLine(myString);
+
+    myString = "Hi"; // third object in heap
+    Console.WriteLine(myString);
+}
+```
+Кожного разу коли 
