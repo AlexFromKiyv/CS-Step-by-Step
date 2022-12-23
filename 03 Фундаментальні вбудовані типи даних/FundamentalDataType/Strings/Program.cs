@@ -90,7 +90,7 @@ static void ChangeStringsBeforeComparison()
     Console.WriteLine(myString.ToUpper() == enteredString.ToUpper());
 }
 
-ComparationWithCustomize();
+//ComparationWithCustomize();
 
 static void ComparationWithCustomize()
 {
@@ -108,4 +108,18 @@ static void ComparationWithCustomize()
     Console.WriteLine($"s1.IndexOf(\"I\"): {s1.IndexOf("I")}");
     Console.WriteLine($"s1.IndexOf(\"I\",StringComparison.OrdinalIgnoreCase)}}: {s1.IndexOf("I",StringComparison.OrdinalIgnoreCase)}");
     Console.WriteLine($"s1.IndexOf(\"I\",StringComparison.InvariantCultureIgnoreCase)}}: {s1.IndexOf("I", StringComparison.InvariantCultureIgnoreCase)}");
+}
+
+
+StringInHeap();
+static void StringInHeap()
+{
+    string myString = "Hi girl!"; // first object in heap
+    Console.WriteLine(myString);
+    
+    Console.WriteLine(myString.ToUpper()); // second object in heap
+    Console.WriteLine(myString);
+
+    myString = "Hi"; // third object in heap
+    Console.WriteLine(myString);
 }
