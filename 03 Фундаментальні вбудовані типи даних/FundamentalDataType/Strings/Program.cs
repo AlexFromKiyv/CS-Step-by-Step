@@ -51,7 +51,7 @@ static void Escapes()
     Console.WriteLine("\a");
 }
 
-Verbatim();
+//Verbatim();
 
 static void Verbatim()
 {
@@ -62,4 +62,20 @@ static void Verbatim()
     are
        you?";
     Console.WriteLine(myString);
+}
+
+StringComparison();
+
+static void StringComparison()
+{
+    string string1 = "Hi";
+    string string2 = "HI";
+    Console.WriteLine($"string1:{string1} string2:{string2}");
+
+    Console.WriteLine($" string1 == string2 {string1 == string2} ");
+    Console.WriteLine($" string1 == \"Hi\"  {string1 == "Hi"}");
+    Console.WriteLine($" string1 == \"HI\"  {string1 == "HI"}");
+    Console.WriteLine($" string1 == \"hi\"  {string1 == "HI"}");
+    Console.WriteLine($" Hi.Equals(string1) {"Hi".Equals(string1)}");
+    Console.WriteLine($" string1.Equals(string2) {string1.Equals(string2)}");
 }

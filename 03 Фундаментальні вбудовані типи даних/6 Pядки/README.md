@@ -79,7 +79,27 @@ static void Verbatim()
     Console.WriteLine(myString);
 }
 ```
-Додаваня <em>@<em> виключає escape символи і робить рядок таким як він є. Це корисно наприклад для шляху до теки. 
+Додаваня <em>@</em> виключає escape символи і робить рядок таким як він є. Це корисно наприклад для шляху до теки. 
 
+Хоча рядки відносяться до reference(посилання) типів і в стеку зберігаеться посилання на об'єкт в купі оператори порівняння не порівнюють посилання а порівнюють складових об'єктів рядків.
+Тобто для рядків оператори <em> == , != </em> перевизначені.
+```cs
+StringComparison();
+
+static void StringComparison()
+{
+    string string1 = "Hi";
+    string string2 = "HI";
+    Console.WriteLine($"string1:{string1} string2:{string2}");
+
+    Console.WriteLine($" string1 == string2 {string1 == string2} ");
+    Console.WriteLine($" string1 == \"Hi\"  {string1 == "Hi"}");
+    Console.WriteLine($" string1 == \"HI\"  {string1 == "HI"}");
+    Console.WriteLine($" string1 == \"hi\"  {string1 == "HI"}");
+    Console.WriteLine($" Hi.Equals(string1) {"Hi".Equals(string1)}");
+    Console.WriteLine($" string1.Equals(string2) {string1.Equals(string2)}");
+}
+```
+Об'єкти рядків порівнються посимвольно з урахуванням регистру і культури.
 
 
