@@ -64,7 +64,7 @@ static void Verbatim()
     Console.WriteLine(myString);
 }
 
-StringComparison();
+//StringComparison();
 
 static void StringComparison()
 {
@@ -78,4 +78,14 @@ static void StringComparison()
     Console.WriteLine($" string1 == \"hi\"  {string1 == "HI"}");
     Console.WriteLine($" Hi.Equals(string1) {"Hi".Equals(string1)}");
     Console.WriteLine($" string1.Equals(string2) {string1.Equals(string2)}");
+}
+
+ChangeStringsBeforeComparison();
+
+static void ChangeStringsBeforeComparison()
+{
+    string myString = "MEN";
+    string enteredString = "men";
+
+    Console.WriteLine(myString.ToUpper() == enteredString.ToUpper());
 }
