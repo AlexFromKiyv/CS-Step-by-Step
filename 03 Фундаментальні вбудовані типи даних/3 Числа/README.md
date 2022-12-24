@@ -32,6 +32,8 @@ static void ExplorationOfNumbers_1()
 ```
 Ви бачите типи які були використані під час виконання для відповідних літералів. Але можливо стиль за допомогою якого визначені ці змвні не дасть користі ні вам ні тому хто буде розбиратись з вашим кодом. При можливості замість ключового слова var краше вказувати конкретний тип.
 
+## Створення
+
 ```cs
 ExplorationOfNumbers_2();
 static void ExplorationOfNumbers_2()
@@ -55,6 +57,8 @@ static void ExplorationOfNumbers_2()
     Console.WriteLine($"{number5.GetType()} : {number5}");
 }
 ```
+
+## Діапазони типів
 Кожен числовий тип має свої межи. Подивимось які.
 
 ```cs
@@ -103,6 +107,28 @@ static void ExplorationOfNumbers_3()
 ```
 Треба зазначити що для типів <em> int, double </em> для відповідних літералів не треба суфіксів. Для <em>long</em> потрібен L, для <em>float</em> - F, для <em>decimal</em> - M
 
+В просторі імен System.Numerics; існуе типи для наукових розрахунків BigInteger який не обмежений.
+```cs
+
+UsingBigInteger();
+
+static void UsingBigInteger()
+{
+    BigInteger myBigInt_1;
+    myBigInt_1= BigInteger.Parse("1111111111111111111111111111111111111111111111111111111");
+    Console.WriteLine(myBigInt_1);
+
+    BigInteger myBigInt_2;
+    myBigInt_2 = BigInteger.Parse("2222222222222222222222222222222222222222222222222222222");
+    Console.WriteLine(myBigInt_2);
+
+    Console.WriteLine(myBigInt_1*myBigInt_2);
+
+    Console.WriteLine($"Is ValueType?:{myBigInt_1 is ValueType}");
+}
+
+``` 
+
 # Метод Parse, TryParse
 
 З строки можно отримати змінну типу.
@@ -139,27 +165,11 @@ static void UsingTryParse()
     Console.WriteLine($"Was parsing \"{myString}\" well?:{resultParsing} {myInt2}");
 }
 ```
-В просторі імен System.Numerics; існуе типи для наукових розрахунків BigInteger який не обмежений.
-```cs
 
-UsingBigInteger();
+## Перетворення типів. 
 
-static void UsingBigInteger()
-{
-    BigInteger myBigInt_1;
-    myBigInt_1= BigInteger.Parse("1111111111111111111111111111111111111111111111111111111");
-    Console.WriteLine(myBigInt_1);
 
-    BigInteger myBigInt_2;
-    myBigInt_2 = BigInteger.Parse("2222222222222222222222222222222222222222222222222222222");
-    Console.WriteLine(myBigInt_2);
 
-    Console.WriteLine(myBigInt_1*myBigInt_2);
-
-    Console.WriteLine($"Is ValueType?:{myBigInt_1 is ValueType}");
-}
-
-``` 
 
 
 
