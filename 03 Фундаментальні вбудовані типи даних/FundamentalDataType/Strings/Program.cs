@@ -1,5 +1,7 @@
 ﻿//ExplorationOfStrings_1();
 
+using System.Text;
+
 static void ExplorationOfStrings_1()
 {
     string myString = "Hi girl!";
@@ -111,15 +113,35 @@ static void ComparationWithCustomize()
 }
 
 
-StringInHeap();
+//StringInHeap();
+
+
 static void StringInHeap()
 {
     string myString = "Hi girl!"; // first object in heap
     Console.WriteLine(myString);
-    
+
     Console.WriteLine(myString.ToUpper()); // second object in heap
     Console.WriteLine(myString);
 
     myString = "Hi"; // third object in heap
     Console.WriteLine(myString);
+}
+
+UsingStringBuilder();
+
+static void UsingStringBuilder()
+{
+    StringBuilder mySB = new StringBuilder("Product list:",256);
+    mySB.Append(Environment.NewLine);
+    mySB.AppendLine("Apple");
+    mySB.AppendLine("Garlic");
+    mySB.AppendLine("Tomato");
+    mySB.AppendLine("Bread");
+    mySB.AppendLine("Milk");
+    mySB.Replace("Milk", "Kefir");
+    Console.WriteLine(mySB);
+    Console.WriteLine(mySB.Length);
+
+    
 }

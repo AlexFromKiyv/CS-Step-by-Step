@@ -171,4 +171,35 @@ static void StringInHeap()
 ```
 Кожного разу коли ми присвоюєм нове значення існуючій змінній створюється новий об'єкт а не міняються символи в існуючому. Теж саме відбуваеться коли ми викликаємо методи типа ToUpper.Тому коли ми захочему об'єднувати великі текстові дані рядкових змінних да й ше в циклі то це приведе до великої кількості об'єктів в heap. Тобто змінні типу string паганий варіант для програм обробки великіх текстів.
 
+## Клас System.Text.StringBuilder
+
+Цей клас при використані схожий на string.
+
+```cs
+
+UsingStringBuilder();
+
+static void UsingStringBuilder()
+{
+    StringBuilder mySB = new StringBuilder("Product list:",256);
+    mySB.Append(Environment.NewLine);
+    mySB.AppendLine("Apple");
+    mySB.AppendLine("Garlic");
+    mySB.AppendLine("Tomato");
+    mySB.AppendLine("Bread");
+    mySB.AppendLine("Milk");
+    mySB.Replace("Milk", "Kefir");
+    Console.WriteLine(mySB);
+    Console.WriteLine(mySB.Length);
+  
+}
+```
+
+Коли ви додасте в код тип StringBuilder переконайтесь шо додалось імпортування простору імен в початку файлу using System.Text.
+
+Особливістю використання класу є те шо коли ми робимо маніпуляцію то ми звінюемо внутрішніні символьні дані, а не отримуемо нову копію як з класом string. за замовчуванням створюеться рядок з 16 символів. Але можна зразу вказати 256.
+
+
+
+
 
