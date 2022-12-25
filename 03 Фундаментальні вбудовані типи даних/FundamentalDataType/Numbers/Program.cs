@@ -124,7 +124,7 @@ static void UsingTryParse()
 }
 
 
-UsingBigInteger();
+//UsingBigInteger();
 
 static void UsingBigInteger()
 {
@@ -140,3 +140,49 @@ static void UsingBigInteger()
 
     Console.WriteLine($"Is ValueType?:{myBigInt_1 is ValueType}");
 }
+
+
+//ImplicitlyCastShortToInt();
+static void ImplicitlyCastShortToInt()
+{
+    Console.WriteLine(short.MaxValue);
+    Console.WriteLine(int.MaxValue);
+    Console.WriteLine();
+
+    short myShort = 100, myOtherShort;
+
+    int myInt = myShort;
+    Console.WriteLine(myInt);
+
+    myInt = Square(myShort);
+
+    Console.WriteLine(myInt);
+
+    // Cannot implicitly convert
+    // myShort = myInt;
+    // myOtherShort = Square(1);
+
+    static int Square(int a)
+    {
+        return a*a;
+    }
+}
+
+ExplicitlyCastIntToShort();
+static void ExplicitlyCastIntToShort()
+{
+    Console.WriteLine(short.MaxValue);
+    Console.WriteLine();
+
+    short myShort, myOtherShort;
+    int myInt = 10_000;
+
+    myShort = (short)myInt;
+    Console.WriteLine(myShort);
+
+    myInt = 32_770;
+    myShort = (short)myInt;
+    Console.WriteLine(myShort);
+}
+
+

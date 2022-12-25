@@ -168,6 +168,65 @@ static void UsingTryParse()
 
 ## Перетворення типів. 
 
+```cs
+ImplicitlyCastShortToInt();
+
+static void ImplicitlyCastShortToInt()
+{
+    Console.WriteLine(short.MaxValue);
+    Console.WriteLine(int.MaxValue);
+
+    short myShort = 100, myOtherShort;
+    Console.WriteLine();
+
+    int myInt = myShort;
+    Console.WriteLine(myInt);
+
+    myInt = Square(myShort);
+
+    Console.WriteLine(myInt);
+
+    // Cannot implicitly convert
+    // myShort = myInt;
+    // myOtherShort = Square(1);
+
+    static int Square(int a)
+    {
+        return a*a;
+    }
+}
+```
+Оскілкі любе значення short без проблем може бути доповнене до int в процесі виконання відбуваеться неявне претвореня short в int. Прицьому дані претворюються безопасно без втрати. Можна сказати short підмножина int. Також при передачі методу якій очікує int змінної типа short також відбувается неявне претворення і помилки не виникає. Кажуть змінна myShort розширюється до int. В звороньому напрямку претворення неявно не выдбудеться ы компылятор сповыстить про це. Хоча 1 можно зберігти в типі short тип int неавно не перетворюеться(не звужуеться). Розмір int виходить за межи (overflow) short. Компілятор не пропускає всі неявні звужуючи перетворення. 
+
+Компілятору можно вказати явно про звуження типу але при цьому можна втратити данні.
+
+```cs
+ExplicitlyCastIntToShort();
+static void ExplicitlyCastIntToShort()
+{
+    Console.WriteLine(short.MaxValue);
+    Console.WriteLine();
+
+    short myShort, myOtherShort;
+    int myInt = 10_000;
+
+    myShort = (short)myInt;
+    Console.WriteLine(myShort);
+
+    myInt = 32_770;
+    myShort = (short)myInt;
+    Console.WriteLine(myShort);
+}
+```
+Код компилюється виконуеться але данні стають некоректними. Коли скорочується місце де зберігаються дані частина данних відсікаеться. При цьому не сповіщаеться про якісь помилки.   
+
+
+
+
+
+
+
+ 
 
 
 
