@@ -198,6 +198,8 @@ static void ImplicitlyCastShortToInt()
 ```
 Оскілкі любе значення short без проблем може бути доповнене до int в процесі виконання відбуваеться неявне претвореня short в int. Прицьому дані претворюються безопасно без втрати. Можна сказати short підмножина int. Також при передачі методу якій очікує int змінної типа short також відбувается неявне претворення і помилки не виникає. Кажуть змінна myShort розширюється до int. В звороньому напрямку претворення неявно не выдбудеться ы компылятор сповыстить про це. Хоча 1 можно зберігти в типі short тип int неавно не перетворюеться(не звужуеться). Розмір int виходить за межи (overflow) short. Компілятор не пропускає всі неявні звужуючи перетворення. 
 
+## Переповнення
+
 Компілятору можно вказати явно про звуження типу але при цьому можна втратити данні.
 
 ```cs
@@ -257,6 +259,26 @@ static void UsingChacked()
 ```
 
 При використані checked перевіряеться чи не було переповнення і видаеться сповіщеня шо було переповнення.  
+
+## Перевірка переповнення 
+
+Якшо в проекті багато мість для перевірки можна ваказати перевірку всього проекту.
+1. Правий клік на проекті
+2. Properties
+3. В рядку пошуку введіть overflow
+4. Поставити флаг Check for arithmeric overflow
+
+Ця операцыя добавляе в файл проекту
+
+```xml
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
+  </PropertyGroup>
+```
 
 
 
