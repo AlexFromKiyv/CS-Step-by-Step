@@ -207,19 +207,56 @@ static void ExplicitlyCastIntToShort()
     Console.WriteLine(short.MaxValue);
     Console.WriteLine();
 
-    short myShort, myOtherShort;
+    short myShort;
     int myInt = 10_000;
 
     myShort = (short)myInt;
-    Console.WriteLine(myShort);
+    Console.WriteLine($"{myShort} = {myInt}");
 
     myInt = 32_770;
     myShort = (short)myInt;
-    Console.WriteLine(myShort);
+    Console.WriteLine($"{myShort} = {myInt}");
 }
 ```
-Код компилюється виконуеться але данні стають некоректними. Коли скорочується місце де зберігаються дані частина данних відсікаеться. При цьому не сповіщаеться про якісь помилки.   
+Код компилюється виконуеться але данні стають некоректними. Коли скорочується місце де зберігаються дані частина данних відсікається. При цьому нема сповіщень про якісь помилки. Якшо примусово компілятору вказуеться операцію приведеня треба додадково потурбуватися що вона пройде без втрати данних.
 
+Оскільки при операції приведеня процесс може пройти як успішно так і з помилкою надаеться можливість контролювати цей процес як на рівні додадку так і на рівні частини коду.
+
+```cs
+
+UsingChacked();
+
+static void UsingChacked()
+{
+    int myInt = 10_000;
+    short myShort;
+    try
+    {
+        checked
+        {
+            myShort = (short)myInt; // or checked((short)myInt)
+        }
+        Console.WriteLine($"{myShort} = {myInt}");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+
+    myInt = 32_770;
+    try
+    {
+        myShort = checked((short)myInt);
+        Console.WriteLine($"{myShort} = {myInt}");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+}
+```
+
+При використані checked перевіряеться чи не було переповнення і видаеться сповіщеня шо було переповнення.  
 
 
 

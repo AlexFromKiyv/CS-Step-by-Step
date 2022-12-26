@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System.Drawing;
+using System.Numerics;
 //ExplorationOfNumbers_1();
 
 
@@ -168,21 +169,50 @@ static void ImplicitlyCastShortToInt()
     }
 }
 
-ExplicitlyCastIntToShort();
+//ExplicitlyCastIntToShort();
 static void ExplicitlyCastIntToShort()
 {
     Console.WriteLine(short.MaxValue);
     Console.WriteLine();
 
-    short myShort, myOtherShort;
+    short myShort;
     int myInt = 10_000;
 
     myShort = (short)myInt;
-    Console.WriteLine(myShort);
+    Console.WriteLine($"{myShort} = {myInt}");
 
     myInt = 32_770;
     myShort = (short)myInt;
-    Console.WriteLine(myShort);
+    Console.WriteLine($"{myShort} = {myInt}");
 }
 
+UsingChacked();
 
+static void UsingChacked()
+{
+    int myInt = 10_000;
+    short myShort;
+    try
+    {
+        checked
+        {
+            myShort = (short)myInt; // or checked((short)myInt)
+        }
+        Console.WriteLine($"{myShort} = {myInt}");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+
+    myInt = 32_770;
+    try
+    {
+        myShort = checked((short)myInt);
+        Console.WriteLine($"{myShort} = {myInt}");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+}
