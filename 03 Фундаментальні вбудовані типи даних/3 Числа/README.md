@@ -268,7 +268,7 @@ static void UsingChacked()
 3. В рядку пошуку введіть overflow
 4. Поставити флаг Check for arithmeric overflow
 
-Ця операцыя добавляе в файл проекту
+Цe добавляе в файл проекту
 
 ```xml
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -279,6 +279,7 @@ static void UsingChacked()
     <CheckForOverflowUnderflow>True</CheckForOverflowUnderflow>
   </PropertyGroup>
 ```
+Включивши перевірку проекту ви первіряете весь код. Деяки нагружени ділянки можна послабити за допомогою ключового слова unchecked тим самим підвищити продуктивність.
 
 
 
