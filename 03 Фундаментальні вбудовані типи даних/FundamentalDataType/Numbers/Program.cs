@@ -1,5 +1,4 @@
-﻿using System.Drawing;
-using System.Numerics;
+﻿using System.Numerics;
 //ExplorationOfNumbers_1();
 
 
@@ -97,6 +96,23 @@ static void ExplorationOfNumbers_3()
 
 }
 
+UsingVar();
+static void UsingVar()
+{
+    var myInt = 100;
+    var myLong = 100L;
+    var myDouble = 100.00;
+    var myFloat = 100.00F;
+    var myDecimal = 100.00M;
+
+    Console.WriteLine($"{myInt} : {myInt.GetType()}");
+    Console.WriteLine($"{myLong} : {myLong.GetType()}");
+    Console.WriteLine($"{myDouble} : {myDouble.GetType()}");
+    Console.WriteLine($"{myFloat} : {myFloat.GetType()}");
+    Console.WriteLine($"{myDecimal} : {myDecimal.GetType()}");
+}
+
+
 //UsingParse();
 static void UsingParse()
 {
@@ -186,7 +202,7 @@ static void ExplicitlyCastIntToShort()
     Console.WriteLine($"{myShort} = {myInt}");
 }
 
-UsingChacked();
+//UsingChacked();
 
 static void UsingChacked()
 {

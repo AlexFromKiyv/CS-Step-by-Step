@@ -128,6 +128,26 @@ static void UsingBigInteger()
 }
 
 ``` 
+# Використання var
+
+```cs
+UsingVar();
+static void UsingVar()
+{
+    var myInt = 100;
+    var myLong = 100L;
+    var myDouble = 100.00;
+    var myFloat = 100.00F;
+    var myDecimal = 100.00M;
+
+    Console.WriteLine($"{myInt} : {myInt.GetType()}");
+    Console.WriteLine($"{myLong} : {myLong.GetType()}");
+    Console.WriteLine($"{myDouble} : {myDouble.GetType()}");
+    Console.WriteLine($"{myFloat} : {myFloat.GetType()}");
+    Console.WriteLine($"{myDecimal} : {myDecimal.GetType()}");
+}
+```
+
 
 # Метод Parse, TryParse
 
