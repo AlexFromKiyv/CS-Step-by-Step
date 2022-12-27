@@ -56,13 +56,34 @@ static void ImplicitDeclarations()
     var name = "Bicycle";
     var weight = 14.23;
     var inStock = true;
+   
+    //var something; //must be initialized
+
 
     Console.WriteLine($"{code} {name} {weight} {inStock}");
     Console.WriteLine($"{code.GetType()} {name.GetType()} {weight.GetType()} {inStock.GetType()}");
 }
 ```
 
-Var можна використовувати не тільки для примітивних вбудованих типіd але і для складних які ви створюєте самі. 
+Зміну з var треба ініціалізувати і не значенням null. Але коли змінна вже ініціалызована reference типом їй можна присваювать значення null.
+
+Var можна використовувати не тільки для примітивних вбудованих типів але і для складних які ви створюєте самі. 
+
+Неявну типізацію можна викорустовувати лише для локальних змінних. Не можна використовувати var для значеня шо поверає метод або для параметрів. Не можно використовувати для полів даних класу. 
+
+```cs
+Console.WriteLine(GetVarString("Hi girl"));
+
+static string GetVarString(string enterString)
+{
+    var myString =  enterString+"!";
+
+    return myString;
+}
+
+```
+
+Дозволено повернати неявно визначену зміну ящо її тип співпадае з зазначеним у методі.
 
 
 

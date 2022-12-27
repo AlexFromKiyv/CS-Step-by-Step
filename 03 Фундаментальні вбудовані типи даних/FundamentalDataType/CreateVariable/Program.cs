@@ -33,16 +33,27 @@ static void UsingNew()
     Console.WriteLine($"DataTime:{myDateTime}");
 }
 
-ImplicitDeclarations();
+//ImplicitDeclarations();
 static void ImplicitDeclarations()
 {
     var code = "025441";
     var name = "Bicycle";
     var weight = 14.23;
     var inStock = true;
+   
+    //var something; //must be initialized
+
 
     Console.WriteLine($"{code} {name} {weight} {inStock}");
     Console.WriteLine($"{code.GetType()} {name.GetType()} {weight.GetType()} {inStock.GetType()}");
 }
 
+Console.WriteLine(GetVarString("Hi girl"));
+
+static string GetVarString(string enterString)
+{
+    var myString =  enterString+"!";
+
+    return myString;
+}
 
