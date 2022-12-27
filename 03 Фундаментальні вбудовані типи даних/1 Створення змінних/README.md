@@ -44,7 +44,25 @@ static void UsingNew()
     Console.WriteLine($"DataTime:{myDateTime}");
 }
 ```
+# Неявна типізація 
 
+В C# є можливість замість типу вказати ключеве слово var. Компілятор на основі даних що ініціалізують змінну визначає її тип.
+
+```cs
+ImplicitDeclarations();
+static void ImplicitDeclarations()
+{
+    var code = "025441";
+    var name = "Bicycle";
+    var weight = 14.23;
+    var inStock = true;
+
+    Console.WriteLine($"{code} {name} {weight} {inStock}");
+    Console.WriteLine($"{code.GetType()} {name.GetType()} {weight.GetType()} {inStock.GetType()}");
+}
+```
+
+Var можна використовувати не тільки для примітивних вбудованих типіd але і для складних які ви створюєте самі. 
 
 
 

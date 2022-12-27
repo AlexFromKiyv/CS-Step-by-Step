@@ -2,6 +2,8 @@
 
 //CreateVarable();
 
+using System.Xml.Linq;
+
 static void CreateVarable()
 {
     string name = "";
@@ -16,7 +18,7 @@ static void CreateVarable()
     Console.WriteLine($"{name} {price} {weight} ");
 }
 
-UsingNew();
+//UsingNew();
 static void UsingNew()
 {
     int myInt = new int();
@@ -31,5 +33,16 @@ static void UsingNew()
     Console.WriteLine($"DataTime:{myDateTime}");
 }
 
+ImplicitDeclarations();
+static void ImplicitDeclarations()
+{
+    var code = "025441";
+    var name = "Bicycle";
+    var weight = 14.23;
+    var inStock = true;
+
+    Console.WriteLine($"{code} {name} {weight} {inStock}");
+    Console.WriteLine($"{code.GetType()} {name.GetType()} {weight.GetType()} {inStock.GetType()}");
+}
 
 
