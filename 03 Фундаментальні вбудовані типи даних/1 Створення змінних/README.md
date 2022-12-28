@@ -78,13 +78,61 @@ static string GetVarString(string enterString)
 {
     var myString =  enterString+"!";
 
+    //myString = 45;// Cannot implicitly convert int to string
+
     return myString;
 }
 
 ```
-
 Дозволено повернати неявно визначену зміну ящо її тип співпадае з зазначеним у методі.
+Змінна визначена за допомогою var по суті строго типізована і інколи скорочуе ввод тексту. Під час копіляції тип визначаеться. Компілятор не дозволить змінній типа string ,оголошеный неявно, призначити int.
 
+# Коли корисно використовувати var.
+
+Для локальних змінних використовування неявної типізації мало чого дає. Можливо тільки коли тип дуже довгий меньше набирати. Але явна типізація більше зрозуміла для тих хто читає код. 
+
+```cs
+ static void ReadebleCode()
+{
+    var power = 12;
+
+    var sum = GetSum(10,15);
+
+    var squareSum = sum * sum;
+
+    var result = squareSum * power;
+
+    static double GetSum(int a,int b)
+    {
+        return a + b;
+    }
+}
+```
+
+Хоча компілятор підказуе якого типу в результаті буде result, але щоб зрозуміти чому треба пробігтись по всім рядкам.
+
+Var дійсно корисний коли тип даних складно прописати при визначенні запитів LINQ.
+
+```cs
+UsinVarForLinq();
+
+static void UsinVarForLinq()
+{
+    int[] temperaturs = { 5, 12, 4, 15, 10, 8, 17 };
+
+    var normal = from t in temperaturs where t > 10 select t;
+
+    foreach (var item in normal)
+    {
+        Console.WriteLine(item);
+    }
+
+    Console.WriteLine(normal.GetType().Name);
+}
+```
+Як ви бачите normal не масив int. На щастя, при практичному використанні LINQ немає потреби точно вказувати тип який повертає запит. 
+
+В інших випадках використання var може зробити код нечитабельним і привести до неправільного використання.
 
 
 

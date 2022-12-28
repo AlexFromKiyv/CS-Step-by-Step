@@ -2,6 +2,7 @@
 
 //CreateVarable();
 
+using System.Reflection.Metadata.Ecma335;
 using System.Xml.Linq;
 
 static void CreateVarable()
@@ -48,12 +49,45 @@ static void ImplicitDeclarations()
     Console.WriteLine($"{code.GetType()} {name.GetType()} {weight.GetType()} {inStock.GetType()}");
 }
 
-Console.WriteLine(GetVarString("Hi girl"));
+//Console.WriteLine(GetVarString("Hi girl"));
 
 static string GetVarString(string enterString)
 {
     var myString =  enterString+"!";
 
+    //myString = 45;// Cannot implicitly convert int to string
+
     return myString;
 }
 
+ static void ReadebleCode()
+{
+    var sum = GetSum(10,15);
+
+    var squareSum = sum * sum;
+
+    var power = 12;
+
+    var result = squareSum * power;
+
+    static double GetSum(int a,int b)
+    {
+        return a + b;
+    }
+}
+
+UsinVarForLinq();
+
+static void UsinVarForLinq()
+{
+    int[] temperaturs = { 5, 12, 4, 15, 10, 8, 17 };
+
+    var normal = from t in temperaturs where t > 10 select t;
+
+    foreach (var item in normal)
+    {
+        Console.WriteLine(item);
+    }
+
+    Console.WriteLine(normal.GetType().Name);
+}
