@@ -27,7 +27,7 @@ static void UsingForeach()
 	}
 }
 
-UsinForeachWithVar();
+//UsinForeachWithVar();
 static void UsinForeachWithVar()
 {
     int[] temperaturs = { 5, 12, 4, 15, 10, 8, 17 };
@@ -37,5 +37,20 @@ static void UsinForeachWithVar()
     foreach (var item in normal)
     {
         Console.WriteLine(item);
+    }
+}
+
+
+UsingWhile();
+static void UsingWhile()
+{
+	string enteredString = "";
+
+	while (enteredString.ToLower() != "y")
+	{
+		Console.Write("Do you want to exit ? (Y/N):");
+		enteredString = Console.ReadLine();
+		Console.Clear();
+
     }
 }

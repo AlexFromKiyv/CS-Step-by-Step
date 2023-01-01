@@ -55,4 +55,23 @@ static void UsinForeachWithVar()
     }
 }
 ```
-В циклі модна використовувати неявну типізацію єлементів за допомогою var.
+В циклі можна використовувати неявну типізацію єлементів.
+
+
+# While
+
+```cs
+UsingWhile();
+static void UsingWhile()
+{
+	string enteredString = "";
+
+	while (enteredString.ToLower() != "y")
+	{
+		Console.Write("Do you want to exit ? (Y/N):");
+		enteredString = Console.ReadLine();
+		Console.Clear();
+
+    }
+}
+```
