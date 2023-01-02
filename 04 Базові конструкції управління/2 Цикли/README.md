@@ -75,3 +75,23 @@ static void UsingWhile()
     }
 }
 ```
+
+Цикл while корсиний коли треба виконати блок коду поки не буде виконана умова. Для того щоб цикл колись закінчився треба переконатися що умова рано чи пізно можлива.
+
+```cs
+UsingDoWhile();
+static void UsingDoWhile()
+{
+    string enteredString = "";
+
+	do
+	{
+        Console.Clear();
+        Console.Write("Do you want to exit ? (Y/N):");
+        enteredString = Console.ReadLine();
+    } while (enteredString.ToLower() != "y");
+	
+}
+```
+Особливости циклу do/while то що тіло циклу виконуяться перш ніж перевіряеться умова. Тобто тіло хочаб один раз буде виконано.
+

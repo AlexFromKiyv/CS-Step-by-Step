@@ -41,7 +41,7 @@ static void UsinForeachWithVar()
 }
 
 
-UsingWhile();
+//UsingWhile();
 static void UsingWhile()
 {
 	string enteredString = "";
@@ -53,4 +53,18 @@ static void UsingWhile()
 		Console.Clear();
 
     }
+}
+
+UsingDoWhile();
+static void UsingDoWhile()
+{
+    string enteredString = "";
+
+	do
+	{
+        Console.Clear();
+        Console.Write("Do you want to exit ? (Y/N):");
+        enteredString = Console.ReadLine();
+    } while (enteredString.ToLower() != "y");
+	
 }
