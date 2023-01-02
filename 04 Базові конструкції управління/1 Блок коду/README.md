@@ -1,4 +1,19 @@
 Дужки {} використовують аби декілька послідовних визначень або дій об'єднати в одне ціле.
+
+```cs
+class Person
+{
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public string Phone { get; set; }
+
+    public string GetPhone()
+    {
+        return Phone;
+    }
+}
+```
+
 В умовних операторах і циклах дозволено залишати один рядок коду без дужок але це може бути джерелом помилок.
 
 ```cs
