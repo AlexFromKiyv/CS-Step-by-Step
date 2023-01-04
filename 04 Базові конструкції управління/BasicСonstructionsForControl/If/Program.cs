@@ -1,9 +1,4 @@
-Додамо проект під назвою If
-
-# Логічні вирази
-
-```CS
-LogicalExpression();
+﻿//LogicalExpression();
 
 static void LogicalExpression()
 {
@@ -17,12 +12,9 @@ static void LogicalExpression()
     Console.WriteLine($"weight >= 70  : {weight >= 70}");
     Console.WriteLine($"weight <= 70  : {weight <= 70}");
 }
-```
 
-# if/else
 
-```cs
-SimpleIf();
+//SimpleIf();
 
 static void SimpleIf()
 {
@@ -48,5 +40,5 @@ static void SimpleIfElse()
     {
         Console.WriteLine("Logical expression is false");
     }
+
 }
-```
