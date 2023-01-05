@@ -13,7 +13,6 @@ static void LogicalExpression()
     Console.WriteLine($"weight <= 70  : {weight <= 70}");
 }
 
-
 //SimpleIf();
 
 static void SimpleIf()
@@ -27,7 +26,7 @@ static void SimpleIf()
 }
 
 
-SimpleIfElse();
+//SimpleIfElse();
 
 static void SimpleIfElse()
 {
@@ -40,5 +39,41 @@ static void SimpleIfElse()
     {
         Console.WriteLine("Logical expression is false");
     }
+
+}
+
+//UsingIs();
+static void UsingIs()
+{
+    string myVariable1 = "Hi";
+
+    if (myVariable1 is string newString)
+    {
+        Console.WriteLine(newString);
+    }
+    
+    int myVariable2 = 70;
+    if (myVariable2 is int newInt)
+    {
+        Console.WriteLine(newInt);
+    }
+}
+
+
+//UsingTypePattern();
+static void UsingTypePattern()
+{
+    Type myType = typeof(short);
+
+    if(myType is Type)
+    {
+        Console.WriteLine($"{myType} is type.");
+    }
+
+}
+
+
+static void UsingParenthesizedPattern()
+{
 
 }
