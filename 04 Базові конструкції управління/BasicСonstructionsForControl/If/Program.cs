@@ -1,4 +1,6 @@
-﻿//LogicalExpression();
+﻿using System.Text;
+
+LogicalExpression();
 
 static void LogicalExpression()
 {
@@ -11,7 +13,35 @@ static void LogicalExpression()
     Console.WriteLine($"weight < 70  : {weight < 70}");
     Console.WriteLine($"weight >= 70  : {weight >= 70}");
     Console.WriteLine($"weight <= 70  : {weight <= 70}");
+    
+    Console.WriteLine("------------------------------");
+
+    Console.WriteLine($" true && true   : {true && true }");
+    Console.WriteLine($" true && false  : {true && false}");
+    Console.WriteLine($" false && true  : {false && true}");
+    Console.WriteLine($" false && false : {false && false}");
+
+    Console.WriteLine("------------------------------");
+
+    Console.WriteLine($" true || true   : {true || true}");
+    Console.WriteLine($" true || false  : {true || false}");
+    Console.WriteLine($" false || true  : {false || true}");
+    Console.WriteLine($" false || false : {false || false}");
+
+    Console.WriteLine("------------------------------");
+
+    Console.WriteLine($" !true  : {!true}");
+    Console.WriteLine($" !false : {!false}");
+
+    Console.WriteLine($"false || true && true || true && false || true : {false || true && true || true && false || true }");
+  
+
+
 }
+
+
+
+
 
 //SimpleIf();
 
@@ -109,7 +139,7 @@ static void UsingNegativePattern()
     }
 }
 
-UsingConditionalOperator();
+//UsingConditionalOperator();
 
 static void UsingConditionalOperator()
 {
@@ -124,7 +154,7 @@ static void UsingConditionalOperator()
 }
 
 
-UsingConditionalOperatorWithRef();
+//UsingConditionalOperatorWithRef();
 
 static void UsingConditionalOperatorWithRef()
 {
