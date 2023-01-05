@@ -1,6 +1,6 @@
 Додамо проект під назвою If
 
-# Логічні вирази
+# Логічні опертори та вирази.
 
 ```CS
 LogicalExpression();
@@ -73,7 +73,7 @@ static void UsingIs()
 
 В цьому прикладі перевіряеться тип об'єкту і якщо умова виконується присваюється новій змінній для того шоб потім використовувати.
 
-# Matching patterns
+# Matching patterns.
 
 ```cs
 UsingTypePattern();
@@ -90,6 +90,87 @@ static void UsingTypePattern()
 ```
 Перевірка чи є зміна тип.
 
+```cs
+UsingParenthesizedPattern();
+static void UsingParenthesizedPattern()
+{
+    char myChar = 'y';
 
+    if (myChar is (>= 'a' and <= 'z') or (>= 'A' and <= 'Z') or '.' or ',' or ';')
+    {
+        Console.WriteLine($"{myChar} is a character or separator");
+    }
+}
+```
 
+```cs
+UsingRelationalConjuctiveDisjunctivePattern();
+static void UsingRelationalConjuctiveDisjunctivePattern()
+{
+    char myChar = 'y';
 
+    if (myChar is >= 'a' and <= 'z' or >= 'A' and <= 'Z')
+    {
+        Console.WriteLine($"{myChar} is a character");
+    };
+}
+```
+```cs
+UsingNegativePattern();
+static void UsingNegativePattern()
+{
+    object myObject = 0;
+    if (myObject is not string) 
+    {
+        Console.WriteLine($"{myObject} not string");
+    }
+
+    if (myObject is not null)
+    {
+        Console.WriteLine($"{myObject} not null");
+    }
+}
+```
+
+# Оператор ?
+
+```cs
+UsingConditionalOperator();
+
+static void UsingConditionalOperator()
+{
+    int weight = 95;
+
+    string result = (weight < 72) ? "It's good" : "It's no good";
+
+    Console.WriteLine(result);
+
+    // do not work
+    //(weight < 72) ? Console.WriteLine("It's good") : Console.WriteLine("It's no good");
+}
+
+```
+Для виразності цього оператору я логічний вираз поміщаю в дужки. Якшо умова виконується виконується код за ? , інакше виконується код за : .
+
+```cs
+UsingConditionalOperatorWithRef();
+
+static void UsingConditionalOperatorWithRef()
+{
+    int[] smallArray = new int[] { 1, 2, 3, 4, 5 };
+    int[] largeArray = new int[] { 10, 20, 30, 40, 50, 60, 70 };
+
+    int index = 7;
+    ref int refValue = ref ((index < 5) ? ref smallArray[index] : ref largeArray[index - 5]);
+    refValue = 0;
+
+    Console.WriteLine(string.Join(" ",largeArray));
+
+    index = 2;
+    ((index < 5) ? ref smallArray[index] : ref largeArray[index - 5]) = 100;
+    Console.WriteLine(string.Join(" ", smallArray));
+
+}
+
+```
+В цьому прикладі резульатом роботи оператору є посилання на єлемент масиву. І уе посилання можно використовувати не зберігаючи в окремій змінній. 
