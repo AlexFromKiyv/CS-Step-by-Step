@@ -1,6 +1,4 @@
-﻿using System.Text;
-
-LogicalExpression();
+﻿LogicalExpression();
 
 static void LogicalExpression()
 {
@@ -34,8 +32,6 @@ static void LogicalExpression()
     Console.WriteLine($" !false : {!false}");
 
     Console.WriteLine($"false || true && true || true && false || true : {false || true && true || true && false || true }");
-  
-
 
 }
 
