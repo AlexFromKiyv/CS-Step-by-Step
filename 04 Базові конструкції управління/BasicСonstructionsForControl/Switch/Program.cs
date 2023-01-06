@@ -5,7 +5,7 @@ static void SimpleSwitch()
     Console.WriteLine("Choose: ");
     Console.WriteLine("1. tea");
     Console.WriteLine("2. coffee");
-    Console.WriteLine("3. wather");
+    Console.WriteLine("3. water");
     Console.Write("Enter your varient:");
     
     int.TryParse(Console.ReadLine(), out int enteredVariant); Console.Clear();
@@ -34,7 +34,7 @@ static void SimpleSwitchWithString()
     Console.WriteLine("Choose: ");
     Console.WriteLine("tea");
     Console.WriteLine("coffee");
-    Console.WriteLine("wather");
+    Console.WriteLine("water");
     Console.Write("Enter your varient:");
 
     string enteredVariant = (Console.ReadLine()).ToLower(); Console.Clear();
