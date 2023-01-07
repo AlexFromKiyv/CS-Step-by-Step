@@ -200,7 +200,7 @@ static void UsingConditionalOperatorWithRef()
 ```
 В цьому прикладі резульатом роботи оператору є посилання на єлемент масиву. І це посилання можно використовувати не зберігаючи в окремій змінній. 
 
-# Switch
+# Switch у простому варіанті.
 
 Додамо проект під назвою Switch
 
@@ -271,5 +271,65 @@ static void SimpleSwitchWithString()
 ```
 
 Оператор switch може порівнювати типи char, string, bool, int, long, та enum. 
+
+```cs
+SwitchWithEnum();
+static void SwitchWithEnum()
+{
+    Console.Write("Enter day of the week:");
+
+    DayOfWeek dayOfWeek;
+
+    try
+    {
+        dayOfWeek = (DayOfWeek) Enum.Parse(typeof(DayOfWeek),Console.ReadLine());
+    }
+    catch (Exception)
+    {
+        Console.WriteLine("Bad input!");
+        return;
+    }
+    Console.Clear();
+
+    string result;
+
+    switch (dayOfWeek)
+    {
+        case DayOfWeek.Sunday: result = "Long walk.";
+            break;
+        case DayOfWeek.Monday: 
+            result = "Morning exercise only";
+            break;
+        case DayOfWeek.Tuesday: 
+            result = "Run";
+            break;
+        case DayOfWeek.Wednesday: 
+            result = "Morning exercise only";
+            break;
+        case DayOfWeek.Thursday: 
+            result = "Run";
+            break;
+        case DayOfWeek.Friday:
+            result = "Long walk.";
+            break;
+        case DayOfWeek.Saturday:
+            result = "Morning exercise only";
+            break;
+        default:
+            result = "Bad input!";
+            break;
+    }
+    Console.WriteLine(result);
+}
+```
+Так можна використовувати Enum
+
+```cs
+        case DayOfWeek.Saturday:
+        case DayOfWeek.Sunday:
+            result = "On weekend long walk.";
+            break;
+```
+Якшо результат декількох варіантів має однаковий результат їx можна об'єднати як тут Saturday,Sunday
 
 

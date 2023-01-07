@@ -28,7 +28,7 @@ static void SimpleSwitch()
 }
 
 
-SimpleSwitchWithString();
+//SimpleSwitchWithString();
 static void SimpleSwitchWithString()
 {
     Console.WriteLine("Choose: ");
@@ -58,4 +58,86 @@ static void SimpleSwitchWithString()
     Console.WriteLine(result);
 }
 
+//SwitchWithEnum_1();
+static void SwitchWithEnum_1()
+{
+    Console.Write("Enter day of the week:");
 
+    DayOfWeek dayOfWeek;
+
+    try
+    {
+        dayOfWeek = (DayOfWeek) Enum.Parse(typeof(DayOfWeek),Console.ReadLine());
+    }
+    catch (Exception)
+    {
+        Console.WriteLine("Bad input!");
+        return;
+    }
+    Console.Clear();
+
+    string result;
+
+    switch (dayOfWeek)
+    {
+        case DayOfWeek.Sunday: result = "Long walk.";
+            break;
+        case DayOfWeek.Monday: 
+            result = "Morning exercise only";
+            break;
+        case DayOfWeek.Tuesday: 
+            result = "Run";
+            break;
+        case DayOfWeek.Wednesday: 
+            result = "Morning exercise only.";
+            break;
+        case DayOfWeek.Thursday: 
+            result = "Run";
+            break;
+        case DayOfWeek.Friday:
+            result = "Morning exercise only.";
+            break;
+        case DayOfWeek.Saturday:
+            result = "Long walk.";
+            break;
+        default:
+            result = "Bad input!";
+            break;
+    }
+    Console.WriteLine(result);
+}
+
+SwitchWithEnum_2();
+static void SwitchWithEnum_2()
+{
+    DayOfWeek dayOfWeek = DayOfWeek.Saturday;
+   
+    string result;
+
+    switch (dayOfWeek)
+    {
+        case DayOfWeek.Saturday:
+        case DayOfWeek.Sunday:
+            result = "On weekend long walk.";
+            break;
+        case DayOfWeek.Monday:
+            result = "Morning exercise only";
+            break;
+        case DayOfWeek.Tuesday:
+            result = "Run";
+            break;
+        case DayOfWeek.Wednesday:
+            result = "Morning exercise only.";
+            break;
+        case DayOfWeek.Thursday:
+            result = "Run";
+            break;
+        case DayOfWeek.Friday:
+            result = "Morning exercise only.";
+            break;
+        default:
+            result = "Bad input!";
+            break;
+    }
+    Console.WriteLine(result);
+}
