@@ -144,7 +144,7 @@ static void SwitchWithEnum_2()
 
 
 
-PatternMatchingInSwitch();
+//PatternMatchingInSwitch();
 static void PatternMatchingInSwitch()
 {
     object inputHeight;
@@ -160,9 +160,12 @@ static void PatternMatchingInSwitch()
         case string stringHeight:
             Console.WriteLine("We receive string "+stringHeight); 
             break;
-        case double doubeHeight when doubeHeight>0:
+        case double doubeHeight:
             Console.WriteLine(MaxGoodWeight(doubeHeight));
             break;
+        //case double doubeHeight when doubeHeight > 0: //Compile error due to previos line 
+        //    Console.WriteLine("It's no good.");
+        //    break;
         default:
             Console.WriteLine($"We recive {inputHeight.GetType()} {inputHeight}");
             break;
@@ -174,3 +177,24 @@ static void PatternMatchingInSwitch()
     }
 
 }
+
+UsingSwitchExpression();
+
+static void UsingSwitchExpression()
+{
+    string stringColor = "Green";
+
+    string color = stringColor switch
+    {
+        "Red"  => "#FF0000",
+        "Green"=> "#00FF00", 
+        "Blue" => "#0000FF",
+        _      => "#000000"
+    };
+
+    Console.WriteLine(color);
+
+} 
+
+
+

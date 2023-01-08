@@ -354,9 +354,12 @@ static void PatternMatchingInSwitch()
         case string stringHeight:
             Console.WriteLine("We receive string "+stringHeight); 
             break;
-        case double doubeHeight when doubeHeight>0:
+        case double doubeHeight:
             Console.WriteLine(MaxGoodWeight(doubeHeight));
             break;
+        //case double doubeHeight when doubeHeight > 0: //Compile error due to previos line 
+        //    Console.WriteLine("It's no good.");
+        //    break;
         default:
             Console.WriteLine($"We recive {inputHeight.GetType()} {inputHeight}");
             break;
@@ -371,3 +374,25 @@ static void PatternMatchingInSwitch()
 ```
 
 У данному випадку switch зіставляє тип отриманого значення з типом case. Крім того змінній відповідного типу присваюється значення і додадково превіряеться (when). Але ця змінна недосяжна за оператором case.
+В випадку type pattern порядок case має значення. Визначеня  case double doubeHeight: прекриває інши варіанти з when.
+
+# Switch expression
+
+```cs
+UsingSwitchExpression();
+static void UsingSwitchExpression()
+{
+    string stringColor = "Green";
+
+    string color = stringColor switch
+    {
+        "Red"  => "#FF0000",
+        "Green"=> "#00FF00", 
+        "Blue" => "#0000FF",
+        _      => "#000000"
+    };
+
+    Console.WriteLine(color);
+} 
+```
+Switch вираз досить зрозуміло і компактно.
