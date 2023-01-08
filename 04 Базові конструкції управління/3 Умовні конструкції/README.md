@@ -396,3 +396,21 @@ static void UsingSwitchExpression()
 } 
 ```
 Switch вираз досить зрозуміло і компактно.
+
+```cs
+UsingSwitchExpressionWithTuple();
+
+static void UsingSwitchExpressionWithTuple()
+{
+    string result = (1,1) switch
+    {
+        (1, 0) => "ON 0",
+        (0, 1) => "ON 1",
+        (1, 1) => "ON",
+        _      => "OFF"
+    };
+
+    Console.WriteLine(result);
+}
+```
+Так можна використовувати в switch кортежі.

@@ -178,7 +178,7 @@ static void PatternMatchingInSwitch()
 
 }
 
-UsingSwitchExpression();
+//UsingSwitchExpression();
 
 static void UsingSwitchExpression()
 {
@@ -194,7 +194,23 @@ static void UsingSwitchExpression()
 
     Console.WriteLine(color);
 
-} 
+}
+
+UsingSwitchExpressionWithTuple();
+
+static void UsingSwitchExpressionWithTuple()
+{
+    string result = (1,1) switch
+    {
+        (1, 0) => "ON 0",
+        (0, 1) => "ON 1",
+        (1, 1) => "ON",
+        _      => "OFF"
+    };
+
+    Console.WriteLine(result);
+}
+
 
 
 
