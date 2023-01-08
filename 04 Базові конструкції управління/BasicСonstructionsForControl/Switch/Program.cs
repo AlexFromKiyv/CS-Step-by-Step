@@ -107,7 +107,7 @@ static void SwitchWithEnum_1()
     Console.WriteLine(result);
 }
 
-SwitchWithEnum_2();
+//SwitchWithEnum_2();
 static void SwitchWithEnum_2()
 {
     DayOfWeek dayOfWeek = DayOfWeek.Saturday;
@@ -140,4 +140,37 @@ static void SwitchWithEnum_2()
             break;
     }
     Console.WriteLine(result);
+}
+
+
+
+PatternMatchingInSwitch();
+static void PatternMatchingInSwitch()
+{
+    object inputHeight;
+
+    //inputHeight = "176";
+    //inputHeight = 176;
+    //inputHeight = 176M;
+    inputHeight = 176.5;
+
+
+    switch (inputHeight)
+    {
+        case string stringHeight:
+            Console.WriteLine("We receive string "+stringHeight); 
+            break;
+        case double doubeHeight when doubeHeight>0:
+            Console.WriteLine(MaxGoodWeight(doubeHeight));
+            break;
+        default:
+            Console.WriteLine($"We recive {inputHeight.GetType()} {inputHeight}");
+            break;
+    }
+    
+    static double MaxGoodWeight(double height)
+    {
+        return (height / 100) * (height / 100) * 24.9;
+    }
+
 }

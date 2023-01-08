@@ -333,3 +333,41 @@ static void SwitchWithEnum()
 Якшо результат декількох варіантів має однаковий результат їx можна об'єднати як тут Saturday,Sunday
 
 
+# Pattern Matching (Шаблон зіставлення) в Switch
+
+У простому варіанті switch співставляє значення з константами і називають constant pattern (шаблон констант). Але оператор може оцінювати тип (type pattern) і case не обмежується постійними значеннями.
+
+```cs
+PatternMatchingInSwitch();
+static void PatternMatchingInSwitch()
+{
+    object inputHeight;
+
+    //inputHeight = "176";
+    //inputHeight = 176;
+    //inputHeight = 176M;
+    inputHeight = 176.5;
+
+
+    switch (inputHeight)
+    {
+        case string stringHeight:
+            Console.WriteLine("We receive string "+stringHeight); 
+            break;
+        case double doubeHeight when doubeHeight>0:
+            Console.WriteLine(MaxGoodWeight(doubeHeight));
+            break;
+        default:
+            Console.WriteLine($"We recive {inputHeight.GetType()} {inputHeight}");
+            break;
+    }
+    
+    static double MaxGoodWeight(double height)
+    {
+        return (height / 100) * (height / 100) * 24.9;
+    }
+
+}
+```
+
+У данному випадку switch зіставляє тип отриманого значення з типом case. Крім того змінній відповідного типу присваюється значення і додадково превіряеться (when). Але ця змінна недосяжна за оператором case.
