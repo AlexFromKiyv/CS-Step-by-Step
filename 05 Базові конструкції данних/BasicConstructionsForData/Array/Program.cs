@@ -1,6 +1,6 @@
-﻿UsingSimpleArray_1();
+﻿//UsingSimpleArray();
 
-static void UsingSimpleArray_1()
+static void UsingSimpleArray()
 {
     int[] myIntArray = new int[3]; // declaring
 
@@ -20,4 +20,21 @@ static void UsingSimpleArray_1()
     {
         Console.WriteLine(item);
     }
+}
+
+ArrayInitialization();
+
+static void ArrayInitialization()
+{
+    string[] myStringArray = new string[] { "good", "better", "best" };
+    bool[] myBoolArray = { true, false, false, true };
+    int[] myIntArray = { 10, 15, 20 };
+
+    Console.WriteLine(myStringArray);
+    Console.WriteLine(myStringArray.Length);
+    Console.WriteLine(string.Join(" < ",myStringArray));
+
+    Console.WriteLine(myIntArray);
+    Console.WriteLine(myIntArray.Length);
+    Console.WriteLine(string.Join(", ", myIntArray));
 }

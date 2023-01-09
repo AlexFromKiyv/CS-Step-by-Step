@@ -1,5 +1,7 @@
 # Array
 
+## Створення
+
 Масив це набір єлементів одного типу з доступом через числові індекси.
 
 ```cs
@@ -29,3 +31,28 @@ static void UsingSimpleArray()
 }
 ```
 Треба зауважити new int[3] означає що загальна кількість єлементів 3. Індексація починаеться з 0. Коли ви задекларували масив память виділяеться і він заповнюється значеннями default. В цьому прикладі 0-ми. 
+
+## Ініціалізація
+
+Масив можна задекларувати і одразу задати значення єлементам. 
+
+```cs
+
+ArrayInitialization();
+
+static void ArrayInitialization()
+{
+    string[] myStringArray = new string[] { "good", "better", "best" };
+    bool[] myBoolArray = { true, false, false, true };
+    int[] myIntArray = { 10, 15, 20 };
+
+    Console.WriteLine(myStringArray);
+    Console.WriteLine(myStringArray.Length);
+    Console.WriteLine(string.Join(" < ",myStringArray));
+
+    Console.WriteLine(myIntArray);
+    Console.WriteLine(myIntArray.Length);
+    Console.WriteLine(string.Join(", ", myIntArray));
+}
+```
+При ініціалізації не потрібно вказувати розмір массиву. Також можна опустити new type[]
