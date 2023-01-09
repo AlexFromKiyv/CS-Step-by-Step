@@ -22,7 +22,7 @@ static void UsingSimpleArray()
     }
 }
 
-ArrayInitialization();
+//ArrayInitialization();
 
 static void ArrayInitialization()
 {
@@ -39,7 +39,7 @@ static void ArrayInitialization()
     Console.WriteLine(string.Join(", ", myIntArray));
 }
 
-UsingVarForArray();
+//UsingVarForArray();
 
 static void UsingVarForArray()
 {
@@ -47,7 +47,21 @@ static void UsingVarForArray()
     var myDoubleArray = new[] { 1, 2.1, 3 };
     var myString = new[] { "low", "normal", "high" };
 
+    //var badArray = new[] { 1, "Hi", true }; It do not work
+
     Console.WriteLine(myIntArray);
     Console.WriteLine(myString);
     Console.WriteLine(myDoubleArray);
+}
+
+
+UsingObjectForArray();
+static void UsingObjectForArray()
+{
+    object[] myArray = new object[] { 1, "Hi", true };
+
+    foreach (var item in myArray)
+    {
+        Console.WriteLine(item);
+    }
 }

@@ -57,7 +57,7 @@ static void ArrayInitialization()
 ```
 При ініціалізації не потрібно вказувати розмір массиву. Також можна опустити new type[]
 
-# Неявна типізація
+## Неявна типізація
 
 ```cs
 UsingVarForArray();
@@ -77,3 +77,18 @@ static void UsingVarForArray()
 
 ```
 Тип визначае компілятор і його можна побачити у редакторі.
+
+```cs
+UsingObjectForArray();
+static void UsingObjectForArray()
+{
+    object[] myArray = new object[] { 1, "Hi", true };
+
+    foreach (var item in myArray)
+    {
+        Console.WriteLine(item);
+    }
+}
+```
+Оскільки object є тип від якого походять інщі базові вдудовагі типи це працює.
+
