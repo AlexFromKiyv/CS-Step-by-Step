@@ -38,3 +38,16 @@ static void ArrayInitialization()
     Console.WriteLine(myIntArray.Length);
     Console.WriteLine(string.Join(", ", myIntArray));
 }
+
+UsingVarForArray();
+
+static void UsingVarForArray()
+{
+    var myIntArray = new[] { 1, 2, 3 };
+    var myDoubleArray = new[] { 1, 2.1, 3 };
+    var myString = new[] { "low", "normal", "high" };
+
+    Console.WriteLine(myIntArray);
+    Console.WriteLine(myString);
+    Console.WriteLine(myDoubleArray);
+}

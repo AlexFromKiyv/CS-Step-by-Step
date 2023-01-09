@@ -56,3 +56,24 @@ static void ArrayInitialization()
 }
 ```
 При ініціалізації не потрібно вказувати розмір массиву. Також можна опустити new type[]
+
+# Неявна типізація
+
+```cs
+UsingVarForArray();
+
+static void UsingVarForArray()
+{
+    var myIntArray = new[] { 1, 2, 3 };
+    var myDoubleArray = new[] { 1, 2.1, 3 };
+    var myString = new[] { "low", "normal", "high" };
+
+    //var badArray = new[] { 1, "Hi", true }; It do not work
+
+    Console.WriteLine(myIntArray);
+    Console.WriteLine(myString);
+    Console.WriteLine(myDoubleArray);
+}
+
+```
+Тип визначае компілятор і його можна побачити у редакторі.
