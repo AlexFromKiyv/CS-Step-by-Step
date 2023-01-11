@@ -189,3 +189,89 @@ static void ArrayFunctionality()
 }
 ```
 System.Array має багато статичних методів для роботи з масивами. Як бачите сортування залежить від типу.
+
+## Index, Rang 
+
+Представляє індекс в послідовності.
+
+```cs
+UsingIndex();
+
+static void UsingIndex()
+{
+    int[] myArray = new int[] { 10, 20, 30 };
+
+    for (int i = 0; i < myArray.Length; i++)
+    {
+        Index index= i;
+        Console.Write(myArray[index].ToString() + " ");
+    }
+    Console.WriteLine();
+
+    for (int i = 1; i < myArray.Length+1; i++)
+    {
+        Index index = ^i;
+        Console.Write(myArray[index].ToString() + " ");
+    }
+}
+```
+
+
+```cs
+UsingRang();
+static void UsingRang()
+{
+    int[] myArray = new int[] { 10, 20, 30 };
+    
+    foreach (var item in myArray[0..2])
+    {
+        Console.Write(item.ToString() + " ");
+    }
+    Console.WriteLine();
+
+    Range range = 0..2;
+
+    foreach (var item in myArray[range])
+    {
+        Console.Write(item.ToString() + " ");
+    }
+    Console.WriteLine();
+
+    Index index1 = 0;
+    Index index2 = 2;
+    Range range1 = index1..index2;
+
+    foreach (var item in myArray[range1])
+    {
+        Console.Write(item.ToString() + " ");
+    }
+    Console.WriteLine();
+
+    foreach (var item in myArray[..])
+    {
+        Console.Write(item.ToString() + " ");
+    }
+    Console.WriteLine();
+
+    foreach (var item in myArray[0..2])
+    {
+        Console.Write(item.ToString() + " ");
+    }
+    Console.WriteLine();
+
+    foreach (var item in myArray[0..])
+    {
+        Console.Write(item.ToString() + " ");
+    }
+    Console.WriteLine();
+
+    foreach (var item in myArray[..1])
+    {
+        Console.Write(item.ToString() + " ");
+    }
+    Console.WriteLine();
+
+    int myInt = myArray.ElementAt(^1);
+    Console.WriteLine(myInt);
+}
+```
