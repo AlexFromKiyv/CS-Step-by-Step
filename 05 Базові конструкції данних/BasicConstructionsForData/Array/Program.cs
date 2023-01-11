@@ -55,7 +55,7 @@ static void UsingVarForArray()
 }
 
 
-UsingObjectForArray();
+//UsingObjectForArray();
 static void UsingObjectForArray()
 {
     object[] myArray = new object[] { 1, "Hi", true };
@@ -65,3 +65,95 @@ static void UsingObjectForArray()
         Console.WriteLine(item);
     }
 }
+
+
+//UsingRectangularArray();
+static void UsingRectangularArray()
+{
+    int[,] myArray = new int[3, 4];
+
+    for (int i = 0; i < 3; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            myArray[i, j] = i + j;
+            Console.Write(myArray[i,j]+" ");
+        }
+        Console.WriteLine();
+    }
+}
+
+
+//UsingJaggedArray();
+
+static void UsingJaggedArray()
+{
+    int[][] myArray = new int[3][];
+
+    for (int i = 0; i < myArray.Length; i++)
+    {
+        myArray[i] = new int[i + 2];
+    }
+
+    for (int i = 0; i < myArray.Length; i++)
+    {
+        for (int j = 0; j < myArray[i].Length; j++)
+        {
+            Console.Write(myArray[i][j]+" ");
+        }
+        Console.WriteLine();
+    }
+}
+
+
+ArrayFunctionality();
+
+static void ArrayFunctionality()
+{
+    string[] myArray = new string[] { "good", "better", "best" };
+
+    PrintArray(myArray);
+
+    Console.WriteLine(myArray.Rank); 
+
+    Console.WriteLine(myArray.Length);
+
+    Array.Reverse(myArray);
+
+    PrintArray(myArray);
+
+    Array.Clear(myArray,2,1);
+
+    PrintArray(myArray);
+
+    Array.Clear(myArray);
+
+    PopulateArray(myArray);
+
+    PrintArray(myArray);
+
+    Array.Sort(myArray);
+
+    PrintArray(myArray);
+
+
+    static void PrintArray(string[] array)
+    {
+        for (int i = 0; i < array.Length; i++)
+        {
+            Console.Write(array[i] + " ");
+        }
+        Console.WriteLine();
+
+    }
+
+    static void PopulateArray(string[] array)
+    {
+        for (int i = 0; i < array.Length; i++)
+        {
+            array[i] = (10-i).ToString();
+        }
+    }
+
+}
+
