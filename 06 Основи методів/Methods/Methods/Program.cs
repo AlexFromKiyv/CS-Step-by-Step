@@ -15,7 +15,7 @@ static void SimpleMethod()
 }
 
 
-SimpleMethodWithLambda();
+//SimpleMethodWithLambda();
 
 static void SimpleMethodWithLambda()
 {
@@ -25,4 +25,30 @@ static void SimpleMethodWithLambda()
     static double MaxGoodWeight(double height) => (height / 100) * (height / 100) * 24.9;
 }
 
+SimpleMethodWithValidation();
+static void SimpleMethodWithValidation()
+{
+    for (int height = 164; height < 192; height+=2)
+    {
+        Console.WriteLine(MaxGoodWeightWithValidation(height));
+    }
+   
+    //Console.WriteLine(MaxGoodWeight(320)); it do not work
 
+    static string MaxGoodWeightWithValidation(double height)
+    {
+
+        if (height > 130 && height < 280 )
+        {
+            return $"Max good weight for {height} cm is {MaxGoodWeight(height)} "; 
+        }
+        else
+        {
+            return $"Bad input height {height} ";
+        }
+
+        // Local function
+        static double MaxGoodWeight(double height) => (height/100)*(height/100)*24.9;
+        
+    }
+}

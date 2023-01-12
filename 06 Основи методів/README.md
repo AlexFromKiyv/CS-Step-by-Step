@@ -31,7 +31,7 @@ static void SimpleMethod()
 }
 ```
 
-Для досить простих функцій можна використовувати лямбда вираз.
+Для простих функцій можна використовувати лямбда вираз.
 
 ```cs
 SimpleMethodWithLambda();
@@ -44,3 +44,39 @@ static void SimpleMethodWithLambda()
 }
 
 ```
+## Локальні функції
+
+Функцію яка задекларована в іншій функції називають локальною. Вана має бути або private або static.
+Для локальних функцій не підтримується перезавантаження.
+
+```cs
+SimpleMethodWithValidation();
+static void SimpleMethodWithValidation()
+{
+    for (int height = 164; height < 192; height+=2)
+    {
+        Console.WriteLine(MaxGoodWeightWithValidation(height));
+    }
+   
+    //Console.WriteLine(MaxGoodWeight(320)); it do not work
+
+    static string MaxGoodWeightWithValidation(double height)
+    {
+
+        if (height > 130 && height < 280 )
+        {
+            return $"Max good weight for {height} cm is {MaxGoodWeight(height)} "; 
+        }
+        else
+        {
+            return $"Bad input height {height} ";
+        }
+
+        // Local function
+        static double MaxGoodWeight(double height) => (height/100)*(height/100)*24.9;
+        
+    }
+}
+```
+Локальні функції досяжні в межах іншої функції де вони створені. Локальним функціям можна додавати атрібути наприклад #nullable enable
+
