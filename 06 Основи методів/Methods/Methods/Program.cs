@@ -48,7 +48,42 @@ static void SimpleMethodWithValidation()
         }
 
         // Local function
-        static double MaxGoodWeight(double height) => (height/100)*(height/100)*24.9;
+        static double MaxGoodWeight(double height)
+        {
+            return (height / 100) * (height / 100) * 24.9;
+        }  
         
+    }
+}
+
+//BadNoStaticLocalFunction();
+
+static void BadNoStaticLocalFunction()
+{
+    PrintRectangle(1);
+
+    static void PrintRectangle(double lenght)
+    {
+        Console.WriteLine(Rectangle());
+
+        double Rectangle()
+        {
+            lenght += 1;
+            return lenght * lenght;
+        }
+    }
+}
+
+StaticLocalFunction();
+static void StaticLocalFunction()
+{
+    PrintRectangle(1);
+
+    static void PrintRectangle(double lenght)
+    {
+        Console.WriteLine(Rectangle(lenght));
+
+        static double Rectangle(double l) => l * l; 
+  
     }
 }

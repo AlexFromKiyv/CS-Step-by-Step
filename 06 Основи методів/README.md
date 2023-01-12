@@ -80,3 +80,43 @@ static void SimpleMethodWithValidation()
 ```
 Локальні функції досяжні в межах іншої функції де вони створені. Локальним функціям можна додавати атрібути наприклад #nullable enable
 
+```cs
+BadNoStaticLocalFunction();
+
+static void BadNoStaticLocalFunction()
+{
+    PrintRectangle(1);
+
+    static void PrintRectangle(double lenght)
+    {
+        Console.WriteLine(Rectangle());
+
+        double Rectangle()
+        {
+            lenght += 1;
+            return lenght * lenght;
+        }
+    }
+}
+
+```
+
+Якшо потрібно щоб локальна функція не змінювала параметрів головної функції напряму її треба робити статичною.
+
+```cs
+StaticLocalFunction();
+static void StaticLocalFunction()
+{
+    PrintRectangle(1);
+
+    static void PrintRectangle(double lenght)
+    {
+        Console.WriteLine(Rectangle(lenght));
+
+        static double Rectangle(double l) => l * l; 
+  
+    }
+}
+```
+
+
