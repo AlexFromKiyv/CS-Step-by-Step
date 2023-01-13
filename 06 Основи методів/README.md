@@ -208,7 +208,7 @@ static void UsingOutModifier_2()
 ```
 Дійсна користь від оператора полягає шо він дозволяє одній функції вертати декілька параметрів. Якшо вам не потрібні деякі значення ви можете відкинути ЇЇ за допомогою out _. _ - це фіктивна змінна яка навмисно не використовується.
 
-## ref параметри
+## ref параметри.
 
 ```cs
 
@@ -256,7 +256,46 @@ static void UsingRefModifier()
 }
 ```
 
-При використовувані ref модіфікатора параметри повині бути ініціалізовані до визову функції. Функція впливає на зміні шо за її межами і параметри передаються як посилання.
+При використовувані ref модіфікатора параметри повині бути ініціалізовані до визову функції. Функція впливає на зміні шо за її межами і параметри передаються як посилання на існуючу в пам'яті змінну.
+
+## in параметри.
+
+Модіфікатор in для параметрів передае значення за посиланям і не дозволяє методу його змінювати.
+Цей модіфікатор корисний коли в якості параметра передається наприклад велика структура яку не треба змінювати і коли копіювання без модіфікатора затримує процесс. Крім того при передачі reference типів ви можете змінити данні в методі і модіфікатор in рішає цю проблему.
+
+```cs
+UsingInModifier();
+
+static void UsingInModifier()
+{
+    string greeting = "Welcome to paradise!";
+
+    Console.WriteLine(greeting is ValueType); //False
+
+    Console.WriteLine($"Before:{greeting}");
+    ChangeWay(greeting);
+    Console.WriteLine($"After:{greeting}");
+
+    static void ChangeWay(string greetingString)
+    {
+        greetingString = "Welcom to hell!";
+    }
+
+    Console.WriteLine($"Before:{greeting}");
+    ChangeWayWithIn(greeting);
+    Console.WriteLine($"After:{greeting}");
+
+
+    static void ChangeWayWithIn(in string greetingStreeng)
+    {
+        //greetingStreeng = "Welcom to paradise!"; //it don't work
+        // using greetingString 
+        Console.WriteLine(greetingStreeng.Length);
+    }
+}
+```
+Хоча тип string не є ValueType в методи без модіфікаторів предається значення. Вказуючи модіфікатор in ви даєте зрозуміти шо цей параметр не буде змінюватися.
+
 
 
 

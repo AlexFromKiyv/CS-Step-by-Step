@@ -155,7 +155,7 @@ static void UsingOutModifier_2()
 
 }
 
-UsingRefModifier();
+//UsingRefModifier();
 
 static void UsingRefModifier()
 {
@@ -195,5 +195,37 @@ static void UsingRefModifier()
         string stringTemp = b;
         b = a;
         a = stringTemp;
+    }
+}
+
+
+
+UsingInModifier();
+
+static void UsingInModifier()
+{
+    string greeting = "Welcome to paradise!";
+
+    Console.WriteLine(greeting is ValueType); //False
+
+    Console.WriteLine($"Before:{greeting}");
+    ChangeWay(greeting);
+    Console.WriteLine($"After:{greeting}");
+
+    static void ChangeWay(string greetingString)
+    {
+        greetingString = "Welcom to hell!";
+    }
+
+    Console.WriteLine($"Before:{greeting}");
+    ChangeWayWithIn(greeting);
+    Console.WriteLine($"After:{greeting}");
+
+
+    static void ChangeWayWithIn(in string greetingStreeng)
+    {
+        //greetingStreeng = "Welcom to paradise!"; //it don't work
+        // using greetingString 
+        Console.WriteLine(greetingStreeng.Length);
     }
 }
