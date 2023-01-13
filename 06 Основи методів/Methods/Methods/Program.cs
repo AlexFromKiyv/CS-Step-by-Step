@@ -25,7 +25,7 @@ static void SimpleMethodWithLambda()
     static double MaxGoodWeight(double height) => (height / 100) * (height / 100) * 24.9;
 }
 
-SimpleMethodWithValidation();
+//SimpleMethodWithValidation();
 static void SimpleMethodWithValidation()
 {
     for (int height = 164; height < 192; height+=2)
@@ -62,28 +62,97 @@ static void BadNoStaticLocalFunction()
 {
     PrintRectangle(1);
 
-    static void PrintRectangle(double lenght)
+    static void PrintRectangle(double length)
     {
         Console.WriteLine(Rectangle());
 
         double Rectangle()
         {
-            lenght += 1;
-            return lenght * lenght;
+            length += 1;
+            return length * length;
         }
     }
 }
 
-StaticLocalFunction();
+//StaticLocalFunction();
 static void StaticLocalFunction()
 {
     PrintRectangle(1);
 
-    static void PrintRectangle(double lenght)
+    static void PrintRectangle(double length)
     {
-        Console.WriteLine(Rectangle(lenght));
+        Console.WriteLine(Rectangle(length));
 
         static double Rectangle(double l) => l * l; 
   
     }
 }
+
+//ValueTypeWithoutModifier();
+
+static void ValueTypeWithoutModifier()
+{
+    int length = 2;
+
+    Console.WriteLine(Rectangle(length));
+
+    static int Rectangle(int l)
+    {
+        Console.WriteLine(l is ValueType);
+       
+        int result = l * l;
+        
+        return result;
+    }
+}
+
+//UsingOutModifier_1();
+static void UsingOutModifier_1()
+{
+    int enterlength = 10;
+
+    Rectangle(enterlength, out int rectangle);
+
+    static void Rectangle(int length, out int result)
+    {
+        result = length * length;
+    }
+
+
+    Console.WriteLine($"{enterlength} * {enterlength} = {rectangle}");
+
+
+    int newRectangle;
+
+    newRectangle = 10;
+
+    Rectangle(enterlength, out newRectangle);
+
+    Console.WriteLine(newRectangle);
+
+
+}
+
+UsingOutModifier_2();
+static void UsingOutModifier_2()
+{
+    int enterlength = 10;
+
+    static void RectangleAndVolume(int length,out bool isPositive , out int rectangle, out int volume)
+    {
+        isPositive = length > 0;
+        rectangle = length * length;
+        volume = length * length * length;
+    }
+
+    RectangleAndVolume(enterlength, out bool isPositive, out int rectangle, out int volume);
+
+    Console.WriteLine($"{enterlength} isPositive:{isPositive} rectangle:{rectangle}, volume:{volume}");
+
+    RectangleAndVolume(5, out _, out _, out int newVolume);
+
+    Console.WriteLine(newVolume);
+
+}
+
+
