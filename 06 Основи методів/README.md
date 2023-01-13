@@ -208,7 +208,55 @@ static void UsingOutModifier_2()
 ```
 Дійсна користь від оператора полягає шо він дозволяє одній функції вертати декілька параметрів. Якшо вам не потрібні деякі значення ви можете відкинути ЇЇ за допомогою out _. _ - це фіктивна змінна яка навмисно не використовується.
 
+## ref параметри
 
+```cs
+
+UsingRefModifier();
+
+static void UsingRefModifier()
+{
+    int x = 5;
+    int y = 8;
+
+    Console.WriteLine($"Before:  x:{x} y:{y}");
+
+    SwapInt(ref x,ref y);
+
+    Console.WriteLine($"After:   x:{x} y:{y}");
+
+    SwapInt(ref x, ref y);
+
+    Console.WriteLine($"After:   x:{x} y:{y}");
+
+    static void SwapInt(ref int a, ref int b)
+    {
+        if (a < b)
+        {   int t = b;
+            b = a;
+            a = t;
+        }
+    }
+
+    string str1 = "Bye";
+    string str2 = "Hi";
+
+    Console.WriteLine("Before: " + str1 + " " + str2);
+
+    SwapStr(ref str1, ref str2);
+    
+    Console.WriteLine("After: " + str1 + " " + str2);
+
+    static void SwapStr(ref string a, ref string b)
+    {
+        string stringTemp = b;
+        b = a;
+        a = stringTemp;
+    }
+}
+```
+
+При використовувані ref модіфікатора параметри повині бути ініціалізовані до визову функції. Функція впливає на зміні шо за її межами і параметри передаються як посилання.
 
 
 

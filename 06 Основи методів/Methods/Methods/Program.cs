@@ -133,7 +133,7 @@ static void UsingOutModifier_1()
 
 }
 
-UsingOutModifier_2();
+//UsingOutModifier_2();
 static void UsingOutModifier_2()
 {
     int enterlength = 10;
@@ -155,4 +155,45 @@ static void UsingOutModifier_2()
 
 }
 
+UsingRefModifier();
 
+static void UsingRefModifier()
+{
+    int x = 5;
+    int y = 8;
+
+    Console.WriteLine($"Before:  x:{x} y:{y}");
+
+    SwapInt(ref x,ref y);
+
+    Console.WriteLine($"After:   x:{x} y:{y}");
+
+    SwapInt(ref x, ref y);
+
+    Console.WriteLine($"After:   x:{x} y:{y}");
+
+    static void SwapInt(ref int a, ref int b)
+    {
+        if (a < b)
+        {   int t = b;
+            b = a;
+            a = t;
+        }
+    }
+
+    string str1 = "Bye";
+    string str2 = "Hi";
+
+    Console.WriteLine("Before: " + str1 + " " + str2);
+
+    SwapStr(ref str1, ref str2);
+    
+    Console.WriteLine("After: " + str1 + " " + str2);
+
+    static void SwapStr(ref string a, ref string b)
+    {
+        string stringTemp = b;
+        b = a;
+        a = stringTemp;
+    }
+}
