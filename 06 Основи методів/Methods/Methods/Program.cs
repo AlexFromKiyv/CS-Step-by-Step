@@ -200,7 +200,7 @@ static void UsingRefModifier()
 
 
 
-UsingInModifier();
+//UsingInModifier();
 
 static void UsingInModifier()
 {
@@ -227,5 +227,39 @@ static void UsingInModifier()
         //greetingStreeng = "Welcom to paradise!"; //it don't work
         // using greetingString 
         Console.WriteLine(greetingStreeng.Length);
+    }
+}
+
+UsingParamsModifier();
+
+static void UsingParamsModifier()
+{
+    Console.WriteLine(GetSum());
+
+    Console.WriteLine(GetSum(1));
+
+    Console.WriteLine(GetSum(1,2,3,4));
+
+    double d = 7.34; 
+
+    Console.WriteLine(GetSum(1.2,3.3,4.5,d));
+
+    double[] myDoubleArray = new double[] {4,5,6.7};
+
+    Console.WriteLine(GetSum(myDoubleArray));
+
+
+    static double GetSum(params double[] values)
+    {
+        double sum = 0;
+
+        if (values.Length > 0)
+        {
+            for (int i = 0; i < values.Length; i++)
+            {
+                sum += values[i];
+            }
+        }
+        return sum;
     }
 }

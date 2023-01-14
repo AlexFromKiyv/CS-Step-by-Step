@@ -296,6 +296,46 @@ static void UsingInModifier()
 ```
 Хоча тип string не є ValueType в методи без модіфікаторів предається значення. Вказуючи модіфікатор in ви даєте зрозуміти шо цей параметр не буде змінюватися.
 
+# params модіфікатор.
+
+Цей модіфікатор дозволяє передати в метод змінну кількість параметрів одного типу як одне ціле.
+
+```cs
+UsingParamsModifier();
+
+static void UsingParamsModifier()
+{
+    Console.WriteLine(GetSum());
+
+    Console.WriteLine(GetSum(1));
+
+    Console.WriteLine(GetSum(1,2,3,4));
+
+    double d = 7.34; 
+
+    Console.WriteLine(GetSum(1.2,3.3,4.5,d));
+
+    double[] myDoubleArray = new double[] {4,5,6.7};
+
+    Console.WriteLine(GetSum(myDoubleArray));
+
+
+    static double GetSum(params double[] values)
+    {
+        double sum = 0;
+
+        if (values.Length > 0)
+        {
+            for (int i = 0; i < values.Length; i++)
+            {
+                sum += values[i];
+            }
+        }
+        return sum;
+    }
+}
+```
+При попадані всі параиетри предані в метод потрапляють в массив. Щоб уникнути неоднозначність праметр з модіфікатором params повиниен бути тільки один і у кінці всіх інших.
 
 
 
