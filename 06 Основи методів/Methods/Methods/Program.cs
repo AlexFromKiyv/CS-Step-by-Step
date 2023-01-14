@@ -276,4 +276,12 @@ static void UsingOptionalPatameters()
     {
         return temperature.ToString() + "°" + scale;
     }
+
+    //static string GetStringTemperatureWithDateTime(double temperature, 
+    //    string scale = "C", 
+    //    DateTime dateTime = DateTime.Now) // it don't work
+    //{
+    //    return temperature.ToString() + "°" + scale + dateTime.ToString() ;
+    //}
+
 }
