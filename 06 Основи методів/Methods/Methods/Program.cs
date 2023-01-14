@@ -1,4 +1,6 @@
 ﻿//SimpleMethod();
+using System.Reflection.Metadata.Ecma335;
+
 static void SimpleMethod()
 {
     double height = 176;
@@ -230,7 +232,7 @@ static void UsingInModifier()
     }
 }
 
-UsingParamsModifier();
+//UsingParamsModifier();
 
 static void UsingParamsModifier()
 {
@@ -261,5 +263,17 @@ static void UsingParamsModifier()
             }
         }
         return sum;
+    }
+}
+
+UsingOptionalPatameters();
+static void UsingOptionalPatameters()
+{
+    Console.WriteLine(GetStringTemperature(20));
+    Console.WriteLine(GetStringTemperature(68,"F"));
+
+    static string GetStringTemperature(double temperature,string scale = "C")
+    {
+        return temperature.ToString() + "°" + scale;
     }
 }

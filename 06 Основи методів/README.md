@@ -337,6 +337,30 @@ static void UsingParamsModifier()
 ```
 При попадані всі параиетри предані в метод потрапляють в массив. Щоб уникнути неоднозначність праметр з модіфікатором params повиниен бути тільки один і у кінці всіх інших.
 
+## Необов'язкові параметри.
+
+```cs
+UsingOptionalPatameters();
+static void UsingOptionalPatameters()
+{
+    Console.WriteLine(GetStringTemperature(20));
+    Console.WriteLine(GetStringTemperature(68,"F"));
+
+    static string GetStringTemperature(double temperature,string scale = "C")
+    {
+        return temperature.ToString() + "°" + scale;
+    }
+
+    //static string GetStringTemperatureWithDateTime(double temperature, 
+    //    string scale = "C", 
+    //    DateTime dateTime = DateTime.Now) // it don't work
+    //{
+    //    return temperature.ToString() + "°" + scale + dateTime.ToString() ;
+    //}
+
+}
+```
+Параметри за замовчуванням повині бути визначені під час компіляції.
 
 
 
