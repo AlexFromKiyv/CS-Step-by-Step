@@ -266,7 +266,7 @@ static void UsingParamsModifier()
     }
 }
 
-UsingOptionalPatameters();
+//UsingOptionalPatameters();
 static void UsingOptionalPatameters()
 {
     Console.WriteLine(GetStringTemperature(20));
@@ -284,4 +284,27 @@ static void UsingOptionalPatameters()
     //    return temperature.ToString() + "°" + scale + dateTime.ToString() ;
     //}
 
+}
+
+
+UsingNamedParameters();
+static void UsingNamedParameters()
+{
+
+    Volume(length: 1, height: 3, width: 2);
+
+
+    static void Volume(int length, int width , int height)
+    {
+        Console.WriteLine($"Lenght:{length} Width:{width} Height:{height}" );
+        Console.WriteLine(length*width*height);    
+    }
+
+  
+    Console.WriteLine(GetStringTemperature(temperature:20));
+  
+    static string GetStringTemperature(string scale = "C",double temperature = 0)
+    {
+        return temperature.ToString() + "°" + scale;
+    }
 }

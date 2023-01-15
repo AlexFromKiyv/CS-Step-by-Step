@@ -362,7 +362,31 @@ static void UsingOptionalPatameters()
 ```
 Параметри за замовчуванням повині бути визначені під час компіляції. 
 
-## 
+## Іменовані параметри.
 
+```cs
+UsingNamedParameters();
+static void UsingNamedParameters()
+{
+
+    Volume(length: 1, height: 3, width: 2);
+
+
+    static void Volume(int length, int width , int height)
+    {
+        Console.WriteLine($"Lenght:{length} Width:{width} Height:{height}" );
+        Console.WriteLine(length*width*height);    
+    }
+
+  
+    Console.WriteLine(GetStringTemperature(temperature:20));
+  
+    static string GetStringTemperature(string scale = "C",double temperature = 0)
+    {
+        return temperature.ToString() + "°" + scale;
+    }
+}
+```
+Таким чином не об'язково дотримуватися порядку параметрів у методі при визові. Оператор : присваює значення необхідному параметру. Змішаний варіант виклику потребує аби позиційні параматри були перед іменованими або знаходилися в правільному місті.
 
 
