@@ -79,19 +79,19 @@ static void SimpleMethodWithValidation()
 }
 ```
 Локальні функції досяжні в межах іншої функції де вони створені. Локальним функціям можна додавати атрібути наприклад #nullable enable
-
+lenght
 ```cs
 BadNoStaticLocalFunction();
 
 static void BadNoStaticLocalFunction()
 {
-    PrintRectangle(1);
+    PrintQuadrate(1);
 
-    static void PrintRectangle(double length)
+    static void PrintQuadrate(double length)
     {
-        Console.WriteLine(Rectangle());
+        Console.WriteLine(Quadrate());
 
-        double Rectangle()
+        double Quadrate()
         {
             length += 1;
             return length * length;
@@ -107,13 +107,13 @@ static void BadNoStaticLocalFunction()
 StaticLocalFunction();
 static void StaticLocalFunction()
 {
-    PrintRectangle(1);
+    PrintQuadrate(1);
 
-    static void PrintRectangle(double length)
+    static void PrintQuadrate(double length)
     {
-        Console.WriteLine(Rectangle(length));
+        Console.WriteLine(Quadrate(length));
 
-        static double Rectangle(double l) => l * l; 
+        static double Quadrate(double l) => l * l; 
   
     }
 }
@@ -140,9 +140,9 @@ static void ValueTypeWithoutModifier()
 {
     int length = 2;
 
-    Console.WriteLine(Rectangle(length));
+    Console.WriteLine(Quadrate(length));
 
-    static int Rectangle(int l)
+    static int Quadrate(int l)
     {
         Console.WriteLine(l is ValueType);
        
@@ -164,22 +164,22 @@ static void UsingOutModifier_1()
 {
     int enterlength = 10;
 
-    Rectangle(enterlength, out int rectangle);
+    Quadrate(enterlength, out int quadrate);
 
-    static void Rectangle(int length, out int result)
+    static void Quadrate(int length, out int result)
     {
         result = length * length;
     }
 
 
-    Console.WriteLine($"{enterlength} * {enterlength} = {rectangle}");
+    Console.WriteLine($"{enterlength} * {enterlength} = {quadrate}");
 
 
-    int newRectangle;
+    int newQuadrate;
 
-    Rectangle(enterlength, out newRectangle);
+    Quadrate(enterlength, out newQuadrate);
 
-    Console.WriteLine(newRectangle);
+    Console.WriteLine(newQuadrate);
 }
 ```
 Змінну в якості параметра можна створювати при визові функції. В тілі функції обовязково треба присоїти їй значення. При передачі існуючої змінної треба використовувати out і її значення після визову змінеться. 
@@ -189,18 +189,18 @@ static void UsingOutModifier_2()
 {
     int enterlength = 10;
 
-    static void RectangleAndVolume(int length,out bool isPositive , out int rectangle, out int volume)
+    static void QuadrateAndVolume(int length,out bool isPositive , out int quadrate, out int volume)
     {
         isPositive = length > 0;
-        rectangle = length * length;
+        quadrate = length * length;
         volume = length * length * length;
     }
 
-    RectangleAndVolume(enterlength, out bool isPositive, out int rectangle, out int volume);
+    QuadrateAndVolume(enterlength, out bool isPositive, out int quadrate, out int volume);
 
-    Console.WriteLine($"{enterlength} isPositive:{isPositive} rectangle:{rectangle}, volume:{volume}");
+    Console.WriteLine($"{enterlength} isPositive:{isPositive} quadrate:{quadrate}, volume:{volume}");
 
-    RectangleAndVolume(5, out _, out _, out int newVolume);
+    QuadrateAndVolume(5, out _, out _, out int newVolume);
 
     Console.WriteLine(newVolume);
 
@@ -389,4 +389,115 @@ static void UsingNamedParameters()
 ```
 Таким чином не об'язково дотримуватися порядку параметрів у методі при визові. Оператор : присваює значення необхідному параметру. Змішаний варіант виклику потребує аби позиційні параматри були перед іменованими або знаходилися в правільному місті.
 
+## Перезавантаженя методів (method overloading)
 
+Є можливість створити декілька методів з однією назвою але з різною кількістю або типом параметрів. Таким чином перезавантажуються методи. Локальни функції не підтримують презавантаженя.
+
+```cs
+UsingOverload();
+static void UsingOverload()
+{
+    int myInt = 10;
+    double myDouble = 5.23;
+    decimal myDecimal = 1000.2356M;
+    float myFloat = 100.12F;
+    long myLong = 100000000L;
+
+    Console.WriteLine(Quadrate.GetQuadrate(myInt));
+    Console.WriteLine(Quadrate.GetQuadrate(myDouble));
+    Console.WriteLine(Quadrate.GetQuadrate(myDouble,2));
+    Console.WriteLine(Quadrate.GetQuadrate(myDecimal));
+    Console.WriteLine(Quadrate.GetQuadrate(myDecimal,2));
+    Console.WriteLine(Quadrate.GetQuadrate(myFloat));
+    Console.WriteLine(Quadrate.GetQuadrate(myLong)); 
+
+}
+
+static class Quadrate
+{
+    internal static string GetQuadrate(int lenght)
+    {
+        Console.WriteLine("I choose method 1");
+        return (lenght * lenght).ToString(); 
+    }
+    internal static string GetQuadrate(double lenght)
+    {
+        Console.WriteLine("I choose method 2");
+        return (lenght * lenght).ToString();
+    }
+    internal static string GetQuadrate(decimal lenght)
+    {
+        Console.WriteLine("I choose method 3");
+        return (lenght * lenght).ToString();
+    }
+    internal static string GetQuadrate(double lenght, int accuracy = 2)
+    {
+        Console.WriteLine("I choose method 4");
+
+        return double.Round(lenght * lenght, accuracy).ToString();
+    }
+    internal static string GetQuadrate(decimal lenght, int accuracy  = 2)
+    {
+        Console.WriteLine("I choose method 5");
+        return decimal.Round(lenght * lenght, accuracy).ToString();
+    }
+
+    internal static string GetQuadrate(long lenght)
+    {
+        Console.WriteLine("I choose method 6");
+        return GetQuadrate((decimal)lenght);
+    }
+
+}
+```
+Використовуючи превантаження ви можете використови одне і теж ім'я для методів які роблять одне й тесаме але для параметрів різних типів. Якшо методи відрізняються лише типом повертання то цього не достньо для превантаженя методу. 
+
+Коли ви вели частину коду Console.WriteLine(Quadrate.GetStringQuadrate( у вас єможливість побачити варіанти первантаженя.
+
+Аби не було непорозуміня не варто створювати методи які відрізняються лише необов'язковим параметрами, оскілки буде 2 місця для покращеня методу.
+
+```cs
+
+string GetQuadrate(ref int lenght) // don't work
+string GetQuadrate(out int lenght) //
+
+string GetQuadrate(ref int lenght) // work
+string GetQuadrate(int lenght)     // 
+
+```
+
+## Перевірка на null
+
+Коли метод отримує параметр типу reference то він може бути null. 
+```cs
+CheckParameterForNull();
+
+static void CheckParameterForNull()
+{
+    //SendMessageBad(null);
+    //SendMessageLargeCheck(null);
+    SendMessageShortSheck(null);
+
+
+    static void SendMessageBad(string message)
+    {
+        Console.WriteLine(message.Length);
+    }
+
+    static void SendMessageLargeCheck(string message)
+    {
+        if (message == null)
+        {
+            throw new ArgumentNullException(message);
+        }
+        Console.WriteLine("Send:"+message);
+    }
+
+    static void SendMessageShortSheck(string message)
+    {
+        ArgumentNullException.ThrowIfNull(message);
+        Console.WriteLine("Send:" + message);
+
+    }
+}
+```

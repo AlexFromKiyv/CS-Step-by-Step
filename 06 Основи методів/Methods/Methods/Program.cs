@@ -1,5 +1,7 @@
 ﻿//SimpleMethod();
 using System.Reflection.Metadata.Ecma335;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks.Dataflow;
 
 static void SimpleMethod()
 {
@@ -62,13 +64,13 @@ static void SimpleMethodWithValidation()
 
 static void BadNoStaticLocalFunction()
 {
-    PrintRectangle(1);
+    PrintQuadrate(1);
 
-    static void PrintRectangle(double length)
+    static void PrintQuadrate(double length)
     {
-        Console.WriteLine(Rectangle());
+        Console.WriteLine(Quadrate());
 
-        double Rectangle()
+        double Quadrate()
         {
             length += 1;
             return length * length;
@@ -79,13 +81,13 @@ static void BadNoStaticLocalFunction()
 //StaticLocalFunction();
 static void StaticLocalFunction()
 {
-    PrintRectangle(1);
+    PrintQuadrate(1);
 
-    static void PrintRectangle(double length)
+    static void PrintQuadrate(double length)
     {
-        Console.WriteLine(Rectangle(length));
+        Console.WriteLine(Quadrate(length));
 
-        static double Rectangle(double l) => l * l; 
+        static double Quadrate(double l) => l * l; 
   
     }
 }
@@ -96,9 +98,9 @@ static void ValueTypeWithoutModifier()
 {
     int length = 2;
 
-    Console.WriteLine(Rectangle(length));
+    Console.WriteLine(Quadrate(length));
 
-    static int Rectangle(int l)
+    static int Quadrate(int l)
     {
         Console.WriteLine(l is ValueType);
        
@@ -113,24 +115,24 @@ static void UsingOutModifier_1()
 {
     int enterlength = 10;
 
-    Rectangle(enterlength, out int rectangle);
+    Quadrate(enterlength, out int quadrate);
 
-    static void Rectangle(int length, out int result)
+    static void Quadrate(int length, out int result)
     {
         result = length * length;
     }
 
 
-    Console.WriteLine($"{enterlength} * {enterlength} = {rectangle}");
+    Console.WriteLine($"{enterlength} * {enterlength} = {quadrate}");
 
 
-    int newRectangle;
+    int newQuadrate;
 
-    newRectangle = 10;
+    newQuadrate = 10;
 
-    Rectangle(enterlength, out newRectangle);
+    Quadrate(enterlength, out newQuadrate);
 
-    Console.WriteLine(newRectangle);
+    Console.WriteLine(newQuadrate);
 
 
 }
@@ -140,18 +142,18 @@ static void UsingOutModifier_2()
 {
     int enterlength = 10;
 
-    static void RectangleAndVolume(int length,out bool isPositive , out int rectangle, out int volume)
+    static void QuadrateAndVolume(int length,out bool isPositive , out int Quadrate, out int volume)
     {
         isPositive = length > 0;
-        rectangle = length * length;
+        Quadrate = length * length;
         volume = length * length * length;
     }
 
-    RectangleAndVolume(enterlength, out bool isPositive, out int rectangle, out int volume);
+    QuadrateAndVolume(enterlength, out bool isPositive, out int Quadrate, out int volume);
 
-    Console.WriteLine($"{enterlength} isPositive:{isPositive} rectangle:{rectangle}, volume:{volume}");
+    Console.WriteLine($"{enterlength} isPositive:{isPositive} Quadrate:{Quadrate}, volume:{volume}");
 
-    RectangleAndVolume(5, out _, out _, out int newVolume);
+    QuadrateAndVolume(5, out _, out _, out int newVolume);
 
     Console.WriteLine(newVolume);
 
@@ -287,7 +289,7 @@ static void UsingOptionalPatameters()
 }
 
 
-UsingNamedParameters();
+//UsingNamedParameters();
 static void UsingNamedParameters()
 {
 
@@ -307,4 +309,96 @@ static void UsingNamedParameters()
     {
         return temperature.ToString() + "°" + scale;
     }
+}
+
+//UsingOverload();
+static void UsingOverload()
+{
+    int myInt = 10;
+    double myDouble = 5.23;
+    decimal myDecimal = 1000.2356M;
+    float myFloat = 100.12F;
+    long myLong = 100000000L;
+
+    Console.WriteLine(Quadrate.GetQuadrate(myInt));
+    Console.WriteLine(Quadrate.GetQuadrate(myDouble));
+    Console.WriteLine(Quadrate.GetQuadrate(myDouble,2));
+    Console.WriteLine(Quadrate.GetQuadrate(myDecimal));
+    Console.WriteLine(Quadrate.GetQuadrate(myDecimal,2));
+    Console.WriteLine(Quadrate.GetQuadrate(myFloat));
+    Console.WriteLine(Quadrate.GetQuadrate(myLong)); 
+
+}
+
+
+CheckParameterForNull();
+
+static void CheckParameterForNull()
+{
+    //SendMessageBad(null);
+    //SendMessageLargeCheck(null);
+    SendMessageShortSheck(null);
+
+
+    static void SendMessageBad(string message)
+    {
+        Console.WriteLine(message.Length);
+    }
+
+    static void SendMessageLargeCheck(string message)
+    {
+        if (message == null)
+        {
+            throw new ArgumentNullException(message);
+        }
+        Console.WriteLine("Send:"+message);
+    }
+
+    static void SendMessageShortSheck(string message)
+    {
+        ArgumentNullException.ThrowIfNull(message);
+        Console.WriteLine("Send:" + message);
+
+    }
+}
+
+
+
+
+
+static class Quadrate
+{
+    internal static string GetQuadrate(int lenght)
+    {
+        Console.WriteLine("I choose method 1");
+        return (lenght * lenght).ToString();
+    }
+    internal static string GetQuadrate(double lenght)
+    {
+        Console.WriteLine("I choose method 2");
+        return (lenght * lenght).ToString();
+    }
+    internal static string GetQuadrate(decimal lenght)
+    {
+        Console.WriteLine("I choose method 3");
+        return (lenght * lenght).ToString();
+    }
+    internal static string GetQuadrate(double lenght, int accuracy = 2)
+    {
+        Console.WriteLine("I choose method 4");
+
+        return double.Round(lenght * lenght, accuracy).ToString();
+    }
+    internal static string GetQuadrate(decimal lenght, int accuracy = 2)
+    {
+        Console.WriteLine("I choose method 5");
+        return decimal.Round(lenght * lenght, accuracy).ToString();
+    }
+
+    internal static string GetQuadrate(long lenght)
+    {
+        Console.WriteLine("I choose method 6");
+        return GetQuadrate((decimal)lenght);
+    }
+
 }
