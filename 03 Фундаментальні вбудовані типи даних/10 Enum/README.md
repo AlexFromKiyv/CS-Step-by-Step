@@ -187,6 +187,9 @@ static void UsingBitwiseOperationsWithEnum()
 {
     ContactPreferenceEnum contactsJulia = ContactPreferenceEnum.Email | ContactPreferenceEnum.Phone;
 
+    Console.WriteLine(contactsJulia.ToString());
+    Console.WriteLine();
+
     Console.WriteLine("None - {0}", (contactsJulia | ContactPreferenceEnum.None) == contactsJulia);
     Console.WriteLine("Email - {0}", (contactsJulia | ContactPreferenceEnum.Email) == contactsJulia);
     Console.WriteLine("Phone - {0}", (contactsJulia | ContactPreferenceEnum.Phone) == contactsJulia);
