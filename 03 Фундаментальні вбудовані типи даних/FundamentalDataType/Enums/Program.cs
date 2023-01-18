@@ -51,7 +51,7 @@ static void UsingEnum()
 
 }
 
-UsingSystemEnum();
+//UsingSystemEnum();
 static void UsingSystemEnum()
 {
 
@@ -76,6 +76,34 @@ static void UsingSystemEnum()
         Console.WriteLine();
     }
 }
+
+
+
+//UsingBitwiseOperations();
+static void UsingBitwiseOperations(){
+    Console.WriteLine($"6 = {Convert.ToString(6, 2)}");
+    Console.WriteLine($"4 = {Convert.ToString(4, 2)}");
+    Console.WriteLine($"{Convert.ToString(6, 2)} & {Convert.ToString(4, 2)} = {Convert.ToString(6 & 4, 2)} = {6&4} ");
+    Console.WriteLine($"{Convert.ToString(6, 2)} | {Convert.ToString(4, 2)} = {Convert.ToString(6 | 4, 2)} = {6 | 4}  ");
+    Console.WriteLine($"{Convert.ToString(6, 2)} ^ {Convert.ToString(4, 2)} = {Convert.ToString(6 ^ 4, 2)} = {6 ^ 4} ");
+    Console.WriteLine($"{Convert.ToString(6, 2)} >> 1 = {Convert.ToString(6 >> 1, 2)} = {6 >> 1}  ");
+    Console.WriteLine($"{Convert.ToString(6, 2)} << 1 = {Convert.ToString(6 << 1, 2)} = {6 << 1}  ");
+    Console.WriteLine($"~{Convert.ToString(6, 2)} = {Convert.ToString(~6, 2)} = {~6}");
+    Console.WriteLine($"Int.MaxValue =  {Convert.ToString(int.MaxValue, 2)}");
+}
+
+UsingBitwiseOperationsWithEnum();
+static void UsingBitwiseOperationsWithEnum()
+{
+    ContactPreferenceEnum contactsJulia = ContactPreferenceEnum.Email | ContactPreferenceEnum.Phone;
+    Console.WriteLine("Julia contacts:");
+    Console.WriteLine("None - {0}", (contactsJulia | ContactPreferenceEnum.None) == contactsJulia);
+    Console.WriteLine("Email - {0}", (contactsJulia | ContactPreferenceEnum.Email) == contactsJulia);
+    Console.WriteLine("Phone - {0}", (contactsJulia | ContactPreferenceEnum.Phone) == contactsJulia);
+    Console.WriteLine("Ukrposhta - {0}", (contactsJulia | ContactPreferenceEnum.Ukrposhta) == contactsJulia);
+
+}
+
 
 
 enum WaterStateEnum
@@ -111,3 +139,11 @@ enum WaterState3Enum : byte
 }
 
 
+[Flags]
+enum ContactPreferenceEnum
+{
+    None = 1,
+    Email = 2,
+    Phone = 4,
+    Ukrposhta = 8
+}

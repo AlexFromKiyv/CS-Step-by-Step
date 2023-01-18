@@ -150,6 +150,60 @@ static void UsingSystemEnum()
 ```
 В прикладі використовуеться флаг форматування :D.
 
+## Побітові операції і Enum
+
+```cs
+UsingBitwiseOperations();
+static void UsingBitwiseOperations(){
+    Console.WriteLine($"6 = {Convert.ToString(6, 2)}");
+    Console.WriteLine($"4 = {Convert.ToString(4, 2)}");
+    Console.WriteLine($"{Convert.ToString(6, 2)} & {Convert.ToString(4, 2)} = {Convert.ToString(6 & 4, 2)} = {6&4} ");
+    Console.WriteLine($"{Convert.ToString(6, 2)} | {Convert.ToString(4, 2)} = {Convert.ToString(6 | 4, 2)} = {6 | 4}  ");
+    Console.WriteLine($"{Convert.ToString(6, 2)} ^ {Convert.ToString(4, 2)} = {Convert.ToString(6 ^ 4, 2)} = {6 ^ 4} ");
+    Console.WriteLine($"{Convert.ToString(6, 2)} >> 1 = {Convert.ToString(6 >> 1, 2)} = {6 >> 1}  ");
+    Console.WriteLine($"{Convert.ToString(6, 2)} << 1 = {Convert.ToString(6 << 1, 2)} = {6 << 1}  ");
+    Console.WriteLine($"~{Convert.ToString(6, 2)} = {Convert.ToString(~6, 2)} = {~6}");
+    Console.WriteLine($"Int.MaxValue =  {Convert.ToString(int.MaxValue, 2)}");
+}
+```
+Результат:
+
+```
+6 = 110
+4 = 100
+110 & 100 = 100 = 4
+110 | 100 = 110 = 6
+110 ^ 100 = 10 = 2
+110 >> 1 = 11 = 3
+110 << 1 = 1100 = 12
+~110 = 11111111111111111111111111111001 = -7
+Int.MaxValue =  1111111111111111111111111111111
+```
+Побітові оператори швидкий механізм. Разом з Enum можна рішати деякі завдання.
+
+```cs
+UsingBitwiseOperationsWithEnum();
+static void UsingBitwiseOperationsWithEnum()
+{
+    ContactPreferenceEnum contactsJulia = ContactPreferenceEnum.Email | ContactPreferenceEnum.Phone;
+
+    Console.WriteLine("None - {0}", (contactsJulia | ContactPreferenceEnum.None) == contactsJulia);
+    Console.WriteLine("Email - {0}", (contactsJulia | ContactPreferenceEnum.Email) == contactsJulia);
+    Console.WriteLine("Phone - {0}", (contactsJulia | ContactPreferenceEnum.Phone) == contactsJulia);
+    Console.WriteLine("Ukrposhta - {0}", (contactsJulia | ContactPreferenceEnum.Ukrposhta) == contactsJulia);
+}
+
+
+[Flags]
+enum ContactPreferenceEnum
+{
+    None = 1,
+    Email = 2,
+    Phone = 4,
+    Ukrposhta = 8
+}
+```
+
 
 
 
