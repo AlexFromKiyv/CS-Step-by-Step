@@ -1,12 +1,14 @@
-﻿UsingSimpleStructure();
+﻿//UsingSimpleStructure();
 
 static void UsingSimpleStructure()
 {
-    Point point = new Point();
+    Point point;
+    //point.Display(); don't work
 
     point.X = 1;
-    point.Y = 2;
+    //point.Display(); don't work
 
+    point.Y = 2;
     point.Display();
 
     point.Increment();
@@ -26,12 +28,28 @@ static void UsingSimpleStructure()
     Console.WriteLine(point.ToString());
 }
 
+UsingStructureConstructor();
+static void UsingStructureConstructor()
+{
+    Point point = new Point();
+    point.Display();
+
+    Point point1 = new Point(1, 1);
+    point1.Display();
+}
+
+
 struct Point
 {
     // coordinates 
     public int X;
     public int Y;
 
+    public Point(int x, int y)
+    {
+        X = x;
+        Y = y;
+    }
 
     /// <summary>
     /// Add 1 to coordinates 
