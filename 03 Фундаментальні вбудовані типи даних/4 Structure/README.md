@@ -2,9 +2,9 @@
 
 Додамо проект Structs.
 
-## Створення
 Структури добре підходять для моделювання математичних, геометричних і атомарних сутностей.
-Структури можуть містити можуть містити поля даних та медоди роботи з ними.
+Структури можуть реалізовувати інтерфейси але не можна успадковувати і бути основою класа. 
+Структури можуть містити поля даних та медоди роботи з ними.
 
 ```cs
 UsingSimpleStructure();
@@ -71,7 +71,11 @@ struct Point
 }
 ```
 У цьому прикладі визначена структура з двома загально досупними полями і методами. Модіфікатор public дозволяе мати доступ до поля змінної. Але робити поля напряму загальнодоступними пагана практика. Краще для цього використовувати властивості, а поля робити приватним.
-Як видно із прикладу перед тим як змінну типа струттура використовувати вона повина бути проініціалізована. Тобта всі поля повини мати значення. Ви можете створити змінну структури використовуючи new, який виключе конструктор за замовчуванням. Всі поля після цого заповнюються значеннями за замовчуванням (default).
+
+
+## Конструктори
+
+Як видно із прикладу перед тим як змінну типа струтура використовувати вона повина бути проініціалізована. Тобта всі поля повини мати значення. Ви можете створити змінну структури використовуючи new, який виключе конструктор за замовчуванням. 
 
 ```cs
 UsingStructureConstructor();
@@ -123,13 +127,100 @@ struct Point
 
 }
 ```
+Всі поля після цого заповнюються значеннями за замовчуванням (default).
+
+## Ініціалізація
+
+Структури можна ініціалізувати при декларуванні.
+
+```cs
+UsingInizializersStructure();
+
+static void UsingInizializersStructure()
+{
+    Coordinates coordinates = new Coordinates();
+    coordinates.Display();
+}
+
+struct Coordinates
+{
+    public int X = 1;
+    public int Y = 1;
+
+    public Coordinates()
+    {
+    }
+
+    public void Display()
+    {
+        Console.WriteLine($"{X}:{Y}");
+    }
+}
+```
+
+## Read-only структури
+
+Структури можуть бути тіки для читання і це означає шо вони незмінні. Вони можуть бути більш продуктивними. 
+```cs
+static void UsingReadonlyStructure()
+{
+    ApartmentSquare myApartment = new ApartmentSquare(59);
+
+    //myApartment.Square = 72; it don't work
+
+    myApartment.Display();
+
+}
+
+readonly struct ApartmentSquare
+{
+    public double Square { get; }
+
+    public ApartmentSquare(double square)
+    {
+        Square = square;
+    }
+
+    public void Display()
+    {
+        Console.WriteLine(Square);
+    }
+}
+```
+Незмінні поля можна встановити при створенні.
+
+Redonly можуть бути деякі поля, властивості і методи структури.
+
+```cs
+UsingStructureWithRedonlyMemebers();
+static void UsingStructureWithRedonlyMemebers()
+{
+    ApartmentWithPeople apartment = new ApartmentWithPeople(7,48,2);
+    apartment.Display();
+    //apartment.Number = 8; don't work
+    apartment.NumberOfResidents = 3;
+    apartment.Display();
+}
+
+struct ApartmentWithPeople
+{
+    public readonly int Number;
+    public readonly double Square;
+    public int NumberOfResidents;
+
+    public ApartmentWithPeople(int number, double square, int numberOfResidents)
+    {
+        Number = number;
+        Square = square;
+        NumberOfResidents = numberOfResidents;
+    }
+
+    public readonly void Display()
+    {
+        Console.WriteLine($"Apartment :{Number} Square:{Square} Number of residents:{NumberOfResidents}" );
+    }
+}
+```
 
 
 
-
-
-
-
-
-
-Структури можуть реалізовувати інтерфейси але не можна успадковувати і робити основою класа. 
