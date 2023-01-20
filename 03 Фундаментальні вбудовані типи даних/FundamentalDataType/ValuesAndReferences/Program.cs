@@ -1,31 +1,4 @@
-# Value i Reference типи
-
-Додамо проект ValuesAndReferences
-
-System.Object є предком всіх інших типів. Від нього походять тип ValueType а також типи посилання(Reference type).
-
-Типи які походять від ValueType називають Value типами або тип значення. До них відносяться     
-
-- числа (int,double,... )   
-- bool                      
-- void      
-- char                      
-- час (DataTime,TimeSpan,... )
-- struct
-- enum
-
-
-До типів посилання (Reference type) відноситься 
-
-- object      
-- class    (System.Type)
-- string   (System.String)
-- array    (System.Array)
-- exeption (System.Exeption)
-- delegate (System.Delegate) 
-
-```cs
-CheckingValueType();
+﻿CheckingValueType();
 static void CheckingValueType()
 {
     Console.WriteLine("Value Type:");
@@ -93,23 +66,3 @@ class House
     public string Adress { get; set; }
     public double Square { get; set; }
 }
-```
-Результат
-```
-Value Type:
-int is ValueType: True
-double is ValueType: True
-bool is ValueType: True
-char is ValueType: True
-DateTime is ValueType: True
-Structure is ValueType: True
-Enum is ValueType: True
-
-
-Reference type:
-оbject is ValueType: False
-class is ValueType: False
-string is ValueType: False
-array is ValueType: False
-exception is ValueType: False
-```
