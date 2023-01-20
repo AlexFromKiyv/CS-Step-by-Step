@@ -222,5 +222,5 @@ struct ApartmentWithPeople
 }
 ```
 
-
+Типи int,double,decimal та інші це структури.
 
