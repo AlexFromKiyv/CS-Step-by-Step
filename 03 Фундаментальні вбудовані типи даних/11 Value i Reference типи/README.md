@@ -26,6 +26,7 @@ System.Object є предком всіх інших типів. Від ньог�
 
 ```cs
 CheckingValueType();
+
 static void CheckingValueType()
 {
     Console.WriteLine("Value Type:");
@@ -45,20 +46,20 @@ static void CheckingValueType()
     DateTime time = DateTime.Now;
     Console.WriteLine($"DateTime is ValueType: {time is ValueType}");
 
-    Point point = new Point(2);
+    Point point = new Point(1,2);
     Console.WriteLine($"Structure is ValueType: {point is ValueType}");
 
     Season season = Season.Winter;
     Console.WriteLine($"Enum is ValueType: {season is ValueType}");
-
+        
+    
     Console.WriteLine("\n\nReference type: ");
-
 
     object myObject = new();
     Console.WriteLine($"оbject is ValueType: {myObject is ValueType}");
 
-    House house = new House();
-    Console.WriteLine($"class is ValueType: {house is ValueType}");
+    Apartment apartment = new();
+    Console.WriteLine($"class is ValueType: {apartment is ValueType}");
 
     string myString = "Hi";
     Console.WriteLine($"string is ValueType: {myString is ValueType}");
@@ -88,10 +89,20 @@ enum Season
     Summer
 }
 
-class House
+class Apartment
 {
-    public string Adress { get; set; }
+    public int Number { get; set; }
     public double Square { get; set; }
+
+    public Apartment()
+    {
+    }
+
+    public Apartment(int number, double square)
+    {
+        Number = number;
+        Square = square;
+    }
 }
 ```
 Результат
@@ -113,3 +124,100 @@ string is ValueType: False
 array is ValueType: False
 exception is ValueType: False
 ```
+
+Головне для чого існує ValueType це гарантувати щоб похідний тип розішувався в stack, а не в garbage-collected heap. Данні розміщені в стек швидко створюються та знишуються і час їх життя  визначається визначальною областю. Коли змінна типу значення випадає з області визначення, вона негайно видаляється з пам’яті. З іншого боку, дані, виділені в динамічній пам’яті, контролюються збирачем сміття .NET Core і мають тривалість життя, яка визначається багатьма факторами.
+
+
+```cs
+static void UsingValueInStack()
+{
+    static void ValueInStack()
+    {
+        int myInt = 5;
+        Season season = Season.Autumn;
+    } //at now myInt, season is not in the stack, memory
+}
+```
+
+# Присвоення
+
+Коли одній змінній ValueType приваюється друга зміна то відбуваеться копіювання даних.
+```cs
+
+AssignValueType();
+static void AssignValueType()
+{
+    int a = 5;
+    int b = a;
+    Console.WriteLine(b);
+
+    Point pointA = new Point(1,1);
+    Point pointB = pointA;
+    pointB.Display();
+    
+    pointB.X = 2;
+    pointB.Y = 2;
+    pointB.Display();
+    pointA.Display();
+}
+
+struct Point
+{
+    public int X { get; set; }
+    public int Y { get; set; }
+
+    public Point(int x, int y)
+    {
+        X = x;
+        Y = y;
+    }
+
+    public void Display()
+    {
+        Console.WriteLine($"X:{X} Y:{Y}");
+    }
+}
+```
+Для тип int для а і b в стеку створюеться окремі місця і значення з одного місця копіюється в інше. Оскільки Point це Value type відбуваеться аналогічне. В стеку виділяються окремі місця і значення X і Y коіюються почерзі. Оскільіки змінні в стеку пребувають окремо змінна однієї не впливає на іншу. 
+
+Інша справа коли змінна належить до Reference type
+```cs
+
+AssignReferenceType();
+static void AssignReferenceType()
+{
+    Apartment apartment5 = new Apartment(5, 42); 
+    Apartment apartment7 = new();
+    
+    apartment7 = apartment5; 
+    apartment7.Info();
+
+    apartment7.Number = 7;
+    apartment5.Info();
+}
+
+class Apartment
+{
+    public int Number { get; set; }
+    public double Square { get; set; }
+
+    public Apartment()
+    {
+    }
+
+    public Apartment(int number, double square)
+    {
+        Number = number;
+        Square = square;
+    }
+
+    public void Info()
+    {
+        Console.WriteLine($"Apartment:{Number} Square:{Square}");
+    }
+}
+```
+В цьому випадку спочатку створюється в стеку змінна apartment5 в якій зберігаеться посилання на створенний у manadged heap єкземпляр класу Apartment. Потім створюється в стеку друга зміна якій в стеку копіюється посилання на той самий об'єкт. Таким чином обі змінні вказують на той самий обїект в пам'яті. Використання будь якої зних впливає на той самий об'єкт. 
+
+
+
