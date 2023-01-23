@@ -54,7 +54,7 @@ static void UsingValueInStack()
     } //at now myInt, season is not in the stack, memory
 }
 
-AssignValueType();
+//AssignValueType();
 static void AssignValueType()
 {
     int a = 5;
@@ -74,7 +74,7 @@ static void AssignValueType()
     pointA.Display();
 }
 
-AssignReferenceType();
+//AssignReferenceType();
 static void AssignReferenceType()
 {
     Apartment apartment5 = new Apartment(5, 42);
@@ -88,6 +88,46 @@ static void AssignReferenceType()
 }
 
 
+ReferenceTypeWithinValueType();
+
+static void ReferenceTypeWithinValueType()
+{
+    Console.WriteLine("Create point2 = point1");
+
+    PointOnLine point1 = new PointOnLine("point1","X",100);
+    PointOnLine point2 = point1;
+
+    point1.Display();
+    point2.Display();
+
+    Console.WriteLine("Change value type fild. point2 200 ");
+    point2.Name = "point2";
+    point2.Value = 200;
+    point1.Display();
+    point2.Display();
+
+    Console.WriteLine("\nVariant 1");
+    Console.WriteLine("Change regerence type fild. point2.Axis = new Axis(\"Y\");  ");
+
+    point2.Axis = new Axis("Y");
+    point1.Display();
+    point2.Display();
+
+    Console.WriteLine("\nRecall point2 = point1");
+    point2 = point1;
+    point1.Display();
+    point2.Display();
+
+    Console.WriteLine("\nVariant 2");
+    Console.WriteLine("point2.Axis.Name = \"Y\";");
+    point2.Axis.Name = "Y";
+    point1.Display();
+    point2.Display();
+}
+
+
+
+
 struct Point
 {
     public int X { get; set; }
@@ -98,6 +138,7 @@ struct Point
         X = x;
         Y = y;
     }
+
     public void Display()
     {
         Console.WriteLine($"X:{X} Y:{Y}");
@@ -133,3 +174,33 @@ class Apartment
     }
 }
 
+
+class Axis
+{
+    public string Name;
+
+    public Axis(string name)
+    {
+        Name = name;
+    }
+}
+
+struct PointOnLine
+{
+    public string Name;
+    public Axis Axis;
+    public double Value;
+
+    public PointOnLine(string name, string axisName, double value)
+    {
+        Name = name;
+        Axis = new Axis(axisName);
+        Value = value;
+    }
+
+    public void Display()
+    {
+        Console.WriteLine($"{Name} - {Axis.Name} : {Value}");
+    }
+
+}

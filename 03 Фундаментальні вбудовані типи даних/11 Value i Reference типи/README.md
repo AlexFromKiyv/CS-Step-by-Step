@@ -219,5 +219,81 @@ class Apartment
 ```
 В цьому випадку спочатку створюється в стеку змінна apartment5 в якій зберігаеться посилання на створенний у manadged heap єкземпляр класу Apartment. Потім створюється в стеку друга зміна якій в стеку копіюється посилання на той самий об'єкт. Таким чином обі змінні вказують на той самий обїект в пам'яті. Використання будь якої зних впливає на той самий об'єкт. 
 
+# Reference тип в Value типі.
 
+В середині структурі може бути тип посилання.
+```cs
+ReferenceTypeWithinValueType();
+
+static void ReferenceTypeWithinValueType()
+{
+    Console.WriteLine("Create point2 = point1");
+
+    PointOnLine point1 = new PointOnLine("point1","X",100);
+    PointOnLine point2 = point1;
+
+    point1.Display();
+    point2.Display();
+
+    Console.WriteLine("Change value type fild. point2 200 ");
+    point2.Name = "point2";
+    point2.Value = 200;
+    point1.Display();
+    point2.Display();
+
+    Console.WriteLine("\nVariant 1");
+    Console.WriteLine("Change regerence type fild. point2.Axis = new Axis(\"Y\");  ");
+
+    point2.Axis = new Axis("Y");
+    point1.Display();
+    point2.Display();
+
+    Console.WriteLine("\nAgain point2 = point1");
+    point2 = point1;
+    point1.Display();
+    point2.Display();
+
+    Console.WriteLine("\nVariant 2");
+    Console.WriteLine("point2.Axis.Name = \"Y\";");
+    point2.Axis.Name = "Y";
+    point1.Display();
+    point2.Display();
+}
+
+
+class Axis
+{
+    public string Name;
+
+    public Axis(string name)
+    {
+        Name = name;
+    }
+}
+
+struct PointOnLine
+{
+    public string Name;
+    public Axis Axis;
+    public double Value;
+
+    public PointOnLine(string name, string axisName, double value)
+    {
+        Name = name;
+        Axis = new Axis(axisName);
+        Value = value;
+    }
+
+    public void Display()
+    {
+        Console.WriteLine($"{Name} - {Axis.Name} : {Value}");
+    }
+
+}
+```
+При створені PointOnLine point2 = point1; в стеку зберігаеться окремо змінні з індентичними данними в тому чилі посилання на один и той самий об'єкт в heap. Коли виконуеться point2.Axis = new Axis("Y"); тоді в heap створюеться новій окремий єкзкмпляр класу Axis і point2.Axis зберігає посилання на нього. Це ніяк не впливає на point1 тому що вони окрумі. При повторному point2 = point1; point1.Axis і point2.Axis знову вказує на один і той самий об'єкт в heap. І коли ми виконуємо  point2.Axis.Name = "Y"; тим самим міняємо об'єкт на який вказує і point1.Axis.
+
+Воливо пам'ятати що якшо тип маю в собі посиланя то при присваюванні копіюється посилання на той самий об'єкт, а не створюється копія об'єкту. 
+
+Для глибокого копіювання потрібно де стан копіюється в новий об'єкт можна реалізувати інтерфейс IClonable.
 
