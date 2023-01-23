@@ -88,7 +88,7 @@ static void AssignReferenceType()
 }
 
 
-ReferenceTypeWithinValueType();
+//ReferenceTypeWithinValueType();
 
 static void ReferenceTypeWithinValueType()
 {
@@ -113,7 +113,7 @@ static void ReferenceTypeWithinValueType()
     point1.Display();
     point2.Display();
 
-    Console.WriteLine("\nRecall point2 = point1");
+    Console.WriteLine("\nAgain point2 = point1");
     point2 = point1;
     point1.Display();
     point2.Display();
@@ -125,7 +125,30 @@ static void ReferenceTypeWithinValueType()
     point2.Display();
 }
 
+UsingReferenceTypeAsParameterWithoutModifier();
 
+static void UsingReferenceTypeAsParameterWithoutModifier()
+{
+    Person girl  = new Person("Julia", 29);
+    
+    Console.Write("Before:");
+    girl.Dislpay();
+
+    AgePlusOne(girl);
+    
+    Console.Write("After:");
+    girl.Dislpay();
+  
+    static void AgePlusOne(Person person)
+    {
+        person.Age++;
+        person = new Person("Olga", 27);
+        Console.WriteLine("----Person within method----");
+        person.Dislpay();
+        Console.WriteLine("----------------------------");
+    }
+
+}
 
 
 struct Point
@@ -202,5 +225,23 @@ struct PointOnLine
     {
         Console.WriteLine($"{Name} - {Axis.Name} : {Value}");
     }
+}
+
+class Person
+{
+    public string Name;
+    public int Age;
+
+    public Person()
+    {
+    }
+
+    public Person(string name, int age)
+    {
+        Name = name;
+        Age = age;
+    }
+
+    public void Dislpay() => Console.WriteLine($"Name: {Name}  Age: {Age}");
 
 }

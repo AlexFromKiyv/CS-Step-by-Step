@@ -139,7 +139,7 @@ static void UsingValueInStack()
 }
 ```
 
-# Присвоення
+## Присвоення
 
 Коли одній змінній ValueType приваюється друга зміна то відбуваеться копіювання даних.
 ```cs
@@ -219,7 +219,7 @@ class Apartment
 ```
 В цьому випадку спочатку створюється в стеку змінна apartment5 в якій зберігаеться посилання на створенний у manadged heap єкземпляр класу Apartment. Потім створюється в стеку друга зміна якій в стеку копіюється посилання на той самий об'єкт. Таким чином обі змінні вказують на той самий обїект в пам'яті. Використання будь якої зних впливає на той самий об'єкт. 
 
-# Reference тип в Value типі.
+## Reference тип в Value типі.
 
 В середині структурі може бути тип посилання.
 ```cs
@@ -296,4 +296,55 @@ struct PointOnLine
 Воливо пам'ятати що якшо тип маю в собі посиланя то при присваюванні копіюється посилання на той самий об'єкт, а не створюється копія об'єкту. 
 
 Для глибокого копіювання потрібно де стан копіюється в новий об'єкт можна реалізувати інтерфейс IClonable.
+
+## Передача параметра Reference типа як значення.
+
+```cs
+UsingReferenceTypeAsParameterWithoutModifier();
+
+static void UsingReferenceTypeAsParameterWithoutModifier()
+{
+    Person girl  = new Person("Julia", 29);
+    
+    Console.Write("Before:");
+    girl.Dislpay();
+
+    AgePlusOne(girl);
+    
+    Console.Write("After:");
+    girl.Dislpay();
+  
+    static void AgePlusOne(Person person)
+    {
+        person.Age++;
+        person = new Person("Olga", 27);
+        Console.WriteLine("----Person within method----");
+        person.Dislpay();
+        Console.WriteLine("----------------------------");
+    }
+
+}
+
+class Person
+{
+    public string Name;
+    public int Age;
+
+    public Person()
+    {
+    }
+
+    public Person(string name, int age)
+    {
+        Name = name;
+        Age = age;
+    }
+
+    public void Dislpay() => Console.WriteLine($"Name: {Name}  Age: {Age}");
+
+}
+
+```
+
+Коли метод має параметри типу reference без модіфікаторів він створюе в стеку методу зміну person в якій копіюється посилання на той самий об'єкт в heap що і зміна girl. Тому person.Age++; змінює цей об'єкт.  При визові person = new Person("Olga", 27); в person записуеться посилання на інший об'єкт. Оскілки person окрема копія данних зміна посилань не впливає на посилання в girl.
 
