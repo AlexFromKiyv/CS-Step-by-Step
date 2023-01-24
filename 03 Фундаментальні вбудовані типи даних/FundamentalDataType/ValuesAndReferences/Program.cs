@@ -125,9 +125,9 @@ static void ReferenceTypeWithinValueType()
     point2.Display();
 }
 
-UsingReferenceTypeAsParameterWithoutModifier();
+//UsingReferenceTypeAsParameterAsValue();
 
-static void UsingReferenceTypeAsParameterWithoutModifier()
+static void UsingReferenceTypeAsParameterAsValue()
 {
     Person girl  = new Person("Julia", 29);
     
@@ -147,8 +147,31 @@ static void UsingReferenceTypeAsParameterWithoutModifier()
         person.Dislpay();
         Console.WriteLine("----------------------------");
     }
-
 }
+
+UsingReferenceTypeAsParameterAsReference();
+static void UsingReferenceTypeAsParameterAsReference()
+{
+    Person girl = new Person("Julia", 29);
+
+    Console.Write("Before:");
+    girl.Dislpay();
+
+    AgePlusOne(ref girl);
+
+    Console.Write("After:");
+    girl.Dislpay();
+
+    static void AgePlusOne(ref Person person)
+    {
+        person.Age++;
+        person = new Person("Olga", 27);
+        Console.WriteLine("----Person within method----");
+        person.Dislpay();
+        Console.WriteLine("----------------------------");
+    }
+}
+
 
 
 struct Point

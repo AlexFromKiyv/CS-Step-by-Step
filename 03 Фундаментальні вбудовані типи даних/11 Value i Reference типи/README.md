@@ -300,9 +300,9 @@ struct PointOnLine
 ## Передача параметра Reference типа як значення.
 
 ```cs
-UsingReferenceTypeAsParameterWithoutModifier();
+UsingReferenceTypeAsParameterAsValue();
 
-static void UsingReferenceTypeAsParameterWithoutModifier()
+static void UsingReferenceTypeAsParameterAsValue()
 {
     Person girl  = new Person("Julia", 29);
     
@@ -345,6 +345,72 @@ class Person
 }
 
 ```
+Результат
+```txt
+Before:Name: Julia  Age: 29
+----Person within method----
+Name: Olga  Age: 27
+----------------------------
+After:Name: Julia  Age: 30
+```
 
-Коли метод має параметри типу reference без модіфікаторів він створюе в стеку методу зміну person в якій копіюється посилання на той самий об'єкт в heap що і зміна girl. Тому person.Age++; змінює цей об'єкт.  При визові person = new Person("Olga", 27); в person записуеться посилання на інший об'єкт. Оскілки person окрема копія данних зміна посилань не впливає на посилання в girl.
+Коли метод має параметри типу reference без модіфікаторів він створюе в стеку методу зміну person в якій копіюється посилання на той самий об'єкт в heap що і зміна girl. Тому person.Age++; змінює цей об'єкт.  При визові person = new Person("Olga", 27); в person записуеться посилання на інший об'єкт. Оскілки person окрема копія данних запис нового посиланя не впливає на посилання в girl.
 
+Таким чином якщо посилальний тип передається за значенням, виклик може змінити значення даних стану об’єкта, але не об’єкт, на який він посилається.
+
+## Передача параметра Reference типа як посилання.
+По іншому працює метод коли параметр має модіфікатор ref і предаеться як посилання.
+
+```cs
+UsingReferenceTypeAsParameterAsReference();
+static void UsingReferenceTypeAsParameterAsReference()
+{
+    Person girl = new Person("Julia", 29);
+
+    Console.Write("Before:");
+    girl.Dislpay();
+
+    AgePlusOne(ref girl);
+
+    Console.Write("After:");
+    girl.Dislpay();
+
+    static void AgePlusOne(ref Person person)
+    {
+        person.Age++;
+        person = new Person("Olga", 27);
+        Console.WriteLine("----Person within method----");
+        person.Dislpay();
+        Console.WriteLine("----------------------------");
+    }
+}
+
+class Person
+{
+    public string Name;
+    public int Age;
+
+    public Person()
+    {
+    }
+
+    public Person(string name, int age)
+    {
+        Name = name;
+        Age = age;
+    }
+
+    public void Dislpay() => Console.WriteLine($"Name: {Name}  Age: {Age}");
+
+}
+
+```
+Результат:
+```
+Before:Name: Julia  Age: 29
+----Person within method----
+Name: Olga  Age: 27
+----------------------------
+After:Name: Olga  Age: 27
+```
+В цьому випадку метод може змінити не тільки стан об'єкту на який вказуе person, а також може змінити об'ект на який посилаеться girl.
