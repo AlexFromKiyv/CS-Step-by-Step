@@ -1,6 +1,30 @@
-﻿//AssignNull();
+﻿CrashWithNull();
+static void CrashWithNull()
+{
 
-static void AssignNull()
+    Person girl = new(); 
+
+    AgePlusOne(girl);//Ok 
+    girl.Display();  //Ok  Name: Age:1 IsNull:False
+
+    Person boy = null; //War: Converting null to no-nullable type. // Start problem
+    AgePlusOne(boy); //War: may be null here  // Сontinuation of the problem
+
+    Person maneger = new();
+    maneger.Name = null; //War: Converting null to no-nullable type. // Start problem
+    maneger.Name.ToUpper();//War: may be null here  // Exeption thrown Name == null
+
+    static void AgePlusOne(Person p)
+    {
+        p.Age++; // Exeption thrown if p == null
+    }
+}
+
+
+
+//AssignNull();
+
+//static void AssignNull()
 {
     //int age = null; //not-nullable //Cannot convert null to int because it is not-nullable value type.
 
@@ -51,8 +75,8 @@ static void UsingSystemNullable()
     //Nullable<Person> person = null; // Person must be non-nullable value type.
 }
 
-UsingNullables();
-static void UsingNullables()
+//UsingNullablesValueType();
+static void UsingNullablesValueType()
 {
     UserDatabaseSimulator user = new UserDatabaseSimulator(1, "Julia");
 
@@ -80,9 +104,12 @@ static void UsingNullables()
     static string GetUserInfo(UserDatabaseSimulator user) => $"{user.id} {user.name} ";
 }
 
+
 class Person
 {
-    public string Name { get; set; }
+    public string Name { get; set; } //Here warning 
+    public int Age { get; set; }
+    public void Display() => Console.WriteLine($"Name:{Name} Age:{Age} IsNull:{this is null}");
 }
 
 class UserDatabaseSimulator
