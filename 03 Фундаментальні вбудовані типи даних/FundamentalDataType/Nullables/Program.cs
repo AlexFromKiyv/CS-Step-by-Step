@@ -1,4 +1,4 @@
-﻿CrashWithNull();
+﻿//CrashWithNull();
 static void CrashWithNull()
 {
 
@@ -24,17 +24,24 @@ static void CrashWithNull()
 
 //AssignNull();
 
-//static void AssignNull()
+static void AssignNull()
 {
-    //int age = null; //not-nullable //Cannot convert null to int because it is not-nullable value type.
+    //int weight = null; // don't work //Cannot convert null to int because it is not-nullable value type.
+    //string title = null; // work, but has warning
 
-    int? age; //nullable
-    bool? married; //nullable
+    string title = "User:";
+
+    int? age;      //nullable
+    bool? married; //
+
+    age = null;     // no problem
+    married = null; //
+
 
     age = GetAgeFromDB();
     married = GetMarriedFromDB();
     
-    Console.WriteLine($"{age} {married}");
+    Console.WriteLine($"{title} {age} {married}");
 
 
     static bool? GetMarriedFromDB()
@@ -48,11 +55,11 @@ static void CrashWithNull()
     }
 }
 
-//UsingSystemNullable();
-static void UsingSystemNullable()
+//StructSystemNullable();
+static void StructSystemNullable()
 {
 
-    Nullable<bool> merried = null; 
+    Nullable<bool> merried = null;
     Nullable<int> age = null;
     Console.WriteLine("merried = null, age = null");
     Console.WriteLine($"merried.HasValue : {merried.HasValue}");
@@ -75,33 +82,54 @@ static void UsingSystemNullable()
     //Nullable<Person> person = null; // Person must be non-nullable value type.
 }
 
-//UsingNullablesValueType();
+UsingNullablesValueType();
 static void UsingNullablesValueType()
 {
-    UserDatabaseSimulator user = new UserDatabaseSimulator(1, "Julia");
+    
+    UserDatabaseSimulator girlJulia = new UserDatabaseSimulator(1, "Julia");
+    GetUserInfo(girlJulia);
 
-    int? age = user.GetAge();
+    UserDatabaseSimulator girlHanna = new UserDatabaseSimulator(2, "Hanna",true,35);
+    GetUserInfo(girlHanna);
 
-    if (age.HasValue)
-    {
-        Console.WriteLine(GetUserInfo(user)+age.ToString());   
-    }
-    else
-    {
-        Console.WriteLine(GetUserInfo(user)+"age is undefined");     
-    }
+    UserDatabaseSimulator boyAlex = new UserDatabaseSimulator(3, "Alex",null, 30);
+    GetUserInfo(boyAlex);
 
-    bool? merried = user.GetMerried();
+    UserDatabaseSimulator boyJohn = new UserDatabaseSimulator(4, "Jhon",true);
+    GetUserInfo(boyJohn);
 
-    if (merried != null)
+
+
+    void GetUserInfo(UserDatabaseSimulator user)
     {
-        Console.WriteLine(GetUserInfo(user) + $"Merried:{merried.Value}");
+
+        string result = $"Id:{user.id} Name:{user.name} ";
+
+        bool? merried = user.GetMerried();
+
+
+        if (merried.HasValue)
+        {
+            result +=$"Merried:{merried.Value} ";
+        }
+        else
+        {
+            result += "Merried: undefined ";
+        }
+
+        int? age = user.GetAge();
+
+        if (age != null)
+        {
+           result +=$"Age:{age}";
+        }
+        else
+        {
+            result += "Age: undefined";
+        }
+
+        Console.WriteLine(result);
     }
-    else
-    {
-        Console.WriteLine(GetUserInfo(user) + "merried is undefined");
-    }
-    static string GetUserInfo(UserDatabaseSimulator user) => $"{user.id} {user.name} ";
 }
 
 
@@ -116,13 +144,15 @@ class UserDatabaseSimulator
 {
     public int id;
     public string name; 
-    public bool? merried = true;
-    public int? age = null;
+    public bool? merried;
+    public int? age;
 
-    public UserDatabaseSimulator(int id, string name)
+    public UserDatabaseSimulator(int id, string name, bool? merried = null, int? age=null)
     {
         this.id = id;
         this.name = name;
+        this.merried = merried;
+        this.age = age;
     }
 
     public bool? GetMerried()

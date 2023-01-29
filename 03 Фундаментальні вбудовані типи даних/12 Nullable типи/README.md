@@ -2,7 +2,7 @@
 
 Додамо проект Nullables
 
-Коли ви заповнюєте якусь форму наприклад для регістрації ви можете не заповнювати деякі необовязкові поля наприклад сімейний стан або вік. Це приводить до того що в базі данних є поля які не визначені абож null. В базах даним може бути багато мість де дані не визначенні тобто null.
+Коли ви заповнюєте якусь форму наприклад для регістрації ви можете не заповнювати деякі необовязкові поля наприклад сімейний стан або вік. Це приводить до того що в базі данних є поля які не визначені абож null. В базах даним може бути багато мість де дані не визначенні.
 
 Коли поле або об'єкт не визначенно і ми їx використовуем неналежним чином среда виконання викидує NullReferenceException і програма закінчує роботу. Оскільки виправлення помилок іноді дуже дороге задоволення було вирішено вже коли створюється код нагадувати розробнику що в цьому місті може виникнути преблема.
 
@@ -37,13 +37,16 @@ class Person
     public void Display() => Console.WriteLine($"Name:{Name} Age:{Age} IsNull:{this is null}");
 }
 ```
-Як ми бачимо з прикладу синтаксичний аналізатор показує де в коді можуть винукнути проблеми.
+Як ми бачимо з прикладу синтаксичний аналізатор показує де в коді можуть винукнути проблеми. Для того і було створено nullable-контекс в усіх файлах проекту за замовченням.
 
 
 # Nullable і value типи.
 
 Такі типи як int або bool представляють моножину значень. Наприклад int може приймати значеня від –2147483648 від 2147483647, а bool true або false. Всім зміним, типи які відносяться до типів значень(Value type) , не  можна призначити значення null. Значення null використовується для встановлення посилання на порожній об'єкт.
 
+```cs
+int weight = null; // don't work //Cannot convert null to int because it is not-nullable value type.
+```
 
 Можно зробити так щоб тип крім множини всіх своїх значень примав ще і значення null.
 ```cs
@@ -51,15 +54,22 @@ AssignNull();
 
 static void AssignNull()
 {
-    //int age = null; //not-nullable //Cannot convert null to int because it is not-nullable value type.
+    //int weight = null; // don't work //Cannot convert null to int because it is not-nullable value type.
+    //string title = null; // work, but has warning
 
-    int? age; //nullable
-    bool? married; //nullable
+    string title = "User:";
+
+    int? age;      //nullable
+    bool? married; //
+
+    age = null;     // no problem
+    married = null; //
+
 
     age = GetAgeFromDB();
     married = GetMarriedFromDB();
     
-    Console.WriteLine($"{age} {married}");
+    Console.WriteLine($"{title} {age} {married}");
 
 
     static bool? GetMarriedFromDB()
@@ -74,12 +84,12 @@ static void AssignNull()
 }
 ```
 
-Коли ви визначили тип nullable bool (bool?) то змінна може приймати значеня true, false, null. І це важливо при отримані данних з бази данних. Іншого зручного способу представлення bool та числових данних без значення немає.
+Коли ви визначили тип nullable bool (bool?) то змінна може приймати значеня true, false, null. І це важливо при отримані данних з бази данних. Іншого зручного способу представлення bool та числових данних без значення немає. Зверніть увагу шо сінтаксіческий аналізатор не видає ніяких попереджень.
 
 При використані ? використовуеться структура загальної структури System.Nullable<T>. 
 ```cs
-UsingSystemNullable();
-static void UsingSystemNullable()
+StructSystemNullable();
+static void StructSystemNullable()
 {
 
     Nullable<bool> merried = null; 
@@ -126,52 +136,78 @@ age is ValueType : True
 merried.Value : True
 age.Value : 25
 ```
+Змінні nullable типу використовують функціональність структури System.Nullable<T>.  
+
 
 ## Використання nullable value типів
 
-Змінні nullable типу використовують функціональність структури System.Nullable<T>.  
+Функціональність структури Nullable<T> можна використовувати при отримані данних від БД. 
 
 ```cs
-UsingNullables();
-static void UsingNullables()
+
+UsingNullablesValueType();
+static void UsingNullablesValueType()
 {
-    UserDatabaseSimulator user = new UserDatabaseSimulator(1, "Julia");
+    
+    UserDatabaseSimulator girlJulia = new UserDatabaseSimulator(1, "Julia");
+    GetUserInfo(girlJulia);
 
-    int? age = user.GetAge();
+    UserDatabaseSimulator girlHanna = new UserDatabaseSimulator(2, "Hanna",true,35);
+    GetUserInfo(girlHanna);
 
-    if (age.HasValue)
-    {
-        Console.WriteLine(GetUserInfo(user)+age);   
-    }
-    else
-    {
-        Console.WriteLine(GetUserInfo(user)+"age is undefined");     
-    }
+    UserDatabaseSimulator boyAlex = new UserDatabaseSimulator(3, "Alex",null, 30);
+    GetUserInfo(boyAlex);
 
-    bool? merried = user.GetMerried();
+    UserDatabaseSimulator boyJohn = new UserDatabaseSimulator(4, "Jhon",true);
+    GetUserInfo(boyJohn);
 
-    if (merried != null)
+
+
+    void GetUserInfo(UserDatabaseSimulator user)
     {
-        Console.WriteLine(GetUserInfo(user) + $"Merried:{merried}");
+
+        string result = $"Id:{user.id} Name:{user.name} ";
+
+        bool? merried = user.GetMerried();
+
+
+        if (merried.HasValue)
+        {
+            result +=$"Merried:{merried.Value} ";
+        }
+        else
+        {
+            result += "Merried: undefined ";
+        }
+
+        int? age = user.GetAge();
+
+        if (age != null)
+        {
+           result +=$"Age:{age}";
+        }
+        else
+        {
+            result += "Age: undefined";
+        }
+
+        Console.WriteLine(result);
     }
-    else
-    {
-        Console.WriteLine(GetUserInfo(user) + "merried is undefined");
-    }
-    static string GetUserInfo(UserDatabaseSimulator user) => $"{user.id} {user.name} ";
 }
 
 class UserDatabaseSimulator
 {
     public int id;
     public string name; 
-    public bool? merried = true;
-    public int? age = null;
+    public bool? merried;
+    public int? age;
 
-    public UserDatabaseSimulator(int id, string name)
+    public UserDatabaseSimulator(int id, string name, bool? merried = null, int? age=null)
     {
         this.id = id;
         this.name = name;
+        this.merried = merried;
+        this.age = age;
     }
 
     public bool? GetMerried()
@@ -186,7 +222,7 @@ class UserDatabaseSimulator
 }
 ```
 
-Оскільки для необовязкових полів БД ми можемо получити як встановлені так і не встановленні значення за допомогю властивості HasValue та != null ми можимо корректно обробити данні.
+Оскільки для необовязкових полів БД ми можемо получити як встановлені так і не встановленні значення за допомогю властивості HasValue та != null ми можимо корректно обробити данні. Також існує корисний метод GetValueOrDefault() якій при відсутності значення вертає default. Треба зазначити шо синтаксичний аналізатор не дає попереджень і тобто ми можемо бути більш впевнені внашому коді. Крім того з прикладу видно шо прі різних комбінаціях визначенності та не визначенності данних метод GetUserInfo обробляє данні корректно і не викидає виняткових ситуацій. 
 
 
 
