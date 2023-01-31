@@ -301,11 +301,52 @@ Nullable reference типи можна визначати в nullable-конте
 <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 ```
 
-## Оператор ??
+## Оператор ?? та ??=
 
 Для визначення становиша nullable змінних є декілька корисних операторів.
 
+```cs
+UsingNullCoalescing();
+static void UsingNullCoalescing()
+{
+    UserDatabaseSimulator girlJulia = new UserDatabaseSimulator(1, "Julia");
+    Console.WriteLine($"Is age null: {girlJulia.age == null}");
+    int? girlAge;
+
+    //Code without ??
+    girlAge = girlJulia.age;
+    if (!girlJulia.age.HasValue)
+    {
+        girlAge = 35;
+    }
+    Console.WriteLine(girlAge);
+
+
+    //With operator ??
+    girlAge = girlJulia.age ?? 35;
+    Console.WriteLine(girlAge);
+
+
+    //Operator ??=
+    girlAge ??= 85;
+    Console.WriteLine(girlAge);
+} 
+
 ```
+
+Результат
+```
+Is age null: True
+35
+35
+35
+```
+
+Оператор ?? може мати більше 2 операндів. Він вичисляє їх доки в цьому є резон.
+
+## Оператор object?
+
+
 
 
 

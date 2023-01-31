@@ -132,7 +132,7 @@ static void UsingNullablesValueType()
     }
 }
 
-UsingNullableReferenceType();
+//UsingNullableReferenceType();
 static void UsingNullableReferenceType()
 {
 
@@ -160,10 +160,39 @@ static void UsingNullableReferenceType()
 
     static Person? GetPersonFromDb(bool IsItDefinet)
     {
-        return IsItDefinet ? new Person("SomeOne",30) : null;
+        return IsItDefinet ? new Person("Someone",30) : null;
     }
 
 }
+
+
+UsingNullCoalescing();
+static void UsingNullCoalescing()
+{
+    UserDatabaseSimulator girlJulia = new UserDatabaseSimulator(1, "Julia");
+    Console.WriteLine($"Is age null: {girlJulia.age == null}");
+    int? girlAge;
+
+    //Code without ??
+    girlAge = girlJulia.age;
+    if (!girlJulia.age.HasValue)
+    {
+        girlAge = 35;
+    }
+    Console.WriteLine(girlAge);
+
+
+    //With operator ??
+    girlAge = girlJulia.age ?? 35;
+    Console.WriteLine(girlAge);
+
+
+    //Operator ??=
+    girlAge ??= 85;
+    Console.WriteLine(girlAge);
+} 
+
+
 
 class Person
 {
