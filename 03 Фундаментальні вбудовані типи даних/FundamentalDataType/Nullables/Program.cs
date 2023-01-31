@@ -82,7 +82,7 @@ static void StructSystemNullable()
     //Nullable<Person> person = null; // Person must be non-nullable value type.
 }
 
-UsingNullablesValueType();
+//UsingNullablesValueType();
 static void UsingNullablesValueType()
 {
     
@@ -132,13 +132,60 @@ static void UsingNullablesValueType()
     }
 }
 
+UsingNullableReferenceType();
+static void UsingNullableReferenceType()
+{
+
+    Person? girl;
+
+    girl = GetPersonFromDb(IsItDefinet: true);
+    GetPersonData(girl);
+
+    girl = GetPersonFromDb(IsItDefinet: false);
+    GetPersonData(girl);
+
+
+    static void GetPersonData(Person? person)
+    {
+        if(person != null)
+        {
+            person.Display();
+        }
+        else
+        {
+            Console.WriteLine("Person undefined");
+        }
+        
+    }
+
+    static Person? GetPersonFromDb(bool IsItDefinet)
+    {
+        return IsItDefinet ? new Person("SomeOne",30) : null;
+    }
+
+}
 
 class Person
 {
-    public string Name { get; set; } //Here warning 
+    public string? Name { get; set; }
     public int Age { get; set; }
-    public void Display() => Console.WriteLine($"Name:{Name} Age:{Age} IsNull:{this is null}");
+
+    public Person()
+    {
+    }
+
+    public Person(string name, int age)
+    {
+        Name = name;
+        Age = age;
+    }
+
+    public void Display() => Console.WriteLine($"Name:{Name} Age:{Age}");
 }
+
+
+
+
 
 class UserDatabaseSimulator
 {

@@ -228,5 +228,84 @@ class UserDatabaseSimulator
 
 ## Nullable reference типи.
 
-Починаючи з С# 10 включають nullable reference типи у всіх шаблонах за замовченням. Коли в коді виникає ситуація коли об'єкт може прийняти значенyя null і іде доступ до члену об'екту то тоді компілятор попереджає шо тут може виникнути виняток і програма закінчить працювати. 
+Reference тип теж може бути nullable. Як було показано раніше в методі CrashWithNull() де використвоуються змінни NoNullable типу і зволікалися зауваженя аналізатора коду програма закінчувала роботу викинувши виняток. Використовуючи Nullable і обробити випадки коли значення не визначено можно бути більше впевненому в надійності колу.  
+
+```cs
+
+UsingNullableReferenceType();
+static void UsingNullableReferenceType()
+{
+
+    Person? girl;
+
+    girl = GetPersonFromDb(IsItDefinet: true);
+    GetPersonData(girl);
+
+    girl = GetPersonFromDb(IsItDefinet: false);
+    GetPersonData(girl);
+
+
+    static void GetPersonData(Person? person)
+    {
+        if(person != null)
+        {
+            person.Display();
+        }
+        else
+        {
+            Console.WriteLine("Person undefined");
+        }
+        
+    }
+
+    static Person? GetPersonFromDb(bool IsItDefinet)
+    {
+        return IsItDefinet ? new Person("SomeOne",30) : null;
+    }
+
+}
+
+
+class Person
+{
+    public string? Name { get; set; }
+    public int Age { get; set; }
+
+    public Person()
+    {
+    }
+
+    public Person(string name, int age)
+    {
+        Name = name;
+        Age = age;
+    }
+
+    public void Display() => Console.WriteLine($"Name:{Name} Age:{Age}");
+}
+```
+Як ми бачимо синтаксішний аналізатор не дає поппереджень і тому винятків не виникне.
+Nullable reference типи можна визначати в nullable-контексті. За замовченям від .Net 6 це весі шаблоши. Це визначаеться в файлі проекту.
+
+```xml
+    <Nullable>enable</Nullable>
+```
+При міграції коду з версій меньще С# 8 рекомендується спочатку включати попередження без вмикання аннотації (?). Потім очшашючи код включати аннотацію використовуючи дерективи компілятору.
+
+Існує можливість налаштувати зауваженя компілятора як помилки.
+```
+<WarningsAsErrors>CS8604,CS8625</WarningsAsErrors>
+```
+Крім того існую налаштування якє всі зауваженя трактує як помилки.
+```
+<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+```
+
+## Оператор ??
+
+Для визначення становиша nullable змінних є декілька корисних операторів.
+
+```
+
+
 
