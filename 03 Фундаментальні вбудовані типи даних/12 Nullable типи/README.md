@@ -345,8 +345,79 @@ Is age null: True
 Оператор ?? може мати більше 2 операндів. Він вичисляє їх доки в цьому є резон.
 
 ## Оператор object?
+Перед тим як використовувати об'єкт класу ви провіряете чи не дорівнює він null.
+
+```cs
+UsingNullConditional();
+
+static void UsingNullConditional()
+{
+    //Exapmle1
+
+    ArrayLength(null);
+    ArrayLength(new string[] { "good", "better", "best" });
+
+    static void ArrayLength(string[]? args)
+    {
+        //Without operator ?
+        if (args != null)
+        {
+            Console.WriteLine(args.Length);
+        }
+        else
+        {
+            Console.WriteLine(0);
+        }
+
+        //With operator ?
+        Console.WriteLine(args?.Length ?? 0);
+
+    }
 
 
+    //Example2
+
+    Person? boy;
+
+    boy = null;
+    Action(boy);
+
+    boy = new Person("John",30);
+    Action(boy);    
 
 
+    static void Action(Person? person)
+    {
+        //Without operator ?
+        if (person != null)
+        {
+            Console.WriteLine(person.Name);
+        }
 
+        //With operator ?
+        Console.WriteLine(person?.Name);
+
+        person?.Display();
+    }
+}
+
+class Person
+{
+    public string? Name { get; set; }
+    public int Age { get; set; }
+
+    public Person()
+    {
+    }
+
+    public Person(string name, int age)
+    {
+        Name = name;
+        Age = age;
+    }
+
+    public void Display() => Console.WriteLine($"Name:{Name} Age:{Age}");
+}
+
+```
+Як бачите цей опреатор спрощує перевірку на null. Також він корисний для подій та делегатів.
