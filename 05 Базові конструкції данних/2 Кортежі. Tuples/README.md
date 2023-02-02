@@ -68,3 +68,39 @@ True
 ```
 Під час порівнювання виконуються можливи неявні приведеня типів.
 
+## Кортеж як значення шо повертає метод.
+
+Для використання классів і структур для того шоб метод повернув декілька значень потрібно дододково розроляти їх. Крім того меньш єфективно пертворювати кілька значень в об'єкт а потім знову і значення. Для цілей транспортування декількох данних гарно підходить кортеж. 
+
+```cs
+UsingTuples();
+void UsingTuples()
+{
+
+    var result1 = GetPersonCharacteristic(10);
+
+    Console.WriteLine(result1);
+    Console.WriteLine(result1.Name);
+    Console.WriteLine(result1.Height);
+    Console.WriteLine(result1.Weight);
+
+    var (_,name,_,_) = GetPersonCharacteristic(10);
+    Console.WriteLine(name);
+
+
+    (int? Id, string? Name, int? Height, int? Weight) GetPersonCharacteristic(int? Id)
+    {
+        //get data from db
+        return (Id, "Jerry", 170, 85);
+    }
+}
+```
+```
+(10, Jerry, 170, 85)
+Jerry
+170
+85
+Jerry
+```
+
+

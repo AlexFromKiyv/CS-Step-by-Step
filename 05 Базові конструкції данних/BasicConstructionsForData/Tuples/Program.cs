@@ -1,5 +1,6 @@
-﻿
-//CreateTuples();
+﻿//CreateTuples();
+
+
 void CreateTuples()
 {
     var temperatures = (-2, -1, 0, 1, -1);
@@ -29,7 +30,7 @@ void CreateTuples()
     Console.WriteLine(otherTerminator);
 }
 
-ComparationTuples();
+//ComparationTuples();
 void ComparationTuples()
 {
     (int? a, int? b) tuple1 = (160, 60);
@@ -43,4 +44,26 @@ void ComparationTuples()
     (int, (int, int, int)) tuple4 = (35, (90, 60, 90));
     var tuple5 = (35, (90, 60, 90));
     Console.WriteLine(tuple4 == tuple5);
+}
+
+UsingTuples();
+void UsingTuples()
+{
+
+    var result1 = GetPersonCharacteristic(10);
+
+    Console.WriteLine(result1);
+    Console.WriteLine(result1.Name);
+    Console.WriteLine(result1.Height);
+    Console.WriteLine(result1.Weight);
+
+    var (_,name,_,_) = GetPersonCharacteristic(10);
+    Console.WriteLine(name);
+
+
+    (int? Id, string? Name, int? Height, int? Weight) GetPersonCharacteristic(int? Id)
+    {
+        //get data from db
+        return (Id, "Jerry", 170, 85);
+    }
 }
