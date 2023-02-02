@@ -41,4 +41,30 @@ void CreateTuples()
 Значення в кортежі не обов'язково повинні бути однакового типу.
 Поля кортежів додадково неперевірені(not validated) і ви не можете для них зробити додадкові методи. Тобто вони слугуюдь тільки як механізм передачі данних.
 
+## Порівняння кортежів
+
+```cs
+
+ComparationTuples();
+void ComparationTuples()
+{
+    (int? a, int? b) tuple1 = (160, 60);
+    var tuple2 = (a:160, b:60);
+
+    Console.WriteLine(tuple1 == tuple2);
+
+    (long, int?) tuple3 = (160, 60);
+    Console.WriteLine(tuple2 == tuple3);
+
+    (int, (int, int, int)) tuple4 = (35, (90, 60, 90));
+    var tuple5 = (35, (90, 60, 90));
+    Console.WriteLine(tuple4 == tuple5);
+}
+```
+```
+True
+True
+True
+```
+Під час порівнювання виконуються можливи неявні приведеня типів.
 

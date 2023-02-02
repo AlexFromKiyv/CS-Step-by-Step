@@ -1,5 +1,5 @@
 ﻿
-CreateTuples();
+//CreateTuples();
 void CreateTuples()
 {
     var temperatures = (-2, -1, 0, 1, -1);
@@ -27,4 +27,20 @@ void CreateTuples()
     var terminator = new { Model = "101", Power = 2800 };
     var otherTerminator = (terminator.Model, terminator.Power);
     Console.WriteLine(otherTerminator);
+}
+
+ComparationTuples();
+void ComparationTuples()
+{
+    (int? a, int? b) tuple1 = (160, 60);
+    var tuple2 = (a:160, b:60);
+
+    Console.WriteLine(tuple1 == tuple2);
+
+    (long, int?) tuple3 = (160, 60);
+    Console.WriteLine(tuple2 == tuple3);
+
+    (int, (int, int, int)) tuple4 = (35, (90, 60, 90));
+    var tuple5 = (35, (90, 60, 90));
+    Console.WriteLine(tuple4 == tuple5);
 }
