@@ -70,7 +70,7 @@ void UsingTuples()
     }
 }
 
-UsingTupleInSwitch();
+//UsingTupleInSwitch();
 void UsingTupleInSwitch()
 {
     string result = GetNaturalConditions(("high", "low"));
@@ -94,4 +94,49 @@ void UsingTupleInSwitch()
             (_, _) => "Did not understand the data"
         };
     }
+}
+
+//DeconstructingTuple();
+void DeconstructingTuple(){
+
+    (string Name, int? Height, int? Weight) girl = ("Olga", 180, 80);
+    Console.WriteLine(girl);
+
+    string name;
+    int? height;
+    int? weight;
+
+    (name, height, weight) = girl;
+
+    Console.WriteLine($"{name} {height} {weight}");
+
+
+    (string yourName,int? yourHeight, _) = girl;
+
+    Console.WriteLine($"{yourName} {yourHeight}");
+}
+
+
+DeconstructingTupleWithStruct();
+void DeconstructingTupleWithStruct()
+{
+    Point point = new Point(10, 5);
+
+    int a;
+    int b;
+    (a, b) = point.Deconstruct();
+    Console.WriteLine($"{a} {b}");
+}
+
+struct Point
+{
+    public int X;
+    public int Y;
+    public Point(int x, int y)
+    {
+        X = x;
+        Y = y;
+    }
+
+    public (int x, int y) Deconstruct() => (X, Y);
 }
