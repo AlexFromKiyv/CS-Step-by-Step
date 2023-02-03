@@ -1,6 +1,8 @@
 ﻿//CreateTuples();
 
 
+using System.Security.Cryptography.X509Certificates;
+
 void CreateTuples()
 {
     var temperatures = (-2, -1, 0, 1, -1);
@@ -46,7 +48,7 @@ void ComparationTuples()
     Console.WriteLine(tuple4 == tuple5);
 }
 
-UsingTuples();
+//UsingTuples();
 void UsingTuples()
 {
 
@@ -65,5 +67,31 @@ void UsingTuples()
     {
         //get data from db
         return (Id, "Jerry", 170, 85);
+    }
+}
+
+UsingTupleInSwitch();
+void UsingTupleInSwitch()
+{
+    string result = GetNaturalConditions(("high", "low"));
+    Console.WriteLine(result);
+
+    result = GetNaturalConditions(("no", "no"));
+    Console.WriteLine(result);
+
+    result = GetNaturalConditions(("high", "no"));
+    Console.WriteLine(result);
+
+
+    string GetNaturalConditions((string wind, string snow) values)
+    {
+        return values switch
+        {
+            ("high", "high") => "Worst",
+            ("high", "low") => "Bad",
+            ("low", "no") => "Normal",
+            ("no","no") => "Good",
+            (_, _) => "Did not understand the data"
+        };
     }
 }

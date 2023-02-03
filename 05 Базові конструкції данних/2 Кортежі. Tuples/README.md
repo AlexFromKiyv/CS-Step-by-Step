@@ -103,4 +103,40 @@ Jerry
 Jerry
 ```
 
+## Кортежі в виразах switch
+
+```cs
+UsingTupleInSwitch();
+void UsingTupleInSwitch()
+{
+    string result = GetNaturalConditions(("high", "low"));
+    Console.WriteLine(result);
+
+    result = GetNaturalConditions(("no", "no"));
+    Console.WriteLine(result);
+
+    result = GetNaturalConditions(("high", "no"));
+    Console.WriteLine(result);
+
+
+    string GetNaturalConditions((string wind, string snow) values)
+    {
+        return values switch
+        {
+            ("high", "high") => "Worst",
+            ("high", "low") => "Bad",
+            ("low", "no") => "Normal",
+            ("no","no") => "Good",
+            (_, _) => "Did not understand the data"
+        };
+    }
+}
+```
+
+```
+Bad
+Good
+Did not understand the data
+```
+Треба зазначити шо в виразі за замовчуванням використовється кортеж з двома відхиленнями. 
 
