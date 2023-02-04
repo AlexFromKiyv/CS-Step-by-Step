@@ -27,7 +27,6 @@ static void SimpleSwitch()
     Console.WriteLine(result);
 }
 
-
 //SimpleSwitchWithString();
 static void SimpleSwitchWithString()
 {
@@ -57,6 +56,27 @@ static void SimpleSwitchWithString()
     }
     Console.WriteLine(result);
 }
+
+
+SwitchWithReturn();
+
+void SwitchWithReturn()
+{
+    Console.WriteLine(DoAction(1,1,1));
+
+    int DoAction(int actionCode, int a, int b)
+    {
+        switch (actionCode)
+        {
+            case 1: return a + b;
+            case 2: return a - b;
+            case 3: return a * b;
+            default: return 0;
+        }
+    }
+}
+
+
 
 //SwitchWithEnum_1();
 static void SwitchWithEnum_1()
@@ -196,7 +216,7 @@ static void UsingSwitchExpression()
 
 }
 
-UsingSwitchExpressionWithTuple();
+//UsingSwitchExpressionWithTuple();
 
 static void UsingSwitchExpressionWithTuple()
 {

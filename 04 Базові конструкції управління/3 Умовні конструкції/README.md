@@ -269,6 +269,27 @@ static void SimpleSwitchWithString()
     Console.WriteLine(result);
 }
 ```
+Можна використовувати return
+
+```cs
+SwitchWithReturn();
+
+void SwitchWithReturn()
+{
+    Console.WriteLine(DoAction(1,1,1));
+
+    int DoAction(int actionCode, int a, int b)
+    {
+        switch (actionCode)
+        {
+            case 1: return a + b;
+            case 2: return a - b;
+            case 3: return a * b;
+            default: return 0;
+        }
+    }
+}
+```
 
 Оператор switch може порівнювати типи char, string, bool, int, long, та enum. 
 
@@ -333,7 +354,7 @@ static void SwitchWithEnum()
 Якшо результат декількох варіантів має однаковий результат їx можна об'єднати як тут Saturday,Sunday
 
 
-# Pattern Matching (Шаблон зіставлення) в Switch
+## Pattern Matching (Шаблон зіставлення) в Switch
 
 У простому варіанті switch співставляє значення з константами і називають constant pattern (шаблон констант). Але оператор може оцінювати тип (type pattern) і case не обмежується постійними значеннями.
 
@@ -376,7 +397,7 @@ static void PatternMatchingInSwitch()
 У данному випадку switch зіставляє тип отриманого значення з типом case. Крім того змінній відповідного типу присваюється значення і додадково превіряеться (when). Але ця змінна недосяжна за оператором case.
 В випадку type pattern порядок case має значення. Визначеня  case double doubeHeight: прекриває інши варіанти з when.
 
-# Switch expression
+## Switch expression
 
 ```cs
 UsingSwitchExpression();
