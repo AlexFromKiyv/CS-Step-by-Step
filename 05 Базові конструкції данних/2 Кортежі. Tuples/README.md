@@ -177,6 +177,11 @@ void DeconstructingTupleWithStruct()
     int b;
     (a, b) = point.Deconstruct();
     Console.WriteLine($"{a} {b}");
+
+    int c1;
+    int c2;
+    (c1, c2) = point;
+    Console.WriteLine($"{c1} {c2}");
 }
 
 struct Point
@@ -190,5 +195,12 @@ struct Point
     }
 
     public (int x, int y) Deconstruct() => (X, Y);
+
+    internal void Deconstruct(out int x, out int y)
+    {
+        x = X;
+        y = Y;
+    }
 }
 ```
+Тут для структури point можно явно визвати метод Deconstruct який повертає кортеж, а можемо виконати неявно (c1, c2) = point; тоді з струттури буде визан метод з параметрами out.
