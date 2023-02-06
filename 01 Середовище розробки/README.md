@@ -230,6 +230,7 @@ dotnet new console
 ```
 dotnet -h
 ```
+У редактора Visual Studio Code є список комбінацій клавіш для виконання різних операцій Help > Keyboard Shortcuts Reference.   
 
 ## Використовування WSL
 
