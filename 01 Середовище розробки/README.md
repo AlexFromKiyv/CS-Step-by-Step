@@ -165,13 +165,13 @@ VSC можна завантажити з  <a href="https://code.visualstudio.com
 
 Ось перелік найважливіших для роботи з .NET та С# :
 
-| Назва | Пошук |
-| ----------- | ----------- |
-| C# for Visual Studio Code|  ms-dotnettools.csharp |
-|.NET Interactive Notebooks | ms-dotnettools.dotnet-interactivevscode|
-|MSBuild project tools | tinytoy.msbuild-project-tools|
-|REST Client | humao.rest-client|
-|SQL Server (mssql) for Visual Studio Code | ms-mssql.mssql|
+| Назва |
+| ----------- |
+| C#|
+|Polyglot Notebooks|
+|MSBuild project tools |
+|REST Client |
+|SQL Server |
 
 У VSC можна редагувати кількома проектами як одним цілим. 
 
