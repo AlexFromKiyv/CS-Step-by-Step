@@ -150,6 +150,7 @@ Tools > Options > Debugging > General > Automatically close the console when deb
 ```
 dotnet new gitignore
 ```
+У редактора Visual Studio  є список комбінацій клавіш для виконання різних операцій Help > Keyboard Shortcuts Reference.
 
 ## Встановлення Visual Studio Code та створення програми.
 
