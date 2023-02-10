@@ -15,6 +15,11 @@ static void UsingConsoleForInputOutputString()
     Console.WriteLine("Hi {0}! {0} like {1}.", name, interests);
     Console.WriteLine("Hi {1}! {1} like {0}.", interests, name );
     Console.WriteLine($"Hi {name}! {name} like {interests}.");
+
+    Console.OutputEncoding = System.Text.Encoding.UTF8;
+    string grinningEmoji = char.ConvertFromUtf32(0x1F600);
+    Console.WriteLine(grinningEmoji);
+
 }
 
 //UsingConsoleColor();
@@ -47,7 +52,7 @@ static void UsingNumericalFormatingForConsole()
     Console.WriteLine($"Hexadecimal format X:{1000000:X}");
 }
 
-UsingFormattingToGetStringObject();
+//UsingFormattingToGetStringObject();
 static void UsingFormattingToGetStringObject()
 {
     string summ = string.Format($"{1000000:N} $");

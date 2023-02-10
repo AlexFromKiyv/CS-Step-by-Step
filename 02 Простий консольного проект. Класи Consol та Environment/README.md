@@ -176,7 +176,8 @@ static void UsingConsoleForInputOutputString()
     Console.WriteLine("Hi {0}! {0} like {1}.", name, interests);
     Console.WriteLine("Hi {1}! {1} like {0}.", interests, name );
     Console.WriteLine($"Hi {name}! {name} like {interests}.");
-} 
+
+}
 ```
 
 Закоментуемо виклик методу.
