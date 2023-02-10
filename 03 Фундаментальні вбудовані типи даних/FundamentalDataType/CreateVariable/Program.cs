@@ -1,9 +1,6 @@
 ﻿//
 
-//CreateVarable();
-
-using System.Reflection.Metadata.Ecma335;
-using System.Xml.Linq;
+CreateVarable();
 
 static void CreateVarable()
 {
@@ -16,7 +13,7 @@ static void CreateVarable()
     weight = 14.23;
     price = 12853; 
     
-    Console.WriteLine($"{name} {price} {weight} ");
+    Console.WriteLine($"{nameof(name)}: {name}\n{nameof(price)}: {price}\n{nameof(weight)}: {weight} ");
 }
 
 //UsingNew();
@@ -76,7 +73,7 @@ static string GetVarString(string enterString)
     }
 }
 
-UsinVarForLinq();
+//UsinVarForLinq();
 
 static void UsinVarForLinq()
 {

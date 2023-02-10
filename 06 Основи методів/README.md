@@ -19,6 +19,7 @@ static  void MyMethod (string[] args)
 }
 
 ```
+Назви змінних зазвичай прописують в "Title case". Наприклад: DoIt, ReverseList.
 
 ```cs
 SimpleMethod();
