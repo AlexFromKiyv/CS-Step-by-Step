@@ -246,22 +246,31 @@ void RangeOfWhole()
     Console.WriteLine($"ulong   {ulong.MinValue}   {ulong.MaxValue} byte:{sizeof(ulong)}");
 }
 
-//DoubleAndDecimalInAction();
 
-void DoubleAndDecimalInAction()
+//RangeOfDoubleAndDecimal();
+void RangeOfDoubleAndDecimal()
+{
+    Console.WriteLine($"double   {double.MinValue}   {double.MaxValue} byte:{sizeof(double)}");
+    Console.WriteLine($"decimal   {decimal.MinValue}   {decimal.MaxValue} byte:{sizeof(decimal)}");
+}
+
+
+
+DoubleOrDecimal();
+void DoubleOrDecimal()
 {
     double doubleA = 0.3;
     double doubleB = 0.2;
     Console.WriteLine($"DoubleA:{doubleA} DoubleB:{doubleB}");
-    Console.WriteLine($"DoubleA - DoubleB = 0.1:{(doubleA - doubleB) == 0.1 }");
+    Console.WriteLine($"DoubleA - DoubleB = 0.1? :{(doubleA - doubleB) == 0.1 }");
     Console.WriteLine($"DoubleA - DoubleB :{doubleA-doubleB}");
-    Console.WriteLine(doubleA - doubleB - 0.1);
+    Console.WriteLine($"DoubleA - DoubleB -0.1 :{doubleA - doubleB - 0.1}");
 
     Console.WriteLine();
 
     decimal decimalA = 0.3M;
     decimal decimalB = 0.2M;
     Console.WriteLine($"DecimalA:{decimalA} DecimalB:{decimalB} ");
+    Console.WriteLine($"DecimalA - DecimalB = 0.1 ?:{(decimalA - decimalB) == 0.1M}");
     Console.WriteLine($"DecimalA - DecimalB:{decimalA - decimalB}");
-
 }

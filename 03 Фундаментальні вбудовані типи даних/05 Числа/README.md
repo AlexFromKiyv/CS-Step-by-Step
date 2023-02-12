@@ -332,11 +332,59 @@ ulong   0   18446744073709551615 byte:8
 ```
 Дивлячись на діапазон зрозуміло чому кілкість мість в вагоні не обов'язково зберігати в типі int.
 
-При зберіганні не цілих чисел треба звертати увагу як буде використовуватися змінна і наскільки важлива точність розрахунків.
+При зберіганні реальних чисел вони перетворюються в бінарну систему обчисленяя і тому 
+в випадку з float або double не повністю точно співпадають с аналогом в 10 системі счислення. Тому треба звертати увагу як буде використовуватися змінна і наскільки важлива точність розрахунків.
 
 Розглянемо особливості типу double i decimal.
 
+Діапазони типів різні.
+```cs
+RangeOfDoubleAndDecimal();
+void RangeOfDoubleAndDecimal()
+{
+    Console.WriteLine($"double   {double.MinValue}   {double.MaxValue} byte:{sizeof(double)}");
+    Console.WriteLine($"decimal   {decimal.MinValue}   {decimal.MaxValue} byte:{sizeof(decimal)}");
+}
+```
+```
+double   -1,7976931348623157E+308   1,7976931348623157E+308 byte:8
+decimal   -79228162514264337593543950335   79228162514264337593543950335 byte:16
+```
+Хоча double займає меньше місця і має більший діапазон але в деяких випадках не відповідає вимогам точності.
+```cs
+DoubleOrDecimal();
+void DoubleOrDecimal()
+{
+    double doubleA = 0.3;
+    double doubleB = 0.2;
+    Console.WriteLine($"DoubleA:{doubleA} DoubleB:{doubleB}");
+    Console.WriteLine($"DoubleA - DoubleB = 0.1? :{(doubleA - doubleB) == 0.1 }");
+    Console.WriteLine($"DoubleA - DoubleB :{doubleA-doubleB}");
+    Console.WriteLine($"DoubleA - DoubleB -0.1 :{doubleA - doubleB - 0.1}");
 
+    Console.WriteLine();
+
+    decimal decimalA = 0.3M;
+    decimal decimalB = 0.2M;
+    Console.WriteLine($"DecimalA:{decimalA} DecimalB:{decimalB} ");
+    Console.WriteLine($"DecimalA - DecimalB = 0.1 ?:{(decimalA - decimalB) == 0.1M}");
+    Console.WriteLine($"DecimalA - DecimalB:{decimalA - decimalB}");
+}
+```
+```
+DoubleA:0,3 DoubleB:0,2
+DoubleA - DoubleB = 0.1? :False
+DoubleA - DoubleB :0,09999999999999998
+DoubleA - DoubleB -0.1 :-2,7755575615628914E-17
+
+DecimalA:0,3 DecimalB:0,2
+DecimalA - DecimalB = 0.1 ?:True
+DecimalA - DecimalB:0,1
+```
+Як видно з прикладу розахунки з використанням double не дають точного співпадіння.
+Таким чином тип double можна використовувати коли з зміною можна використовувати порівняння на > ,< але точне співпадіння не є критерієм принятя рішення. Наприклад вимірювання ваги людини і порівнювання з витривалістю велосипеда не потребую точного співпадіня. Тобто double не гаратує роботу == оскілки результат обчислень може відрізнятися на дуже маленьке значення. В інших випадках він може зберегти память.
+
+Використовуйте decimal для обліку грошей, інжинерних обчислень і всюду де потребується точність обчислень.
 
 
 
