@@ -1,4 +1,4 @@
-﻿ExploringSystemObject();
+﻿//ExploringSystemObject();
 
 static void ExploringSystemObject()
 {
@@ -31,5 +31,18 @@ static void ExploringSystemObject()
     Console.WriteLine(myString.GetType());
     Console.WriteLine(myString.GetHashCode());
     Console.WriteLine($"string is ValueType: {myString is ValueType}");
+}
+
+ItIsNoGoodUsingObject();
+
+void ItIsNoGoodUsingObject()
+{
+    object weight = 69;
+    object name = "Hanna";
+
+    Console.WriteLine($"{name} weight {weight} kg");
+
+    Console.WriteLine(((string)name).Length);
+    Console.WriteLine((int)weight+1);
 }
 
