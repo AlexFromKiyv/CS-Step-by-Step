@@ -23,7 +23,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Structs", "Structs\Structs.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ValuesAndReferences", "ValuesAndReferences\ValuesAndReferences.csproj", "{3EE71E69-FDF6-4A5F-99F6-20ED252032BC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nullables", "Nullables\Nullables.csproj", "{931C6B11-41AF-4DC6-A2C1-A651F1D9BC2A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nullables", "Nullables\Nullables.csproj", "{931C6B11-41AF-4DC6-A2C1-A651F1D9BC2A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dynamics", "Dynamics\Dynamics.csproj", "{5E13C1C7-E1B6-4974-B83B-D8976A072DFF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -75,6 +77,10 @@ Global
 		{931C6B11-41AF-4DC6-A2C1-A651F1D9BC2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{931C6B11-41AF-4DC6-A2C1-A651F1D9BC2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{931C6B11-41AF-4DC6-A2C1-A651F1D9BC2A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5E13C1C7-E1B6-4974-B83B-D8976A072DFF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E13C1C7-E1B6-4974-B83B-D8976A072DFF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E13C1C7-E1B6-4974-B83B-D8976A072DFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E13C1C7-E1B6-4974-B83B-D8976A072DFF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
