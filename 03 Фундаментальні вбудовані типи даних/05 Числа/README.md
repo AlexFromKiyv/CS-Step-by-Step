@@ -95,7 +95,6 @@ static void ExplorationOfNumbers_3()
     Console.WriteLine(double.PositiveInfinity);
     Console.WriteLine(double.NegativeInfinity);
 
-
     Console.WriteLine("decimal -------------");
     decimal m = 100_000.12345M;
     Console.WriteLine(m);
@@ -105,7 +104,7 @@ static void ExplorationOfNumbers_3()
 
 }
 ```
-Треба зазначити що для типів <em> int, double </em> для відповідних літералів не треба суфіксів. Для <em>long</em> потрібен L, для <em>float</em> - F, для <em>decimal</em> - M
+Треба зазначити що для типів  int, double для відповідних літералів не треба суфіксів. Для long потрібен L, для float - F, для decimal - M
 
 В просторі імен System.Numerics; існуе типи для наукових розрахунків BigInteger який не обмежений.
 ```cs
@@ -300,6 +299,43 @@ static void UsingChacked()
   </PropertyGroup>
 ```
 Включивши перевірку проекту ви первіряете весь код. Деяки нагружени ділянки можна послабити за допомогою ключового слова unchecked тим самим підвищити продуктивність.
+
+## Як вибрати потрібний тип.
+
+Зазвичай для цілих чисел вибирають int, але можна вибрати враховуючи діапазон.
+```cs
+RangeOfWhole();
+
+void RangeOfWhole()
+{
+
+    Console.WriteLine($"sbyte  {sbyte.MinValue}  {sbyte.MaxValue} byte:{sizeof(sbyte)}");
+    Console.WriteLine($"byte   {byte.MinValue}   {byte.MaxValue} byte:{sizeof(byte)}");
+    Console.WriteLine($"short  {short.MinValue}  {short.MaxValue} byte:{sizeof(short)} ");
+    Console.WriteLine($"ushort {ushort.MinValue} {ushort.MaxValue} byte:{sizeof(ushort)}");
+    Console.WriteLine($"int    {int.MinValue}    {int.MaxValue} byte:{sizeof(int)}");
+    Console.WriteLine($"uint   {uint.MinValue}   {uint.MaxValue} byte:{sizeof(uint)}");
+    Console.WriteLine($"long   {long.MinValue}   {long.MaxValue} byte:{sizeof(long)}");
+    Console.WriteLine($"ulong   {ulong.MinValue}   {ulong.MaxValue} byte:{sizeof(ulong)}");
+}
+
+```
+```
+sbyte  -128  127 byte:1
+byte   0   255 byte:1
+short  -32768  32767 byte:2
+ushort 0 65535 byte:2
+int    -2147483648    2147483647 byte:4
+uint   0   4294967295 byte:4
+long   -9223372036854775808   9223372036854775807 byte:8
+ulong   0   18446744073709551615 byte:8
+```
+Дивлячись на діапазон зрозуміло чому кілкість мість в вагоні не обов'язково зберігати в типі int.
+
+При зберіганні не цілих чисел треба звертати увагу як буде використовуватися змінна і наскільки важлива точність розрахунків.
+
+Розглянемо особливості типу double i decimal.
+
 
 
 

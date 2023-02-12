@@ -1,7 +1,5 @@
 ﻿using System.Numerics;
 //ExplorationOfNumbers_1();
-
-
 static void ExplorationOfNumbers_1()
 {
     var number1 = 100;
@@ -96,7 +94,7 @@ static void ExplorationOfNumbers_3()
 
 }
 
-UsingVar();
+//UsingVar();
 static void UsingVar()
 {
     var myInt = 100;
@@ -231,4 +229,39 @@ static void UsingChacked()
     {
         Console.WriteLine(ex.Message);
     }
+}
+
+//RangeOfWhole();
+
+void RangeOfWhole()
+{
+
+    Console.WriteLine($"sbyte  {sbyte.MinValue}  {sbyte.MaxValue} byte:{sizeof(sbyte)}");
+    Console.WriteLine($"byte   {byte.MinValue}   {byte.MaxValue} byte:{sizeof(byte)}");
+    Console.WriteLine($"short  {short.MinValue}  {short.MaxValue} byte:{sizeof(short)} ");
+    Console.WriteLine($"ushort {ushort.MinValue} {ushort.MaxValue} byte:{sizeof(ushort)}");
+    Console.WriteLine($"int    {int.MinValue}    {int.MaxValue} byte:{sizeof(int)}");
+    Console.WriteLine($"uint   {uint.MinValue}   {uint.MaxValue} byte:{sizeof(uint)}");
+    Console.WriteLine($"long   {long.MinValue}   {long.MaxValue} byte:{sizeof(long)}");
+    Console.WriteLine($"ulong   {ulong.MinValue}   {ulong.MaxValue} byte:{sizeof(ulong)}");
+}
+
+//DoubleAndDecimalInAction();
+
+void DoubleAndDecimalInAction()
+{
+    double doubleA = 0.3;
+    double doubleB = 0.2;
+    Console.WriteLine($"DoubleA:{doubleA} DoubleB:{doubleB}");
+    Console.WriteLine($"DoubleA - DoubleB = 0.1:{(doubleA - doubleB) == 0.1 }");
+    Console.WriteLine($"DoubleA - DoubleB :{doubleA-doubleB}");
+    Console.WriteLine(doubleA - doubleB - 0.1);
+
+    Console.WriteLine();
+
+    decimal decimalA = 0.3M;
+    decimal decimalB = 0.2M;
+    Console.WriteLine($"DecimalA:{decimalA} DecimalB:{decimalB} ");
+    Console.WriteLine($"DecimalA - DecimalB:{decimalA - decimalB}");
+
 }
