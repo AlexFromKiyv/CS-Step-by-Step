@@ -386,7 +386,43 @@ DecimalA - DecimalB:0,1
 
 Використовуйте decimal для обліку грошей, інжинерних обчислень і всюду де потребується точність обчислень.
 
+## Особливості операції ++
 
+```
+IncremetAndAssign();
+void IncremetAndAssign()
+{
+    int x;
+    int y;
+
+    x = 1;
+    y = x++;
+    Console.WriteLine($"x = 1;");
+    Console.WriteLine($"y = x++;");
+    Console.WriteLine($"x:{x}  y:{y}");
+    Console.WriteLine();
+    Console.WriteLine("Good practice:");
+    x = 1;
+    x++;
+    y = x;
+    Console.WriteLine($"x = 1;");
+    Console.WriteLine("x++;");
+    Console.WriteLine($"y = x;");
+    Console.WriteLine($"x:{x}  y:{y}");
+}
+```
+
+```
+x = 1;
+y = x++;
+x:2  y:1
+
+Good practice:
+x = 1;
+x++;
+y = x;
+x:2  y:2
+```
 
 
 

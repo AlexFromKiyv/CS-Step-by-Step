@@ -256,7 +256,7 @@ void RangeOfDoubleAndDecimal()
 
 
 
-DoubleOrDecimal();
+//DoubleOrDecimal();
 void DoubleOrDecimal()
 {
     double doubleA = 0.3;
@@ -273,4 +273,26 @@ void DoubleOrDecimal()
     Console.WriteLine($"DecimalA:{decimalA} DecimalB:{decimalB} ");
     Console.WriteLine($"DecimalA - DecimalB = 0.1 ?:{(decimalA - decimalB) == 0.1M}");
     Console.WriteLine($"DecimalA - DecimalB:{decimalA - decimalB}");
+}
+
+IncremetAndAssign();
+void IncremetAndAssign()
+{
+    int x;
+    int y;
+
+    x = 1;
+    y = x++;
+    Console.WriteLine($"x = 1;");
+    Console.WriteLine($"y = x++;");
+    Console.WriteLine($"x:{x}  y:{y}");
+    Console.WriteLine();
+    Console.WriteLine("Good practice:");
+    x = 1;
+    x++;
+    y = x;
+    Console.WriteLine($"x = 1;");
+    Console.WriteLine("x++;");
+    Console.WriteLine($"y = x;");
+    Console.WriteLine($"x:{x}  y:{y}");
 }

@@ -46,3 +46,4 @@ void ItIsNoGoodUsingObject()
     Console.WriteLine((int)weight+1);
 }
 
+
