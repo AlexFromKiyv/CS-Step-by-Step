@@ -110,6 +110,41 @@ static void UsingVar()
     Console.WriteLine($"{myDecimal} : {myDecimal.GetType()}");
 }
 
+//IncremetAndAssign();
+void IncremetAndAssign()
+{
+    int x;
+    int y;
+
+    x = 1;
+    y = x++;
+    Console.WriteLine($"x = 1;");
+    Console.WriteLine($"y = x++;");
+    Console.WriteLine($"x:{x}  y:{y}");
+    Console.WriteLine();
+    Console.WriteLine("Good practice:");
+    x = 1;
+    x++;
+    y = x;
+    Console.WriteLine($"x = 1;");
+    Console.WriteLine("x++;");
+    Console.WriteLine($"y = x;");
+    Console.WriteLine($"x:{x}  y:{y}");
+}
+
+BinaryOperations();
+void BinaryOperations()
+{
+    int a = 11;
+    int b = 3;
+
+    Console.WriteLine($"{a} + {b}={a + b}");
+    Console.WriteLine($"{a} - {b}={a - b}");
+    Console.WriteLine($"{a} * {b}={a * b}");
+    Console.WriteLine($"{a} / {b}={a / b}");
+    Console.WriteLine($"{a} % {b}={a % b}");
+}
+
 
 //UsingParse();
 static void UsingParse()
@@ -275,24 +310,3 @@ void DoubleOrDecimal()
     Console.WriteLine($"DecimalA - DecimalB:{decimalA - decimalB}");
 }
 
-IncremetAndAssign();
-void IncremetAndAssign()
-{
-    int x;
-    int y;
-
-    x = 1;
-    y = x++;
-    Console.WriteLine($"x = 1;");
-    Console.WriteLine($"y = x++;");
-    Console.WriteLine($"x:{x}  y:{y}");
-    Console.WriteLine();
-    Console.WriteLine("Good practice:");
-    x = 1;
-    x++;
-    y = x;
-    Console.WriteLine($"x = 1;");
-    Console.WriteLine("x++;");
-    Console.WriteLine($"y = x;");
-    Console.WriteLine($"x:{x}  y:{y}");
-}

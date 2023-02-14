@@ -127,7 +127,7 @@ static void UsingBigInteger()
 }
 
 ``` 
-# Використання var
+## Використання var
 
 ```cs
 UsingVar();
@@ -146,9 +146,69 @@ static void UsingVar()
     Console.WriteLine($"{myDecimal} : {myDecimal.GetType()}");
 }
 ```
+## Операціїї
 
+## Особливості унарної операції ++
+```
+IncremetAndAssign();
+void IncremetAndAssign()
+{
+    int x;
+    int y;
 
-# Метод Parse, TryParse
+    x = 1;
+    y = x++;
+    Console.WriteLine($"x = 1;");
+    Console.WriteLine($"y = x++;");
+    Console.WriteLine($"x:{x}  y:{y}");
+    Console.WriteLine();
+    Console.WriteLine("Good practice:");
+    x = 1;
+    x++;
+    y = x;
+    Console.WriteLine($"x = 1;");
+    Console.WriteLine("x++;");
+    Console.WriteLine($"y = x;");
+    Console.WriteLine($"x:{x}  y:{y}");
+}
+```
+
+```
+x = 1;
+y = x++;
+x:2  y:1
+
+Good practice:
+x = 1;
+x++;
+y = x;
+x:2  y:2
+```
+## Бінарні операції.
+```cs
+BinaryOperations();
+void BinaryOperations()
+{
+    int a = 11;
+    int b = 3;
+
+    Console.WriteLine($"{a} + {b}={a + b}");
+    Console.WriteLine($"{a} - {b}={a - b}");
+    Console.WriteLine($"{a} * {b}={a * b}");
+    Console.WriteLine($"{a} / {b}={a / b}");
+    Console.WriteLine($"{a} % {b}={a % b}");
+}
+```
+
+```
+11 + 3=14
+11 - 3=8
+11 * 3=33
+11 / 3=3
+11 % 3=2
+```
+
+## Метод Parse, TryParse
 
 З строки можно отримати змінну типу.
 
@@ -385,54 +445,3 @@ DecimalA - DecimalB:0,1
 Таким чином тип double можна використовувати коли з зміною можна використовувати порівняння на > ,< але точне співпадіння не є критерієм принятя рішення. Наприклад вимірювання ваги людини і порівнювання з витривалістю велосипеда не потребують точного співпадіння. Тобто double не гаратує роботу == оскілки результат обчислень може відрізнятися на дуже маленьке значення. В інших випадках він може зберегти память.
 
 Використовуйте decimal для обліку грошей, інжинерних обчислень і всюду де потребується точність обчислень.
-
-## Особливості операції ++
-
-```
-IncremetAndAssign();
-void IncremetAndAssign()
-{
-    int x;
-    int y;
-
-    x = 1;
-    y = x++;
-    Console.WriteLine($"x = 1;");
-    Console.WriteLine($"y = x++;");
-    Console.WriteLine($"x:{x}  y:{y}");
-    Console.WriteLine();
-    Console.WriteLine("Good practice:");
-    x = 1;
-    x++;
-    y = x;
-    Console.WriteLine($"x = 1;");
-    Console.WriteLine("x++;");
-    Console.WriteLine($"y = x;");
-    Console.WriteLine($"x:{x}  y:{y}");
-}
-```
-
-```
-x = 1;
-y = x++;
-x:2  y:1
-
-Good practice:
-x = 1;
-x++;
-y = x;
-x:2  y:2
-```
-
-
-
- 
-
-
-
-
-
-
-
-
-
