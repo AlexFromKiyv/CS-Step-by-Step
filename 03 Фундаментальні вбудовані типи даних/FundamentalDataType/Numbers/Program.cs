@@ -132,7 +132,7 @@ void IncremetAndAssign()
     Console.WriteLine($"x:{x}  y:{y}");
 }
 
-BinaryOperations();
+//BinaryOperations();
 void BinaryOperations()
 {
     int a = 11;
@@ -143,6 +143,29 @@ void BinaryOperations()
     Console.WriteLine($"{a} * {b}={a * b}");
     Console.WriteLine($"{a} / {b}={a / b}");
     Console.WriteLine($"{a} % {b}={a % b}");
+
+    double c = 11.0;
+    Console.WriteLine($"{c} / {b}={c/b}");
+
+}
+
+AssignmentOperators();
+void AssignmentOperators()
+{
+    int a = 2;
+    Console.WriteLine(a);
+    
+    a += 2;
+    Console.WriteLine(a);
+
+    a -= 2;
+    Console.WriteLine(a);
+
+    a *= 2;
+    Console.WriteLine(a);
+
+    a /= 2;
+    Console.WriteLine(a);
 }
 
 

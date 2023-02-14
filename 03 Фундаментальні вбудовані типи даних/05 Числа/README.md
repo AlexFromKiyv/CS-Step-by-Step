@@ -197,6 +197,10 @@ void BinaryOperations()
     Console.WriteLine($"{a} * {b}={a * b}");
     Console.WriteLine($"{a} / {b}={a / b}");
     Console.WriteLine($"{a} % {b}={a % b}");
+
+    double c = 11.0;
+    Console.WriteLine($"{c} / {b}={c/b}");
+
 }
 ```
 
@@ -206,7 +210,37 @@ void BinaryOperations()
 11 * 3=33
 11 / 3=3
 11 % 3=2
+11 / 3=3,6666666666666665
 ```
+## Присваювання.
+```cs
+AssignmentOperators();
+void AssignmentOperators()
+{
+    int a = 2;
+    Console.WriteLine(a);
+    
+    a += 2;
+    Console.WriteLine(a);
+
+    a -= 2;
+    Console.WriteLine(a);
+
+    a *= 2;
+    Console.WriteLine(a);
+
+    a /= 2;
+    Console.WriteLine(a);
+}
+```
+```
+2
+4
+2
+4
+2
+```
+
 
 ## Метод Parse, TryParse
 
