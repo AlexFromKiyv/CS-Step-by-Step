@@ -16,6 +16,41 @@ static void ExplorationOfBooleanType()
 
 Змінна типу <em>bool</em> може мати значення або False або True. В класі System.Boolean є строкове представлення ціх значень.    
 
+# Логічні операції AND, OR, XOR
+```cs
+
+AndOrXor();
+void AndOrXor()
+{
+    bool a = true;
+    bool b = false;
+    Console.WriteLine($"AND  | True  | False    ");
+    Console.WriteLine($"True | {a & a,-5} | {a & b,-5} ");
+    Console.WriteLine($"False| {b & a,-5} | {b & b,-5} ");
+    Console.WriteLine();
+    Console.WriteLine($"OR   | True  | False    ");
+    Console.WriteLine($"True | {a | a,-5} | {a | b,-5} ");
+    Console.WriteLine($"False| {b | a,-5} | {b | b,-5} ");
+    Console.WriteLine();
+    Console.WriteLine($"XOR  | True  | False    ");
+    Console.WriteLine($"True | {a ^ a,-5} | {a ^ b,-5} ");
+    Console.WriteLine($"False| {b ^ a,-5} | {b ^ b,-5} ");
+}
+```
+```
+AND  | True  | False
+True | True  | False
+False| False | False
+
+OR   | True  | False
+True | True  | True
+False| True  | False
+
+XOR  | True  | False
+True | False | True
+False| True  | False
+```
+
 # Метод Parse, TryParse
 
 З строки можно отримати змінну типу.

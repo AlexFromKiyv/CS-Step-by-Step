@@ -149,7 +149,7 @@ void BinaryOperations()
 
 }
 
-AssignmentOperators();
+//AssignmentOperators();
 void AssignmentOperators()
 {
     int a = 2;
