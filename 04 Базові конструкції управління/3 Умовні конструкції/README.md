@@ -1,6 +1,6 @@
 Додамо проект під назвою If
 
-# Логічні опертори та вирази.
+## Логічні опертори та вирази.
 
 ```CS
 LogicalExpression();
@@ -44,7 +44,7 @@ static void LogicalExpression()
 Оператори && || не перевіряють вираз до кінця якшо результат визначен. Аби превірити весь вираз існують  & |. 
 
 
-# IF/ELSE
+## IF/ELSE
 
 ```cs
 SimpleIf();
@@ -75,7 +75,7 @@ static void SimpleIfElse()
     }
 }
 ```
-# IS
+## IS
 
 ```cs
 UsingIs();
@@ -98,7 +98,31 @@ static void UsingIs()
 
 В цьому прикладі перевіряеться тип об'єкту і якщо умова виконується присваюється новій змінній для того шоб потім використовувати.
 
-# Matching patterns.
+
+
+## Matching patterns.
+
+```cs
+PatternMatchingWithIf();
+void PatternMatchingWithIf()
+{
+    Console.WriteLine(GetSquare(10));
+    Console.WriteLine(GetSquare("Hi"));
+
+    int GetSquare(object o)
+    { 
+        if (o is int value)
+        {
+            return value * value;
+        }
+        else
+        {
+            return -1;
+        }
+    }
+}
+```
+
 
 ```cs
 UsingTypePattern();
@@ -157,7 +181,7 @@ static void UsingNegativePattern()
 }
 ```
 
-# Оператор ?
+## Оператор ?
 
 ```cs
 UsingConditionalOperator();

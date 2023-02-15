@@ -26,7 +26,7 @@ void AndOrXor()
     Console.WriteLine($"False| {b ^ a,-5} | {b ^ b,-5} ");
 }
 
-ConditionalLogicalOperators();
+//ConditionalLogicalOperators();
 void ConditionalLogicalOperators()
 {
     Console.WriteLine($"True & TrueReturn :{true & TrueReturn()}");
@@ -35,8 +35,8 @@ void ConditionalLogicalOperators()
     Console.WriteLine($"False | TrueReturn :{false | TrueReturn()}");
 
     Console.WriteLine($"True && TrueReturn :{true && TrueReturn()}");
-    Console.WriteLine($"False && TrueReturn :{false && TrueReturn()}");
-    Console.WriteLine($"True || TrueReturn :{true || TrueReturn()}");
+    Console.WriteLine($"False && TrueReturn :{false && TrueReturn()}"); // No TrueReturn
+    Console.WriteLine($"True || TrueReturn :{true || TrueReturn()}"); // No TrueReturn
     Console.WriteLine($"False || TrueReturn :{false || TrueReturn()}");
 
     bool TrueReturn()
