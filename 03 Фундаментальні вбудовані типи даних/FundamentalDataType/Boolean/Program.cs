@@ -29,21 +29,17 @@ void AndOrXor()
 ConditionalLogicalOperators();
 void ConditionalLogicalOperators()
 {
+    Console.WriteLine($"True & TrueReturn :{true & TrueReturn()}");
+    Console.WriteLine($"False & TrueReturn :{false & TrueReturn()}");
+    Console.WriteLine($"True | TrueReturn :{true | TrueReturn()}");
+    Console.WriteLine($"False | TrueReturn :{false | TrueReturn()}");
 
-    Console.WriteLine($"True & ReturnsBoolReportWork :{true & ReturnsBoolReportWork()}");
-    Console.WriteLine($"False & ReturnsBoolReportWork :{false & ReturnsBoolReportWork()}");
-    Console.WriteLine($"True | ReturnsBoolReportWork :{true | ReturnsBoolReportWork()}");
-    Console.WriteLine($"False | ReturnsBoolReportWork :{false | ReturnsBoolReportWork()}");
+    Console.WriteLine($"True && TrueReturn :{true && TrueReturn()}");
+    Console.WriteLine($"False && TrueReturn :{false && TrueReturn()}");
+    Console.WriteLine($"True || TrueReturn :{true || TrueReturn()}");
+    Console.WriteLine($"False || TrueReturn :{false || TrueReturn()}");
 
-
-
-    Console.WriteLine($"True && ReturnsBoolReportWork :{true && ReturnsBoolReportWork()}");
-    Console.WriteLine($"False && ReturnsBoolReportWork :{false && ReturnsBoolReportWork()}");
-    Console.WriteLine($"True || ReturnsBoolReportWork :{true || ReturnsBoolReportWork()}");
-    Console.WriteLine($"False || ReturnsBoolReportWork :{false || ReturnsBoolReportWork()}");
-
-
-    bool ReturnsBoolReportWork()
+    bool TrueReturn()
     {
         Console.Write("Im Working.  ");
         return true;

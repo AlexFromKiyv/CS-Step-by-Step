@@ -56,17 +56,17 @@ False| True  | False
 ConditionalLogicalOperators();
 void ConditionalLogicalOperators()
 {
-    Console.WriteLine($"True & ReturnsBoolReportWork :{true & ReturnsBoolReportWork()}");
-    Console.WriteLine($"False & ReturnsBoolReportWork :{false & ReturnsBoolReportWork()}");
-    Console.WriteLine($"True | ReturnsBoolReportWork :{true | ReturnsBoolReportWork()}");
-    Console.WriteLine($"False | ReturnsBoolReportWork :{false | ReturnsBoolReportWork()}");
+    Console.WriteLine($"True & TrueReturn :{true & TrueReturn()}");
+    Console.WriteLine($"False & TrueReturn :{false & TrueReturn()}");
+    Console.WriteLine($"True | TrueReturn :{true | TrueReturn()}");
+    Console.WriteLine($"False | TrueReturn :{false | TrueReturn()}");
 
-    Console.WriteLine($"True && ReturnsBoolReportWork :{true && ReturnsBoolReportWork()}");
-    Console.WriteLine($"False && ReturnsBoolReportWork :{false && ReturnsBoolReportWork()}");
-    Console.WriteLine($"True || ReturnsBoolReportWork :{true || ReturnsBoolReportWork()}");
-    Console.WriteLine($"False || ReturnsBoolReportWork :{false || ReturnsBoolReportWork()}");
+    Console.WriteLine($"True && TrueReturn :{true && TrueReturn()}");
+    Console.WriteLine($"False && TrueReturn :{false && TrueReturn()}");
+    Console.WriteLine($"True || TrueReturn :{true || TrueReturn()}");
+    Console.WriteLine($"False || TrueReturn :{false || TrueReturn()}");
 
-    bool ReturnsBoolReportWork()
+    bool TrueReturn()
     {
         Console.Write("Im Working.  ");
         return true;
@@ -74,16 +74,15 @@ void ConditionalLogicalOperators()
 } 
 ```
 
-
 ```
-Im Working.  True & ReturnsBoolReportWork :True
-Im Working.  False & ReturnsBoolReportWork :False
-Im Working.  True | ReturnsBoolReportWork :True
-Im Working.  False | ReturnsBoolReportWork :True
-Im Working.  True && ReturnsBoolReportWork :True
-False && ReturnsBoolReportWork :False
-True || ReturnsBoolReportWork :True
-Im Working.  False || ReturnsBoolReportWork :True
+Im Working.  True & TrueReturn :True
+Im Working.  False & TrueReturn :False
+Im Working.  True | TrueReturn :True
+Im Working.  False | TrueReturn :True
+Im Working.  True && TrueReturn :True
+False && TrueReturn :False
+True || TrueReturn :True
+Im Working.  False || TrueReturn :True
 ```
 Як видно оператори && || долучають другий операнд тількі тоді коли це потрібно. Це може бути кориснє коли багато поерандів.
 
