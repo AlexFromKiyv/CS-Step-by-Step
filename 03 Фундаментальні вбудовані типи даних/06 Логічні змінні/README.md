@@ -16,7 +16,7 @@ static void ExplorationOfBooleanType()
 
 Змінна типу <em>bool</em> може мати значення або False або True. В класі System.Boolean є строкове представлення ціх значень.    
 
-# Логічні операції AND, OR, XOR
+## Логічні оператори AND &, OR |, XOR ^
 ```cs
 
 AndOrXor();
@@ -50,8 +50,45 @@ XOR  | True  | False
 True | False | True
 False| True  | False
 ```
+## Умовні логічні оператори AND &&, OR ||
+```cs
 
-# Метод Parse, TryParse
+ConditionalLogicalOperators();
+void ConditionalLogicalOperators()
+{
+    Console.WriteLine($"True & ReturnsBoolReportWork :{true & ReturnsBoolReportWork()}");
+    Console.WriteLine($"False & ReturnsBoolReportWork :{false & ReturnsBoolReportWork()}");
+    Console.WriteLine($"True | ReturnsBoolReportWork :{true | ReturnsBoolReportWork()}");
+    Console.WriteLine($"False | ReturnsBoolReportWork :{false | ReturnsBoolReportWork()}");
+
+    Console.WriteLine($"True && ReturnsBoolReportWork :{true && ReturnsBoolReportWork()}");
+    Console.WriteLine($"False && ReturnsBoolReportWork :{false && ReturnsBoolReportWork()}");
+    Console.WriteLine($"True || ReturnsBoolReportWork :{true || ReturnsBoolReportWork()}");
+    Console.WriteLine($"False || ReturnsBoolReportWork :{false || ReturnsBoolReportWork()}");
+
+    bool ReturnsBoolReportWork()
+    {
+        Console.Write("Im Working.  ");
+        return true;
+    }
+} 
+```
+
+
+```
+Im Working.  True & ReturnsBoolReportWork :True
+Im Working.  False & ReturnsBoolReportWork :False
+Im Working.  True | ReturnsBoolReportWork :True
+Im Working.  False | ReturnsBoolReportWork :True
+Im Working.  True && ReturnsBoolReportWork :True
+False && ReturnsBoolReportWork :False
+True || ReturnsBoolReportWork :True
+Im Working.  False || ReturnsBoolReportWork :True
+```
+Як видно оператори && || долучають другий операнд тількі тоді коли це потрібно. Це може бути кориснє коли багато поерандів.
+
+
+## Метод Parse, TryParse
 
 З строки можно отримати змінну типу.
 

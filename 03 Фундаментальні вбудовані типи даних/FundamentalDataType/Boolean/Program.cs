@@ -8,7 +8,7 @@ static void ExplorationOfBooleanType()
     Console.WriteLine($"Representation to string: {bool.TrueString}, {bool.FalseString} ");
 }
 
-AndOrXor();
+//AndOrXor();
 void AndOrXor()
 {
     bool a = true;
@@ -25,6 +25,30 @@ void AndOrXor()
     Console.WriteLine($"True | {a ^ a,-5} | {a ^ b,-5} ");
     Console.WriteLine($"False| {b ^ a,-5} | {b ^ b,-5} ");
 }
+
+ConditionalLogicalOperators();
+void ConditionalLogicalOperators()
+{
+
+    Console.WriteLine($"True & ReturnsBoolReportWork :{true & ReturnsBoolReportWork()}");
+    Console.WriteLine($"False & ReturnsBoolReportWork :{false & ReturnsBoolReportWork()}");
+    Console.WriteLine($"True | ReturnsBoolReportWork :{true | ReturnsBoolReportWork()}");
+    Console.WriteLine($"False | ReturnsBoolReportWork :{false | ReturnsBoolReportWork()}");
+
+
+
+    Console.WriteLine($"True && ReturnsBoolReportWork :{true && ReturnsBoolReportWork()}");
+    Console.WriteLine($"False && ReturnsBoolReportWork :{false && ReturnsBoolReportWork()}");
+    Console.WriteLine($"True || ReturnsBoolReportWork :{true || ReturnsBoolReportWork()}");
+    Console.WriteLine($"False || ReturnsBoolReportWork :{false || ReturnsBoolReportWork()}");
+
+
+    bool ReturnsBoolReportWork()
+    {
+        Console.Write("Im Working.  ");
+        return true;
+    }
+} 
 
 
 //UsingParse();
