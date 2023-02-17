@@ -482,9 +482,9 @@ DecimalA - DecimalB:0,1
 
 ## Особливості округлення
 ```cs
-RoundingRule();
+RoundingRuleDefault();
 
-void RoundingRule()
+void RoundingRuleDefault()
 {
     Console.WriteLine(Math.Round(3.5));
     Console.WriteLine(Math.Round(4.5));
@@ -495,3 +495,20 @@ void RoundingRule()
 4
 ```
 За замовчуванням при округленні використовується правило Banker's Rounding.Округлятиметься в більшу сторону, якщо десяткова частина дорівнює середині 0,5, а недесяткова частина є непарною, але округлятиметься в меншу сторону, якщо недесяткова частина є парною. Це відрізняеться правилам принятим в математиці.
+
+Процес округлення можна контролювати.
+
+```cs
+RoundingRuleAwayFromZero();
+
+void RoundingRuleAwayFromZero()
+{
+    Console.WriteLine(Math.Round(3.5,0,MidpointRounding.AwayFromZero));
+    Console.WriteLine(Math.Round(4.5,0, MidpointRounding.AwayFromZero));
+}
+```
+```
+4
+5
+```
+

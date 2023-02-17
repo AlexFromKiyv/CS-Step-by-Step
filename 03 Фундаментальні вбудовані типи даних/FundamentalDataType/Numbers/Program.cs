@@ -333,10 +333,18 @@ void DoubleOrDecimal()
     Console.WriteLine($"DecimalA - DecimalB:{decimalA - decimalB}");
 }
 
-RoundingRule();
+//RoundingRuleDefault();
 
-void RoundingRule()
+void RoundingRuleDefault()
 {
     Console.WriteLine(Math.Round(3.5));
     Console.WriteLine(Math.Round(4.5));
+}
+
+RoundingRuleAwayFromZero();
+
+void RoundingRuleAwayFromZero()
+{
+    Console.WriteLine(Math.Round(3.5,0,MidpointRounding.AwayFromZero));
+    Console.WriteLine(Math.Round(4.5,0, MidpointRounding.AwayFromZero));
 }
