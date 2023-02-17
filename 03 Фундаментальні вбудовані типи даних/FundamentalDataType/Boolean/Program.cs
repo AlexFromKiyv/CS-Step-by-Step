@@ -89,4 +89,3 @@ static void UsingTryParse()
         Console.WriteLine($"Cannot convert \"{myString}\" to bool.");
     }
 }
-
