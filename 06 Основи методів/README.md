@@ -1,8 +1,9 @@
 # Методи
 
+Створимо рішеня Methods з проектом Methods.
+
 ## Створення
 
-Створимо рішеня Methods з проектом Methods.
 
 При створенні методів вказуеться модіфікатор доступу, тип поверненя, та параметри. Методи які повертають значення називають функціями.
 
@@ -503,3 +504,43 @@ static void CheckParameterForNull()
     }
 }
 ```
+
+## Документування методу.
+
+Додамо в проект Methods class Program.MyMath.cs
+
+```cs
+partial class Program
+{
+    static int RoundedSquare(double x,double y)
+    {
+        return (int) Math.Round(x*y);
+    }
+}
+```
+
+Для того аби задокументувати що робить фунуція над її назвою введіть /// та заповніть шаблон.
+
+```cs
+    /// <summary>
+    /// Calculates the area for a rectangle with dimensions x, y
+    /// </summary>
+    /// <param name="x">length</param>
+    /// <param name="y">width</param>
+    /// <returns>The area of a rectangle with length and width rounded to a whole value.</returns>
+    static int RoundedSquare(double x,double y)
+    {
+        return (int) Math.Round(x*y);
+    }
+
+```
+Додайте в файл Program.cs перед визначенням класів
+```cs
+Documenting();
+void Documenting()
+{
+    Console.WriteLine(RoundedSquare(10.23,12.34));
+}
+```
+Зверніть увагу що при наведені курсора на функції з'являеться підказка.
+

@@ -331,7 +331,7 @@ static void UsingOverload()
 }
 
 
-CheckParameterForNull();
+//CheckParameterForNull();
 
 static void CheckParameterForNull()
 {
@@ -362,6 +362,11 @@ static void CheckParameterForNull()
     }
 }
 
+Documenting();
+void Documenting()
+{
+    Console.WriteLine(RoundedSquare(10.23,12.34));
+}
 
 
 
@@ -400,5 +405,5 @@ static class Quadrate
         Console.WriteLine("I choose method 6");
         return GetQuadrate((decimal)lenght);
     }
-
 }
+
