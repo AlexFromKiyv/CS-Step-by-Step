@@ -53,7 +53,7 @@ namespace ConsoleAppWithoutTopLevel
 5. Next
 6. Project name: ConsoleAppWithTopLevel
 7. Next
-8. Не встановіть флажок Do not use top-level stattamens
+8. Не встановлюйте флажок Do not use top-level stattamens
 9. Create
 
 Файл Program.cs виглядає так:
@@ -72,6 +72,32 @@ Console.WriteLine("Hello, World!");
 - Функції в класі Program локальні
 - Додаткові типи можуть бути оголошені після всіх операторів верхнього рівня.
 - Інструкції верхнього рівня компілюються до класу під назвою Program, дозволяючи додати частковий клас Program для зберігання звичайних методів.
+
+Краша практика створити функції , які ви будете викликати в Program.cs, в окремому файлі та вручну визначте їх у частковому класі Program. Це об’єднає їх у автоматично створений клас Program на тому самому рівні, що й метод <Main>$, а не як локальні функції всередині методу <Main>$.
+
+В проекті ConsoleAppWithTopLevel додамо класс myMath
+1. На назві проекту правий клік 
+2. Add
+3. Class з назвою Program.MyMath.cs  
+
+```cs
+    partial class Program
+    {
+        static double RoundAdd(double a,double b) => Math.Round(a+b);
+    }
+```
+В файлі Program.cs додайте
+```cs
+double result = RoundAdd(12.5434,4.34);
+Console.WriteLine(result);
+```
+```
+Hello, World!
+17
+```
+Це крашій варіант але я для компактності небуду створювати додаткових файлів і буду створювати методи в Program.cs
+
+
 
 ## Передача программі параметрів з консолі.
 
