@@ -9,10 +9,18 @@ namespace SimpleClass
 {
     class Bike
     {
+
         public string ownerName;
         public int currentSpeed;
 
-        public void StateToConsol() => Console.WriteLine($"{ownerName} is driving at speed {currentSpeed}");
+        //Change default constructor
+        public Bike()
+        {
+            ownerName = "Noname";
+            currentSpeed = 2;
+        }
+
+        public void StateToConsol() => Console.WriteLine($"Bicycler: {ownerName} is driving at speed: {currentSpeed}");
         public void SpeedUp(int speedChange) => currentSpeed += speedChange;
     }
 }
