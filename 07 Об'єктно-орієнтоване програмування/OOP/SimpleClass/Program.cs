@@ -1,6 +1,6 @@
 ﻿using SimpleClass;
 
-UsingClassBike();
+//UsingClassBike();
 void UsingClassBike()
 {
     Bike bike;
@@ -20,4 +20,32 @@ void UsingClassBike()
     }
 }
 
+//UsingVariousConstructors();
+void UsingVariousConstructors()
+{
+    Bike bike = new();
+    bike.StateToConsol();
 
+    Bike veraOnBike = new("Vera");
+    veraOnBike.StateToConsol();
+
+    Bike maxBike = new("Max", 15);
+    maxBike.StateToConsol();
+}
+
+
+//IfNoUseThis();
+void IfNoUseThis()
+{
+    Bike bike = new();
+    bike.SetOwnerName("David");
+    bike.StateToConsol();
+}
+
+MethodWithThis();
+void MethodWithThis()
+{
+    Bike bike = new();
+    bike.SetOwnerNameWithThis("David");
+    bike.StateToConsol();
+}
