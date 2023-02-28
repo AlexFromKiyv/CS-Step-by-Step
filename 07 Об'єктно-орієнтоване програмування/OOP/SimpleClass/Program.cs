@@ -42,10 +42,37 @@ void IfNoUseThis()
     bike.StateToConsol();
 }
 
-MethodWithThis();
+//MethodWithThis();
 void MethodWithThis()
 {
     Bike bike = new();
     bike.SetOwnerNameWithThis("David");
     bike.StateToConsol();
+}
+
+//UsingChainOfConstructors();
+void UsingChainOfConstructors()
+{
+    Bus25 bus25 = new(30);
+    bus25.StateToConsol();
+}
+
+UsingConstructorWithOpionalParameter();
+
+void UsingConstructorWithOpionalParameter()
+{
+    Bus bus_1 = new();
+    bus_1.ToConsol();
+    
+    Bus bus_2 = new(15);
+    bus_2.ToConsol();
+
+    Bus bus_3 = new(driverName:"Mark");
+    bus_3.ToConsol();
+
+    Bus bus_4 = new(35, "Jack");
+    bus_4.ToConsol();
+
+    Bus bus_5 = new(default, default);
+    bus_5.ToConsol();
 }

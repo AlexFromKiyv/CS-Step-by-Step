@@ -211,6 +211,7 @@ this користно використовувати в ланцюгу конс�
 
         public Bus25(int numberOfSeats, string? driverName)
         {
+            Console.WriteLine("in main constructor");
             if (numberOfSeats > 24)
             {
                 numberOfSeats = 24;
@@ -219,16 +220,94 @@ this користно використовувати в ланцюгу конс�
             this.driverName = driverName;
         }
 
-        public Bus25(int numberOfSeats) : this(numberOfSeats,null)
+        public Bus25()
         {
+            Console.WriteLine("in default constructor");
         }
 
-        public Bus25(string? driverName) : this(default,driverName)
+        public Bus25(int numberOfSeats) : this(numberOfSeats, null)
         {
+            Console.WriteLine("in constructor for numberOfSeats");
         }
+
+        public Bus25(string? driverName) : this(default, driverName)
+        {
+            Console.WriteLine("in constructor for driverName");
+        }
+
+        public void StateToConsol() => Console.WriteLine($"driverName: {driverName}  numberOfSeats: {numberOfSeats}");
     }
 ``` 
 Тут спочатку реалізовуеться конструктор з максимальною кількістю праметрів і необхідною логікою. Інші конструктори визивають його через this. Таким чином треба турбуватись за один конструктор в класі. 
+
+Викличемо один із конструкторів
+```cs
+UsingChainOfConstructors();
+void UsingChainOfConstructors()
+{
+    Bus25 bus25 = new(30);
+    bus25.StateToConsol();
+}
+```
+```
+in main constructor
+in constructor for numberOfSeats
+driverName:   numberOfSeats: 24
+```
+Як видно спочатку виконуеться конструктор з всіма параметрами а потім сам конструктор. 
+
+Можна створити конструктор використовуючи необов'язкові параметри.
+```cs
+    class Bus
+    {
+        public int numberOfSeats;
+        public string? driverName;
+
+        public Bus(int numberOfSeats = 20 , string? driverName = "Someone")
+        {
+            if (numberOfSeats > 30)
+            {
+                numberOfSeats = 30;
+            }
+
+            this.numberOfSeats = numberOfSeats;
+            this.driverName = driverName;
+        }
+        public void ToConsol() => Console.WriteLine($"driverName: {driverName}  numberOfSeats: {numberOfSeats}");
+    }
+```
+Таке визначення тепер надає декілька способів створення об’єктів за допомогою єдиного конструктора.
+```cs
+UsingConstructorWithOpionalParameter();
+
+void UsingConstructorWithOpionalParameter()
+{
+    Bus bus_1 = new();
+    bus_1.ToConsol();
+    
+    Bus bus_2 = new(15);
+    bus_2.ToConsol();
+
+    Bus bus_3 = new(driverName:"Mark");
+    bus_3.ToConsol();
+
+    Bus bus_4 = new(35, "Jack");
+    bus_4.ToConsol();
+
+    Bus bus_5 = new(default, default);
+    bus_5.ToConsol();
+}
+```
+```
+driverName: Someone  numberOfSeats: 20
+driverName: Someone  numberOfSeats: 15
+driverName: Mark  numberOfSeats: 20
+driverName: Jack  numberOfSeats: 30
+driverName:   numberOfSeats: 0
+```
+
+
+
 
 
 
