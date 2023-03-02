@@ -1,4 +1,5 @@
 ﻿using Statics;
+using static Statics.PersonUtility;
 
 void BadInvokeStatic()
 {
@@ -75,4 +76,12 @@ void UsingStaticClass()
     Person maria = new("Maria", 165, 55);
     maria.ToConsole();
     Console.WriteLine(PersonUtility.IsWeightGood(maria));
+}
+
+ImportStaticClass();
+
+void ImportStaticClass()
+{
+    Person john = new("John", 165, 70);
+    IsWeightGood(john);
 }

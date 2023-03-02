@@ -240,3 +240,18 @@ Body mass index:20,2
 Weight is normal
 ```
 
+Якщо статичний клас використовується дуже часто його можно імпортувати.
+```cs
+using static Statics.PersonUtility;
+```
+Після чого для використання методу не потрімно вводити назву класу.
+```cs
+ImportStaticClass();
+
+void ImportStaticClass()
+{
+    Person john = new("John", 165, 70);
+    IsWeightGood(john);
+}
+```  
+Такій підхід корисний коли використовуються класи утіліти типу Math, Console, DateTime. Але требе врахувати шоб назви методів не співпадали в різних класах. 
