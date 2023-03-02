@@ -10,10 +10,17 @@ namespace Statics
     {
         public static double maxWeight = 635;
         public static double avarageWeight = 81.5;
+        public static double desiredHeight; 
 
         public string name;
         public double? height;
         public double? weight;
+
+        static Person() 
+        {
+            //Console.WriteLine("Static constructor");
+            desiredHeight = 170;
+        }
 
         public Person(string name, double? height, double? weight)
         {
