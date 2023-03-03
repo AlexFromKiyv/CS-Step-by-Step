@@ -5,7 +5,9 @@ VisualStudioVersion = 17.5.33414.496
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleClass", "SimpleClass\SimpleClass.csproj", "{BD070416-56BD-4757-A5CC-0A3433209BE5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Statics", "Statics\Statics.csproj", "{045236D7-4D4B-4738-A805-9CF19DF266DF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Statics", "Statics\Statics.csproj", "{045236D7-4D4B-4738-A805-9CF19DF266DF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccessModifiers", "AccessModifiers\AccessModifiers.csproj", "{E1324232-F975-40A7-9CBA-11F0126A8D58}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{045236D7-4D4B-4738-A805-9CF19DF266DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{045236D7-4D4B-4738-A805-9CF19DF266DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{045236D7-4D4B-4738-A805-9CF19DF266DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E1324232-F975-40A7-9CBA-11F0126A8D58}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E1324232-F975-40A7-9CBA-11F0126A8D58}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E1324232-F975-40A7-9CBA-11F0126A8D58}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E1324232-F975-40A7-9CBA-11F0126A8D58}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
