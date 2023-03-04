@@ -61,8 +61,12 @@ LivingOrganism organism = new(); // don't work .LivingOrganism() inaccesible
     }
 ```
 ```cs
-Animal animal = new();
-// animal.weight = 20; //no access 
+void UsingAnimal()
+{
+    Animal animal = new();
+
+    // animal.weight //no access
+}
 ```
 Зазвичай для створення об'єктів класу конcтруктор робиться public.
 
@@ -79,13 +83,19 @@ Animal animal = new();
     }
 ```
 ```
-Dog snupy = new("mutt");
-Console.WriteLine(snupy.Breed);
+void UsingDog()
+{
+
+    Dog snupy = new("mutt");
+    Console.WriteLine(snupy.Breed);
+
+}
+
 ```
 Такий тип і члени будуть доступні з завнішних збірок.
 
 
-## Владені типи та структури
+## Вкладені типи та структури
 
 Типи та структури можуть бути об'явлені в межах типу private. Але тип в namaspase ні.
 

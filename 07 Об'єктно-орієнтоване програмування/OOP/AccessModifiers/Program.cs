@@ -2,9 +2,18 @@
 
 //LivingOrganism livingOrganism = new(); // LivingOrganism.LivingOrganism() inaccesible
 
-Animal animal = new();
+void UsingAnimal()
+{
+    Animal animal = new();
 
-// animal.weight //no access
+    // animal.weight //no access
+}
 
-Dog snupy = new("mutt");
-Console.WriteLine(snupy.Breed);
+
+
+void UsingDog()
+{
+    Dog snupy = new("mutt");
+    Console.WriteLine(snupy.Breed);
+}
+

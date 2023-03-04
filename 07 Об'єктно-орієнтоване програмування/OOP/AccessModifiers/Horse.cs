@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 
 namespace AccessModifiers
 {
-    internal class Horse
+    //private class Horse // Element defined in namespace cannot be
+    //                    // explixitly declared as private
+    public class Hourse
     {
+        private bool _sick;
     }
 }
