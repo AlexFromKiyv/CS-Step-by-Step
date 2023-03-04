@@ -85,4 +85,18 @@ Console.WriteLine(snupy.Breed);
 Такий тип і члени будуть доступні з завнішних збірок.
 
 
+## Владені типи та структури
+
+Типи та структури можуть бути об'явлені в межах типу private. Але тип в namaspase ні.
+
+```cs
+    //private class Horse // Element defined in namespace cannot be
+    //                    // explixitly declared as private
+    public class Hourse
+    {
+        private bool _sick;
+    }
+```
+
+
 
