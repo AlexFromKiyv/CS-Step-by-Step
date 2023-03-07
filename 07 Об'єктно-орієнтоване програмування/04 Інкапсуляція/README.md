@@ -88,4 +88,187 @@ void UsingEmployee_v1()
 
 Для спрощеня процесу інкапсуляції в C# існує контейнер якій включае в собі методи  отримання(get) і встановлення(set) полів стану які називаються властивостями. 
 
+```cs
+    internal class Employee_v2
+    {
+        private int _employeeId;
+        private string? _employeeName;
+        private decimal _currentPay;
+
+        public Employee_v2(int employeeId, string? employeeName, decimal currentPay)
+        {
+            _employeeId = employeeId;
+            _employeeName = employeeName;
+            _currentPay = currentPay;
+        }
+
+        public int Id 
+        { 
+            get { return _employeeId; } 
+            set { _employeeId = value; } 
+        }
+
+        public string? Name 
+        { 
+            get { return _employeeName; } 
+            set
+            {
+                if (value?.Length > 17)
+                {
+                    Console.WriteLine("The name is not set.It must be less than 17 characters");
+
+                }
+                else
+                {
+                    _employeeName = value;
+                }
+            }
+        }
+
+        public decimal CurrentPay 
+        { 
+            get => _currentPay;     
+            set => _currentPay = value;
+        }
+
+        public void GiveBonus(decimal amount) => _currentPay += amount;
+        public void ToConsole()
+        {
+            Console.WriteLine($"Id:{_employeeId}");
+            Console.WriteLine($"Name:{_employeeName}");
+            Console.WriteLine($"Pay:{_currentPay}\n\n ");
+        }
+    }
+```
+```cs
+UsingEmployee_v2();
+
+void UsingEmployee_v2()
+{
+    Employee_v2 employee = new(1, "Joseph", 10000);
+    employee.ToConsole();
+
+    employee.GiveBonus(1000);
+    employee.ToConsole();
+
+    employee.CurrentPay++;
+    employee.ToConsole();
+
+    employee.Name = "Joe";
+    employee.ToConsole();
+
+    employee.Name = "SoIAttemptToInputTooBigName";
+ 
+}
+```
+```
+Id:1
+Name:Joseph
+Pay:10000
+
+
+Id:1
+Name:Joseph
+Pay:11000
+
+
+Id:1
+Name:Joseph
+Pay:11001
+
+
+Id:1
+Name:Joe
+Pay:11001
+
+
+The name is not set.It must be less than 17 characters
+```
+В області визначення set використовуеться маркер value для вхідного значення. Коли відбувається звернення до властивостей відпрацьовують відповідні блоки get та set. 
+Крім того як видно з прикладу до властивостей можна застосовувати операції наприклад інкремент. В визначенні властивостей можна використовувати лябда вирази. 
+
+
+## Конструктор з власивостями
+
+Перевіпка вхідних даних потрібна при створені об'єктів конструктором.
+
+```cs
+    internal class Employee_v3
+    {
+        private int _employeeId;
+        private string? _employeeName;
+        private decimal _currentPay;
+
+        public Employee_v3()
+        {
+        }
+
+        public Employee_v3(int id, string? name):this(id,name,default)
+        {
+        }
+
+        public Employee_v3(int id, string? name, decimal currentPay)
+        {
+            Id = id;
+            Name = name;
+            CurrentPay = currentPay;
+        }
+
+        public int Id
+        {
+            get { return _employeeId; }
+            set { _employeeId = value; }
+        }
+
+        public string? Name
+        {
+            get { return _employeeName; }
+            set
+            {
+                if (value?.Length > 17)
+                {
+                    Console.WriteLine("The name is not set.It must be less than 17 characters");
+
+                }
+                else
+                {
+                    _employeeName = value;
+                }
+            }
+        }
+
+        public decimal CurrentPay
+        {
+            get => _currentPay;
+            set => _currentPay = value;
+        }
+
+        public void GiveBonus(decimal amount) => Pay += amount;
+        public void ToConsole()
+        {
+            Console.WriteLine($"Id:{Id}");
+            Console.WriteLine($"Name:{Name}");
+            Console.WriteLine($"Pay:{Pay}\n\n ");
+        }
+
+    }
+
+```
+```cs
+void UsingEmployee_v3()
+{
+    Employee_v3 employee = new(1, "Joseph", 10000);
+    employee.ToConsole();
+
+    employee.GiveBonus(1000);
+    employee.ToConsole();
+
+    employee.Name = "Joe";
+    employee.ToConsole();
+
+    Employee_v3 badEmployee = new(1, "SoIAttemptToInputTooBigName");
+    badEmployee.ToConsole();
+}
+```
+Тут головний конструктор вивикористовує властивості які перевіряють вхідні данні. Зверніть увагу шо в межах класу також іде звертання до властивостей а не приватних даних стану.
 
