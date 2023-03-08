@@ -55,11 +55,28 @@ void UsingEmployee_v3()
     badEmployee.ToConsole();
 }
 
-UsingEmployee_v5();
+//UsingEmployee_v5();
 
 void UsingEmployee_v5()
 {
     Employee_v5 employee = new(1, "Joseph", 11000);
 
     Console.WriteLine(employee.IsPayMoreThanAverage());
+}
+
+UsingEmployee_v6();
+
+void UsingEmployee_v6()
+{
+    Employee_v6 employee = new(1, "Joseph", 10000,EmployeePayTypeEnum.Commission);
+    employee.GiveBonus(1000);
+    Console.WriteLine(employee.Pay);
+
+    employee.Pay = 10000;
+    employee.GiveBonusWithId(1000);
+    Console.WriteLine(employee.Pay);
+
+    Employee_v6 max = new(103, "Max", 10000, EmployeePayTypeEnum.Commission);
+    max.GiveBonusWithId(1000);
+    Console.WriteLine(max.Pay);
 }

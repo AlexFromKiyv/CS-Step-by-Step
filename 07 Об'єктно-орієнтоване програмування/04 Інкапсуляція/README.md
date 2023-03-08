@@ -347,4 +347,142 @@ void UsingEmployee_v5()
 }
 ```
 
+## Властивості та шаблон зіставлення (pattern mathing).
 
+```cs
+namespace EmployeeApp;
+public enum EmployeePayTypeEnum
+{
+    Hourly,
+    Salaried,
+    Commission
+}
+```
+```cs
+    internal class Employee_v6
+    {
+        private int _employeeId;
+        private string? _employeeName;
+        private decimal _currentPay;
+        private EmployeePayTypeEnum _payType;
+
+        public int Id { get => _employeeId; set => _employeeId = value; }
+        public string? Name { get => _employeeName; set => _employeeName = value; }
+        public decimal Pay  { get => _currentPay; set => _currentPay = value;}
+
+        public EmployeePayTypeEnum PayType 
+        { 
+            get => _payType; set => _payType = value;
+        }
+
+        public Employee_v6(int id, string? name, decimal pay)
+            :this(id, name, pay, EmployeePayTypeEnum.Salaried)
+        {
+        }
+
+        public Employee_v6(int id, string? name, decimal pay, EmployeePayTypeEnum payType)
+        {
+            Id = id;
+            Name = name;
+            Pay = pay;
+            PayType = payType;
+        }
+
+        public void GiveBonus(decimal amount)
+        {
+            Pay = this switch
+            {
+                { PayType: EmployeePayTypeEnum.Commission } => Pay + amount * 0.1M,
+                { PayType:EmployeePayTypeEnum.Hourly} => Pay + amount *40M/2080M,
+                { PayType:EmployeePayTypeEnum.Salaried} => Pay + amount,
+                _=> Pay
+            }; 
+
+        }
+
+    }
+```
+```cs
+UsingEmployee_v6();
+
+void UsingEmployee_v6()
+{
+    Employee_v6 employee = new(1, "Joseph", 10000,EmployeePayTypeEnum.Commission);
+
+    employee.GiveBonus(1000);
+
+    Console.WriteLine(employee.Pay);
+
+}
+```
+```
+10100,0
+```
+Таким чином можна використовувати switch. Крім того можна використовувати не одну властивість.
+
+```cs
+        public void GiveBonusWithId(decimal amount)
+        {
+            Pay = this switch
+            {
+                { Id: > 100, PayType: EmployeePayTypeEnum.Commission } => Pay + amount * 0.1M,
+                { Id: > 100, PayType: EmployeePayTypeEnum.Hourly } => Pay + amount * 40M / 2080M,
+                { Id: > 100, PayType: EmployeePayTypeEnum.Salaried } => Pay + amount,
+                _ => Pay
+            };
+        }
+```
+```cs
+UsingEmployee_v6();
+
+void UsingEmployee_v6()
+{
+    Employee_v6 employee = new(1, "Joseph", 10000,EmployeePayTypeEnum.Commission);
+    employee.GiveBonus(1000);
+    Console.WriteLine(employee.Pay);
+
+    employee.Pay = 10000;
+    employee.GiveBonusWithId(1000);
+    Console.WriteLine(employee.Pay);
+
+    Employee_v6 max = new(103, "Max", 10000, EmployeePayTypeEnum.Commission);
+    max.GiveBonus(1000);
+    Console.WriteLine(max.Pay);
+}
+```
+```
+10100,0
+10000
+10100,0
+```
+
+Шаблон властивостей можна владати.
+
+```cs
+    private DateTime _hireDate;
+    public DateTime HireDate { get => _hireDate; set => _hireDate = value; }
+
+    public void GiveBonusWithIdAndHireDate(decimal amount)
+    {
+        Pay = this switch
+        {
+        { Id: > 100, PayType: EmployeePayTypeEnum.Commission, HireDate: { Year : > 2020} } => Pay + amount * 0.1M,
+        { Id: > 100, PayType: EmployeePayTypeEnum.Hourly, HireDate: { Year: > 2020 } } => Pay + amount * 40M / 2080M,
+        { Id: > 100, PayType: EmployeePayTypeEnum.Salaried, HireDate: { Year: > 2020 } } => Pay + amount,
+        _ => Pay
+        };
+    }        
+
+    public void GiveBonusWithIdAndHireDateImproved(decimal amount)
+    {
+        Pay = this switch
+        {
+            { Id: > 100, PayType: EmployeePayTypeEnum.Commission, HireDate.Year: > 2020  } => Pay + amount * 0.1M,
+            { Id: > 100, PayType: EmployeePayTypeEnum.Hourly, HireDate.Year: > 2020 } => Pay + amount * 40M / 2080M,
+            { Id: > 100, PayType: EmployeePayTypeEnum.Salaried, HireDate.Year: > 2020 } => Pay + amount,
+            _ => Pay
+        };
+    }
+```
+
+## Автоматичні властивості.
