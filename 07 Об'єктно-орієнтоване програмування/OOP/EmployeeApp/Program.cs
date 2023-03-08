@@ -38,7 +38,7 @@ void UsingEmployee_v2()
 }
 
 
-UsingEmployee_v3();
+//UsingEmployee_v3();
 
 void UsingEmployee_v3()
 {
@@ -53,4 +53,13 @@ void UsingEmployee_v3()
 
     Employee_v3 badEmployee = new(1, "SoIAttemptToInputTooBigName");
     badEmployee.ToConsole();
+}
+
+UsingEmployee_v5();
+
+void UsingEmployee_v5()
+{
+    Employee_v5 employee = new(1, "Joseph", 11000);
+
+    Console.WriteLine(employee.IsPayMoreThanAverage());
 }

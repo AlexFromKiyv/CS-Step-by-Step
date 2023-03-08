@@ -11,9 +11,9 @@ namespace EmployeeApp
         private int _employeeId;
         private string? _employeeName;
         private decimal _currentPay;
-        private readonly string? _passportNumber;
+        private string? _passportNumber;
 
-        public int Id { get { return _employeeId; } set { _employeeId = value; } }
+        public int Id { set { _employeeId = value; } }
         public string? Name
         {
             get { return _employeeName; }
@@ -32,8 +32,12 @@ namespace EmployeeApp
         }
         public decimal CurrentPay { get { return _currentPay; } set { _currentPay = value; } }
 
-        public string? PassportNumber { get { return _passportNumber; } }
-
+        public string? PassportNumber 
+        { 
+            get { return _passportNumber; } 
+            private set { _passportNumber = value; }
+        }
+            
         public Employee_v4(int id, string? name, decimal currentPay, string? passportNumber)
         {
             Id = id;

@@ -84,7 +84,7 @@ void UsingEmployee_v1()
 
 Тут інкапсулюється поле _employeeName. В метод утановки додана додадкова перевірка. Інкапсуляція робить але такі ж самі методи для всатновлення та отримання стану потрібно реалізовувати для всіх полів. Тому в C# є додаткові можливості робити інкапсуляцію.
 
-# Властивості
+# Властивості.
 
 Для спрощеня процесу інкапсуляції в C# існує контейнер якій включае в собі методи  отримання(get) і встановлення(set) полів стану які називаються властивостями. 
 
@@ -188,7 +188,7 @@ The name is not set.It must be less than 17 characters
 Крім того як видно з прикладу до властивостей можна застосовувати операції наприклад інкремент. В визначенні властивостей можна використовувати лябда вирази. 
 
 
-## Конструктор з властивостями
+## Конструктор з властивостями.
 
 Перевіпка вхідних даних потрібна при створені об'єктів конструктором.
 
@@ -272,12 +272,13 @@ void UsingEmployee_v3()
 ```
 Тут головний конструктор використовує властивості які перевіряють вхідні данні. Зверніть увагу шо в межах класу також іде звертання до властивостей а не приватних даних стану.
 
-## Read-only властивості
+## Read-only та write-only властивості.
 
 Властивості можуть буди налаштовані тільки для отримання данних. 
 
 ```cs
         public string? PassportNumber { get { return _passportNumber; } }
+        public int Id { set { _employeeId = value; } }
 
         public Employee_v4(int id, string? name, decimal currentPay, string? passportNumber)
         {
@@ -289,4 +290,61 @@ void UsingEmployee_v3()
             _passportNumber = passportNumber;
         }
 ```
-Для того аби властивість була read-only опускаеться set. Але в конструкторі змінити базове поле не має змоги тоді. 
+Для того аби властивість була read-only опускаеться set. Аби властивість була write-only опускаеться get. Але в конструкторі змінити базове поле не має змоги тоді. Можна зробити також одну із частин приватною для класа.
+
+```cs
+        public string? PassportNumber 
+        { 
+            get { return _passportNumber; } 
+            private set { _passportNumber = value; }
+        }
+```
+Таким чином отримати дані можна а змінити лише в межах класу.
+
+## Статичні властивості
+
+Якшо для класу потріблі статичні дани можна створити статичні властивості та конструктори.
+
+```cs
+    internal class Employee_v5
+    {
+        private int _employeeId;
+        private string? _employeeName;
+        private decimal _currentPay;
+
+        private static decimal _averagePay;
+
+        static Employee_v5()
+        {
+            _averagePay = 10000; // It's bad style. Here must be reading from configuration.
+        }
+
+        public static decimal AveragePay 
+        {
+            get => _averagePay;
+            set => _averagePay = value;
+        }
+                
+        public Employee_v5(int employeeId, string? employeeName, decimal currentPay)
+        {
+            _employeeId = employeeId;
+            _employeeName = employeeName;
+            _currentPay = currentPay;
+        }
+
+        public bool IsPayMoreThanAverage() => _currentPay > _averagePay; 
+
+    }
+```
+```cs
+UsingEmployee_v5();
+
+void UsingEmployee_v5()
+{
+    Employee_v5 employee = new(1, "Joseph", 11000);
+
+    Console.WriteLine(employee.IsPayMoreThanAverage());
+}
+```
+
+
