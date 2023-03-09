@@ -347,7 +347,7 @@ void UsingEmployee_v5()
 }
 ```
 
-## Властивості та шаблон зіставлення (pattern mathing).
+## Шаблон зпівставлення з шаблоном властивостей.
 
 ```cs
 namespace EmployeeApp;
@@ -486,3 +486,115 @@ void UsingEmployee_v6()
 ```
 
 ## Автоматичні властивості.
+
+Іноді для областей get та set не потрібно додадкових бізнес правила. Ці означає шо можна марнувати час на створеня приватних полів і схожого коду отриманя та встановлення. Розгянемо проект CarApp. Для швидкого визначення властивостей почніть вводити prop та tab.
+```cs
+    internal class Car_v1
+    {
+        public string Manufacturer { get; set; }
+        public string Model { get; set; }
+        public int Year { get; set; }
+        public int SerialNumber { get; }
+
+        public Car_v1(string manufacturer, string model, int year)
+        {
+            Manufacturer = manufacturer;
+            Model = model;
+            Year = year;
+        }
+
+        public Car_v1() : this("Not known", "Not known", default)
+        {
+        }
+
+        public void ToConsole()
+        {
+            Console.WriteLine($"Manufacturer: {Manufacturer}");
+            Console.WriteLine($"Modle: {Model}");
+            Console.WriteLine($"Year: {Year}");
+            Console.WriteLine("\n");
+        }
+    }
+```
+```cs
+UsingCar_v1();
+void UsingCar_v1()
+{
+    Car_v1 car = new();
+    car.ToConsole();
+
+    car.Manufacturer = "VW";
+    car.Model = "Golf 7";
+    car.Year = 2018;
+    car.ToConsole();
+
+    Car_v1 yourCar = new("Mercedes", "Sprinter", 2018);
+    yourCar.ToConsole();
+}
+```
+```
+Manufacturer: Not known
+Modle: Not known
+Year: 0
+
+
+Manufacturer: VW
+Modle: Golf 7
+Year: 2018
+
+
+Manufacturer: Mercedes
+Modle: Sprinter
+Year: 2018
+```
+Таке визначення властивостей називають автоматичними властивостями і воно прекладає процес інкапсуляції на компілятор. Також можна створювати read-only властивості.
+
+Коли ви використовуєте автоматичні властивості для чисел та логічних значень за замовчуванням втсновлюється 0 та false. Інші типи в автовластивості можуть приймати значення за замовчуванням null і тут потрібно бути обережним.
+
+```cs
+    internal class Garage_v1
+    {
+        public int NumberOfCars { get; set; }
+        public Car_v1 MyCar { get; set; } // Non-nullable prop must contain a non-null when exiting constructor. 
+    }
+```
+```cs
+UsingGarage_v1();
+
+void UsingGarage_v1()
+{
+    Garage_v1 garage = new();
+
+    Console.WriteLine(garage.NumberOfCars);
+    Console.WriteLine(garage.MyCar.Model);
+}
+
+```
+Такий код викидає виняток System.NullReferenceException. попередження компілятора застерігає про таку ситуацію бо конструктор за замовчуванням призначає null. Можна замінити конструктор за замовчуванням.
+
+```cs
+    internal class Garage_v2
+    {
+        public int NumberOfCars { get; set; }
+        public Car_v1 MyCar { get; set; }
+
+        public Garage_v2()
+        {
+            NumberOfCars = default;
+            MyCar = new Car_v1();
+        }
+    }
+```
+```cs
+
+UsingGarage_v2();
+
+void UsingGarage_v2()
+{
+    Garage_v2 garage = new();
+
+    Console.WriteLine(garage.NumberOfCars);
+    Console.WriteLine(garage.MyCar.Model);
+}
+```
+

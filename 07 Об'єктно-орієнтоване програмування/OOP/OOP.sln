@@ -9,9 +9,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Statics", "Statics\Statics.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AccessModifiers", "AccessModifiers\AccessModifiers.csproj", "{E1324232-F975-40A7-9CBA-11F0126A8D58}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Encapsulation", "Encapsulation\Encapsulation.csproj", "{016B82B3-F1E6-4414-B0E0-EC4724893EA3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Encapsulation", "Encapsulation\Encapsulation.csproj", "{016B82B3-F1E6-4414-B0E0-EC4724893EA3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmployeeApp", "EmployeeApp\EmployeeApp.csproj", "{19246291-D6DE-4B21-A0B3-486D9B525172}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EmployeeApp", "EmployeeApp\EmployeeApp.csproj", "{19246291-D6DE-4B21-A0B3-486D9B525172}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarApp", "CarApp\CarApp.csproj", "{0DB4767A-15F4-452F-9C59-17FA72041EF9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{19246291-D6DE-4B21-A0B3-486D9B525172}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{19246291-D6DE-4B21-A0B3-486D9B525172}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{19246291-D6DE-4B21-A0B3-486D9B525172}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0DB4767A-15F4-452F-9C59-17FA72041EF9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0DB4767A-15F4-452F-9C59-17FA72041EF9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0DB4767A-15F4-452F-9C59-17FA72041EF9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0DB4767A-15F4-452F-9C59-17FA72041EF9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

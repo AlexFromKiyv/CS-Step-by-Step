@@ -64,7 +64,7 @@ void UsingEmployee_v5()
     Console.WriteLine(employee.IsPayMoreThanAverage());
 }
 
-UsingEmployee_v6();
+//UsingEmployee_v6();
 
 void UsingEmployee_v6()
 {
