@@ -598,3 +598,38 @@ void UsingGarage_v2()
 }
 ```
 
+Так само як приватним полям даних можна призначити значення, також можна призначити значення автовластивостям. Це дозволяє не писати додадкових призначень в конструкторах.
+
+
+```cs
+    internal class Garage_v3
+    {
+        public int NumberOfCars { get; set; } = 1;
+        public Car_v1 MyCar { get; set; } = new Car_v1();
+
+        public Garage_v3()
+        {
+        }
+
+        public Garage_v3(int numberOfCars, Car_v1 myCar)
+        {
+            NumberOfCars = numberOfCars;
+            MyCar = myCar;
+        }
+    }
+```
+```cs
+UsingGarage_v3();
+void UsingGarage_v3()
+{
+    Garage_v3 garage = new();
+
+    Console.WriteLine(garage.NumberOfCars);
+    Console.WriteLine(garage.MyCar.Model);
+}
+```
+```
+1
+Not known
+```
+Таким чином автовластивість зручний синтаксис який при необхідності можна пертворити в властивість. 

@@ -26,7 +26,7 @@ void UsingGarage_v1()
 }
 
 
-UsingGarage_v2();
+//UsingGarage_v2();
 
 void UsingGarage_v2()
 {
@@ -35,3 +35,13 @@ void UsingGarage_v2()
     Console.WriteLine(garage.NumberOfCars);
     Console.WriteLine(garage.MyCar.Model);
 }
+
+UsingGarage_v3();
+void UsingGarage_v3()
+{
+    Garage_v3 garage = new();
+
+    Console.WriteLine(garage.NumberOfCars);
+    Console.WriteLine(garage.MyCar.Model);
+}
+
