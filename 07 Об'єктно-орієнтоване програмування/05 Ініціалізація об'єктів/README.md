@@ -173,4 +173,74 @@ void UsingPoint_v2()
 
 [2,2] - Red
 ```
+Якшо клас має влативості типу інший клас теж можно використовувати ініціалізатор.
 
+```cs
+    internal class Rectangle
+    {
+        private Point topLeft =new();
+        private Point bottomRight =new();
+
+        public Point TopLeft 
+        { 
+            get { return topLeft; } 
+            set { topLeft = value; } 
+        }
+        public Point BottomRight 
+        { 
+            get { return bottomRight; } 
+            set { bottomRight = value; } 
+        }
+
+        public void ToConsole()
+        {
+            Console.WriteLine($"Rectangle [{TopLeft.X},{TopLeft.Y}],[{BottomRight.X},{BottomRight.Y}] \n");
+        }   
+
+    }
+```
+```cs
+UsingRectangle();
+void UsingRectangle()
+{
+    Rectangle rectangle = new()
+    {
+        TopLeft = new(1, 1),
+        BottomRight = new(2, 2)
+    };
+
+    rectangle.ToConsole();
+}
+```
+```
+Rectangle [1,1],[2,2]
+```
+Або можна скоротити 
+```cs
+    internal class Rectangle_v1
+    {
+        public Point TopLeft { get; set; }
+        public Point BottomRight { get; set; }
+
+        public void ToConsole()
+        {
+            Console.WriteLine($"Rectangle [{TopLeft.X},{TopLeft.Y}],[{BottomRight.X},{BottomRight.Y}] \n");
+        }
+    }
+```
+```cs
+UsingRectangle_v1();
+void UsingRectangle_v1()
+{
+    Rectangle_v1 rectangle = new()
+    {
+        TopLeft = new(2, 2),
+        BottomRight = new(3, 3)
+    };
+
+    rectangle.ToConsole();
+}
+```
+```
+Rectangle [2,2],[3,3]
+```
