@@ -40,7 +40,7 @@ void CustomConstuctorAndInizialiser()
     point.ToConsole();
 }
 
-UsingPoint_v2();
+//UsingPoint_v2();
 void UsingPoint_v2()
 {
     Point_v2 point_1 = new() { X = 1, Y = 1 };
@@ -49,4 +49,28 @@ void UsingPoint_v2()
     Point_v2 point_2 = new Point_v2(PointColorEnum.Red) { X = 2, Y = 2 };
     point_2.ToConsole();
    
+}
+
+//UsingRectangle();
+void UsingRectangle()
+{
+    Rectangle rectangle = new()
+    {
+        TopLeft = new(1, 1),
+        BottomRight = new(2, 2)
+    };
+
+    rectangle.ToConsole();
+}
+
+UsingRectangle_v1();
+void UsingRectangle_v1()
+{
+    Rectangle_v1 rectangle = new()
+    {
+        TopLeft = new(2, 2),
+        BottomRight = new(3, 3)
+    };
+
+    rectangle.ToConsole();
 }
