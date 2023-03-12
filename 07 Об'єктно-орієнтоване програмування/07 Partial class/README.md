@@ -53,5 +53,18 @@ Name:Julia
 
 Перoш за все зверніть увагу на ключеве слово partial в обох файлах класу. Вимога назва типу в класах повина співпадати і було в одному просторі імен. Таким чином клас поділено на ту частину яка білше змінюється і яка майже не змінюеться.
 
+Top-level оператори визначені в partial static класі Program. Можна створити додадковий  partial клас наприклад Program.Methods.cs.
+```cs
+    partial class Program
+    {
+        static void GetSquareToConsole(double lenght) => Console.WriteLine(lenght*lenght);
+
+    }
+```  
+Та визвати с Top-level операторів Program.cs.
+```cs
+GetSquareToConsole(10);
+```
+
 
 
