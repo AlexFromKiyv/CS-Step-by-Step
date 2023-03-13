@@ -34,11 +34,13 @@ void UsingCar()
     Console.WriteLine(car1);
 
     Console.WriteLine( car1 == car2 );
+    Console.WriteLine(ReferenceEquals(car1,car2));
 }
 ```
 ```
 Records.Car
 Records.Car
+False
 False
 ```
 Тут використовуються логіка реалізована в System.Object. Метод ToString відображає тип посилання. При порівнювані двох об'єктів порівнюються чи на одне і теж місце посилаються змінни. Аби реалізувати інши правила порівняння об'єктів треба додавати окремий код. Оскільки такі задачи досить часті і був добавлений тип records.
@@ -78,14 +80,16 @@ void UsingCarRecord_v1()
     Console.WriteLine(car1.GetType());
     Console.WriteLine(car1);
     Console.WriteLine( car1 == car2 );
+    Console.WriteLine(ReferenceEquals(car1, car2));
 }
 ```
 ```
 Records.CarRecord_v1
 CarRecord_v1 { Manufacturer = VW, Model = Polo, Color = Red }
 True
+False
 ```
-Створення record з стандартного типу властивостей схоже на створення класу. Цей класс immutable оскільки використовується init. Теж саме можна створити компактим кодом.
+Створення record з стандартного типу властивостей схоже на створення класу. Цей класс immutable оскільки використовується init. Теж саме можна створити компактим кодом. Для типів record неявно змінена реалізація Equlas, == та !=. Два записи вважаються однаковими якшо ввони одного типу і співпадають відповідні значення.
 
 
 ## Record з позиційним синтаксисом.
@@ -106,22 +110,16 @@ void UsingCarRecord_v2()
     Console.WriteLine(car1.GetType());
     Console.WriteLine(car1);
     Console.WriteLine(car1 == car2);
-
-    CarRecord_v2 car3 = new CarRecord_v2(null, null, null);
-    Console.WriteLine(car3.Manufacturer);
-    Console.WriteLine(car3.Model);
-    Console.WriteLine(car3.Color);
-
+    Console.WriteLine(car1.Equals(car2));
+    Console.WriteLine(ReferenceEquals(car1, car2));
 }
 ```
 ```
 Records.CarRecord_v2
 CarRecord_v2 { Manufacturer = VW, Model = Polo, Color = Red }
 True
-
-
-
-
+True
+False
 ```
 Використовуючи синатксис схожий на початок визначення конструктора можна створити тип record якій є immutable, тобто тільки для читання. З записами ініціалізатор не працює. При створені треба враховувати позицію. Тобто record надає головний конструктор з усіма властивостями.
 
@@ -158,6 +156,25 @@ VW Polo Red
 При створені record з позиційним синтаксисом надаеться метод Deconstruct. Положеня параметра відповідае порядку створеня типу. 
 
 ## Змінювальні(mutable) record.
+```cs
+    record CarRecord_v3
+    {
+        public string Manufacturer { get; set; }
+        public string Model { get; set; }
+        public string Color { get; set; }
+
+        public CarRecord_v3(string manufacturer, string model, string color)
+        {
+            Manufacturer = manufacturer;
+            Model = model;
+            Color = color;
+        }
+        public CarRecord_v3() : this("Not known", "Not known", "Not known")
+        {
+        }
+    }
+```
+Хоча такий синтаксис підтримуеться, тип record передбачає використання в незмінних моделях даних.
 
 
 

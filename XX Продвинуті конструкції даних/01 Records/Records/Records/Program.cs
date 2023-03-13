@@ -1,7 +1,6 @@
 ﻿
 using Records;
-using System.Security.Cryptography.X509Certificates;
-using System.Xml;
+
 //UsingCar();
 void UsingCar()
 {
@@ -17,6 +16,7 @@ void UsingCar()
     Console.WriteLine(car1);
 
     Console.WriteLine( car1 == car2 );
+    Console.WriteLine(ReferenceEquals(car1,car2));
 }
 
 //UsingCarRecord_v1();
@@ -33,9 +33,10 @@ void UsingCarRecord_v1()
     Console.WriteLine(car1.GetType());
     Console.WriteLine(car1);
     Console.WriteLine( car1 == car2 );
+    Console.WriteLine(ReferenceEquals(car1, car2));
 }
 
-//UsingCarRecord_v2();
+UsingCarRecord_v2();
 void UsingCarRecord_v2()
 {
     CarRecord_v2 car1 = new("VW", "Polo", "Red");
@@ -47,15 +48,11 @@ void UsingCarRecord_v2()
     Console.WriteLine(car1.GetType());
     Console.WriteLine(car1);
     Console.WriteLine(car1 == car2);
-
-    CarRecord_v2 car3 = new CarRecord_v2(null, null, null);
-    Console.WriteLine(car3.Manufacturer);
-    Console.WriteLine(car3.Model);
-    Console.WriteLine(car3.Color);
-
+    Console.WriteLine(car1.Equals(car2));
+    Console.WriteLine(ReferenceEquals(car1, car2));
 }
 
-UsingDeconstuct();
+//UsingDeconstuct();
 void UsingDeconstuct()
 {
     CarRecord_v1 car1 = new("VW", "Polo", "Red");
