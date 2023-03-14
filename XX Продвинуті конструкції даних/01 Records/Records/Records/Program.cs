@@ -102,7 +102,7 @@ void CopyingRecord()
 
 }
 
-UsingRecordStruct();
+//UsingRecordStruct();
 void UsingRecordStruct()
 {
     Point_v1 point1 = new(1, 1);
@@ -132,4 +132,16 @@ void UsingReadonlyRecordStruct()
     //point2.X = 3; don't work
     point2.ToConsole();
  
+}
+UsingDecontrictRecordStruct();
+
+void UsingDecontrictRecordStruct()
+{
+    Point_v1 point = new(1, 2);
+    var (x, y) = point;
+    Console.WriteLine(x.GetType());
+    Console.WriteLine(x);
+
+    point.Deconstruct(out int x1,out int y1);
+    Console.WriteLine(x1);
 }

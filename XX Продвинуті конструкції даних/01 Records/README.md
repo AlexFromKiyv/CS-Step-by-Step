@@ -313,10 +313,27 @@ void UsingReadonlyRecordStruct()
 Point_v3 { X = 1, Y = 1 }
 [2,2]
 ```
+## Deconstruct для record struct.
 
+Визначені за допомогою позиційного синтаксису record struct мають метод Decobstruct.
+```cs
+public record struct Point_v1(int X,int Y);
+```
+```cs
+UsingDecontrictRecordStruct();
+void UsingDecontrictRecordStruct()
+{
+    Point_v1 point = new(1, 2);
+    var (x, y) = point;
+    Console.WriteLine(x.GetType());
+    Console.WriteLine(x);
 
-
-
-
-
-
+    point.Deconstruct(out int x1,out int y1);
+    Console.WriteLine(x1);
+}
+```
+```
+System.Int32
+1
+1
+```
