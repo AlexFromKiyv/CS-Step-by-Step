@@ -1,11 +1,7 @@
 # Structure
 
-Додамо проект Structs.
-
-Структури добре підходять для моделювання математичних, геометричних і атомарних сутностей.
-Структури можуть реалізовувати інтерфейси але не можна успадковувати і бути основою класа. 
-Структури можуть містити поля даних та медоди роботи з ними.
-
+Структури добре підходять для моделювання математичних, геометричних і атомарних сутностей. Структури можуть реалізовувати інтерфейси але не можна успадковувати і бути основою класа. Структури можуть містити поля даних та медоди роботи з ними.
+Проект Structs
 ```cs
 UsingSimpleStructure();
 
@@ -157,7 +153,6 @@ struct Coordinates
     }
 }
 ```
-
 ## Read-only структури
 
 Структури можуть бути тіки для читання і це означає шо вони незмінні. Вони можуть бути більш продуктивними. 
@@ -223,4 +218,42 @@ struct ApartmentWithPeople
 ```
 
 Типи int,double,decimal та інші це структури.
+
+## Структури з властивостями.
+Розглянемо Point_v1.cs
+```cs
+    struct Point_v1
+    {
+        public int X { get; set; } = default;
+        public int Y { get; set; } = default;
+
+        public Point_v1(int x, int y)
+        {
+            X = x;
+            Y = y;
+        }
+         public void ToConsole() => Console.WriteLine($"[{X},{Y}]"); 
+    }
+```
+```cs
+UsingStructureWithProperties();
+void UsingStructureWithProperties()
+{
+    Point_v1 point = new(10, 10);
+    point.ToConsole();
+
+    point.X = 20;
+    point.Y = 30;
+    point.ToConsole();
+
+    Point_v1 point1 = new();
+    point1.ToConsole();
+}
+```
+```
+[10,10]
+[20,30]
+[0,0]
+```
+Цей приклад аналогічний інкапсуляції в класах. 
 

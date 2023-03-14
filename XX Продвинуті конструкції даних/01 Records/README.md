@@ -176,6 +176,143 @@ VW Polo Red
 ```
 Хоча такий синтаксис підтримуеться, тип record передбачає використання в незмінних моделях даних.
 
+## Копіювання record.
+
+Тип record це посуті клас з особовою поведінкою. Зміна такого типу вказує на місце в пам'яті і веде себе як об'єкт класу.
+
+```cs
+record CarRecord(string Manufacturer, string Model, string Color);
+```
+```cs
+AssigningRecord();
+void AssigningRecord()
+{
+    CarRecord carRecord_1 = new CarRecord("VW", "Polo", "Red");
+    CarRecord carRecord_2 = carRecord_1;
+
+    Console.WriteLine(carRecord_2);
+    Console.WriteLine(carRecord_1.Equals(carRecord_2));
+    Console.WriteLine(ReferenceEquals(carRecord_1,carRecord_2));
+}
+```
+```
+CarRecord { Manufacturer = VW, Model = Polo, Color = Red }
+True
+True
+```
+Тоб то призначення просто записує посилання на той самий об'єкт. Але є синтаксис що дозволяє робити копію.
+
+```cs
+record CarRecord(string Manufacturer, string Model, string Color);
+```
+```cs
+CopyingRecord();
+void CopyingRecord()
+{
+    CarRecord carRecord = new("VW", "Polo", "Not known");
+
+    CarRecord carRecord1 = carRecord with { Color = "White" };
+    CarRecord carRecord2 = carRecord with { Color = "Red" };
+
+
+    Console.WriteLine(carRecord1);
+    Console.WriteLine(carRecord2);
+
+    Console.WriteLine(carRecord.Equals(carRecord1));
+    Console.WriteLine(ReferenceEquals(carRecord,carRecord1));
+
+}
+```
+```
+CarRecord { Manufacturer = VW, Model = Polo, Color = White }
+CarRecord { Manufacturer = VW, Model = Polo, Color = Red }
+False
+False
+```
+Таким чином можна створювати аналогічні записи на основі існуючих встановлюючи потрідні властивості.
+
+## Record struct
+
+Record struct аналогічний типу record але має Value type. Тобто зберігає дани в стеку. Найбільша відмінність record struct від record то шо вони за замовчуваням змінні(muttable). 
+```cs
+public record struct Point_v1(int X,int Y);
+```
+```cs
+    public record struct Point_v2
+    {
+        public int X { get; set; } = default;
+        public int Y { get; set; } = default;
+
+        public Point_v2(int x, int y)
+        {
+            X = x;
+            Y = y;
+        }
+        public void ToConsole() => Console.WriteLine($"[{X},{Y}]");
+    }
+```
+```cs
+UsingRecordStruct();
+void UsingRecordStruct()
+{
+    Point_v1 point1 = new(1, 1);
+    Console.WriteLine(point1);
+    
+    point1.X = 2;
+    point1.Y = 2;
+    Console.WriteLine(point1);
+
+    Point_v2 point2 = new();
+    point2.ToConsole();
+    
+    Point_v2 point3 = point2 with { Y = 1 };
+    point3.ToConsole();
+}
+```
+```
+Point_v1 { X = 1, Y = 1 }
+Point_v1 { X = 2, Y = 2 }
+[0,0]
+[0,1]
+```
+Вирази з with працюють аналогічно record. Для того щоб структура стала незмінною(immutable) треба добавити модіфікатор readonly або змінити в властивості set на init.
+
+```cs
+public readonly record struct Point_v3(int X, int Y);
+```
+```cs
+    public record struct Point_v4
+    {
+        public int X { get; init; }
+        public int Y { get; init; }
+
+        public Point_v4(int x, int y)
+        {
+            X = x;
+            Y = y;
+        }
+        public void ToConsole() => Console.WriteLine($"[{X},{Y}]");
+    }
+```
+```cs
+UsingReadonlyRecordStruct();
+void UsingReadonlyRecordStruct()
+{
+    Point_v3 point1 = new(1, 1);
+    Console.WriteLine(point1);
+
+    //point1.X = 2; don't work
+
+
+    Point_v4 point2 = new(2,2);
+    //point2.X = 3; don't work
+    point2.ToConsole();
+}
+```
+```
+Point_v3 { X = 1, Y = 1 }
+[2,2]
+```
 
 
 

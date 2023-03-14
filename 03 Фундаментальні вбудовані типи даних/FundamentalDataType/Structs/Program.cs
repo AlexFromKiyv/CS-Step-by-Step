@@ -1,4 +1,8 @@
-﻿//UsingSimpleStructure();
+﻿//Example methods
+
+//UsingSimpleStructure();
+
+using Structs;
 
 static void UsingSimpleStructure()
 {
@@ -56,7 +60,7 @@ static void UsingReadonlyStructure()
     myApartment.Display();
 }
 
-UsingStructureWithRedonlyMemebers();
+//UsingStructureWithRedonlyMemebers();
 static void UsingStructureWithRedonlyMemebers()
 {
     ApartmentWithPeople apartment = new ApartmentWithPeople(7,48,2);
@@ -67,6 +71,24 @@ static void UsingStructureWithRedonlyMemebers()
 }
 
 
+UsingStructureWithProperties();
+void UsingStructureWithProperties()
+{
+    Point_v1 point = new(10, 10);
+    point.ToConsole();
+
+    point.X = 20;
+    point.Y = 30;
+    point.ToConsole();
+
+    Point_v1 point1 = new();
+    point1.ToConsole();
+}
+
+
+
+
+// Structures definitions
 struct Point
 {
     // coordinates 
@@ -103,7 +125,6 @@ struct Point
         Console.WriteLine($"X:{X} Y:{Y}");
     }
 }
-
 
 
 struct Coordinates
@@ -153,8 +174,6 @@ struct ApartmentWithPeople
     {
         Console.WriteLine($"Apartment :{Number} Square:{Square} Number of residents:{NumberOfResidents}" );
     }
-
-
 
 }
 
