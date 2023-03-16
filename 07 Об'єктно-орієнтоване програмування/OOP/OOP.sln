@@ -19,7 +19,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Initializers", "Initializer
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConstAndReadOnly", "ConstAndReadOnly\ConstAndReadOnly.csproj", "{EA3BAE31-6B76-4EEF-84F5-24FF770E013E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Partial", "Partial\Partial.csproj", "{B039714B-B1A4-45F8-BF25-0A203A6609DA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Partial", "Partial\Partial.csproj", "{B039714B-B1A4-45F8-BF25-0A203A6609DA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BasicInheritance", "BasicInheritance\BasicInheritance.csproj", "{60B0D92E-3EBE-4D12-9E85-8196FB47D276}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -63,6 +65,10 @@ Global
 		{B039714B-B1A4-45F8-BF25-0A203A6609DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B039714B-B1A4-45F8-BF25-0A203A6609DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B039714B-B1A4-45F8-BF25-0A203A6609DA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{60B0D92E-3EBE-4D12-9E85-8196FB47D276}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{60B0D92E-3EBE-4D12-9E85-8196FB47D276}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{60B0D92E-3EBE-4D12-9E85-8196FB47D276}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{60B0D92E-3EBE-4D12-9E85-8196FB47D276}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
