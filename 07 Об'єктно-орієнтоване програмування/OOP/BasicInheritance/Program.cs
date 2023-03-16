@@ -28,16 +28,17 @@ void ExamineInheritancedClass()
     Console.WriteLine(van.Speed);
 
     MiniVan van1 = new();
-    van1.Speed = 120;
+    van1.Speed = 100;
     Console.WriteLine(van1.Speed);
 
-    MiniVan van2 = new() { Speed = 100 };
+    MiniVan van2 = new() { Speed = 80 };
     Console.WriteLine(van2.Speed);
 
     //MiniVan van3 = new(100) //   doesn`t contain constructor
 
     Console.WriteLine(van2 is MiniVan);
     Console.WriteLine(van2 is Car);
+
 }
 
 

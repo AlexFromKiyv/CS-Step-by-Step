@@ -8,5 +8,11 @@ namespace BasicInheritance
 {
     internal class MiniVan : Car
     {
+        public void SpeedUp()
+        {
+            Speed++;
+            //_currentSpeed++; //he hasn't access
+        }
     }
+
 }
