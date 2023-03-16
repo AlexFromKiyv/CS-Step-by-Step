@@ -6,7 +6,12 @@ using System.Threading.Tasks;
 
 namespace BasicInheritance
 {
-    internal class Truck
+    sealed class Truck :Car
     {
+        public int CarryingCapacity { get; set; }
     }
+
+    //class SuperTruck : Truck { } // cannot derive from sealed type
+
+    //class MyString : String // cannot derive from sealed type
 }
