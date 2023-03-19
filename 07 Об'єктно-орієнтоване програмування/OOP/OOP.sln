@@ -21,7 +21,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConstAndReadOnly", "ConstAn
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Partial", "Partial\Partial.csproj", "{B039714B-B1A4-45F8-BF25-0A203A6609DA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BasicInheritance", "BasicInheritance\BasicInheritance.csproj", "{60B0D92E-3EBE-4D12-9E85-8196FB47D276}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BasicInheritance", "BasicInheritance\BasicInheritance.csproj", "{60B0D92E-3EBE-4D12-9E85-8196FB47D276}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DetailsOfInheritance", "DetailsOfInheritance\DetailsOfInheritance.csproj", "{61BD5A04-DC17-4F42-960D-7A67BA531F83}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -69,6 +71,10 @@ Global
 		{60B0D92E-3EBE-4D12-9E85-8196FB47D276}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{60B0D92E-3EBE-4D12-9E85-8196FB47D276}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{60B0D92E-3EBE-4D12-9E85-8196FB47D276}.Release|Any CPU.Build.0 = Release|Any CPU
+		{61BD5A04-DC17-4F42-960D-7A67BA531F83}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{61BD5A04-DC17-4F42-960D-7A67BA531F83}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{61BD5A04-DC17-4F42-960D-7A67BA531F83}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{61BD5A04-DC17-4F42-960D-7A67BA531F83}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

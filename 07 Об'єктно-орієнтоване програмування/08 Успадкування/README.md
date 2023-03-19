@@ -157,9 +157,251 @@ True
     }
 ```
 
-Коли видалити файл з поля діаграми це не вилучає його з проекту. Toolbox дозволяє добавляти типи і звязки. Для редагування класу є Class Details в якому можна додати поля і члени. 
+Коли видалити файл з поля діаграми це не вилучає його з проекту. Toolbox дозволяє добавляти типи і звязки. Для редагування класу є Class Details в якому можна додати поля і члени. Код який можна згенервати треба перевірять на помилки. Наприклад якшо ви просто добавите клас без вказання internal буде помилка.
+
+# Деталі успадкування.
+
+Проект DetailsOfInheritance.
+
+```cs
+partial class Employee
+    {
+        private int _id;
+        private string _name;
+        private float _pay;
+        private int _age;
+        private string _ssn;
+        private EmployeePayTypeEnum _payType;
 
 
+        public int Id { get => _id; set => _id = value; }
+        public string Name 
+        { 
+            get => _name;
+            set 
+            {
+                if (value.Length > 15) 
+                {
+                    Console.WriteLine("Name lenght exceeds 15 characters!");
+                }
+                else
+                {
+                    _name = value;
+                }
+            } 
+        }
+        public float Pay { get => _pay; set => _pay = value; }
+        public int Age { get => _age; set => _age = value; }
+        public string SSN { get => _ssn; set => _ssn = value; }
+        public EmployeePayTypeEnum PayType { get => _payType ; set => _payType = value ; }
+    }
+```
+```cs
+    public enum EmployeePayTypeEnum
+    {
+        Hourly,
+        Salaried,
+        Commission
+    }
+```
+```cs
+    partial class Employee
+    {
+
+        public Employee(int id, string name, float pay, int age, string sSN, EmployeePayTypeEnum payType)
+        {
+            _name = string.Empty;
+            _ssn = string.Empty;
+
+            Id = id;
+            Name = name;
+            Pay = pay;
+            Age = age;
+            SSN = sSN;
+            PayType = payType;
+        }
+
+        public Employee() 
+        {
+            _name = string.Empty;
+            _ssn = string.Empty;
+        }
+
+        public void ToConsole()
+        {
+            Console.WriteLine($"Id:{Id} Name:{Name} Age:{Age} Pay:{Pay} SSN:{SSN} PayType:{PayType} \n");
+        }
+
+        public void GiveBonus(float amount)
+        {
+            Pay = this switch
+            {
+                { PayType: EmployeePayTypeEnum.Hourly } => amount * 0.1F,
+                { PayType: EmployeePayTypeEnum.Salaried } => (amount * 40F) / 2080F,
+                { PayType: EmployeePayTypeEnum.Commission } => Pay + amount,
+                _ => Pay
+            }; 
+        }
+    }
+```
+Це базовий клас успадкування. Він визначає загальні характеристики для всіх нащадків. Підкласи додають специфічну функціональність.
+
+```cs
+    internal class Manager :Employee
+    {
+        public int StockOptions { get; set; }
+    }
+```
+```cs
+    internal class SalesPerson : Employee
+    {
+        public int SalesNumber { get; set; }
+    }
+```
+```cs
+UsingDescendants();
+void UsingDescendants()
+{
+    Manager manager1 = new();
+    Console.WriteLine(manager1);
+    manager1.ToConsole();
+
+    Manager manager2 = new()
+    {   Id = 1, 
+        Name = "Bob", 
+        Age = 35, 
+        StockOptions = 10 
+    };
+    Console.WriteLine(manager2);
+    Console.WriteLine(manager2.StockOptions);
+    manager2.ToConsole();
+
+    SalesPerson salesPerson1 = new();
+    Console.WriteLine(salesPerson1);
+    salesPerson1.ToConsole();
+
+    SalesPerson salesPerson2 = new()
+    {
+        Id = 2,
+        Name = "Inna",
+        SalesNumber = 50
+    };
+    Console.WriteLine(salesPerson2);
+    Console.WriteLine(salesPerson2.SalesNumber);
+    salesPerson2.ToConsole();
+
+    Employee employee = new(1, "John", 1000, 25, "123123123", EmployeePayTypeEnum.Hourly);
+    //Manager manager = new(2, "Jo", 1000, 25, "233123123", EmployeePayTypeEnum.Hourly);
+    //'Manager' does not contain a constructor
+
+}
+```
+```
+DetailsOfInheritance.Manager
+Id:0 Name: Age:0 Pay:0 SSN: PayType:Hourly
+
+DetailsOfInheritance.Manager
+10
+Id:1 Name:Bob Age:35 Pay:0 SSN: PayType:Hourly
+
+DetailsOfInheritance.SalesPerson
+Id:0 Name: Age:0 Pay:0 SSN: PayType:Hourly
+
+DetailsOfInheritance.SalesPerson
+50
+Id:2 Name:Inna Age:0 Pay:0 SSN: PayType:Hourly
+```
+При встановлені зв'язку "is-a" нащадки успадкували всі public члени базового класу.Але якщо взяти клас нащадок то конструктори базового класу покі недоступни. Треба зробити додадкові зусилля.
+
+## base 
+
+Похідний клас зроблений з мінімальними зусилями має тільки конструктор за замовчуванням. 
+```cs
+        public Manager_attempt1(int id, string name, float pay, int age, string sSN, EmployeePayTypeEnum payType, int stockOptions)
+        {
+            Id = id;
+            Name = name;
+            Pay = pay;
+            Age = age;
+            //SSN = sSN; //set acceser is inaccesible SSN is redonly
+            PayType = payType;
+
+            StockOptions = stockOptions;
+        }
+```
+Не варто створювати конструктори з тіми самими діями шо і в базовому. Спочатку виникає питаня шо до властивостей тільки для читанння. Крім того такий конструктор буде працювати неєффективно.
+
+В похідному класі є можливість явно визвати конструктори базового класу а не типовий. У базовому класі уже існує головний конструктор.
+```cs
+        public Employee(int id, string name, float pay, int age, string sSN, EmployeePayTypeEnum payType)
+        {
+            _name = string.Empty;
+            _ssn = string.Empty;
+
+            Id = id;
+            Name = name;
+            Pay = pay;
+            Age = age;
+            SSN = sSN;
+            PayType = payType;
+        }
+
+```
+Його можно використати для створення конструктора в похідному класі.
+```cs
+    internal class Manager_v1  :Employee
+    {
+        public int StockOptions { get; set; }
+        public Manager_v1(int id, string name, float pay, int age, string sSN, int stockOptions)
+            : base(id, name, pay, age, sSN, EmployeePayTypeEnum.Salaried)
+        {
+            StockOptions = stockOptions;
+        }
+        public Manager_v1()
+        {
+        }
+    }
+```
+При створені нового конструктора конструктор за замовчуванням перестає працювати, тому бажано додати конструктор без праметрів.
+
+Тут з допомогою base в батьківський конструктор нащадок передає дані. При визові батьківського конструктора вказана розширена поведінка конкретно до цього класу. Для іншого класу поведінка може бути іншою.
+
+```cs
+    internal class SalesPerson_v1: Employee
+    {
+        public int SalesNumber { get; set; }
+        public SalesPerson_v1(int id, string name, float pay, int age, string sSN, int salesNumber) : base(id, name, pay, age, sSN,EmployeePayTypeEnum.Commission)
+        {
+            SalesNumber = salesNumber;
+        }
+    }
+```
+```cs
+    internal class SalesPerson_v1: Employee
+    {
+        public int SalesNumber { get; set; }
+        public SalesPerson_v1(int id, string name, float pay, int age, string sSN, int salesNumber) : base(id, name, pay, age, sSN,EmployeePayTypeEnum.Commission)
+        {
+            SalesNumber = salesNumber;
+        }
+
+        public SalesPerson_v1()
+        {
+        }
+    }
+```
+```
+Id:0 Name: Age:0 Pay:0 SSN: PayType:Hourly
+
+Id:1 Name:Mikolay Age:35 Pay:1000 SSN:233234234234 PayType:Salaried
+
+Id:0 Name: Age:0 Pay:0 SSN: PayType:Hourly
+
+Id:2 Name:Mark Age:27 Pay:700 SSN:421412424 PayType:Commission
+```
+Як правило, усі підкласи повинні явно викликати відповідний конструктор базового класу.
+
+base можна використовувати коли підклас хоче отримати доступ до публічного або захищеного методу батьківського класу. Тобто його можно використовувати не тільки до конструкторів.
 
 
 
