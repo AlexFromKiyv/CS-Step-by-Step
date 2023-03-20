@@ -210,9 +210,6 @@ partial class Employee
 
         public Employee(int id, string name, float pay, int age, string sSN, EmployeePayTypeEnum payType)
         {
-            _name = string.Empty;
-            _ssn = string.Empty;
-
             Id = id;
             Name = name;
             Pay = pay;
@@ -223,8 +220,6 @@ partial class Employee
 
         public Employee() 
         {
-            _name = string.Empty;
-            _ssn = string.Empty;
         }
 
         public void ToConsole()
@@ -335,9 +330,6 @@ Id:2 Name:Inna Age:0 Pay:0 SSN: PayType:Hourly
 ```cs
         public Employee(int id, string name, float pay, int age, string sSN, EmployeePayTypeEnum payType)
         {
-            _name = string.Empty;
-            _ssn = string.Empty;
-
             Id = id;
             Name = name;
             Pay = pay;
@@ -390,6 +382,23 @@ Id:2 Name:Inna Age:0 Pay:0 SSN: PayType:Hourly
         }
     }
 ```
+```cs
+UsingBaseConstructor();
+void UsingBaseConstructor()
+{
+    Manager_v1 manager1 = new();
+    manager1.ToConsole();
+
+    Manager_v1 manager2 = new(1, "Mikolay", 1000, 35, "233234234234", 10);
+    manager2.ToConsole();
+
+    SalesPerson_v1 salesPerson1 = new();
+    salesPerson1.ToConsole();
+
+    SalesPerson_v1 salesPerson2 = new(2, "Mark", 700, 27, "421412424", 57);
+    salesPerson2.ToConsole();
+}
+```
 ```
 Id:0 Name: Age:0 Pay:0 SSN: PayType:Hourly
 
@@ -402,6 +411,130 @@ Id:2 Name:Mark Age:27 Pay:700 SSN:421412424 PayType:Commission
 Як правило, усі підкласи повинні явно викликати відповідний конструктор базового класу.
 
 base можна використовувати коли підклас хоче отримати доступ до публічного або захищеного методу батьківського класу. Тобто його можно використовувати не тільки до конструкторів.
+
+## protected
+
+Члени класу які позначені модіфікатором privat доступні тілки в класі, а public де завгодно. Коли в базовому класі члени визначені за допомогою модіфікатора protected то нащадки мають до нього доступ. Але зовні член виглядає так само як private.Тобто до protected членів є доступ в сімействі класів.  
+```cs
+    class Employee_v2
+    {
+        protected int EmpId;
+        protected string EmpName;
+        protected float EmpPay;
+        protected int EmpAge;
+        protected string? EmpSSN;
+        protected EmployeePayTypeEnum EmpPayType;
+
+        public int Id { get => EmpId; set => EmpId = value; }
+        public string Name
+        {
+            get => EmpName;
+            set
+            {
+                if (value?.Length > 15)
+                {
+                    Console.WriteLine("Name lenght exceeds 15 characters!");
+                }
+                else
+                {
+                    if (value != null)
+                    {
+                        EmpName = value;
+                    }
+                }
+            }
+        }
+        public float Pay { get => EmpPay; set => EmpPay = value; }
+        public int Age { get => EmpAge; set => EmpAge = value; }
+        public string? SSN { get => EmpSSN; private set => EmpSSN = value; }
+        public EmployeePayTypeEnum PayType { get => EmpPayType; set => EmpPayType = value; }
+
+        public Employee_v2(int id, string name, float pay, int age, string? sSN, EmployeePayTypeEnum payType):this()
+        {
+            Id = id;
+            Name = name;
+            Pay = pay;
+            Age = age;
+            SSN = sSN;
+            PayType = payType;
+        }
+
+        public Employee_v2()
+        {
+            EmpName = string.Empty;
+        }
+        public void ToConsole()
+        {
+            Console.WriteLine($"Id:{Id} Name:{Name} Age:{Age} Pay:{Pay} SSN:{SSN} PayType:{PayType} \n");
+        }
+    }
+```
+```cs
+    internal class Manager_v2 : Employee_v2
+    {
+
+        public Manager_v2()
+        {
+            EmpPayType = EmployeePayTypeEnum.Salaried;
+        }
+
+        public Manager_v2(int id, string name, float pay, int age, string? sSN) : base(id, name, pay, age, sSN, EmployeePayTypeEnum.Salaried)
+        {
+        }
+    }
+```
+```cs
+UsingProtected();
+void UsingProtected()
+{
+    Employee_v2 employee = new();
+    employee.ToConsole();
+    //employee1.EmpId = 1; // inaccesible 
+
+    Manager_v2 manager = new();
+    manager.ToConsole();
+}
+```
+```
+Id:0 Name: Age:0 Pay:0 SSN: PayType:Hourly
+
+Id:0 Name: Age:0 Pay:0 SSN: PayType:Salaried
+
+```
+Коли надаеться доступ до приватних даних батьківського класу нашадок може обійти правила встановлені в загально доступних властивостях батька і таким чином створити власні правила.
+
+Хоча модіфікатор protected може нарушити інкапсуляцію він може бути безпечним і корисним для визначені методів. При побудові ієрархії визначають набір загальних методів які можно використовуати тільки в похідних типах і до яких нема доступу зовні. 
+
+## Обмеження гілки іерархії.
+
+Іноді гілку іерархії нема сенсу продовжувати. Тоді клас запаковують.
+```cs
+        public int SalesNumber { get; set; }
+        public SalesPerson_v1(int id, string name, float pay, int age, string sSN, int salesNumber) : base(id, name, pay, age, sSN,EmployeePayTypeEnum.Commission)
+        {
+            SalesNumber = salesNumber;
+        }
+
+        public SalesPerson_v1()
+        {
+        }
+    }
+```
+```cs
+    sealed class PartSalesPerson_v1 : SalesPerson_v1
+    {
+        public PartSalesPerson_v1()
+        {
+        }
+        public PartSalesPerson_v1(int id, string name, float pay, int age, string sSN, int salesNumber) : base(id, name, pay, age, sSN, salesNumber)
+        {
+        }
+
+    }
+```
+Аби заборонити успадкування ві дкласу можна використати модіфікатор sealed.
+
+# Успадкування в record.
 
 
 

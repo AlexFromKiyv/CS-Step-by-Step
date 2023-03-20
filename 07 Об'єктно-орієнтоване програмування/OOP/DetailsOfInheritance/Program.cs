@@ -36,7 +36,7 @@ void UsingDescendants()
     //'Manager' does not contain a constructor
 }
 
-UsingBaseConstructor();
+//UsingBaseConstructor();
 void UsingBaseConstructor()
 {
     Manager_v1 manager1 = new();
@@ -50,8 +50,15 @@ void UsingBaseConstructor()
 
     SalesPerson_v1 salesPerson2 = new(2, "Mark", 700, 27, "421412424", 57);
     salesPerson2.ToConsole();
+}
 
+UsingProtected();
+void UsingProtected()
+{
+    Employee_v2 employee = new();
+    employee.ToConsole();
+    //employee1.EmpId = 1; // inaccesible 
 
-
-
+    Manager_v2 manager = new();
+    manager.ToConsole();
 }

@@ -11,9 +11,6 @@ namespace DetailsOfInheritance
 
         public Employee(int id, string name, float pay, int age, string sSN, EmployeePayTypeEnum payType)
         {
-            _name = string.Empty;
-            _ssn = string.Empty;
-
             Id = id;
             Name = name;
             Pay = pay;
@@ -24,8 +21,6 @@ namespace DetailsOfInheritance
 
         public Employee() 
         {
-            _name = string.Empty;
-            _ssn = string.Empty;
         }
 
         public void ToConsole()
