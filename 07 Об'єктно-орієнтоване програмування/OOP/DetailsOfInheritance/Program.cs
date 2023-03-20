@@ -62,3 +62,4 @@ void UsingProtected()
     Manager_v2 manager = new();
     manager.ToConsole();
 }
+
