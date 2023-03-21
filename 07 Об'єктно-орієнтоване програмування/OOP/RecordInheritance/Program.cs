@@ -1,5 +1,7 @@
 ﻿
 using RecordInheritance;
+using System.Drawing;
+using System.Reflection;
 
 //ExploreRecordInheritance();
 void ExploreRecordInheritance()
@@ -30,7 +32,7 @@ void ExplorePositionRecordInheritance()
     Console.WriteLine(car1 is MiniVan_v1);
 }
 
-ExploreEqualityRecordInheritance();
+//ExploreEqualityRecordInheritance();
 void ExploreEqualityRecordInheritance()
 {
     MotorCycle motorCycle = new("Harley", "Low Rider");
@@ -51,4 +53,18 @@ void ExploreEqualityRecordInheritance()
 
     Console.WriteLine(motorCycle.GetType());
     Console.WriteLine(motorCycle2.GetType());
+}
+
+ExploreDeconstructorRecordInheritance();
+void ExploreDeconstructorRecordInheritance()
+{
+    MotorCycle motorCycle = new FancyScooter("Harley", "Low Rider", "Red");
+
+    var (manufacturer1, model1) = motorCycle;
+    Console.WriteLine($"{manufacturer1} {model1}");
+
+    //var (manufacturer2, model2, color2 ) = motorCycle; // don't work
+    var (manufacturer2, model2, color2) = (FancyScooter)motorCycle;
+    Console.WriteLine($"{manufacturer2} {model2} {color2}");
+
 }

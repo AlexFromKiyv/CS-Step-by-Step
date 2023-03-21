@@ -587,7 +587,7 @@ MiniVan { Manufacturer = Mersedes, Model = Vito, Color = White, Seating = 3 }
 
 Успадкування працює і з позиційними типами record.
 ```cs
-record Car_v1(string Manufacturer, string Model, string Color);
+    record Car_v1(string Manufacturer, string Model, string Color);
 ```
 ```cs
     record MiniVan_v1(string Manufacturer, string Model, string Color, int Seating)
@@ -623,7 +623,7 @@ True
 Тип record дозволяє легко порівняти об'єкти без додадкового коду. Але коли відбувається порівняння тип враховується.
 ```cs
    record MotorCycle(string Manufacturer, string Model);
-    record Scooter(string Manufacturer, string Model):MotorCycle(Manufacturer,Model);
+   record Scooter(string Manufacturer, string Model):MotorCycle(Manufacturer,Model);
 
 ```
 ```cs
@@ -664,6 +664,39 @@ RecordInheritance.MotorCycle
 RecordInheritance.Scooter
 ```
 При порівнянні використовується тип при виконанні а не оголошений тип. При виконані в пам'яті може бути тип якій не такий як декларуеться а нашадок.
+
+Є особливість при роботі з методом Deconstruct.
+
+```cs
+
+    record MotorCycle(string Manufacturer, string Model);
+    
+    record Scooter(string Manufacturer, string Model):MotorCycle(Manufacturer,Model);
+
+    record FancyScooter(string Manufacturer, string Model, string FancyColor):Scooter(Manufacturer,Model);
+```
+```cs
+ExploreDeconstructorRecordInheritance();
+void ExploreDeconstructorRecordInheritance()
+{
+    MotorCycle motorCycle = new FancyScooter("Harley", "Low Rider", "Red");
+
+    var (manufacturer1, model1) = motorCycle;
+    Console.WriteLine($"{manufacturer1} {model1}");
+
+    //var (manufacturer2, model2, color2 ) = motorCycle; // don't work
+    var (manufacturer2, model2, color2) = (FancyScooter)motorCycle;
+    Console.WriteLine($"{manufacturer2} {model2} {color2}");
+
+}
+
+```
+```
+Harley Low Rider
+Harley Low Rider Red
+```
+Аби спрацював необхідний метод потрібно явно виконати перетворення.
+
 
 
 

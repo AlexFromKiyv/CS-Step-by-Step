@@ -8,5 +8,5 @@ namespace RecordInheritance
 {
     record MotorCycle(string Manufacturer, string Model);
     record Scooter(string Manufacturer, string Model):MotorCycle(Manufacturer,Model);
-
+    record FancyScooter(string Manufacturer, string Model, string FancyColor):Scooter(Manufacturer,Model);
 }
