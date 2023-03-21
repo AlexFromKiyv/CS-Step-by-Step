@@ -509,6 +509,8 @@ Id:0 Name: Age:0 Pay:0 SSN: PayType:Salaried
 
 Іноді гілку іерархії нема сенсу продовжувати. Тоді клас запаковують.
 ```cs
+    internal class SalesPerson_v1: Employee
+    {
         public int SalesNumber { get; set; }
         public SalesPerson_v1(int id, string name, float pay, int age, string sSN, int salesNumber) : base(id, name, pay, age, sSN,EmployeePayTypeEnum.Commission)
         {
@@ -518,7 +520,7 @@ Id:0 Name: Age:0 Pay:0 SSN: PayType:Salaried
         public SalesPerson_v1()
         {
         }
-    }
+    }   
 ```
 ```cs
     sealed class PartSalesPerson_v1 : SalesPerson_v1
@@ -532,12 +534,136 @@ Id:0 Name: Age:0 Pay:0 SSN: PayType:Salaried
 
     }
 ```
-Аби заборонити успадкування ві дкласу можна використати модіфікатор sealed.
+Аби заборонити успадкування від класу можна використати модіфікатор sealed.
 
-# Успадкування в record.
+## Успадкування в record.
 
+Оскільки record є особливим типом класів є можливість успадкування. Проєкт RecordInheritance.
+```cs
+    public record Car
+    {
+        public string Manufacturer { get; init; }
+        public string Model { get; init; }
+        public string Color { get; init; }
 
+        public Car(string manufacturer, string model, string color)
+        {
+            Manufacturer = manufacturer;
+            Model = model;
+            Color = color;
+        }
+    }
+```
+```cs
+    public sealed record MiniVan : Car
+    {
+        public MiniVan(string manufacturer, string model, string color,int seating ) : base(manufacturer, model, color)
+        {
+            Seating = seating;
+        }
 
+        public int Seating { get; init; }
+    }
+```
+```cs
+ExploreRecordInheritance();
+void ExploreRecordInheritance()
+{
+    MiniVan miniVan = new("Mersedes", "Vito", "White", 3);
+    Console.WriteLine(miniVan);
+
+    Console.WriteLine(miniVan is Car);
+
+    Car car = miniVan;
+    Console.WriteLine(car);
+}
+```
+```
+MiniVan { Manufacturer = Mersedes, Model = Vito, Color = White, Seating = 3 }
+True
+MiniVan { Manufacturer = Mersedes, Model = Vito, Color = White, Seating = 3 }
+```
+Хоча record специфічні класи ви не можете створювати class на базі record чи навпаки.
+
+Успадкування працює і з позиційними типами record.
+```cs
+record Car_v1(string Manufacturer, string Model, string Color);
+```
+```cs
+    record MiniVan_v1(string Manufacturer, string Model, string Color, int Seating)
+        : Car_v1(Manufacturer, Model, Color);
+```
+```cs
+ExplorePositionRecordInheritance();
+void ExplorePositionRecordInheritance()
+{
+    MiniVan_v1 miniVan = new MiniVan_v1("Mercedes", "Vito", "Black", 4);
+    Console.WriteLine(miniVan);
+
+    Car_v1 car = new MiniVan_v1("VW", "Transporter", "White", 4);
+    Console.WriteLine(car);
+    Console.WriteLine(car is Car_v1);
+    Console.WriteLine(car is MiniVan_v1);
+
+    Car_v1 car1 = car with { Manufacturer = "VW", Model = "Transporter", Color = "Black" };
+    Console.WriteLine(car1);
+    Console.WriteLine(car1 is Car_v1);
+    Console.WriteLine(car1 is MiniVan_v1);
+}
+```
+```
+MiniVan_v1 { Manufacturer = Mercedes, Model = Vito, Color = Black, Seating = 4 }
+MiniVan_v1 { Manufacturer = VW, Model = Transporter, Color = White, Seating = 4 }
+True
+True
+MiniVan_v1 { Manufacturer = VW, Model = Transporter, Color = Black, Seating = 4 }
+True
+True
+```
+Тип record дозволяє легко порівняти об'єкти без додадкового коду. Але коли відбувається порівняння тип враховується.
+```cs
+   record MotorCycle(string Manufacturer, string Model);
+    record Scooter(string Manufacturer, string Model):MotorCycle(Manufacturer,Model);
+
+```
+```cs
+ExploreEqualityRecordInheritance();
+void ExploreEqualityRecordInheritance()
+{
+    MotorCycle motorCycle = new("Harley", "Low Rider");
+    MotorCycle motorCycle1 = new("Harley", "Low Rider");
+    Console.WriteLine(motorCycle);
+    Console.WriteLine(motorCycle1);
+    Console.WriteLine(motorCycle == motorCycle1);
+
+    Scooter scooter = new("Harley", "Low Rider");
+    Console.WriteLine(motorCycle);
+    Console.WriteLine(scooter);
+    Console.WriteLine(motorCycle == scooter);
+
+    MotorCycle motorCycle2 = new Scooter("Harley", "Low Rider");
+    Console.WriteLine(motorCycle);
+    Console.WriteLine(motorCycle2);
+    Console.WriteLine(motorCycle == motorCycle2);
+
+    Console.WriteLine(motorCycle.GetType());
+    Console.WriteLine(motorCycle2.GetType());
+}
+```
+```
+MotorCycle { Manufacturer = Harley, Model = Low Rider }
+MotorCycle { Manufacturer = Harley, Model = Low Rider }
+True
+MotorCycle { Manufacturer = Harley, Model = Low Rider }
+Scooter { Manufacturer = Harley, Model = Low Rider }
+False
+MotorCycle { Manufacturer = Harley, Model = Low Rider }
+Scooter { Manufacturer = Harley, Model = Low Rider }
+False
+RecordInheritance.MotorCycle
+RecordInheritance.Scooter
+```
+При порівнянні використовується тип при виконанні а не оголошений тип. При виконані в пам'яті може бути тип якій не такий як декларуеться а нашадок.
 
 
 
