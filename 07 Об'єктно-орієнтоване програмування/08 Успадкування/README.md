@@ -536,74 +536,6 @@ Id:0 Name: Age:0 Pay:0 SSN: PayType:Salaried
 ```
 Аби заборонити успадкування від класу можна використати модіфікатор sealed.
 
-# Агрегація або Containment/Delegation
-
-Для того аби повторно використовувати код можна використовувати не тільки успадкування у вигляді відношення "is a". 
-
-```cs
-    internal class BenefitPackage
-    {
-        // other memebers
-        public double ComputePayDeducation()
-        {
-            return 125.0;
-        }
-    }
-```
-```cs
-    internal class Employee_v3
-    {
-        protected int EmpId;
-        protected string EmpName;
-        protected float EmpPay;
-        protected BenefitPackage EmpBenefits = new BenefitPackage();
-
-        public int Id { get => EmpId; set => EmpId = value; }
-        public string Name { get => EmpName ; set => EmpName = value; }
-        public float Pay { get => EmpPay; set => EmpPay = value; }
-        public BenefitPackage Benefits { get => EmpBenefits; set => EmpBenefits =value; }
-
-        public Employee_v3(int id, string name, float pay) : this()
-        {
-            Id = id;
-            Name = name;
-            Pay = pay;
-        }
-        public Employee_v3()
-        {
-            EmpName = string.Empty;
-        }
-
-        public double GetBenefitCost() => EmpBenefits.ComputePayDeducation();
-    }
-```
-```cs
-    internal class Manager_v3 : Employee_v3
-    {
-        public Manager_v3()
-        {
-        }
-        public Manager_v3(int id, string name, float pay) : base(id, name, pay)
-        {
-        }
-    }
-```
-```cs
-ExploreAgregation();
-void ExploreAgregation()
-{
-    Manager_v3 manager = new(1, "bob", 1000);
-    Console.WriteLine(manager.GetBenefitCost());
-}
-
-```
-```
-125
-```
-Коли відношеня "is a" не доречне можна створити окремий клас з необхідною функціональностю. До головного проектуємого класу додається об'єкт цого допоміжного класу. Тобто клас має в собі об'єкт, тому відношення називається "has a". Для зовнішнього світу цій об'єкт делегує свою функціональність у вигляді публічних медодів. Таким чином зовнішній світ не знає як додається функціональність прото використовує її.
-
-
-
 ## Успадкування в record.
 
 Оскільки record є особливим типом класів є можливість успадкування. Проєкт RecordInheritance.
@@ -765,6 +697,120 @@ Harley Low Rider Red
 ```
 Аби спрацював необхідний метод потрібно явно виконати перетворення.
 
+# Агрегація або Containment/Delegation
+
+Для того аби повторно використовувати код можна використовувати не тільки успадкування у вигляді відношення "is a". Проект DetailsOfInheritance
+
+```cs
+    internal class BenefitPackage
+    {
+        // other memebers
+        public double ComputePayDeducation()
+        {
+            return 125.0;
+        }
+    }
+```
+```cs
+    internal class Employee_v3
+    {
+        protected int EmpId;
+        protected string EmpName;
+        protected float EmpPay;
+        protected BenefitPackage EmpBenefits = new BenefitPackage();
+
+        public int Id { get => EmpId; set => EmpId = value; }
+        public string Name { get => EmpName ; set => EmpName = value; }
+        public float Pay { get => EmpPay; set => EmpPay = value; }
+        public BenefitPackage Benefits { get => EmpBenefits; set => EmpBenefits =value; }
+
+        public Employee_v3(int id, string name, float pay) : this()
+        {
+            Id = id;
+            Name = name;
+            Pay = pay;
+        }
+        public Employee_v3()
+        {
+            EmpName = string.Empty;
+        }
+
+        public double GetBenefitCost() => EmpBenefits.ComputePayDeducation();
+    }
+```
+```cs
+    internal class Manager_v3 : Employee_v3
+    {
+        public Manager_v3()
+        {
+        }
+        public Manager_v3(int id, string name, float pay) : base(id, name, pay)
+        {
+        }
+    }
+```
+```cs
+ExploreAgregation();
+void ExploreAgregation()
+{
+    Manager_v3 manager = new(1, "bob", 1000);
+    Console.WriteLine(manager.GetBenefitCost());
+}
+
+```
+```
+125
+```
+Коли відношеня "is a" не доречне можна створити окремий клас з необхідною функціональностю. До головного проектуємого класу додається об'єкт цого допоміжного класу. Тобто клас має в собі об'єкт, тому відношення називається "has a". Для зовнішнього світу цій об'єкт делегує свою функціональність у вигляді публічних медодів. Таким чином зовнішній світ не знає як додається функціональність прото використовує її.
+
+
+## Вкладені типи.
+
+В межах класу або структури можна визначити інший тип (enum, class, interface, struct, or delegate). 
+Невкладені типи які знаходяться в namespace не можуть бути визначені як private.Вкладений тип може бути private і тому є повний контроль доступу.Привтний тип може мати доступ до приватних членів класу. Вкладений тип є членом класу яким можна маніпулювати як іншими членами(fields, properties, methods, and events). Ці типи часто використовуються як допоміжний клас для внутрішноього застосування в межах класу і не призначений для зовнішнього використання. Але можна зробити використання зовні.
+```cs
+    class Employee_v4
+    {
+        protected int EmpId;
+        protected string EmpName;
+        protected float EmpPay;
+        public int Id { get => EmpId; set => EmpId = value; }
+        public string Name { get => EmpName; set => EmpName = value; }
+        public float Pay { get => EmpPay; set => EmpPay = value; }
+
+        public class BenefitPackage
+        {
+            public enum BenefitPackageLevel
+            {
+                Standard, Gold, Platinum
+            }
+        }
+
+        public Employee_v4(int id, string name, float pay) : this()
+        {
+            Id = id;
+            Name = name;
+            Pay = pay;
+        }
+        public Employee_v4()
+        {
+            EmpName = string.Empty;
+        }
+
+    }
+```
+```cs
+UsingNestedClass();
+void UsingNestedClass()
+{
+    Employee_v4.BenefitPackage.BenefitPackageLevel benefitPackageLevel = Employee_v4.BenefitPackage.BenefitPackageLevel.Gold;
+    Console.WriteLine(benefitPackageLevel);
+}
+```
+```
+Gold
+```
+Таким чином будується тісний звязок між повязаними між собою класами і enum.
 
 
 

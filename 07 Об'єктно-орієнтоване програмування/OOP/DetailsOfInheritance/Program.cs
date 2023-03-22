@@ -65,10 +65,16 @@ void UsingProtected()
 
 
 
-ExploreAgregation();
+//ExploreAgregation();
 void ExploreAgregation()
 {
     Manager_v3 manager = new(1, "bob", 1000);
     Console.WriteLine(manager.GetBenefitCost());
 }
 
+UsingNestedClass();
+void UsingNestedClass()
+{
+    Employee_v4.BenefitPackage.BenefitPackageLevel benefitPackageLevel = Employee_v4.BenefitPackage.BenefitPackageLevel.Gold;
+    Console.WriteLine(benefitPackageLevel);
+}
