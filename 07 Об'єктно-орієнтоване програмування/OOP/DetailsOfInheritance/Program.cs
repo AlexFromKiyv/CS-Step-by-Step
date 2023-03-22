@@ -52,7 +52,7 @@ void UsingBaseConstructor()
     salesPerson2.ToConsole();
 }
 
-UsingProtected();
+//UsingProtected();
 void UsingProtected()
 {
     Employee_v2 employee = new();
@@ -61,5 +61,14 @@ void UsingProtected()
 
     Manager_v2 manager = new();
     manager.ToConsole();
+}
+
+
+
+ExploreAgregation();
+void ExploreAgregation()
+{
+    Manager_v3 manager = new(1, "bob", 1000);
+    Console.WriteLine(manager.GetBenefitCost());
 }
 

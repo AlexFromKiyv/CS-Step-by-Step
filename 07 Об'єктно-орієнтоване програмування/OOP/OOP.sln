@@ -25,7 +25,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BasicInheritance", "BasicIn
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DetailsOfInheritance", "DetailsOfInheritance\DetailsOfInheritance.csproj", "{61BD5A04-DC17-4F42-960D-7A67BA531F83}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RecordInheritance", "RecordInheritance\RecordInheritance.csproj", "{00576B9E-EB90-4487-96F9-CDB08C4E9F94}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RecordInheritance", "RecordInheritance\RecordInheritance.csproj", "{00576B9E-EB90-4487-96F9-CDB08C4E9F94}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
