@@ -291,10 +291,152 @@ void ExploreAbstractClass()
 1
  Pay:1000
 ```
-Створити об'єкт абстрактного класу не можна і не потрібно оскільки потрібен більш конкретний тип.
+Створити об'єкт абстрактного класу не можна і не потрібно оскільки потрібен більш конкретний тип. Абстракний клас це допоміжний клас а не конкретна сутність. В абстракному класі може бути багато конструкторів які будуть визиватися з нашадків.
 
 
+## Поліморфний інтерфейс.
 
+Розглянемо наступний дізайн класів. Проект PolymorphicInterface
+
+```cs
+namespace PolymorphicInterface
+{
+    abstract class Shape_v1
+    {
+        public string Name { get; set; }
+        protected Shape_v1(string name = "No name")
+        {
+            Name = name;
+        }
+        public virtual void Draw()
+        {
+            Console.WriteLine("Work method Shape.Draw()");
+        }
+        public virtual void  ToConsole() => Console.WriteLine($"\n {Name}");
+    }
+
+    class Circle_v1 : Shape_v1
+    {
+        public Circle_v1(string name = "No name") : base(name)
+        {
+        }
+    }
+
+    class Hexagon_v1 : Shape_v1
+    {
+        public Hexagon_v1(string name = "No name") : base(name)
+        {
+        }
+        public override void Draw()
+        {
+            Console.WriteLine($"Hexogen - {Name}");
+        }
+    }
+}
+```
+```cs
+ExploreAbstractClassMemeber();
+void ExploreAbstractClassMemeber()
+{
+    Circle_v1 circle_1 = new();
+    circle_1.ToConsole();
+    circle_1.Draw();
+
+
+    Circle_v1 circle_2 = new("Ball");
+    circle_2.ToConsole();
+    circle_2.Draw();
+
+    Hexagon_v1 hexagon_1 = new("Max");
+    hexagon_1.ToConsole();
+    hexagon_1.Draw();
+}
+```
+```
+
+ No name
+Work method Shape.Draw()
+
+ Ball
+Work method Shape.Draw()
+
+ Max
+Hexogen - Max
+```
+В прикладі базовий клас занадто загальний і тому він абстрактний. Цім ви кажете шо не треба об'єктів цього класу. Конструктор визначені як protect тому його можна викликати лише в похідному класі. Метод Draw визначено як віртуальний тому нащадкі можуть його реалізовувати. Один нашадок не перевизначає метод і використовує той шо в базовому класі. Iнший заміняє реалізацію. Нашадок з власною реалізацію набагато ясніший чим загальна реалізація. Перевизначення віртуальних методів не обов'язковє.
+Тож аби примусити нашадків бути більш чіткишими і виразними треба зробити метод abstract. Коли метод стає abstract це означає шо немає реалізації за замовчуівнням і нашадкі забов'язані мати власну. 
+Абстрактні методи можуть бути визначені тільки в абстрактних класах. Методи позначений abstract слугує тіки для вказування. Це вказуваня для нащадків що ви повині реалізувати цей метод щоб відповідати рисам сімейства класів. 
+```cs
+namespace PolymorphicInterface
+{
+    abstract class Shape_v2
+    {
+        public string Name { get; set; }
+        protected Shape_v2(string name = "No name")
+        {
+            Name = name;
+        }
+        public abstract void Draw();
+    }
+
+    class Circle_v2 : Shape_v2
+    {
+        public Circle_v2(string name = "No name") : base(name)
+        {
+        }
+
+        public override void Draw() => Console.WriteLine($"Circle({Name})");
+    }
+
+    class Hexagon_v2 : Shape_v2
+    {
+        public Hexagon_v2(string name = "No name") : base(name)
+        {
+        }
+
+        public override void Draw()
+        {
+            Console.WriteLine($"This is Hexogen -> {Name}");
+        }
+    }
+}
+```
+```cs
+ExploreAbstractMethods();
+void ExploreAbstractMethods()
+{
+
+    Shape_v2[] shapes = {
+        new Circle_v2(),
+        new Circle_v2("Ball"),
+        new Hexagon_v2(),
+        new Hexagon_v2("Max")
+        };
+
+    foreach(Shape_v2 shape in shapes)
+    {
+        Console.WriteLine(shape.GetType());
+        shape.Draw();
+    }
+}
+```
+```
+PolymorphicInterface.Circle_v2
+Circle(No name)
+
+PolymorphicInterface.Circle_v2
+Circle(Ball)
+
+PolymorphicInterface.Hexagon_v2
+This is Hexogen -> No name
+
+PolymorphicInterface.Hexagon_v2
+This is Hexogen -> Max
+
+```
+Визов shape.Draw() найкрашим образом демонструю поліморфний інтерфейс. Хоча не можна створити об'єкт базового класу можна зберігати посилання на об'єкти похідного класу. Всі об'єкти шо походять від астрактоного класу підтримують той самий поліморфний інтерфейс, тому в них е реалізований абстрактний метод Draw. Коли переглядається масив тоді викликається необхідний метод. Шо важливо при появі інших нащадків цю частину коду не треба буде змінювати.
+
+Абстрактний клас може визначити будь-яку кількість абстрактних членів. Абстрактний член користний коли вам не достатьно базової реалізації і кожен нащадок повинен створити свою реалізацію. Таким чином нав'язуеться поліморфний інтерфейс для кожного нащадка. Нашадок має реалізувати абстрактні члени враховуючи свої особливості. Простіше кажучи, поліморфний інтерфейс посилається на віртуальні і абстратні методи. Це дозволяє створювати гнучки і розширювані додатки. 
 
 
 
