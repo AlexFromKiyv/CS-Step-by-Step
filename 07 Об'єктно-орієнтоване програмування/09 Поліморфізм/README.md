@@ -438,10 +438,90 @@ This is Hexogen -> Max
 
 Абстрактний клас може визначити будь-яку кількість абстрактних членів. Абстрактний член користний коли вам не достатьно базової реалізації і кожен нащадок повинен створити свою реалізацію. Таким чином нав'язуеться поліморфний інтерфейс для кожного нащадка. Нашадок має реалізувати абстрактні члени враховуючи свої особливості. Простіше кажучи, поліморфний інтерфейс посилається на віртуальні і абстратні методи. Це дозволяє створювати гнучки і розширювані додатки. 
 
+## new (shadowing)
 
+Якщо батьківський клас має реалізацію яка не підходить похідному класу але використовується однакове визначення тоді нащадок може визначити повністью свою нову реалізацію. Це буває корисне коли не достатньо прав доступу до батьківського класу. Похідний клас як би затьмарює батьківський.
+```cs
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Channels;
+using System.Threading.Tasks;
 
+namespace PolymorphicInterface
+{
+    abstract class Shape_v3
+    {
+        protected string _name;
+        public string Name 
+        { 
+            get => _name;
+            set 
+            {
+                if(value.Length < 10)
+                {
+                    _name = value;
+                }
+                else
+                {
+                    _name = "";
+                } 
+                
+            } 
+        }
+        protected Shape_v3(string name = ""):this() 
+        {
+            Name = name;
+        }
+        protected Shape_v3()
+        {
+            _name = "";
+        }
 
+        public abstract void Draw();
+    }
 
+    class Circle_v3 : Shape_v3
+    {
+        public Circle_v3(string name = "") : base(name)
+        {
+        }
 
+        public override void Draw() => Console.WriteLine($"Circle({Name})");
+    }
 
+    class ThreeDCircle_v3 : Circle_v3
+    {
+        public new string Name { get; set; }
+        public ThreeDCircle_v3(string name)
+        {
+            Name = name;
+        }
+        public new void Draw() => Console.WriteLine($"Drawing 3D Circle -> {Name}");
+    }
+
+}
+```
+```cs
+ExploreShadowing();
+void ExploreShadowing()
+{
+    Circle_v3 circle_1 = new("VeriBiGThreeDCircle");
+    circle_1.Draw();
+
+    ThreeDCircle_v3 circle_2 = new("VeriBiGThreeDCircle");
+    circle_2.Draw();
+    ((Circle_v3)circle_2).Draw();
+}
+```
+```
+Circle()
+Drawing 3D Circle -> VeriBiGThreeDCircle
+Circle()
+```
+Припустимо базові класи знаходяться в бібліотеці і якісь обмеженя вам не піжходять. Або ви отримали від коллег клас якій має туж назву але непотрібну реалізацію. 
+Якщо є можливість можна перевизначити метод. Але якшо немає доступу можна визначити медод ключовим словом new. Це означає навмисне ігнорування батьківської версії.(реально це можливо якщо зовнішні реалізації комфліктують з вашими). 
+new можна застосовувати до (field, constant, static member, or property).
+Але в прикладі показано що можна зробити явне перетвореня до батьківського типу і визвати батьківський метод.
 

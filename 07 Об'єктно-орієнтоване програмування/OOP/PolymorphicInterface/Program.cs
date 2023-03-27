@@ -17,7 +17,7 @@ void ExploreAbstractClassMemebers()
     hexagon_1.Draw();
 }
 
-ExploreAbstractMethods();
+//ExploreAbstractMethods();
 void ExploreAbstractMethods()
 {
 
@@ -33,4 +33,15 @@ void ExploreAbstractMethods()
         Console.WriteLine(shape.GetType());
         shape.Draw();
     }
+}
+
+ExploreShadowing();
+void ExploreShadowing()
+{
+    Circle_v3 circle_1 = new("VeriBiGThreeDCircle");
+    circle_1.Draw();
+
+    ThreeDCircle_v3 circle_2 = new("VeriBiGThreeDCircle");
+    circle_2.Draw();
+    ((Circle_v3)circle_2).Draw();
 }
