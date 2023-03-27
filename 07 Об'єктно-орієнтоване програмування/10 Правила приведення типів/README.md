@@ -59,8 +59,8 @@ namespace ClassCastingRules
 Основним базовим класом є System.Оbject. Тому в ірархії любого класу є цей клас. 
 Інакше кажучи любий клас "is an" Object. Враховуючи це єкземпляр любого класу можна зберігати в змінній цього типу. Тип також можна зберігати в типі попередників.
 ```cs
-ExploreHierarchy();
-void ExploreHierarchy()
+ExploreImplicideCasting();
+void ExploreImplicideCasting()
 {
     object obj = new Manager(1, "Max", 1000, 200);
     Console.WriteLine(obj);
