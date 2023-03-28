@@ -42,7 +42,7 @@ void UsingImplicideCasting()
     }
 }
 
-UsingExplicitCasting();
+//UsingExplicitCasting();
 void UsingExplicitCasting()
 {
     object obj = new Manager(1, "Max", 1000, 200);
@@ -56,5 +56,60 @@ void UsingExplicitCasting()
         Console.WriteLine($"{employee.Name} was promoted! Pay: {employee.Pay}");
         Console.WriteLine(employee.GetType());
         Console.WriteLine();
+    }
+}
+
+//ExploreExplicitCasting();
+void ExploreExplicitCasting()
+{
+    object meneger = new Manager(1, "Bill", 1000, 100);
+
+    Hexagon hexagon = (Hexagon)meneger;
+
+    Console.WriteLine(hexagon.Name);
+}
+
+//ExploreExplicitCastingWithTry();
+void ExploreExplicitCastingWithTry()
+{
+    object meneger = new Manager(1, "Bill", 1000, 100);
+
+    try
+    {
+        Hexagon hexagon = (Hexagon)meneger;
+        Console.WriteLine(hexagon.Name);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+}
+
+UsingKeywordAs();
+void UsingKeywordAs()
+{
+    object[] things = new object[4];
+    things[0] = "Hi girl";
+    things[1] = new Manager(1, "Bill", 1000, 100);
+    things[2] = new Hexagon("Hex");
+    things[3] = new PartSalesPerson(3, "Jill", 500, 20);
+
+    foreach( object thing in things)
+    {
+        Employee? employee = thing as Employee;
+        if (employee != null )
+        {
+            Console.WriteLine(employee.Name);
+        }
+    }
+    Console.WriteLine();
+
+    foreach (object thing in things)
+    {
+        Shape? shape = thing as Shape;
+        if (shape != null)
+        {
+            Console.WriteLine(shape.Name);
+        }
     }
 }

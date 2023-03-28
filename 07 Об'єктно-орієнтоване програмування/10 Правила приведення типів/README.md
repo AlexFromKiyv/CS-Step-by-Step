@@ -161,6 +161,116 @@ Max was promoted! Pay: 1001
 ClassCastingRules.Manager
 ```
 Тут явним чином відбувається приведеня до типу який можна предети в метод.
+ 
 
 ## as
+
+Треба пам'ятати шо явне приведеня оцінюється під час виконанння а не компіляції.
+
+```cs
+namespace ClassCastingRules
+{
+    abstract class Shape
+    {
+        public string? Name { get; set; }
+        protected Shape(string? name = "No name")
+        {
+            Name = name;
+        }
+        public abstract void Draw();
+    }
+
+    class Hexagon : Shape
+    {
+        public Hexagon(string? name = "No name") : base(name)
+        {
+        }
+        public override void Draw()
+        {
+            Console.WriteLine($"\n Hexagone {Name}"); 
+        }
+    }
+}
+```
+```cs
+ExploreExplicitCasting();
+void ExploreExplicitCasting()
+{
+    object meneger = new Manager(1, "Bill", 1000, 100);
+
+    Hexagon hexagon = (Hexagon)meneger;
+
+    Console.WriteLine(hexagon.Name);
+}
+```
+```
+Unhandled exception. System.InvalidCastException: Unable to cast object of type 'ClassCastingRules.Manager' to type 'ClassCastingRules.Hexagon'.
+```
+Хоча такий код не має сенусу, компілятор не показує помилку а при виконані виникає виняток. У таких випадках краще використовувати конструкцію try і catch.
+
+```cs
+ExploreExplicitCastingWithTry();
+void ExploreExplicitCastingWithTry()
+{
+    object meneger = new Manager(1, "Bill", 1000, 100);
+
+    try
+    {
+        Hexagon hexagon = (Hexagon)meneger;
+        Console.WriteLine(hexagon.Name);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+}
+```
+```
+Unable to cast object of type 'ClassCastingRules.Manager' to type 'ClassCastingRules.Hexagon'.
+```
+Така ситуація надумана і рідко виникає. Але припустимо ми маємо обробити масив System.Object. 
+```cs
+UsingKeywordAs();
+void UsingKeywordAs()
+{
+    object[] things = new object[4];
+    things[0] = "Hi girl";
+    things[1] = new Manager(1, "Bill", 1000, 100);
+    things[2] = new Hexagon("Hex");
+    things[3] = new PartSalesPerson(3, "Jill", 500, 20);
+
+    foreach( object thing in things)
+    {
+        Employee? employee = thing as Employee;
+        if (employee != null )
+        {
+            Console.WriteLine(employee.Name);
+        }
+    }
+    Console.WriteLine();
+
+    foreach (object thing in things)
+    {
+        Shape? shape = thing as Shape;
+        if (shape != null)
+        {
+            Console.WriteLine(shape.Name);
+        }
+    }
+}
+```
+```
+Bill
+Jill
+
+Hex
+```
+Є можливість швидко визначити чи данний елемент сумісний з типом.
+Для цього використовується ключове слово as. Якшо не сумісний повертаеться null.
+
+# is
+
+
+
+
 
