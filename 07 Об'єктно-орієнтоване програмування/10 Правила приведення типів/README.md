@@ -161,12 +161,9 @@ Max was promoted! Pay: 1001
 ClassCastingRules.Manager
 ```
 Тут явним чином відбувається приведеня до типу який можна предети в метод.
- 
+Треба пам'ятати шо явне приведеня оцінюється під час виконанння а не компіляції. 
 
 ## as
-
-Треба пам'ятати шо явне приведеня оцінюється під час виконанння а не компіляції.
-
 ```cs
 namespace ClassCastingRules
 {
@@ -269,8 +266,168 @@ Hex
 Для цього використовується ключове слово as. Якшо не сумісний повертаеться null.
 
 # is
+```cs
+UsingKeywordIs();
+void UsingKeywordIs()
+{
+
+    SalesPerson salesPerson_1 = new(1, "Max", 800, 60);
+    EmployeeDetails(salesPerson_1);
+
+    Manager manager = new(2, "Bill", 1100, 100);
+    EmployeeDetails(manager);
+
+    Employee employee = new PartSalesPerson(3, "Julia", 300, 10);
+    EmployeeDetails(employee);
 
 
+    static void EmployeeDetails(Employee employee)
+    {
+        string details = string.Empty;
 
+        if (employee is SalesPerson)
+        {
+            details = "  Number of sales: " + ((SalesPerson)employee).SalesNumber.ToString();
+        }
+
+        if (employee is Manager)
+        {
+            details = "  Stock options: " + ((Manager)employee).StockOptions.ToString();
+        }
+
+        Console.WriteLine(employee.Name + details);
+
+    }
+}
+```
+```
+Max  Number of sales: 60
+Bill  Stock options: 100
+Julia  Number of sales: 10
+
+```
+
+Ключеве слова is дозволяю визначити сумісність типа. Якщо тип не сумісний конструкція повертає false. В прикладі, під час виконання, перевіряється сумісність отриманого об'єкта в пам'яті і конкретного типа. Якшо так то виконується явне приведення і отримується доступ до спеціалізованих членів класу. 
+Таку конструкція не потрібно огортати try ... catch, тому що приведення виконується безпечно.
+
+Також якшо типи сумісні можна виконати призначення змінній.
+```cs
+
+UsingKeywordIsWithAssign();
+void UsingKeywordIsWithAssign()
+{
+
+    SalesPerson salesPerson_1 = new(1, "Max", 800, 60);
+    EmployeeDetails(salesPerson_1);
+
+    Manager manager = new(2, "Bill", 1100, 100);
+    EmployeeDetails(manager);
+
+    Employee employee = new PartSalesPerson(3, "Julia", 300, 10);
+    EmployeeDetails(employee);
+
+
+    static void EmployeeDetails(Employee employee)
+    {
+        string details = string.Empty;
+
+        if (employee is SalesPerson saleser)
+        {
+            details = "  Number of sales: " + saleser.SalesNumber.ToString();
+        }
+
+        if (employee is Manager _manager)
+        {
+            details = "  Stock options: " + _manager.StockOptions.ToString();
+        }
+
+        Console.WriteLine(employee.Name + details);
+
+    }
+}
+``` 
+Це працює бистріше оскільки при перевірці всерівно виконується приведеня в тип і таким чином в цьому варіанті не треба робити приведення другий раз.
+
+Крім того можна створювати конструкції з not.
+
+```cs
+UsingKeywordIsNot();
+void UsingKeywordIsNot()
+{
+    object[] things = new object[4];
+    things[0] = "Hi girl";
+    things[1] = new Manager(1, "Bill", 1000, 100);
+    things[2] = new Hexagon("Hex");
+    things[3] = new PartSalesPerson(3, "Jill", 500, 20);
+
+    foreach (object thing in things)
+    {
+        if (thing is not Employee)
+        {
+            Console.WriteLine("No know object");
+        }
+        else
+        {
+            Console.WriteLine(((Employee)thing).Id);
+        }
+    }
+}
+```
+```
+No know object
+1
+No know object
+3
+```
+
+## Співставленя типів в switch
+
+Для switch інує шаблон зіставлнення(pattern matching) який використовувує співставлення типів.
+```cs
+
+UsingSwithWithPatternMatching();
+
+void UsingSwithWithPatternMatching()
+{
+
+    SalesPerson salesPerson_1 = new(1, "Max", 800, 60);
+    EmployeeDetails(salesPerson_1);
+
+    Manager manager = new(2, "Bill", 1100, 100);
+    EmployeeDetails(manager);
+
+    Employee employee = new PartSalesPerson(3, "Julia", 300, 10);
+    EmployeeDetails(employee);
+
+
+    static void EmployeeDetails(Employee employee)
+    {
+        string details = string.Empty;
+
+        switch (employee)
+        {
+            case Manager manager:
+                details = "  Stock options: " + manager.StockOptions.ToString();
+                break;
+            case PartSalesPerson _:
+                details = " No promote.";
+                break;
+            case SalesPerson salesPerson when salesPerson.SalesNumber >30 :
+                details = "  Number of sales: " + salesPerson.SalesNumber.ToString();
+                break;
+            default:
+                break;
+        }
+        Console.WriteLine(employee.Name + details);
+    }
+}
+```
+```
+Max  Number of sales: 60
+Bill  Stock options: 100
+Julia No promote.
+```
+При використанні when приведений об'єкт доступний для використання і можна встановити додадкові обмеження.
+Як показоно в прикладі відкидання(_) також можна використовувати. Зверніть увагу В цьому прикладі важливо послідовність case. 
 
 
