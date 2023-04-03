@@ -31,7 +31,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Polymorphism", "Polymorphis
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PolymorphicInterface", "PolymorphicInterface\PolymorphicInterface.csproj", "{A1A63CD6-8E1C-420B-8CDB-7CA845C50EEF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassCastingRules", "ClassCastingRules\ClassCastingRules.csproj", "{97CCE809-AC8B-4E72-9254-CD287EE97971}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClassCastingRules", "ClassCastingRules\ClassCastingRules.csproj", "{97CCE809-AC8B-4E72-9254-CD287EE97971}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SuperParentClass", "SuperParentClass\SuperParentClass.csproj", "{999A98D2-741C-4BD3-8F5E-9E02928BF471}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -99,6 +101,10 @@ Global
 		{97CCE809-AC8B-4E72-9254-CD287EE97971}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{97CCE809-AC8B-4E72-9254-CD287EE97971}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{97CCE809-AC8B-4E72-9254-CD287EE97971}.Release|Any CPU.Build.0 = Release|Any CPU
+		{999A98D2-741C-4BD3-8F5E-9E02928BF471}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{999A98D2-741C-4BD3-8F5E-9E02928BF471}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{999A98D2-741C-4BD3-8F5E-9E02928BF471}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{999A98D2-741C-4BD3-8F5E-9E02928BF471}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
