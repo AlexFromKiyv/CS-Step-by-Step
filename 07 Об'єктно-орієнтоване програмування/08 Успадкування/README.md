@@ -699,7 +699,7 @@ Harley Low Rider Red
 
 # Агрегація або Containment/Delegation
 
-Для того аби повторно використовувати код можна використовувати не тільки успадкування у вигляді відношення "is a". Проект DetailsOfInheritance
+Для того аби повторно використовувати код можна використовувати не тільки успадкування у вигляді відношення "is a". Можна побудувати відношення "has a". Проект DetailsOfInheritance
 
 ```cs
     internal class BenefitPackage
