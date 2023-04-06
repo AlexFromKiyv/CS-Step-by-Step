@@ -39,10 +39,7 @@ namespace BaseClassExeption
                     _carIsDead = true;
                     throw new Exception($"{Name} has overheated!");
                 }
-                else
-                {
-                    Console.WriteLine($"Current speed {Name}:{CurrentSpeed}");
-                }
+                Console.WriteLine($"Current speed {Name}:{CurrentSpeed}");
             }
         }
     }
