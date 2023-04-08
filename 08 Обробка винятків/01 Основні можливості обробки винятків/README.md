@@ -182,6 +182,263 @@ Attention! Problem occured!
 
 Як ви бачите програма не виваюється з помилкою. Коли виникають винятки можливи ситуації коли программа продовжує працювати але нге так єфективно.(наприклад немає доступу до даних). 
 
+## Властивості об'єкта Exception детально.
+
+### TargetSite
+
+```cs
+ExplorationExceptionMemberTargetSite();
+void ExplorationExceptionMemberTargetSite()
+{
+    Car_v2 car = new("Nissan Leaf", 35);
+
+    try
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            car.Accelerate(20);
+        }
+
+    }
+    catch (Exception e)
+    {
+        Console.WriteLine();
+
+        string stringForShow = "\n" +
+            $" Member Name: {e.TargetSite}\n" +
+            $" Class defining member: {e.TargetSite?.DeclaringType}\n" +
+            $" Memeber Type: {e.TargetSite?.MemberType}\n";
+
+        Console.WriteLine(stringForShow);
+    }
+}
+```
+```
+Current speed Nissan Leaf:55
+Current speed Nissan Leaf:75
+Current speed Nissan Leaf:95
+Current speed Nissan Leaf:115
+Current speed Nissan Leaf:135
+
+
+ Member Name: Void Accelerate(Int32)
+ Class defining member: BaseClassExeption.Car_v2
+ Memeber Type: Method
+```
+TargetSite - властивість шо містить об'єкт System.Reflection.MethodBase який використовується для збору інформації про метод що створив виняток. 
+
+### StackTrace
+
+```cs
+ExplorationExceptionMemberStackTrace();
+void ExplorationExceptionMemberStackTrace()
+{
+    Car_v2 car = new("Nissan Leaf", 35);
+
+    try
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            car.Accelerate(20);
+        }
+
+    }
+    catch (Exception e)
+    {
+        Console.WriteLine();
+
+        string stringForShow = "\n" +
+            $" Stack: {e.StackTrace}\n";
+
+        Console.WriteLine(stringForShow);
+    }
+}
+```
+```
+Current speed Nissan Leaf:55
+Current speed Nissan Leaf:75
+Current speed Nissan Leaf:95
+Current speed Nissan Leaf:115
+Current speed Nissan Leaf:135
+
+
+ Stack:    at BaseClassExeption.Car_v2.Accelerate(Int32 delta) in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\BaseClassExeption\Classes_v2.cs:line 40
+   at Program.<<Main>$>g__ExplorationExceptionMemberStackTrace|0_4() in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\BaseClassExeption\Program.cs:line 90
+```
+System.Exception.StackTrace - показує серію викликів які привели до винятку. Ця властивість створюється середою виконання. Зверніть увагу шо метод класу в якому виникнув виняток стоїть зверху тоді як клієнт шо визвав метод знизу. Це може допомогти розібратись. 
+
+### HelpLink
+```cs
+    class Car_v3
+    {
+        public const int MAXSPEED = 140;
+        public string Name { get; set; } = "";
+        public int CurrentSpeed { get; set; }
+
+        private bool _carIsDead;
+
+        public Car_v3(string name, int currentSpeed)
+        {
+            Name = name;
+            CurrentSpeed = currentSpeed;
+        }
+        public Car_v3()
+        {
+        }
+
+        public void Accelerate(int delta)
+        {
+
+            if (_carIsDead)
+            {
+                Console.WriteLine($"{Name} is out of order ...");
+            }
+            else
+            {
+                CurrentSpeed += delta;
+                if (CurrentSpeed > MAXSPEED)
+                {
+                    CurrentSpeed = 0;
+                    _carIsDead = true;
+                    throw new Exception($"{Name} has overheated!") 
+                    { 
+                        HelpLink = "https://www.youtube.com/results?search_query=car+engine+overhead"
+                    };
+                }
+                Console.WriteLine($"Current speed {Name}:{CurrentSpeed}");
+            }
+        }
+    }
+```
+```cs
+ExplorationExceptionMemberHelpLink();
+void ExplorationExceptionMemberHelpLink()
+{
+    Car_v2 car = new("Nissan Leaf", 35);
+
+    try
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            car.Accelerate(20);
+        }
+
+    }
+    catch (Exception e)
+    {
+        Console.WriteLine();
+
+        string stringForShow = "\n" +
+            $" Help link: {e.HelpLink}\n";
+
+        Console.WriteLine(stringForShow);
+    }
+}
+```
+```
+Current speed Nissan Leaf:55
+Current speed Nissan Leaf:75
+Current speed Nissan Leaf:95
+Current speed Nissan Leaf:115
+Current speed Nissan Leaf:135
+
+
+ Help link: https://www.youtube.com/results?search_query=car+engine+overhead
+```
+HelpLink - властивість яка може містити певну URL-адресу або файл довідки шо містить білше про часті проблеми.
+
+### Data
+
+```cs
+    class Car_v4
+    {
+        public const int MAXSPEED = 140;
+        public string Name { get; set; } = "";
+        public int CurrentSpeed { get; set; }
+
+        private bool _carIsDead;
+
+        public Car_v4(string name, int currentSpeed)
+        {
+            Name = name;
+            CurrentSpeed = currentSpeed;
+        }
+        public Car_v4()
+        {
+        }
+
+        public void Accelerate(int delta)
+        {
+
+            if (_carIsDead)
+            {
+                Console.WriteLine($"{Name} is out of order ...");
+            }
+            else
+            {
+                CurrentSpeed += delta;
+                if (CurrentSpeed > MAXSPEED)
+                {   
+                    int tempSpeed = CurrentSpeed;
+                    CurrentSpeed = 0;
+                    _carIsDead = true;
+                    throw new Exception($"{Name} has overheated!") 
+                    { 
+                        Data =
+                        {
+                            {"TimeStamp",$"The car exploded at {DateTime.Now}" },
+                            {"Clause",$"The speed is too high {tempSpeed}. Maximum speed is {MAXSPEED}" }
+                        }
+                    };
+                }
+                Console.WriteLine($"Current speed {Name}:{CurrentSpeed}");
+            }
+        }
+    }
+```
+```cs
+ExplorationExceptionMemberData();
+void ExplorationExceptionMemberData()
+{
+    Car_v4 car = new("Nissan Leaf", 35);
+
+    try
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            car.Accelerate(20);
+        }
+
+    }
+    catch (Exception e)
+    {
+        Console.WriteLine();
+
+        string stringForShow = "\nProblem:\n";
+        foreach (DictionaryEntry item in e.Data)
+        {
+            stringForShow += $"{item.Key} : {item.Value}\n";
+        }
+       
+        Console.WriteLine(stringForShow);
+    }
+}
+```
+```
+Current speed Nissan Leaf:55
+Current speed Nissan Leaf:75
+Current speed Nissan Leaf:95
+Current speed Nissan Leaf:115
+Current speed Nissan Leaf:135
+
+
+Problem:
+TimeStamp : The car exploded at 07.04.2023 14:59:17
+Clause : The speed is too high 155. Maximum speed is 140
+```
+Data - містить об'єкт реалізує інтерфейс System.Collections.IDictionary. Такі об'єкти містять колекції ключ-значення. Ця властивість корисна тим шо дозволяє запакувати дані шо до стану в момент помилки без потреби створення додадкового типу для розширення типу Exception. Не завжди треба створювати власний тип винятків і не треба забувати властивість Data.
+
+
 
 
 
