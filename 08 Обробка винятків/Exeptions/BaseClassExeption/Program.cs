@@ -43,7 +43,7 @@ void ExplorationTryCatch()
         Console.WriteLine(  );
 
         string stringForShow = "\n" +
-            $"Attention! Problem occured!\n\n" +
+            $"Attention! There is a problem!\n\n" +
             $" Method: {e.TargetSite}\n" +
             $" Message: {e.Message}\n" +
             $" Source: {e.Source}\n";
@@ -145,7 +145,7 @@ void ExplorationExceptionMemberData()
     {
         Console.WriteLine();
 
-        string stringForShow = "\nProblem:\n";
+        string stringForShow = "\nAttention! There is a problem!\n\n";
         foreach (DictionaryEntry item in e.Data)
         {
             stringForShow += $"{item.Key} : {item.Value}\n";
