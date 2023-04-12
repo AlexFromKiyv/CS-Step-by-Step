@@ -60,7 +60,7 @@ True
                     int tempCurrentSpeed = CurrentSpeed;
                     CurrentSpeed = 0;
                     _carIsDead = true;
-                    throw new CarIsDead_v1_Exception($"{Name} has overhead", "Speed too high.", tempCurrentSpeed);
+                    throw new CarIsDead_v1_Exception($"{Name} has overheated!", "Speed too high.", tempCurrentSpeed);
 
                 }
                 Console.WriteLine($"Current speed {Name}:{CurrentSpeed}");
@@ -115,7 +115,7 @@ Current speed Nissan Leaf:95
 Current speed Nissan Leaf:115
 Current speed Nissan Leaf:135
 
-Car error message:      Nissan Leaf has overhead
+Car error message:      Nissan Leaf has overheated!
 Cause:  Speed too high.
 Speed:  155
 ```
@@ -163,7 +163,7 @@ Speed:  155
                     int tempCurrentSpeed = CurrentSpeed;
                     CurrentSpeed = 0;
                     _carIsDead = true;
-                    throw new CarIsDead_v2_Exception("Speed too high.", tempCurrentSpeed, $"{Name} has overhead");
+                    throw new CarIsDead_v2_Exception("Speed too high.", tempCurrentSpeed, $"{Name} has overheated!");
 
                 }
                 Console.WriteLine($"Current speed {Name}:{CurrentSpeed}");
@@ -211,7 +211,7 @@ Current speed Nissan Leaf:95
 Current speed Nissan Leaf:115
 Current speed Nissan Leaf:135
 
-Message:        Nissan Leaf has overhead
+Message:        Nissan Leaf has overheated!
 Cause:  Speed too high.
 Speed:  155
 ```
@@ -261,7 +261,7 @@ Speed:  155
                     int tempCurrentSpeed = CurrentSpeed;
                     CurrentSpeed = 0;
                     _carIsDead = true;
-                    throw new CarIsDead_v3_Exception("Speed too high.", tempCurrentSpeed, $"{Name} has overhead");
+                    throw new CarIsDead_v3_Exception("Speed too high.", tempCurrentSpeed, $"{Name} has overheated!");
 
                 }
                 Console.WriteLine($"Current speed {Name}:{CurrentSpeed}");
@@ -331,7 +331,7 @@ Current speed Nissan Leaf:95
 Current speed Nissan Leaf:115
 Current speed Nissan Leaf:135
 
-Message:        Nissan Leaf has overhead
+Message:        Nissan Leaf has overheated!
 Cause:  Speed too high.
 Speed:  155
 ```

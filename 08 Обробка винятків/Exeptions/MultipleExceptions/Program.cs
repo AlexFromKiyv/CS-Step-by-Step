@@ -1,0 +1,165 @@
+﻿using MultipleExceptions;
+
+//ExplorationUncaughtException();
+void ExplorationUncaughtException()
+{
+    Car_v1 car = new("Nissan Leaf", 75);
+    try
+    {
+            car.Accelerate(-20);
+    }
+    catch (CarIsDead_v1_Exception e)
+    {
+        Console.WriteLine($"\nMessage:\t{e.Message}");
+        Console.WriteLine($"Cause:\t{e.Cause}");
+        Console.WriteLine($"Speed:\t{e.Speed}");
+    }
+}
+
+//ExplorationPairExceptions();
+void ExplorationPairExceptions()
+{
+    //For ArgumentOutOfRangeException
+    Console.WriteLine("\nCase 1\n");
+
+    Car_v1 car = new("Nissan Leaf", 75);
+    try
+    {
+        car.Accelerate(-20);
+    }
+    catch (ArgumentOutOfRangeException e)
+    {
+        Console.WriteLine($"Message:\t{e.Message}");
+        Console.WriteLine($"Parameter name:\t{e.ParamName}");
+    }
+    catch (CarIsDead_v1_Exception e)
+    {
+        Console.WriteLine($"Message:\t{e.Message}");
+        Console.WriteLine($"Cause:\t{e.Cause}");
+        Console.WriteLine($"Speed:\t{e.Speed}");
+    }
+
+    //For CarIsDead_v1_Exception
+    Console.WriteLine("\nCase 2\n");
+
+    car.CurrentSpeed = 35;
+
+    try
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            car.Accelerate(30);
+        }
+    }
+    catch (ArgumentOutOfRangeException e)
+    {
+        Console.WriteLine($"Message:\t{e.Message}");
+        Console.WriteLine($"Parameter name:\t{e.ParamName}");
+    }
+    catch (CarIsDead_v1_Exception e)
+    {
+        Console.WriteLine($"Message:\t{e.Message}");
+        Console.WriteLine($"Cause:\t{e.Cause}");
+        Console.WriteLine($"Speed:\t{e.Speed}");
+    }
+
+}
+
+//ExplorationThreeExceptionsBad();
+void ExplorationThreeExceptionsBad()
+{
+    Car_v1 car = new("Nissan Leaf", 35);
+    try
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            car.Accelerate(30);
+            
+            int speed = 0;
+
+            speed = car.CurrentSpeed / speed;
+        }
+    }
+
+    catch (ArgumentOutOfRangeException e)
+    {
+        Console.WriteLine($"Message:\t{e.Message}");
+        Console.WriteLine($"Parameter name:\t{e.ParamName}");
+    }
+    catch (CarIsDead_v1_Exception e)
+    {
+        Console.WriteLine($"Message:\t{e.Message}");
+        Console.WriteLine($"Cause:\t{e.Cause}");
+        Console.WriteLine($"Speed:\t{e.Speed}");
+    }
+}
+
+ExplorationThreeExceptionsGood();
+void ExplorationThreeExceptionsGood()
+{
+    Car_v1 car = new("Nissan Leaf", 35);
+    try
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            car.Accelerate(30);
+
+            int speed = 0;
+
+            speed = car.CurrentSpeed / speed;
+        }
+    }
+
+    catch (ArgumentOutOfRangeException e)
+    {
+        Console.WriteLine($"Message:\t{e.Message}");
+        Console.WriteLine($"Parameter name:\t{e.ParamName}");
+    }
+    catch (CarIsDead_v1_Exception e)
+    {
+        Console.WriteLine($"Message:\t{e.Message}");
+        Console.WriteLine($"Cause:\t{e.Cause}");
+        Console.WriteLine($"Speed:\t{e.Speed}");
+    }
+    catch (Exception e)
+    {
+        Console.WriteLine();
+
+        string stringForShow = "\n" +
+            $"Attention! There is a problem!\n\n" +
+            $" Message: {e.Message}\n" +
+            $" Is System:{e is SystemException}\n" +
+            e.StackTrace;
+
+        Console.WriteLine(stringForShow);
+    }
+
+}
+
+void ExplorationCatchOrder()
+{
+    Car_v1 car = new("Nissan Leaf", 35);
+    try
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            car.Accelerate(30);
+        }
+    }
+    //catch (Exception e) // It don't work. Put it down.
+    //{
+    //    Console.WriteLine(e.Message);
+    //}
+    catch (ArgumentOutOfRangeException e)
+    {
+        Console.WriteLine($"Message:\t{e.Message}");
+        Console.WriteLine($"Parameter name:\t{e.ParamName}");
+    }
+    catch (CarIsDead_v1_Exception e)
+    {
+        Console.WriteLine($"Message:\t{e.Message}");
+        Console.WriteLine($"Cause:\t{e.Cause}");
+        Console.WriteLine($"Speed:\t{e.Speed}");
+    }
+}
+

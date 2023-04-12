@@ -38,7 +38,7 @@ namespace YourOwnExceptions
                     int tempCurrentSpeed = CurrentSpeed;
                     CurrentSpeed = 0;
                     _carIsDead = true;
-                    throw new CarIsDead_v2_Exception("Speed too high.", tempCurrentSpeed, $"{Name} has overhead");
+                    throw new CarIsDead_v2_Exception("Speed too high.", tempCurrentSpeed, $"{Name} has overheated!");
 
                 }
                 Console.WriteLine($"Current speed {Name}:{CurrentSpeed}");
