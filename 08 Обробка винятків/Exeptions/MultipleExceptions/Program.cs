@@ -94,7 +94,7 @@ void ExplorationThreeExceptionsBad()
     }
 }
 
-ExplorationThreeExceptionsGood();
+//ExplorationThreeExceptionsGood();
 void ExplorationThreeExceptionsGood()
 {
     Car_v1 car = new("Nissan Leaf", 35);
@@ -163,3 +163,23 @@ void ExplorationCatchOrder()
     }
 }
 
+ExplorationGenericCatch();
+void ExplorationGenericCatch()
+{
+    Car_v1 car = new("Nissan Leaf", 135);
+
+    try
+    {
+        int speed = 0;
+
+        speed = car.CurrentSpeed / speed;
+
+        car.Accelerate(50);
+ 
+    }
+    catch 
+    {
+        Console.WriteLine("Something bad happened.");
+    }
+    Console.WriteLine("Work after try.");
+}

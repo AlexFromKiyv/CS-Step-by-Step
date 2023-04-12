@@ -302,5 +302,34 @@ void ExplorationCatchOrder()
 В цьому випадку компілятор покаже помилку оскільки більш базовий виняток не дасть обробити більш конкретні випадки. Перший блок може обробити всі помилки похідні від Exception і які мають звязок "is-a". Таким чином ви отримаєте тилки message без додадкових даних по проблемі. Тобто чим базовіший виняток тим він повинен стояти нижче.
 Останій блок бажано робити інформативним з усіма можливими данними.
 
-## Загальний оператор catsh
+## Загальний оператор catch
 
+```cs
+
+ExplorationGenericCatch();
+void ExplorationGenericCatch()
+{
+    Car_v1 car = new("Nissan Leaf", 135);
+
+    try
+    {
+        int speed = 0;
+
+        speed = car.CurrentSpeed / speed;
+
+        car.Accelerate(50);
+ 
+    }
+    catch 
+    {
+        Console.WriteLine("Something bad happened.");
+    }
+    Console.WriteLine("Work after try.");
+}
+```
+```
+Something bad happened.
+Work after try.
+```
+
+Catch шо не отримує об'єкту Exception спрацовує коли в try виникає будь-який виняток. Вона буде корисна коли не хочеться ділитись додадковою інформацією і треба видадт загальне зауваження видавати загальне завуваженя для всіх помилок.
