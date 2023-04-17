@@ -333,3 +333,305 @@ Work after try.
 ```
 
 Catch шо не отримує об'єкту Exception спрацовує коли в try виникає будь-який виняток. Вона буде корисна коли не хочеться ділитись додадковою інформацією і треба видадт загальне зауваження видавати загальне завуваженя для всіх помилок.
+
+## Повторний викид винятку.
+
+```cs
+ExplorationRethrowingException();
+void ExplorationRethrowingException()
+{
+    Car_v1 car = new("Nissan Leaf", 130);
+    try
+    {
+        car.Accelerate(11);
+
+        int speed = 0;
+        speed = car.CurrentSpeed / speed;
+    }
+    catch (CarIsDead_v1_Exception e)
+    {
+        Console.WriteLine($"\nMessage:{e.Message}");
+        Console.WriteLine($"Cause:\t{e.Cause}");
+        Console.WriteLine($"Speed:\t{e.Speed}\n\n");
+        throw;
+    }
+    catch (Exception e) 
+    {
+        Console.WriteLine(e.Message);
+    }
+}
+```
+```
+Message:Nissan Leaf broke down.
+Cause:  Speed too high.
+Speed:  141
+
+
+Unhandled exception. MultipleExceptions.CarIsDead_v1_Exception: Nissan Leaf broke down.
+   at MultipleExceptions.Car_v1.Accelerate(Int32 delta) in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\Classes_v1.cs:line 48
+   at Program.<<Main>$>g__ExplorationRethrowingExceptions|0_6() in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\Program.cs:line 193
+   at Program.<Main>$(String[] args) in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\Program.cs:line 187
+```
+Коли блок catch може лише частвково обробити помилку в блоці можна знову викинути виняток. Середовище виконання знову отримує виняток і закінчує роботу прорами з помилкою.
+Тобто це обробка винятку трохи краще ніж це б зробило середовище.
+
+## Inner Exceptions
+
+Під час обробки винятку коли ви обробляєте дані зверетраючись до ресурсів може виникнути інший виняток.
+
+```cs
+ExplorationUnhandledInnerException();
+void ExplorationUnhandledInnerException()
+{
+    Car_v1 car = new("Nissan Leaf", 130);
+    try
+    {
+        car.Accelerate(11);
+    }
+
+    catch (CarIsDead_v1_Exception e)
+    {
+        FileStream fileStream = File.Open(@"D:\carError.txt", FileMode.Open);
+
+        Console.WriteLine($"\nMessage:{e.Message}");
+        Console.WriteLine($"Cause:\t{e.Cause}");
+        Console.WriteLine($"Speed:\t{e.Speed}\n\n");
+    }
+}
+```
+```
+Unhandled exception. System.IO.FileNotFoundException: Could not find file 'D:\carError.txt'.
+File name: 'D:\carError.txt'
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.Strategies.OSFileStreamStrategy..ctor(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.Strategies.FileStreamHelpers.ChooseStrategyCore(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.File.Open(String path, FileMode mode)
+   at Program.<<Main>$>g__ExplorationUnhandledInnerException|0_7() in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\Program.cs:line 223
+   at Program.<Main>$(String[] args) in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\Program.cs:line 212
+```
+Тут в блоці catch спроба відкрити неіснуючого файлу.(Доступ до типу FileStream забезпечують glodal using). Як видно з прикладу виняток не оброблюється. Краший варіант не накладати на блок catch забагато роботи, а виділити в окрему функцію. Як поступити з винятком який виник при обробці винятку.
+
+```cs
+ExplorationHandledInnerException();
+void ExplorationHandledInnerException()
+{
+    Car_v1 car = new("Nissan Leaf", 130);
+    try
+    {
+        car.Accelerate(11);
+    }
+
+    catch (CarIsDead_v1_Exception e)
+    {
+        try
+        {
+            FileStream fileStream = File.Open(@"D:\carError.txt", FileMode.Open);
+        }
+        catch (Exception iE)
+        {
+            Console.WriteLine( iE.Message );
+        }
+
+        Console.WriteLine($"\nMessage:{e.Message}");
+        Console.WriteLine($"Cause:\t{e.Cause}");
+        Console.WriteLine($"Speed:\t{e.Speed}\n");
+
+        Console.WriteLine($"Inner Exeption is null:\t{e.InnerException is null}");
+    }
+}
+```
+```
+Unhandled exception. MultipleExceptions.CarIsDead_v1_Exception: Nissan Leaf broke down.
+ ---> System.IO.FileNotFoundException: Could not find file 'D:\carError.txt'.
+File name: 'D:\carError.txt'
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.Strategies.OSFileStreamStrategy..ctor(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.Strategies.FileStreamHelpers.ChooseStrategyCore(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.File.Open(String path, FileMode mode)
+   at Program.<<Main>$>g__ExplorationWriteIntoInnerException|0_8() in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\Program.cs:line 244
+   --- End of inner exception stack trace ---
+   at Program.<<Main>$>g__ExplorationWriteIntoInnerException|0_8() in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\Program.cs:line 248
+   at Program.<Main>$(String[] args) in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\Program.cs:line 231
+```
+Тут не получилось коректно обробити виняток. Але видно шо обробка винятку ініїцювала новий. Краши практики кажуть шо треба використати властивість InnerException того ж типу винятку.
+```cs
+ExplorationWriteIntoInnerException();
+void ExplorationWriteIntoInnerException()
+{
+ 
+    Car_v1 car = new("Nissan Leaf", 130);
+
+    try
+    {
+        MyAccelerate(11, car);
+    }
+    catch (CarIsDead_v1_Exception e)
+    {
+        Console.WriteLine(e.Message);
+        Console.WriteLine(e.Cause);
+        Console.WriteLine(e.Speed);
+        Console.WriteLine(e.InnerException?.Message);
+    }
+    
+ void MyAccelerate(int delta, Car_v1 car)
+    {
+        try
+        {
+            car.Accelerate(delta);
+        }
+        catch (CarIsDead_v1_Exception e)
+        {
+            try
+            {
+                FileStream fileStream = File.Open(@"D:\carError.txt", FileMode.Open);
+            }
+            catch (FileNotFoundException e1)
+            {
+                throw new CarIsDead_v1_Exception(e.Cause, e.Speed, e.Message, e1);
+            }
+            Console.WriteLine($"\nMessage:{e.Message}");
+            Console.WriteLine($"Cause:\t{e.Cause}");
+            Console.WriteLine($"Speed:\t{e.Speed}\n");
+            Console.WriteLine($"InnerException is null:\t{e.InnerException is null}");
+        }
+    }
+}
+```
+```
+Nissan Leaf broke down.
+Speed too high.
+141
+
+InnerException:Could not find file 'D:\carError.txt'.
+```
+Помістити об'ект винятку в InnerException це кращий спосиб задокументувати шо відбувся виняток в обробці винятку. Звернфть увагу шо для цього використовувався відповідний конструктор. Після створення обї'кта винятку ми перекидаєм його в стек викликів. В цьому випадку програма буде оброблювати всі винятки коректо у випадку існувані чи не існування файла.
+
+## finally
+
+Код try/catch може мати також необовьязковий блок finally. Цей блок виконується завжди незалежно від того що відбуваеться в try.
+
+```cs
+    class Radio
+    {
+        public void Switch(bool on)
+        {
+            Console.WriteLine(on ? "Jamming ..." : "Quiet time...");
+        }
+    }
+
+    class Car_v2
+    {
+        public string Name { get; set; } = "";
+        public int CurrentSpeed { get; set; } 
+        public int MaximumSpeed { get; }
+
+        private readonly Radio radio = new Radio();
+
+        private bool _carIsDead;
+
+        public Car_v2()
+        {
+        }
+
+        public Car_v2(string name, int currentSpeed, int maximumSpeed)
+        {
+            Name = name;
+            CurrentSpeed = currentSpeed;
+            MaximumSpeed = maximumSpeed;
+        }
+
+        public void RadioSwitch(bool state)
+        {
+            radio.Switch(state);
+        }
+
+        public void Accelerate(int delta)
+        {
+
+            if (delta < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(delta), "Acceleration must be greater than zero.");
+            }
+
+
+            if (_carIsDead)
+            {
+                Console.WriteLine($"{Name} is out of order ...");
+            }
+            else
+            {
+                CurrentSpeed += delta;
+                if (CurrentSpeed > MaximumSpeed)
+                {
+                    int tempCurrentSpeed = CurrentSpeed;
+                    CurrentSpeed = 0;
+                    _carIsDead = true;
+                    throw new CarIsDead_v2_Exception("Speed too high.", tempCurrentSpeed, $"{Name} broke down.");
+
+                }
+                Console.WriteLine($"Current speed {Name}:{CurrentSpeed}");
+            }
+        }
+    }
+
+
+    public class CarIsDead_v2_Exception : ApplicationException
+    {
+        public CarIsDead_v2_Exception()
+        {
+        }
+        public CarIsDead_v2_Exception(string? message) : base(message)
+        {
+        }
+        public CarIsDead_v2_Exception(string? message, Exception? innerException) : base(message, innerException)
+        {
+        }
+        public CarIsDead_v2_Exception(string? cause, int speed, string? message) : base(message)
+        {
+            Cause = cause;
+            Speed = speed;
+        }
+        public CarIsDead_v2_Exception(string? cause, int speed, string? message, Exception? innerException) : base(message, innerException)
+        {
+            Cause = cause;
+            Speed = speed;
+        }
+
+        public string? Cause { get; }
+        public int Speed { get; }
+    }
+```
+```cs
+ExplorationFinally();
+void ExplorationFinally()
+{
+
+    Car_v2 car = new("Nissan Leaf", 90, 140);
+    car.RadioSwitch(true);
+    try
+    {
+        car.Accelerate(20);
+        car.Accelerate(20);
+     }
+    catch (Exception e)
+    {
+        Console.WriteLine(e.Message);
+    }
+    finally
+    {
+        car.RadioSwitch(false);
+    }        
+
+}    
+```
+```
+Jamming ...
+Current speed Nissan Leaf:110
+Current speed Nissan Leaf:130
+Quiet time...
+```
+Тут при виконані прискорень вимикаеться радіо. У більш реальному сценарії, коли вам потрібно позбутися об’єктів, закрити файл або від’єднатися від бази даних (чи що завгодно), це забезпечує блок finally для належного очищення.
+
+##

@@ -77,6 +77,12 @@ namespace MultipleExceptions
             Speed = speed;
         }
 
+        public CarIsDead_v1_Exception(string? cause, int speed, string? message, Exception? innerException) : base(message,innerException)
+        {
+            Cause = cause;
+            Speed = speed;
+        }
+
         public string? Cause { get; }
         public int Speed { get; }
     }
