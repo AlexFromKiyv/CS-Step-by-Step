@@ -302,7 +302,7 @@ void ExplorationWriteIntoInnerException()
 }
 
 
-ExplorationFinally();
+//ExplorationFinally();
 void ExplorationFinally()
 {
 
@@ -312,7 +312,17 @@ void ExplorationFinally()
     {
         car.Accelerate(20);
         car.Accelerate(20);
-     }
+        car.Accelerate(20);
+    }
+    catch (CarIsDead_v2_Exception e)
+    {
+        Console.WriteLine();
+        Console.WriteLine($"Message:\t{e.Message}");
+        Console.WriteLine($"Cause:\t{e.Cause}");
+        Console.WriteLine($"Speed:\t{e.Speed}");
+        Console.WriteLine($"Time:\t{e.ErrorTimeStamp}");
+        Console.WriteLine();
+    }
     catch (Exception e)
     {
         Console.WriteLine(e.Message);
@@ -322,4 +332,44 @@ void ExplorationFinally()
         car.RadioSwitch(false);
     }        
 
-}    
+}
+
+//ExplorationCathWhen();
+void ExplorationCathWhen()
+{
+
+    Car_v2 car = new("Nissan Leaf", 90, 140);
+    car.RadioSwitch(true);
+    try
+    {
+        car.Accelerate(20);
+        car.Accelerate(20);
+        car.Accelerate(20);
+    }
+    catch (CarIsDead_v2_Exception e) when(e.ErrorTimeStamp.DayOfWeek == DayOfWeek.Wednesday)
+    {
+        Console.WriteLine();
+        Console.WriteLine($"Message:\t{e.Message}");
+        Console.WriteLine($"Cause:\t{e.Cause}");
+        Console.WriteLine($"Speed:\t{e.Speed}");
+        Console.WriteLine($"Time:\t{e.ErrorTimeStamp}");
+        Console.WriteLine();
+    }
+    catch (Exception e)
+    {
+        Console.WriteLine(e.Message);
+    }
+    finally
+    {
+        car.RadioSwitch(false);
+    }
+}
+
+
+UsingDebugging();
+void UsingDebugging()
+{
+    Car_v2 car = new("Nissan Leaf", 110, 140);
+    car.Accelerate(20);
+    car.Accelerate(20);
+}

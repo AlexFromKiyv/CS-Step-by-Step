@@ -438,10 +438,47 @@ Clause : The speed is too high 155. Maximum speed is 140
 ```
 Data - містить об'єкт реалізує інтерфейс System.Collections.IDictionary. Такі об'єкти містять колекції ключ-значення. Ця властивість корисна тим шо дозволяє запакувати дані шо до стану в момент помилки без потреби створення додадкового типу для розширення типу Exception. Не завжди треба створювати власний тип винятків і не треба забувати властивість Data.
 
+## Винятки можна уникнути використовуючи if
+
+Не треба забувати шо виняток можна передбачити і обробити за допомогою іf
+
+```cs
+UsingIf();
+void UsingIf()
+{
+
+    while (true)
+    {
+        Console.Write("Enter whole number:");
+        PrintIncrement(Console.ReadLine());
+    }
 
 
-
-
-
-
-
+    void PrintIncrement(string? enteredString)
+    {
+        if(int.TryParse(enteredString,out int number))
+        {
+            number++;
+            Console.WriteLine(number);
+        }
+        else
+        {
+            Console.WriteLine("You entered not whole number!");
+        }
+    }
+}
+```
+```
+Enter whole number:1
+2
+Enter whole number:2
+3
+Enter whole number:3
+4
+Enter whole number:1000
+1001
+Enter whole number:girl
+You entered not whole number!
+Enter whole number:
+```
+Тут в нагоді пригодився метод класу Int32 TryParse. Такий підхід уникнути виняток може бути швидше і простіше. Тут вся відповідальність перекладається на метод з сістемної бібліотеки.

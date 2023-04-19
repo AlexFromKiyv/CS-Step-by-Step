@@ -128,7 +128,7 @@ void ExplorationExceptionMemberHelpLink()
     }
 }
 
-ExplorationExceptionMemberData();
+//ExplorationExceptionMemberData();
 void ExplorationExceptionMemberData()
 {
     Car_v4 car = new("Nissan Leaf", 35);
@@ -155,3 +155,27 @@ void ExplorationExceptionMemberData()
     }
 }
 
+UsingIf();
+void UsingIf()
+{
+
+    while (true)
+    {
+        Console.Write("Enter whole number:");
+        PrintIncrement(Console.ReadLine());
+    }
+
+
+    void PrintIncrement(string? enteredString)
+    {
+        if(int.TryParse(enteredString,out int number))
+        {
+            number++;
+            Console.WriteLine(number);
+        }
+        else
+        {
+            Console.WriteLine("You entered not whole number!");
+        }
+    }
+}

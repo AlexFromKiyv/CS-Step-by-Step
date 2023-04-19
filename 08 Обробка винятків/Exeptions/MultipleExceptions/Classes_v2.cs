@@ -62,7 +62,7 @@ namespace MultipleExceptions
                     int tempCurrentSpeed = CurrentSpeed;
                     CurrentSpeed = 0;
                     _carIsDead = true;
-                    throw new CarIsDead_v2_Exception("Speed too high.", tempCurrentSpeed, $"{Name} broke down.");
+                    throw new CarIsDead_v2_Exception("Speed too high.",DateTime.Now, tempCurrentSpeed, $"{Name} broke down.");
 
                 }
                 Console.WriteLine($"Current speed {Name}:{CurrentSpeed}");
@@ -76,25 +76,25 @@ namespace MultipleExceptions
         public CarIsDead_v2_Exception()
         {
         }
-        public CarIsDead_v2_Exception(string? message) : base(message)
+        public CarIsDead_v2_Exception(string? cause, DateTime time,int speed) : this(cause,time,speed,string.Empty)
         {
         }
-        public CarIsDead_v2_Exception(string? message, Exception? innerException) : base(message, innerException)
-        {
-        }
-        public CarIsDead_v2_Exception(string? cause, int speed, string? message) : base(message)
-        {
-            Cause = cause;
-            Speed = speed;
-        }
-        public CarIsDead_v2_Exception(string? cause, int speed, string? message, Exception? innerException) : base(message, innerException)
+        public CarIsDead_v2_Exception(string? cause, DateTime time, int speed, string? message) : this(cause,time,speed,message,null)
         {
             Cause = cause;
             Speed = speed;
         }
 
+        public CarIsDead_v2_Exception(string? cause, DateTime time, int speed, string? message, Exception? innerException) : base(message, innerException)
+        {
+            Cause = cause;
+            Speed = speed;
+            ErrorTimeStamp = time;
+        }
+
         public string? Cause { get; }
         public int Speed { get; }
+        public DateTime ErrorTimeStamp { get; set; }
     }
 
 }

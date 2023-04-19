@@ -568,7 +568,7 @@ InnerException:Could not find file 'D:\carError.txt'.
                     int tempCurrentSpeed = CurrentSpeed;
                     CurrentSpeed = 0;
                     _carIsDead = true;
-                    throw new CarIsDead_v2_Exception("Speed too high.", tempCurrentSpeed, $"{Name} broke down.");
+                    throw new CarIsDead_v2_Exception("Speed too high.",DateTime.Now, tempCurrentSpeed, $"{Name} broke down.");
 
                 }
                 Console.WriteLine($"Current speed {Name}:{CurrentSpeed}");
@@ -582,25 +582,25 @@ InnerException:Could not find file 'D:\carError.txt'.
         public CarIsDead_v2_Exception()
         {
         }
-        public CarIsDead_v2_Exception(string? message) : base(message)
+        public CarIsDead_v2_Exception(string? cause, DateTime time,int speed) : this(cause,time,speed,string.Empty)
         {
         }
-        public CarIsDead_v2_Exception(string? message, Exception? innerException) : base(message, innerException)
-        {
-        }
-        public CarIsDead_v2_Exception(string? cause, int speed, string? message) : base(message)
-        {
-            Cause = cause;
-            Speed = speed;
-        }
-        public CarIsDead_v2_Exception(string? cause, int speed, string? message, Exception? innerException) : base(message, innerException)
+        public CarIsDead_v2_Exception(string? cause, DateTime time, int speed, string? message) : this(cause,time,speed,message,null)
         {
             Cause = cause;
             Speed = speed;
         }
 
+        public CarIsDead_v2_Exception(string? cause, DateTime time, int speed, string? message, Exception? innerException) : base(message, innerException)
+        {
+            Cause = cause;
+            Speed = speed;
+            ErrorTimeStamp = time;
+        }
+
         public string? Cause { get; }
         public int Speed { get; }
+        public DateTime ErrorTimeStamp { get; set; }
     }
 ```
 ```cs
@@ -614,7 +614,18 @@ void ExplorationFinally()
     {
         car.Accelerate(20);
         car.Accelerate(20);
-     }
+        car.Accelerate(20);
+    }
+    catch (CarIsDead_v2_Exception e)
+    {
+        Console.WriteLine();
+        Console.WriteLine($"Message:\t{e.Message}");
+        Console.WriteLine($"Cause:\t{e.Cause}");
+        Console.WriteLine($"Speed:\t{e.Speed}");
+        Console.WriteLine($"Time:\t{e.ErrorTimeStamp}");
+        Console.WriteLine();
+    }
+
     catch (Exception e)
     {
         Console.WriteLine(e.Message);
@@ -624,14 +635,89 @@ void ExplorationFinally()
         car.RadioSwitch(false);
     }        
 
-}    
+}   
 ```
 ```
 Jamming ...
 Current speed Nissan Leaf:110
 Current speed Nissan Leaf:130
+
+Message:        Nissan Leaf broke down.
+Cause:  Speed too high.
+Speed:  150
+Time:   19.04.2023 11:38:46
+
 Quiet time...
 ```
-Тут при виконані прискорень вимикаеться радіо. У більш реальному сценарії, коли вам потрібно позбутися об’єктів, закрити файл або від’єднатися від бази даних (чи що завгодно), це забезпечує блок finally для належного очищення.
+Тут при виконані прискорень вимикаеться радіо. Вимикання буде виконуватися в будьякому випадку чи буде рух чи буде поломка. У більш реальному сценарії, коли вам потрібно позбутися об’єктів, закрити файл або від’єднатися від бази даних (чи що завгодно), це забезпечує блок finally для належного очищення.
 
-##
+## catch ... when ...
+
+На процес коли спрацьовує catch можна поставити додадкові умови.
+
+```cs
+ExplorationCathWhen();
+void ExplorationCathWhen()
+{
+
+    Car_v2 car = new("Nissan Leaf", 90, 140);
+    car.RadioSwitch(true);
+    try
+    {
+        car.Accelerate(20);
+        car.Accelerate(20);
+        car.Accelerate(20);
+    }
+    catch (CarIsDead_v2_Exception e) when(e.ErrorTimeStamp.DayOfWeek == DayOfWeek.Wednesday)
+    {
+        Console.WriteLine();
+        Console.WriteLine($"Message:\t{e.Message}");
+        Console.WriteLine($"Cause:\t{e.Cause}");
+        Console.WriteLine($"Speed:\t{e.Speed}");
+        Console.WriteLine($"Time:\t{e.ErrorTimeStamp}");
+        Console.WriteLine();
+    }
+    catch (Exception e)
+    {
+        Console.WriteLine(e.Message);
+    }
+    finally
+    {
+        car.RadioSwitch(false);
+    }
+}
+```
+```
+Jamming ...
+Current speed Nissan Leaf:110
+Current speed Nissan Leaf:130
+
+Message:        Nissan Leaf broke down.
+Cause:  Speed too high.
+Speed:  150
+Time:   19.04.2023 11:47:44
+
+Quiet time...
+
+```
+Умова в when накладає "фільтр" на обробку винятків. Якшо запустити цей код не в середу то відповідний блок catch не зпрацює і не буде видно деталей помилки.
+В реальності цю можливість можна використати для більш детального вивчення проблеми.
+
+## Можливості Visual Studio.
+
+В VS проект можна запустити в двух режимах. В режимі з Debug > Start Debugging (F5) проект зупинеться на містці де викидується виняток.
+
+```cs
+UsingDebugging();
+void UsingDebugging()
+{
+    Car_v2 car = new("Nissan Leaf", 110, 140);
+    car.Accelerate(20);
+    car.Accelerate(20);
+}
+```
+Коли проєкт зупиняється він показує місце де вже відбувся виняток. Також можна використати Show Call Stack та View Details щоб подивитись ланцюг визовів і вміст винятку.
+
+
+
+
