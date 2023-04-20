@@ -364,12 +364,3 @@ void ExplorationCathWhen()
         car.RadioSwitch(false);
     }
 }
-
-
-UsingDebugging();
-void UsingDebugging()
-{
-    Car_v2 car = new("Nissan Leaf", 110, 140);
-    car.Accelerate(20);
-    car.Accelerate(20);
-}
