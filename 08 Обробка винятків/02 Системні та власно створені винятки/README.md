@@ -22,7 +22,7 @@ True
 
 # Власно створені винятки.
 
-## Створенн та перехоплення власного винятку. 
+## Створення та перехоплення власного винятку. 
 
 Для створення виняткив для власного коду було створено окремий клас System.ApplicationException який походить від System.Exeption. Головна мета цього класа віділити системні винятки від ваших власних. 
 Хоча завжди можна створити загальний виняток за допомогою Exception, іноді користно створити строго типізовані винтки для конкрентого випадку які характеризують унікальну проблему.
@@ -228,7 +228,7 @@ Speed:  155
 
 Аби створити всі конструктори бистріше CTRL+. > Generete All
 
-````cs
+```cs
     class Car_v3    
     {
         public const int MAXSPEED = 140;
@@ -336,3 +336,55 @@ Cause:  Speed too high.
 Speed:  155
 ```
 Таким чином буде повністю збережений ланцюг успадкування.
+
+## Коли власні винятки зайві. 
+
+В .Net є багато визначених класів які можна використовувати для викиду винятків.
+Коли ви первіряєте параметри функцій можна використати вбудовані класи.
+
+```cs
+UsingBuilInExceptions();
+void UsingBuilInExceptions()
+{
+
+    // account = null
+    try
+    {
+        AddSum(null, 12);
+    }
+    catch (Exception e)
+    {
+        Console.WriteLine(e.Message);
+    }
+
+    // sum < 0
+    try
+    {
+        AddSum("3234 2345", -10);
+    }
+    catch (Exception e)
+    {
+        Console.WriteLine(e.Message);
+    }
+
+    void AddSum(string account, decimal sum)
+    {
+        if (account is null)
+        {
+            throw new ArgumentNullException(paramName: nameof(account)); // Here use built in exception 
+        }
+        // or   ArgumentException.ThrowIfNullOrEmpty(account); // Here use built in exception
+        if (sum < 0)
+        {
+            throw new ArgumentException(message: "The sum must be greater than zero."); // Here use built in exception
+        }
+    }
+}
+```
+```
+Value cannot be null. (Parameter 'account')
+The sum must be greater than zero.
+```
+Перш ніж створювати власний виняток спробуйте подивиться чи немає вбудованового. 
+
+

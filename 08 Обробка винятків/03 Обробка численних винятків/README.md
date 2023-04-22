@@ -702,3 +702,103 @@ Quiet time...
 ```
 Умова в when накладає "фільтр" на обробку винятків. Якшо запустити цей код не в середу то відповідний блок catch не зпрацює і не буде видно деталей помилки.
 В реальності цю можливість можна використати для більш детального вивчення проблеми.
+
+## Де ловити винятки.
+
+Методи можуть викликать инщі методи які в свою чергу можуть звертатися до бібліoтеки і визивати інші методи. Цепочка визовів зберігаеться в стеку.
+```cs
+ExplorationCallStack();
+void CallStack()
+{
+    Method_1();
+
+    void Method_1()
+    {
+        Console.WriteLine("Method_1");
+        Method_2();
+    }
+
+    void Method_2()
+    {
+        Console.WriteLine("Method_2");
+        MethodFromLibrary();
+    }
+
+    void MethodFromLibrary()
+    {
+        Console.WriteLine("MethodFromLibrary");
+        PrivateMethodFromLibrary();
+    }
+
+    void PrivateMethodFromLibrary()
+    {
+        Console.WriteLine("PrivateMethodFromLibrary");
+        int world = int.Parse("World");
+    }
+}
+```
+```
+Method_1
+Method_2
+MethodFromLibrary
+PrivateMethodFromLibrary
+Unhandled exception. System.FormatException: The input string 'World' was not in a correct format.
+   at System.Number.ThrowOverflowOrFormatException(ParsingStatus status, ReadOnlySpan`1 value, TypeCode type)
+   at System.Int32.Parse(String s)
+   at Program.<<Main>$>g__PrivateMethodFromLibrary|0_17() in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\Program.cs:line 396
+   at Program.<<Main>$>g__MethodFromLibrary|0_16() in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\Program.cs:line 390
+   at Program.<<Main>$>g__Method_2|0_15() in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\Program.cs:line 384
+   at Program.<<Main>$>g__Method_1|0_14() in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\Program.cs:line 378
+   at Program.<<Main>$>g__ExplorationCallStack|0_12() in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\Program.cs:line 372
+   at Program.<Main>$(String[] args) in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\Program.cs:line 369 
+```
+Методи при визові по черзі попадають в стек і коли виникає виняток можна побачити в зворотн'му порядку як виникала проблема. 
+
+Перехопити виняток можна або в місці виникнення або више по стеку. Рішеня де перехопити виняток може спростити і стандартізувати код.
+
+Іноді бібліотека в якій може виникнути виняток не має досатьно даних шоб корректно її описати. Тоді вона може прехопити виняток зробити запис про нього  та далі викинути виняток шоб він обробився више в стеку.
+
+```cs
+CallStackWithThrow();
+void CallStackWithThrow()
+{
+    Method_1();
+
+
+    void Method_1()
+    {
+        Console.WriteLine("Method_1");
+        Method_2();
+    }
+
+    void Method_2()
+    {
+        Console.WriteLine("Method_2");
+        try
+        {
+            MethodFromLibrary();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exeption here: {ex.Message}");
+            throw ex;
+        }
+
+    }
+
+    void MethodFromLibrary()
+    {
+        Console.WriteLine("MethodFromLibrary");
+        PrivateMethodFromLibrary();
+    }
+
+    void PrivateMethodFromLibrary()
+    {
+        Console.WriteLine("PrivateMethodFromLibrary");
+        int world = int.Parse("World");
+    }
+}
+```
+Як ви бачите якшо таким чином перхопити виняток то залишаеться частина визовів стеку. Іноді це пагана практика і щоб залишити повну інформацію замість throw ex екуба визивати throw;
+
+Таким чином слід перехоплювати виняток коли вас є повний обсях даних шо відбулося. Якшо не можете в повній мірі обробити виняток вам слід дозволити винятку пройти через стек викликів на вищий рівень.
