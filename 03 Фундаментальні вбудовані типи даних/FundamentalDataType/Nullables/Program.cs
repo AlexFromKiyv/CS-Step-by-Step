@@ -193,7 +193,7 @@ static void UsingNullCoalescing()
 }
 
 
-UsingNullConditional();
+//UsingNullConditional();
 
 static void UsingNullConditional()
 {
@@ -246,6 +246,43 @@ static void UsingNullConditional()
     }
 }
 
+ValidationOfFunctionArguments();
+void ValidationOfFunctionArguments()
+{
+    try
+    {
+        //AddSum1(null);
+        AddSum2(null);
+
+    }
+    catch (Exception e)
+    {
+        Console.WriteLine(e.Message);
+    }
+
+
+    // Variant 1
+    void AddSum1(string account, decimal sum = 0)
+    {
+        if (account is null)
+        {
+            throw new ArgumentNullException(nameof(account));
+        }
+        // the rest code
+    }
+
+    // Variant 2
+    void AddSum2(string account, decimal sum = 0)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(account);
+        // the rest code
+
+    }
+}
+
+
+
+// Classes
 class Person
 {
     public string? Name { get; set; }

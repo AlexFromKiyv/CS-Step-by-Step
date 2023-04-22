@@ -422,16 +422,60 @@ class Person
 ```
 Як бачите цей опреатор спрощує перевірку на null. Також він корисний для подій та делегатів.
 
-## Кращі спопоби перевірки
+## Кращі спопоби перевірки на null
 ```cs
     if (someting is not null)
     {
         //Action with something
     }
 
-        if (someting is null)
+    if (someting is null)
     {
         //Action with something
     }
 
 ```
+
+## Перевірка аргументів функцій на null.
+
+Коли функція отримує аргументи їх можна первірити на null.
+
+```cs
+ValidationOfFunctionArguments();
+void ValidationOfFunctionArguments()
+{
+    try
+    {
+        //AddSum1(null);
+        AddSum2(null);
+
+    }
+    catch (Exception e)
+    {
+        Console.WriteLine(e.Message);
+    }
+
+
+    // Variant 1
+    void AddSum1(string account, decimal sum = 0)
+    {
+        if (account is null)
+        {
+            throw new ArgumentNullException(nameof(account));
+        }
+        // the rest code
+    }
+
+    // Variant 2
+    void AddSum2(string account, decimal sum = 0)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(account);
+        // the rest code
+
+    }
+}
+```
+```
+Value cannot be null. (Parameter 'account')
+```
+Перевірку на null може згенерувати VS. Для цього треба втати на аргумент(в цьому прикладі account) і натиснути на CTRL + . та вибрати Add null check.
