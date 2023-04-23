@@ -703,102 +703,255 @@ Quiet time...
 Умова в when накладає "фільтр" на обробку винятків. Якшо запустити цей код не в середу то відповідний блок catch не зпрацює і не буде видно деталей помилки.
 В реальності цю можливість можна використати для більш детального вивчення проблеми.
 
-## Де ловити винятки.
+# Де ловити винятки і як викинути знов.
+
+## Call stack
 
 Методи можуть викликать инщі методи які в свою чергу можуть звертатися до бібліoтеки і визивати інші методи. Цепочка визовів зберігаеться в стеку.
+
+Додамо в наше рішеня Exceptions проект типу Class Library з назвою MyClassLibrary. І в ному змінемо файл Class1.cs на MyClass.cs
+
 ```cs
-ExplorationCallStack();
-void CallStack()
+namespace MyClassLibrary
 {
-    Method_1();
-
-    void Method_1()
+    public class MyClass
     {
-        Console.WriteLine("Method_1");
-        Method_2();
+        public static void PublicMethodInLibrary()
+        {
+            Console.WriteLine("PublicMethodInLibrary");
+            PrivateMethodInLibrary();
+        }
+
+        private static void PrivateMethodInLibrary() 
+        {
+            Console.WriteLine("PrivateMethodInLibrary");
+            File.OpenText("bad path to file");
+        }
+    }
+}
+```
+І скажімо ми використовуєм клас з бібліотеки.
+
+```cs
+using MyClassLibrary;
+
+//...
+
+ExplorationCallStack();
+void ExplorationCallStack()
+{
+
+    Method_In_MyApp_1();
+
+    void Method_In_MyApp_1()
+    {
+        Console.WriteLine("Method_In_MyApp_1");
+        Method_In_MyApp_2();
     }
 
-    void Method_2()
+    void Method_In_MyApp_2()
     {
-        Console.WriteLine("Method_2");
-        MethodFromLibrary();
-    }
-
-    void MethodFromLibrary()
-    {
-        Console.WriteLine("MethodFromLibrary");
-        PrivateMethodFromLibrary();
-    }
-
-    void PrivateMethodFromLibrary()
-    {
-        Console.WriteLine("PrivateMethodFromLibrary");
-        int world = int.Parse("World");
+        Console.WriteLine("Method_In_MyApp_2");
+        MyClass.PublicMethodInLibrary();
     }
 }
 ```
 ```
-Method_1
-Method_2
-MethodFromLibrary
-PrivateMethodFromLibrary
-Unhandled exception. System.FormatException: The input string 'World' was not in a correct format.
-   at System.Number.ThrowOverflowOrFormatException(ParsingStatus status, ReadOnlySpan`1 value, TypeCode type)
-   at System.Int32.Parse(String s)
-   at Program.<<Main>$>g__PrivateMethodFromLibrary|0_17() in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\Program.cs:line 396
-   at Program.<<Main>$>g__MethodFromLibrary|0_16() in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\Program.cs:line 390
-   at Program.<<Main>$>g__Method_2|0_15() in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\Program.cs:line 384
-   at Program.<<Main>$>g__Method_1|0_14() in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\Program.cs:line 378
-   at Program.<<Main>$>g__ExplorationCallStack|0_12() in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\Program.cs:line 372
-   at Program.<Main>$(String[] args) in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\Program.cs:line 369 
+Method_In_MyApp_1
+Method_In_MyApp_2
+PublicMethodInLibrary
+PrivateMethodInLibrary
+Unhandled exception. System.IO.FileNotFoundException: Could not find file 'D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\bin\Debug\net7.0\bad path to file'.
+File name: 'D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\bin\Debug\net7.0\bad path to file'
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.Strategies.OSFileStreamStrategy..ctor(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.Strategies.FileStreamHelpers.ChooseStrategyCore(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.StreamReader.ValidateArgsAndOpenPath(String path, Encoding encoding, Int32 bufferSize)
+   at System.IO.File.OpenText(String path)
+   at MyClassLibrary.MyClass.PrivateMethodInLibrary() in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MyClassLibrary\MyClass.cs:line 14
+   at MyClassLibrary.MyClass.PublicMethodInLibrary() in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MyClassLibrary\MyClass.cs:line 8
+   at Program.<<Main>$>g__Method_In_MyApp_2|0_15() in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\Program.cs:line 385
+   at Program.<<Main>$>g__Method_In_MyApp_1|0_14() in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\Program.cs:line 379
+   at Program.<<Main>$>g__ExplorationCallStack|0_12() in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\Program.cs:line 374
+   at Program.<Main>$(String[] args) in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\Program.cs:line 369
+
 ```
-Методи при визові по черзі попадають в стек і коли виникає виняток можна побачити в зворотн'му порядку як виникала проблема. 
+Методи при визові по черзі попадають в стек і коли виникає виняток можна побачити в зворотньому порядку як виникала проблема.
 
-Перехопити виняток можна або в місці виникнення або више по стеку. Рішеня де перехопити виняток може спростити і стандартізувати код.
+## Викид знову
 
-Іноді бібліотека в якій може виникнути виняток не має досатьно даних шоб корректно її описати. Тоді вона може прехопити виняток зробити запис про нього  та далі викинути виняток шоб він обробився више в стеку.
+Постає питання де перехоплювати виняток і як будувати бібіліотеку.
+
+При створені бібліотеки яка використовується в програмі може небути достатьньо інформації шоб виправити виняток розумним способом. В бібліотеці можна стоврити виняток, додати даних, зарегеструвати помилку, і викинути знову аби він був перехоплений више в стеку визовів. Програма маючи більше даних і дані винятку має можливість виправити її.
+
+Існує три способи повторно викинути виняток в блоці catch. 
 
 ```cs
-CallStackWithThrow();
-void CallStackWithThrow()
+ExplorationRethrowing1();
+void ExplorationRethrowing1()
 {
-    Method_1();
+    Method_In_MyApp_1();
 
-
-    void Method_1()
+    void Method_In_MyApp_1()
     {
-        Console.WriteLine("Method_1");
-        Method_2();
-    }
-
-    void Method_2()
-    {
-        Console.WriteLine("Method_2");
+        Console.WriteLine("Method_In_MyApp_1");
         try
         {
-            MethodFromLibrary();
+            Method_In_MyApp_2();
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Exeption here: {ex.Message}");
-            throw ex;
+            Console.WriteLine($"\nMessage:{ex.Message}\n");
+            Console.WriteLine($"\nStack:{ex.StackTrace}\n");
         }
-
     }
 
-    void MethodFromLibrary()
+    void Method_In_MyApp_2()
     {
-        Console.WriteLine("MethodFromLibrary");
-        PrivateMethodFromLibrary();
-    }
 
-    void PrivateMethodFromLibrary()
-    {
-        Console.WriteLine("PrivateMethodFromLibrary");
-        int world = int.Parse("World");
+        Console.WriteLine("Method_In_MyApp_2");
+        try
+        {
+            MyClass.PublicMethodInLibrary();
+        }
+        catch
+        {
+            // save log about exception
+            throw;
+        }
     }
 }
 ```
-Як ви бачите якшо таким чином перхопити виняток то залишаеться частина визовів стеку. Іноді це пагана практика і щоб залишити повну інформацію замість throw ex екуба визивати throw;
+```
+Method_In_MyApp_1
+Method_In_MyApp_2
+PublicMethodInLibrary
+PrivateMethodInLibrary
+
+Message:Could not find file 'D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\bin\Debug\net7.0\bad path to file'.
+
+
+Stack:   at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options)
+   at Microsoft.Win32.SafeHandles.SafeFileHandle.Open(String fullPath, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.Strategies.OSFileStreamStrategy..ctor(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.Strategies.FileStreamHelpers.ChooseStrategyCore(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
+   at System.IO.StreamReader.ValidateArgsAndOpenPath(String path, Encoding encoding, Int32 bufferSize)
+   at System.IO.File.OpenText(String path)
+   at MyClassLibrary.MyClass.PrivateMethodInLibrary() in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MyClassLibrary\MyClass.cs:line 14
+   at MyClassLibrary.MyClass.PublicMethodInLibrary() in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MyClassLibrary\MyClass.cs:line 8
+   at Program.<<Main>$>g__Method_In_MyApp_2|0_18() in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\Program.cs:line 413
+   at Program.<<Main>$>g__Method_In_MyApp_1|0_17() in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\Program.cs:line 398
+```
+Якшо в блоці catch просто використати throw виняток перекиниться вище з повним стеком викликів.
+
+```cs
+ExplorationRethrowing2();
+void ExplorationRethrowing2()
+{
+    Method_In_MyApp_1();
+
+    void Method_In_MyApp_1()
+    {
+        Console.WriteLine("Method_In_MyApp_1");
+        try
+        {
+            Method_In_MyApp_2();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"\nMessage:{ex.Message}\n");
+            Console.WriteLine($"\nStack:{ex.StackTrace}\n");
+        }
+    }
+
+    void Method_In_MyApp_2()
+    {
+
+        Console.WriteLine("Method_In_MyApp_2");
+        try
+        {
+            MyClass.PublicMethodInLibrary();
+        }
+        catch (IOException ex)
+        {
+            // save log about exception
+            throw ex;
+        }
+    }
+}
+```
+```
+Method_In_MyApp_1
+Method_In_MyApp_2
+PublicMethodInLibrary
+PrivateMethodInLibrary
+
+Message:Could not find file 'D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\bin\Debug\net7.0\bad path to file'.
+
+
+Stack:   at Program.<<Main>$>g__Method_In_MyApp_2|0_21() in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\Program.cs:line 453
+   at Program.<<Main>$>g__Method_In_MyApp_1|0_20() in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\Program.cs:line 433
+```
+Тут перхоплено виняток наче проблема виникнула в цьому місці. Зазвичай це погана практика, оскільки ви втратили деяку потенційно корисну інформацію і може заплутати в вирішені проблеми. Але може бути корисною, якщо ви хочете навмисно видалити цю інформацію, яка містить конфіденційні дані.
+
+```cs
+ExplorationRethrowing3();
+void ExplorationRethrowing3()
+{
+    Method_In_MyApp_1();
+
+    void Method_In_MyApp_1()
+    {
+        Console.WriteLine("Method_In_MyApp_1");
+        try
+        {
+            Method_In_MyApp_2();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"\nMessage:{ex.Message}\n");
+            Console.WriteLine($"\nStack:{ex.StackTrace}\n");
+            Console.WriteLine("\n");
+            Console.WriteLine($"Inner ecxeption. Message:{ex.InnerException?.Message}");
+            Console.WriteLine($"Inner ecxeption. TargetSite:{ex.InnerException?.TargetSite}");
+            Console.WriteLine($"Inner ecxeption. CallStack:{ex.InnerException?.TargetSite}");
+        }
+    }
+
+    void Method_In_MyApp_2()
+    {
+        Console.WriteLine("Method_In_MyApp_2");
+        try
+        {
+            MyClass.PublicMethodInLibrary();
+        }
+        catch (IOException ex)
+        {
+            // save log about exception
+            throw new InvalidOperationException("Problem from MyClass.PublicMethodInLibrary. See inner exception ",ex);
+        }
+    }
+}
+```
+```
+Method_In_MyApp_1
+Method_In_MyApp_2
+PublicMethodInLibrary
+PrivateMethodInLibrary
+
+Message:Problem from MyClass.PublicMethodInLibrary. See inner exception
+
+
+Stack:   at Program.<<Main>$>g__Method_In_MyApp_2|0_24() in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\Program.cs:line 491
+   at Program.<<Main>$>g__Method_In_MyApp_1|0_23() in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\Program.cs:line 468
+
+
+
+Inner ecxeption. Message:Could not find file 'D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\bin\Debug\net7.0\bad path to file'.
+Inner ecxeption. TargetSite:Microsoft.Win32.SafeHandles.SafeFileHandle CreateFile(System.String, System.IO.FileMode, System.IO.FileAccess, System.IO.FileShare, System.IO.FileOptions)
+Inner ecxeption. CallStack:Microsoft.Win32.SafeHandles.SafeFileHandle CreateFile(System.String, System.IO.FileMode, System.IO.FileAccess, System.IO.FileShare, System.IO.FileOptions)
+```
+Тут ми спіймали виняток і використали його в конструкторі нового. Тобто обгорнули виняток в нови і передали вище. Таким чино якби віділили винтяки.  
 
 Таким чином слід перехоплювати виняток коли вас є повний обсях даних шо відбулося. Якшо не можете в повній мірі обробити виняток вам слід дозволити винятку пройти через стек викликів на вищий рівень.

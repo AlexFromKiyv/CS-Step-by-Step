@@ -1,4 +1,5 @@
 ﻿using MultipleExceptions;
+using MyClassLibrary;
 
 //ExplorationUncaughtException();
 void ExplorationUncaughtException()
@@ -365,41 +366,129 @@ void ExplorationCathWhen()
     }
 }
 
-
-UsingBuilInExceptions();
-void UsingBuilInExceptions()
+//ExplorationCallStack();
+void ExplorationCallStack()
 {
 
-    // account = null
-    try
+    Method_In_MyApp_1();
+
+    void Method_In_MyApp_1()
     {
-        AddSum(null, 12);
-    }
-    catch (Exception e)
-    {
-        Console.WriteLine(e.Message);
+        Console.WriteLine("Method_In_MyApp_1");
+        Method_In_MyApp_2();
     }
 
-    // sum < 0
-    try
+    void Method_In_MyApp_2()
     {
-        AddSum("3234 2345", -10);
+        Console.WriteLine("Method_In_MyApp_2");
+        MyClass.PublicMethodInLibrary();
     }
-    catch (Exception e)
-    {
-        Console.WriteLine(e.Message);
-    }
+}
 
-    void AddSum(string account, decimal sum)
+//ExplorationRethrowing1();
+void ExplorationRethrowing1()
+{
+    Method_In_MyApp_1();
+
+    void Method_In_MyApp_1()
     {
-        if (account is null)
+        Console.WriteLine("Method_In_MyApp_1");
+        try
         {
-            throw new ArgumentNullException(paramName: nameof(account)); // Here use built in exception 
+            Method_In_MyApp_2();
         }
-        // or   ArgumentException.ThrowIfNullOrEmpty(account); // Here use built in exception
-        if (sum < 0)
+        catch (Exception ex)
         {
-            throw new ArgumentException(message: "The sum must be greater than zero."); // Here use built in exception
+            Console.WriteLine($"\nMessage:{ex.Message}\n");
+            Console.WriteLine($"\nStack:{ex.StackTrace}\n");
+        }
+    }
+
+    void Method_In_MyApp_2()
+    {
+
+        Console.WriteLine("Method_In_MyApp_2");
+        try
+        {
+            MyClass.PublicMethodInLibrary();
+        }
+        catch 
+        {
+            // save log about exception
+            throw;
+        }
+    }
+}
+
+//ExplorationRethrowing2();
+void ExplorationRethrowing2()
+{
+    Method_In_MyApp_1();
+
+    void Method_In_MyApp_1()
+    {
+        Console.WriteLine("Method_In_MyApp_1");
+        try
+        {
+            Method_In_MyApp_2();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"\nMessage:{ex.Message}\n");
+            Console.WriteLine($"\nStack:{ex.StackTrace}\n");
+        }
+    }
+
+    void Method_In_MyApp_2()
+    {
+
+        Console.WriteLine("Method_In_MyApp_2");
+        try
+        {
+            MyClass.PublicMethodInLibrary();
+        }
+        catch (IOException ex)
+        {
+            // save log about exception
+            throw ex;
+        }
+    }
+}
+
+ExplorationRethrowing3();
+void ExplorationRethrowing3()
+{
+    Method_In_MyApp_1();
+
+    void Method_In_MyApp_1()
+    {
+        Console.WriteLine("Method_In_MyApp_1");
+        try
+        {
+            Method_In_MyApp_2();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"\nMessage:{ex.Message}\n");
+            Console.WriteLine($"\nStack:{ex.StackTrace}\n");
+            Console.WriteLine("\n");
+            Console.WriteLine($"Inner ecxeption. Message:{ex.InnerException?.Message}");
+            Console.WriteLine($"Inner ecxeption. TargetSite:{ex.InnerException?.TargetSite}");
+            Console.WriteLine($"Inner ecxeption. CallStack:{ex.InnerException?.TargetSite}");
+        }
+    }
+
+    void Method_In_MyApp_2()
+    {
+        Console.WriteLine("Method_In_MyApp_2");
+        try
+        {
+            MyClass.PublicMethodInLibrary();
+        }
+        catch (IOException ex)
+        {
+            // save log about exception
+            throw new InvalidOperationException("Problem from MyClass.PublicMethodInLibrary. See inner exception ",ex);
         }
     }
 }

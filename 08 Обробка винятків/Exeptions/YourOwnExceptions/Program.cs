@@ -68,3 +68,41 @@ void ExplorationCarIsDead_v3_Exception()
         Console.WriteLine($"Speed:\t{e.Speed}");
     }
 }
+
+UsingBuilInExceptions();
+void UsingBuilInExceptions()
+{
+
+    // account = null
+    try
+    {
+        AddSum(null, 12);
+    }
+    catch (Exception e)
+    {
+        Console.WriteLine(e.Message);
+    }
+
+    // sum < 0
+    try
+    {
+        AddSum("3234 2345", -10);
+    }
+    catch (Exception e)
+    {
+        Console.WriteLine(e.Message);
+    }
+
+    void AddSum(string account, decimal sum)
+    {
+        if (account is null)
+        {
+            throw new ArgumentNullException(paramName: nameof(account)); // Here use built in exception 
+        }
+        // or   ArgumentException.ThrowIfNullOrEmpty(account); // Here use built in exception
+        if (sum < 0)
+        {
+            throw new ArgumentException(message: "The sum must be greater than zero."); // Here use built in exception
+        }
+    }
+}

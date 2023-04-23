@@ -555,3 +555,18 @@ You entered not whole number!
 Enter whole number:
 ```
 Тут в нагоді пригодився метод класу Int32 TryParse. Такий підхід уникнути виняток може бути швидше і простіше. Тут вся відповідальність перекладається на метод з сістемної бібліотеки.
+
+Також можна реалізовувати методи використовуючи шаблон try.
+```cs
+static bool TryParse(string? input, out Person value)
+{
+  if (someFailure)
+  {
+    value = default(Person);
+    return false;
+  }
+  // successfully parsed the string into a Person
+  value = new Person() { ... };
+  return true;
+}
+```
