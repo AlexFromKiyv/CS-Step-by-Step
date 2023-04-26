@@ -14,7 +14,7 @@ void ExplorationICloneable()
     void CloneMe(ICloneable cloneable)
     {
         object TheClone = cloneable.Clone();
-        Console.WriteLine("\n"+cloneable);
+        Console.WriteLine("\n" + cloneable);
         Console.WriteLine($"Clone:{TheClone}");
         Console.WriteLine($"Type:{TheClone.GetType()}");
         Console.WriteLine($"ReferenceEquals:{ReferenceEquals(cloneable, TheClone)}");

@@ -4,8 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace InterfaceTypesVsAbstractClasses
+namespace Interfaces
 {
+
     public abstract class CloneableType
     {
         public abstract object Clone();
@@ -15,8 +16,8 @@ namespace InterfaceTypesVsAbstractClasses
     {
 
     }
-       
+
     //public class Bus : Car, CloneableType { } // cannot multiple base classes 
 
-    
+
 }
