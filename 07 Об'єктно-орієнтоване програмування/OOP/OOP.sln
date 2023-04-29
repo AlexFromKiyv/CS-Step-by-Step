@@ -35,8 +35,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClassCastingRules", "ClassC
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SuperParentClass", "SuperParentClass\SuperParentClass.csproj", "{999A98D2-741C-4BD3-8F5E-9E02928BF471}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InterfaceTypesVsAbstractClasses", "InterfaceTypesVsAbstractClasses\InterfaceTypesVsAbstractClasses.csproj", "{D0C9155B-1E4C-4CE6-8ED8-1B680458ABB6}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Interfaces", "Interfaces\Interfaces.csproj", "{0ACAD823-E347-4FB0-9673-4DEFD73CFF00}"
 EndProject
 Global
@@ -109,10 +107,6 @@ Global
 		{999A98D2-741C-4BD3-8F5E-9E02928BF471}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{999A98D2-741C-4BD3-8F5E-9E02928BF471}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{999A98D2-741C-4BD3-8F5E-9E02928BF471}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D0C9155B-1E4C-4CE6-8ED8-1B680458ABB6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D0C9155B-1E4C-4CE6-8ED8-1B680458ABB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D0C9155B-1E4C-4CE6-8ED8-1B680458ABB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D0C9155B-1E4C-4CE6-8ED8-1B680458ABB6}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0ACAD823-E347-4FB0-9673-4DEFD73CFF00}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0ACAD823-E347-4FB0-9673-4DEFD73CFF00}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0ACAD823-E347-4FB0-9673-4DEFD73CFF00}.Release|Any CPU.ActiveCfg = Release|Any CPU
