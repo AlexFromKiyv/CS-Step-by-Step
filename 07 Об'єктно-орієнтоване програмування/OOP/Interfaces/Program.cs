@@ -142,9 +142,9 @@ void ExplorationDefaultImplamentationInterface()
 
 }
 
-ExplorationStaicConstructorAndMemeberOfInterface();
+ExplorationStaticConstructorAndMemeberOfInterface();
 
-void ExplorationStaicConstructorAndMemeberOfInterface()
+void ExplorationStaticConstructorAndMemeberOfInterface()
 {
     Console.WriteLine(IRegularPointy.Inscription);
 

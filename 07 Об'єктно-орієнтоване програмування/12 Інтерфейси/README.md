@@ -474,9 +474,9 @@ Drawing Garden Square
     }
 ```
 ```cs
-ExplorationStaicConstructorAndMemeberOfInterface();
+ExplorationStaticConstructorAndMemeberOfInterface();
 
-void ExplorationStaicConstructorAndMemeberOfInterface()
+void ExplorationStaticConstructorAndMemeberOfInterface()
 {
     Console.WriteLine(IRegularPointy.Inscription);
 
