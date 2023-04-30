@@ -456,7 +456,7 @@ Drawing Garden Square
 ```
 Властивість Perimeter, визначена в інтерфейсі IRegularPointy, не визначена в класі Square, що робить її недоступною з екземпляра Square. Для того авби використатти реалізацію з інтерфейса треба явно привести об'єкт до цього типу.
 Можна зразу створювати тип IRegularPointy, але тоді не будуть доступни методі класу Square.
-Таким чином перш ніж робити реалізацію за замовчуванням переконайтесь шо вона не приведе до того шо треба буде шукати реалізацію.
+Таким чином перш ніж робити реалізацію за замовчуванням переконайтесь шо вона доречна і корисна.
 
 ## Статичні конструктори і члени.
 
@@ -489,9 +489,91 @@ void ExplorationStaticConstructorAndMemeberOfInterface()
 No inscription
 Shape ...
 ```
-Інтерфейси можуть мати статичні конструктори і члени які функціонують так само як в класах. Статичні конструктори не можуть мати параметрів і мають доступ лише до статичних членів.
-Визов статичних члені відбувається на рівні інтерфейсу.
+Інтерфейси можуть мати статичні конструктори і члени які функціонують так само як в класах. Статичні конструктори не можуть мати параметрів і мають доступ лише до статичних членів. Визов статичних члені відбувається на рівні інтерфейсу.
 
+## Інтерфейси в якості параметрів.
+
+В методі CloneMe розглядалося використаня інтерфейса в якості параметра. Розглянемо інший приклад.
+
+IDraw3D.cs
+```cs
+    internal interface IDraw3D
+    {
+        void Draw3D();
+    }
+```
+В Types_v2.cs
+```cs
+    class Hexagon : Shape, IPointy, IDraw3D
+    {
+        public Hexagon() { }
+        public Hexagon(string name = "") : base(name)
+        {
+        }
+
+        public int Points => 6;
+
+        public override void Draw()
+        {
+            Console.WriteLine($"Drawing {Name} the Hexagon");
+        }
+
+        public void Draw3D() 
+        {
+            Console.WriteLine("Drawing Hexagon in 3D!");
+        }
+    }
+
+    class ThreeDCircle : Circle, IDraw3D
+    {
+
+        public new void Draw()
+        {
+            Console.WriteLine($"Drawing {Name} 3D Circle");
+        }
+
+        public void Draw3D()
+        {
+            Console.WriteLine("Drawing Circle in 3D!");
+        }
+    }
+```
+```cs
+InterfaceAsParameters();
+void InterfaceAsParameters()
+{
+
+    Shape[] shapes = new Shape[]
+    {
+        new Triangle(),
+        new Circle(),
+        new Hexagon(),
+        new ThreeDCircle()
+    };
+
+    foreach (Shape shape in shapes)
+    {
+        if (shape is IDraw3D s)
+        {
+            DrawIn3D(s);
+        }
+    }
+
+    Shape shape1 = new ThreeDCircle();
+    DrawIn3D((IDraw3D)shape1);
+    
+    void DrawIn3D(IDraw3D shape3D)
+    {
+        shape3D.Draw3D();
+    }
+}
+```
+```
+Drawing Hexagon in 3D!
+Drawing Circle in 3D!
+Drawing Circle in 3D!
+```
+Отже перед тим аби викликати метод з інтерфейсом в якокості параметра, треба бути впевненим шо аргумент приведений до цього інтерфейсного типу.
 
 
 

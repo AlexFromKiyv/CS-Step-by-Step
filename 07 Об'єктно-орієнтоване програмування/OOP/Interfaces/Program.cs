@@ -142,7 +142,7 @@ void ExplorationDefaultImplamentationInterface()
 
 }
 
-ExplorationStaticConstructorAndMemeberOfInterface();
+//ExplorationStaticConstructorAndMemeberOfInterface();
 
 void ExplorationStaticConstructorAndMemeberOfInterface()
 {
@@ -151,4 +151,35 @@ void ExplorationStaticConstructorAndMemeberOfInterface()
     IRegularPointy.Inscription = "Shape ...";
 
     Console.WriteLine(IRegularPointy.Inscription );
+}
+
+InterfaceAsParameters();
+void InterfaceAsParameters()
+{
+
+    Shape[] shapes = new Shape[]
+    {
+        new Triangle(),
+        new Circle(),
+        new Hexagon(),
+        new ThreeDCircle()
+    };
+
+    foreach (Shape shape in shapes)
+    {
+        if (shape is IDraw3D s)
+        {
+            DrawIn3D(s);
+        }
+    }
+
+
+    Shape shape1 = new ThreeDCircle();
+    DrawIn3D((IDraw3D)shape1);
+    
+    
+    void DrawIn3D(IDraw3D shape3D)
+    {
+        shape3D.Draw3D();
+    }
 }

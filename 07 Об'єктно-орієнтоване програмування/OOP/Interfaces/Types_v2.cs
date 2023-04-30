@@ -29,7 +29,7 @@ namespace Interfaces
         }
     }
 
-    class Hexagon : Shape, IPointy
+    class Hexagon : Shape, IPointy, IDraw3D
     {
         public Hexagon() { }
         public Hexagon(string name = "") : base(name)
@@ -42,16 +42,25 @@ namespace Interfaces
         {
             Console.WriteLine($"Drawing {Name} the Hexagon");
         }
+
+        public void Draw3D() 
+        {
+            Console.WriteLine("Drawing Hexagon in 3D!");
+        }
     }
 
-    class ThreeDCircle : Circle
+    class ThreeDCircle : Circle, IDraw3D
     {
 
         public new void Draw()
         {
             Console.WriteLine($"Drawing {Name} 3D Circle");
         }
-      
+
+        public void Draw3D()
+        {
+            Console.WriteLine("Drawing Circle in 3D!");
+        }
     }
 
     class Triangle : Shape, IPointy
