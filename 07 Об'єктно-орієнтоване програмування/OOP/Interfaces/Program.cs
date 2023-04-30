@@ -173,10 +173,8 @@ void InterfaceAsParameters()
         }
     }
 
-
     Shape shape1 = new ThreeDCircle();
     DrawIn3D((IDraw3D)shape1);
-    
     
     void DrawIn3D(IDraw3D shape3D)
     {
