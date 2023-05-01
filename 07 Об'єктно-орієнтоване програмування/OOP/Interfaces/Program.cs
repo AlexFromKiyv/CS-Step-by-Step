@@ -1,5 +1,6 @@
 ﻿
 using Interfaces;
+using System.Runtime.InteropServices;
 
 //ExplorationICloneable();
 void ExplorationICloneable()
@@ -182,7 +183,7 @@ void InterfaceAsParameters()
     }
 }
 
-InterfacesAsReturnValues();
+//InterfacesAsReturnValues();
 void InterfacesAsReturnValues()
 {
 
@@ -211,3 +212,35 @@ void InterfacesAsReturnValues()
         }
     }
 }
+
+ArrayOfInteraceType();
+
+void ArrayOfInteraceType()
+{
+    IPointy[] pointiesObject =
+    {
+        new Triangle("Tringle"),
+        new Hexagon("Hexagon"),
+        new Fork(),
+        new Knife(),
+        new PichFork()
+    };
+    
+    foreach (IPointy po in pointiesObject) 
+    {
+        Console.WriteLine($"Оbject {GetName(po)} has {po.Points} poins.");
+    }
+
+    string? GetName(IPointy pointy)
+    {
+        if(pointy is Shape p)
+        {
+            return p.Name;
+        }
+        else
+        {
+            return pointy.ToString();
+        }
+    }
+}
+

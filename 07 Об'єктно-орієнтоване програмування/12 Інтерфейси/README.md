@@ -243,7 +243,8 @@ Interfaces\Types_v2.cs
 
 ```
 В ціх класах релізована властивість  public int Points { get; } інтерфейсного типу IPointy. Таким чином в наших класах Tiangle , Hexagon реалізовують інтерфейс IPointy,а
-Circle, ThreeDCircle ні оскількі це не має сенсу.
+Circle, ThreeDCircle ні оскількі це не має сенсу. 
+Коли ви додаєте до класу визначеня шо буде реалізован інтерфейс VS подкреслює червоним шо треба реалізувати інтерфейс і підказує шо та як можна реалізувати.
 
 ## Використаня членів інтерфейсу.
 
@@ -616,6 +617,72 @@ Interfaces.Hexagon
 
 ```
 Інтерфейсний тип можна використовувати для значень шо аповертає метод. Зновужтаки процес потребую приведеня до типу. В данному прикладі відбувається і перевірка і приведення.
+
+
+## Массиви інтерфейсних типів.
+
+Інтерфейсний тип можна використовувати для створення массивів.
+
+В Types_v2.cs
+```cs
+    class Fork : IPointy
+    {
+        public int Points => 5;
+    }
+
+    class Knife : IPointy
+    {
+        public int Points => 2;
+    }
+
+    class PichFork : IPointy
+    {
+        public int Points => 6;
+    }
+```
+Інтерфейс можуть бути реалізовані в різних класах і іерархіях класів. Це може дати деякі потужні конструкції програмування. Тут додано три класи для моделюваня кухонного приладдя та садового інвентаря. Використовуючи ці типи можна створити масив з типом IPonty  
+```cs
+ArrayOfInteraceType();
+void ArrayOfInteraceType()
+{
+    IPointy[] pointiesObject =
+    {
+        new Triangle("Tringle"),
+        new Hexagon("Hexagon"),
+        new Fork(),
+        new Knife(),
+        new PichFork()
+    };
+    
+    foreach (IPointy po in pointiesObject) 
+    {
+        Console.WriteLine($"Оbject {GetName(po)} has {po.Points} poins.");
+    }
+
+    string? GetName(IPointy pointy)
+    {
+        if(pointy is Shape p)
+        {
+            return p.Name;
+        }
+        else
+        {
+            return pointy.ToString();
+        }
+    }
+}
+```
+```
+Оbject Tringle has 3 poins.
+Оbject Hexagon has 6 poins.
+Оbject Interfaces.Fork has 5 poins.
+Оbject Interfaces.Knife has 2 poins.
+Оbject Interfaces.PichFork has 6 poins.
+
+```
+Хоча всі об'єкти мають походження від різних класів і іерархій і мають різне призначеня і сенс, всі вони підтримують інтерфейс і тому можуть бути елементами масиву. 
+Таким чином якшо створити інтерфейс руху чогось і реалізувати його в класах то єлементами масиву можуть бути і літак і птах і велосипед. 
+
 
 
 

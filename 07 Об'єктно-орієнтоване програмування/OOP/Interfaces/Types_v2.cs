@@ -99,4 +99,19 @@ namespace Interfaces
     }
 
 
+    class Fork : IPointy
+    {
+        public int Points => 5;
+    }
+
+    class Knife : IPointy
+    {
+        public int Points => 2;
+    }
+
+    class PichFork : IPointy
+    {
+        public int Points => 6;
+    }
+
 }
