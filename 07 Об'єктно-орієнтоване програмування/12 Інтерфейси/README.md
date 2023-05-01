@@ -573,7 +573,49 @@ Drawing Hexagon in 3D!
 Drawing Circle in 3D!
 Drawing Circle in 3D!
 ```
-Отже перед тим аби викликати метод з інтерфейсом в якокості параметра, треба бути впевненим шо аргумент приведений до цього інтерфейсного типу.
+Тут не всі елементи масиву типу який реалізовує інтерфейс IDraw3D. Отже перед тим аби викликати метод з інтерфейсом в якокості параметра, треба бути впевненим шо аргумент приведений до цього інтерфейсного типу.
+
+## Інтрефейс в якості типу шо повертає метод.
+
+```cs
+InterfacesAsReturnValues();
+void InterfacesAsReturnValues()
+{
+
+    Shape[] shapes = new Shape[]
+    {
+        new Triangle(),
+        new Circle(),
+        new Hexagon(),
+        new ThreeDCircle()
+    };
+
+    foreach (Shape shape in shapes)
+    {
+        Console.WriteLine(GetPointy(shape));
+    }
+
+    IPointy? GetPointy(Shape shape)
+    {
+        if(shape is IPointy s)
+        {
+            return s;
+        }
+        else
+        {
+            return null;
+        }
+    }
+}
+```
+```
+Interfaces.Triangle
+
+Interfaces.Hexagon
+
+
+```
+Інтерфейсний тип можна використовувати для значень шо аповертає метод. Зновужтаки процес потребую приведеня до типу. В данному прикладі відбувається і перевірка і приведення.
 
 
 

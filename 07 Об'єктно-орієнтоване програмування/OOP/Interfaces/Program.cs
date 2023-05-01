@@ -153,7 +153,7 @@ void ExplorationStaticConstructorAndMemeberOfInterface()
     Console.WriteLine(IRegularPointy.Inscription );
 }
 
-InterfaceAsParameters();
+//InterfaceAsParameters();
 void InterfaceAsParameters()
 {
 
@@ -179,5 +179,35 @@ void InterfaceAsParameters()
     void DrawIn3D(IDraw3D shape3D)
     {
         shape3D.Draw3D();
+    }
+}
+
+InterfacesAsReturnValues();
+void InterfacesAsReturnValues()
+{
+
+    Shape[] shapes = new Shape[]
+    {
+        new Triangle(),
+        new Circle(),
+        new Hexagon(),
+        new ThreeDCircle()
+    };
+
+    foreach (Shape shape in shapes)
+    {
+        Console.WriteLine(GetPointy(shape));
+    }
+
+    IPointy? GetPointy(Shape shape)
+    {
+        if(shape is IPointy s)
+        {
+            return s;
+        }
+        else
+        {
+            return null;
+        }
     }
 }
