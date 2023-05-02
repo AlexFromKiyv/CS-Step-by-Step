@@ -244,7 +244,7 @@ Interfaces\Types_v2.cs
 ```
 В ціх класах релізована властивість  public int Points { get; } інтерфейсного типу IPointy. Таким чином в наших класах Tiangle , Hexagon реалізовують інтерфейс IPointy,а
 Circle, ThreeDCircle ні оскількі це не має сенсу. 
-Коли ви додаєте до класу визначеня шо буде реалізован інтерфейс VS подкреслює червоним шо треба реалізувати інтерфейс і підказує шо та як можна реалізувати.
+Коли ви додаєте до класу визначеня шо буде реалізован інтерфейс VS подкреслює червоним шо треба реалізувати інтерфейс і підказує(у вигляді лампочки) шо та як можна реалізувати.
 
 ## Використаня членів інтерфейсу.
 
@@ -682,6 +682,95 @@ void ArrayOfInteraceType()
 ```
 Хоча всі об'єкти мають походження від різних класів і іерархій і мають різне призначеня і сенс, всі вони підтримують інтерфейс і тому можуть бути елементами масиву. 
 Таким чином якшо створити інтерфейс руху чогось і реалізувати його в класах то єлементами масиву можуть бути і літак і птах і велосипед. 
+
+## Явна реалізація інтерфейсу.
+
+Клас або структура може реалізовувати різні інтерфейси. Інтерфейси можуть мати члени з одинаковою назвою, тому виникає конфлікт імен.
+
+Intrfaces_v1.cs
+```cs
+    internal interface IDrawToForm
+    {
+        void Draw();
+    }
+
+    internal interface IDrawToMemory
+    {
+        void Draw();
+    }
+
+    internal interface IDrawToPrinter
+    {
+        void Draw();
+    }
+```
+Types_v2.cs
+```cs
+    class Octagon_v1 : IDrawToForm, IDrawToMemory, IDrawToPrinter
+    {
+        public void Draw()
+        {
+            Console.WriteLine("Drawing the Octagon...");
+        }
+    }
+```
+```cs
+void ExplorationInterfacesImplementation()
+{
+    Octagon_v1 octagon = new();
+
+    ((IDrawToForm)octagon).Draw();
+    ((IDrawToMemory)octagon).Draw();
+    ((IDrawToPrinter)octagon).Draw();
+}
+```
+```
+Drawing the Octagon...
+Drawing the Octagon...
+Drawing the Octagon...
+```
+Інтерфейси мають одну сігнатуру для методу і компілятор дозволяє визначити реалізацію для всіх одночасно. Тобто тут може бути проблема яка заключається в тому шо поведінка для різних інтерфейсів найчастіше має бути різнною але вона реалізуеться одним і тим методом.  
+
+Аби поведінка відрізнялась для кожного інтерфейсу його треба реалізовувати явно.
+```cs
+    class Octagon_v2 : IDrawToForm, IDrawToMemory, IDrawToPrinter
+    {
+        void IDrawToForm.Draw()
+        {
+            Console.WriteLine("Drawing the Octagon to Form.");
+        }
+
+        void IDrawToMemory.Draw()
+        {
+            Console.WriteLine("Drawing the Octagon to Memory.");
+        }
+
+        void IDrawToPrinter.Draw()
+        {
+            Console.WriteLine("Drawing the Octagon to Printer.");
+        }
+    }
+```
+```cs
+ExplorationExplicitlyImplementation();
+void ExplorationExplicitlyImplementation()
+{
+    Octagon_v2 octagon = new();
+
+    //octagon.Draw(); // ... does not contain definition Draw()
+    
+    ((IDrawToForm)octagon).Draw();
+    ((IDrawToMemory)octagon).Draw();
+    ((IDrawToPrinter)octagon).Draw();
+}
+```
+```
+Drawing the Octagon to Form.
+Drawing the Octagon to Memory.
+Drawing the Octagon to Printer.
+```
+Тут методи реалізовані за замовчуванням є прватні і не доступні з екземпляра об'єкта. Тому треба виконувати приведеня. Таким чином явною реалізацією можна використовувати шоб 
+приховати "більш просунуті" члени об'єкту. Таким чином при використаня об'єкта буде показувати основні члени а якшо треба шось більш продвинуте треба буде виконувати явне приведення.
 
 
 

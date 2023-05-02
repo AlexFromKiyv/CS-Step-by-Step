@@ -114,4 +114,30 @@ namespace Interfaces
         public int Points => 6;
     }
 
+    class Octagon_v1 : IDrawToForm, IDrawToMemory, IDrawToPrinter
+    {
+        public void Draw()
+        {
+            Console.WriteLine("Drawing the Octagon...");
+        }
+    }
+
+    class Octagon_v2 : IDrawToForm, IDrawToMemory, IDrawToPrinter
+    {
+        void IDrawToForm.Draw()
+        {
+            Console.WriteLine("Drawing the Octagon to Form.");
+        }
+
+        void IDrawToMemory.Draw()
+        {
+            Console.WriteLine("Drawing the Octagon to Memory.");
+        }
+
+        void IDrawToPrinter.Draw()
+        {
+            Console.WriteLine("Drawing the Octagon to Printer.");
+        }
+    }
+
 }

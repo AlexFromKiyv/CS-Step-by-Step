@@ -213,7 +213,7 @@ void InterfacesAsReturnValues()
     }
 }
 
-ArrayOfInteraceType();
+//ArrayOfInteraceType();
 
 void ArrayOfInteraceType()
 {
@@ -244,3 +244,23 @@ void ArrayOfInteraceType()
     }
 }
 
+
+//ExplorationInterfacesImplementation();
+void ExplorationInterfacesImplementation()
+{
+    Octagon_v1 octagon = new();
+
+    ((IDrawToForm)octagon).Draw();
+    ((IDrawToMemory)octagon).Draw();
+    ((IDrawToPrinter)octagon).Draw();
+}
+
+ExplorationExplicitlyImplementation();
+void ExplorationExplicitlyImplementation()
+{
+    Octagon_v2 octagon = new();
+
+    ((IDrawToForm)octagon).Draw();
+    ((IDrawToMemory)octagon).Draw();
+    ((IDrawToPrinter)octagon).Draw();
+}
