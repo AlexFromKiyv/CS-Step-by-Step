@@ -255,7 +255,7 @@ void ExplorationInterfacesImplementation()
     ((IDrawToPrinter)octagon).Draw();
 }
 
-ExplorationExplicitlyImplementation();
+//ExplorationExplicitlyImplementation();
 void ExplorationExplicitlyImplementation()
 {
     Octagon_v2 octagon = new();
@@ -263,4 +263,16 @@ void ExplorationExplicitlyImplementation()
     ((IDrawToForm)octagon).Draw();
     ((IDrawToMemory)octagon).Draw();
     ((IDrawToPrinter)octagon).Draw();
+}
+
+ExplorationInterfaceHierarchies();
+void ExplorationInterfaceHierarchies()
+{
+    BitmapImage image = new();
+
+    image.Draw();
+    image.DrawInBoundingBox(1,1,2,2);
+    image.DrawUpsideDown();
+
+    ((IAdvencedDraw)image).DrawUpsideDown();
 }

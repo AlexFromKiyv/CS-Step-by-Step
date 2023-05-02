@@ -772,10 +772,63 @@ Drawing the Octagon to Printer.
 Тут методи реалізовані за замовчуванням є прватні і не доступні з екземпляра об'єкта. Тому треба виконувати приведеня. Таким чином явною реалізацією можна використовувати шоб 
 приховати "більш просунуті" члени об'єкту. Таким чином при використаня об'єкта буде показувати основні члени а якшо треба шось більш продвинуте треба буде виконувати явне приведення.
 
+# Іерархія інтерфейсів.
 
+Інтерфеси можуть успадковуватись. Подібно до класам інтерфейси можуть розширювати батьківський інтерфейс (або декілька) успадковуючи всі абстрактні члени. Створеня нашадка для інтерфейсів може бути корисна коли є бажання додати функціональність, але не не має бажання міняти існуючий код.
 
+Types_v3.cs
+```cs
+    interface IDrawable
+    {
+        void Draw();
+    }
 
+    interface IAdvencedDraw : IDrawable
+    {
+        void DrawInBoundingBox(int top, int left, int bottom, int right);
+        void DrawUpsideDown();
+    }
 
+    class BitmapImage : IAdvencedDraw
+    {
+        public void Draw()
+        {
+            Console.WriteLine("Drawing");
+        }
+
+        public void DrawInBoundingBox(int top, int left, int bottom, int right)
+        {
+            Console.WriteLine("Drawing in box");
+        }
+
+        public void DrawUpsideDown()
+        {
+            Console.WriteLine("Drawing upside down");
+        }
+    }
+```
+```cs
+ExplorationInterfaceHierarchies();
+void ExplorationInterfaceHierarchies()
+{
+    BitmapImage image = new();
+
+    image.Draw();
+    image.DrawInBoundingBox(1,1,2,2);
+    image.DrawUpsideDown();
+
+    ((IAdvencedDraw)image).DrawUpsideDown();
+}
+```
+```
+Drawing
+Drawing in box
+Drawing upside down
+Drawing upside down
+```
+Маючи такій дізайн інтерфейсів клас повинен реалізовувати всі визначеня в ланцюгу іерархії. Оскільки методи реальзовані як public вони можуть бути визвані на рівні об'єкту.
+
+## Ірархія з реалізацію за замовчуванням.
 
 
 
