@@ -265,14 +265,67 @@ void ExplorationExplicitlyImplementation()
     ((IDrawToPrinter)octagon).Draw();
 }
 
-ExplorationInterfaceHierarchies();
+//ExplorationInterfaceHierarchies();
 void ExplorationInterfaceHierarchies()
 {
-    BitmapImage image = new();
+    BitmapImage_v1 image = new();
 
     image.Draw();
     image.DrawInBoundingBox(1,1,2,2);
     image.DrawUpsideDown();
 
-    ((IAdvencedDraw)image).DrawUpsideDown();
+    ((IAdvencedDraw_v1)image).DrawUpsideDown();
+}
+
+//ExplorationInterfaceHierarchiesWithDefault();
+void ExplorationInterfaceHierarchiesWithDefault()
+{
+    BitmapImage_v2 image = new();
+
+    //image.TimeToDraw() //not contain definition ...
+
+    Console.WriteLine($"Time to drawing {((IAdvencedDraw_v2)image).TimeToDraw()}" );
+}
+
+
+//ExplorationInterfaceHierarchiesWithHideDefault();
+void ExplorationInterfaceHierarchiesWithHideDefault()
+{
+    BitmapImage_v3 image = new();
+
+    Console.WriteLine( ((IDrawable_v3)image).TimeToDraw() );
+
+    Console.WriteLine( ((IAdvencedDraw_v3)image).TimeToDraw());
+}
+
+//ExplorationInterfaceHierarchiesWithIgnoreAllDefault();
+void ExplorationInterfaceHierarchiesWithIgnoreAllDefault()
+{
+    BitmapImage_v4 image = new();
+
+    Console.WriteLine(image.TimeToDraw());
+
+    Console.WriteLine(((IDrawable_v3)image).TimeToDraw());
+
+    Console.WriteLine(((IAdvencedDraw_v3)image).TimeToDraw());
+}
+
+//ExplorationMultipleInheritanceWithInterfaceTypes_1();
+void ExplorationMultipleInheritanceWithInterfaceTypes_1()
+{
+    Rectangle_v6 rectangle = new();
+
+    rectangle.Draw();
+    ((IDrawable_v6)rectangle).Draw();
+    ((IPrintable_v6)rectangle).Draw();
+}
+
+ExplorationMultipleInheritanceWithInterfaceTypes_2();
+void ExplorationMultipleInheritanceWithInterfaceTypes_2()
+{
+    Rectangle_v6_1 rectangle = new();
+
+ //   rectangle.Draw();
+    ((IDrawable_v6)rectangle).Draw();
+    ((IPrintable_v6)rectangle).Draw();
 }

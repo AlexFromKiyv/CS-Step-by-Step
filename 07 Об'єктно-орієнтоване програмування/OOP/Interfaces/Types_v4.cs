@@ -6,21 +6,19 @@ using System.Threading.Tasks;
 
 namespace Interfaces
 {
-    /// <summary>
-    /// Base interface for drawing 
-    /// </summary>
-    interface IDrawable_v1
+    interface IDrawable_v2
     {
         void Draw();
+        int TimeToDraw() => 5; // add default implementation
     }
 
-    interface IAdvencedDraw_v1 : IDrawable_v1
+    interface IAdvencedDraw_v2 : IDrawable_v2
     {
         void DrawInBoundingBox(int top, int left, int bottom, int right);
         void DrawUpsideDown();
     }
 
-    class BitmapImage_v1 : IAdvencedDraw_v1
+    class BitmapImage_v2 : IAdvencedDraw_v2
     {
         public void Draw()
         {

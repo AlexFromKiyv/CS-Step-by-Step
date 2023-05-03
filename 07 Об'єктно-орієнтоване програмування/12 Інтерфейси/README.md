@@ -778,18 +778,21 @@ Drawing the Octagon to Printer.
 
 Types_v3.cs
 ```cs
-    interface IDrawable
+    /// <summary>
+    /// Base interface for drawing 
+    /// </summary>
+    interface IDrawable_v1
     {
         void Draw();
     }
 
-    interface IAdvencedDraw : IDrawable
+    interface IAdvencedDraw_v1 : IDrawable_v1
     {
         void DrawInBoundingBox(int top, int left, int bottom, int right);
         void DrawUpsideDown();
     }
 
-    class BitmapImage : IAdvencedDraw
+    class BitmapImage_v1 : IAdvencedDraw_v1
     {
         public void Draw()
         {
@@ -811,13 +814,13 @@ Types_v3.cs
 ExplorationInterfaceHierarchies();
 void ExplorationInterfaceHierarchies()
 {
-    BitmapImage image = new();
+    BitmapImage_v1 image = new();
 
     image.Draw();
     image.DrawInBoundingBox(1,1,2,2);
     image.DrawUpsideDown();
 
-    ((IAdvencedDraw)image).DrawUpsideDown();
+    ((IAdvencedDraw_v1)image).DrawUpsideDown();
 }
 ```
 ```
@@ -826,9 +829,223 @@ Drawing in box
 Drawing upside down
 Drawing upside down
 ```
-Маючи такій дізайн інтерфейсів клас повинен реалізовувати всі визначеня в ланцюгу іерархії. Оскільки методи реальзовані як public вони можуть бути визвані на рівні об'єкту.
+Маючи такій дізайн інтерфейсів клас повинен реалізовувати всі визначеня в ланцюгу іерархії. Оскільки методи реальзовані як public їх можна кисликати на рівні об'єкту.
 
-## Ірархія з реалізацію за замовчуванням.
+## Ієрархія інтерфейсів з реалізацію за замовчуванням.
+
+Types_v4.cs
+```cs
+    interface IDrawable_v2
+    {
+        void Draw();
+        int TimeToDraw() => 5; // add default implementation
+    }
+
+    interface IAdvencedDraw_v2 : IDrawable_v2
+    {
+        void DrawInBoundingBox(int top, int left, int bottom, int right);
+        void DrawUpsideDown();
+    }
+
+    class BitmapImage_v2 : IAdvencedDraw_v2
+    {
+        public void Draw()
+        {
+            Console.WriteLine("Drawing");
+        }
+
+        public void DrawInBoundingBox(int top, int left, int bottom, int right)
+        {
+            Console.WriteLine("Drawing in box");
+        }
+
+        public void DrawUpsideDown()
+        {
+            Console.WriteLine("Drawing upside down");
+        }
+    }
+```
+```cs
+ExplorationInterfaceHierarchiesWithDefault();
+void ExplorationInterfaceHierarchiesWithDefault()
+{
+    BitmapImage_v2 image = new();
+
+    //image.TimeToDraw() //not contain definition ...
+
+    Console.WriteLine($"Time to drawing {((IAdvencedDraw_v2)image).TimeToDraw()}" );
+}
+```
+```cs
+Time to drawing 5
+```
+
+Інтерфейси які мають базовий інтерфейс з реалізацією можуть успадкувати або створити власну реалізаціє за замовченням. В цьому прикладі інтерфейс автоматично успадковує реалізацію методу від батьківського інтерфейсу. 
+
+Types_v5.cs
+```cs
+    interface IDrawable_v3
+    {
+        void Draw();
+        int TimeToDraw() => 5; 
+    }
+
+    interface IAdvencedDraw_v3 : IDrawable_v3
+    {
+        void DrawInBoundingBox(int top, int left, int bottom, int right);
+        void DrawUpsideDown();
+        new int TimeToDraw() => 15; // new implementation hide upstream
+
+    }
+
+    class BitmapImage_v3 : IAdvencedDraw_v3
+    {
+        public void Draw()
+        {
+            Console.WriteLine("Drawing");
+        }
+
+        public void DrawInBoundingBox(int top, int left, int bottom, int right)
+        {
+            Console.WriteLine("Drawing in box");
+        }
+
+        public void DrawUpsideDown()
+        {
+            Console.WriteLine("Drawing upside down");
+        }
+    }
+```
+```cs
+ExplorationInterfaceHierarchiesWithHideDefault();
+void ExplorationInterfaceHierarchiesWithHideDefault()
+{
+    BitmapImage_v3 image = new();
+
+    Console.WriteLine( ((IDrawable_v3)image).TimeToDraw() );
+
+    Console.WriteLine( ((IAdvencedDraw_v3)image).TimeToDraw());
+}
+```
+```
+5
+15
+```
+Якшо нащадок хоче власну реалізацію зазамовчуванням він повинен приховати бвтьківську реалізацію за допомогою new.
+
+Types_v5.cs
+```cs
+    class BitmapImage_v4 : IAdvencedDraw_v3
+    {
+        public void Draw()
+        {
+            Console.WriteLine("Drawing");
+        }
+
+        public void DrawInBoundingBox(int top, int left, int bottom, int right)
+        {
+            Console.WriteLine("Drawing in box");
+        }
+
+        public void DrawUpsideDown()
+        {
+            Console.WriteLine("Drawing upside down");
+        }
+
+        public int TimeToDraw() => 20; // Hide all default in interface
+    }
+```
+```cs
+ExplorationInterfaceHierarchiesWithIgnoreAllDefault();
+void ExplorationInterfaceHierarchiesWithIgnoreAllDefault()
+{
+    BitmapImage_v4 image = new();
+
+    Console.WriteLine(image.TimeToDraw());
+
+    Console.WriteLine(((IDrawable_v3)image).TimeToDraw());
+
+    Console.WriteLine(((IAdvencedDraw_v3)image).TimeToDraw());
+}
+```
+```
+20
+20
+20
+```
+Як бачимо метод реалізація в класі виконується навіть коли ми робимо приведення до різних інтерфейсних типів.
+
+## Успадкування декількох інтерфейсів.
+
+На відміну від класів, інтерфейс може розширбвати декілька базових інтерфейсів. Це досзволяє робити потужні та гнучкі абстрактні поведінки.
+
+```cs
+    interface IDrawable_v6
+    {
+        void Draw();
+    }
+    interface IPrintable_v6
+    {
+        void Print();
+        void Draw();
+    }
+    interface IShape_v6 : IDrawable_v6, IPrintable_v6
+    {
+        int GetNumberOfSide();
+    }
+
+    class Rectangle_v6 : IShape_v6
+    {
+        public int GetNumberOfSide() => 4;
+        public void Draw() => Console.WriteLine("Drawing ..."); 
+        public void Print() => Console.WriteLine("Printing ...");
+    }
+```
+Тут інтерфейс IShape моделює різні абстракції візуалізації і форм.
+```cs
+ExplorationMultipleInheritanceWithInterfaceTypes_1();
+void ExplorationMultipleInheritanceWithInterfaceTypes_1()
+{
+    Rectangle_v6 rectangle = new();
+
+    rectangle.Draw();
+    ((IDrawable_v6)rectangle).Draw();
+    ((IPrintable_v6)rectangle).Draw();
+}
+```
+```
+Drawing ...
+Drawing ...
+Drawing ...
+
+```
+
+При такому визначені метод Draw може бути викликаний для різних прведенях об'єкта. Тобто для реалізації інтерфейсів достатня одна реалізація для обох класів якшо логіка поведінки однакова. Але поведінка інтерфейсів може відрізнятись тоді інтерфейси потрібно реалізовувати явно.
+
+```cs
+    class Rectangle_v6_1 : IShape_v6
+    {
+        public int GetNumberOfSide() => 4;
+        public void Print() => Console.WriteLine("Printing ...");
+
+        void IDrawable_v6.Draw()
+        {
+            Console.WriteLine("Draw to screen");
+        }
+        void IPrintable_v6.Draw()
+        {
+            Console.WriteLine("Draw to print");
+        }
+    }
+```
+```
+Draw to screen
+Draw to print
+```
+
+
+
+
 
 
 
