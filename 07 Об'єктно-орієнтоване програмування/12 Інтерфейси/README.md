@@ -1038,10 +1038,29 @@ Drawing ...
         }
     }
 ```
+```cs
+
+ExplorationMultipleInheritanceWithInterfaceTypes_2();
+void ExplorationMultipleInheritanceWithInterfaceTypes_2()
+{
+    Rectangle_v6_1 rectangle = new();
+
+ //   rectangle.Draw();
+    ((IDrawable_v6)rectangle).Draw();
+    ((IPrintable_v6)rectangle).Draw();
+}
+```
 ```
 Draw to screen
 Draw to print
 ```
+Таким чином можна більш конкретезувати реалізацію інтерфейсу. 
+
+Інтерфейси є фундаментальним аспектом .Net, тому робота з інтерфейсами буде частиною процесу. Інтерфейси можуть бути корисними в наступних випадках:
+
+- маєте одну іерархію але тільки підмножина класів потребує поведінки.
+- є багато ріних ієрархій і немає загального батька (окрім System.Object) а повединка однакова.
+
 
 
 
