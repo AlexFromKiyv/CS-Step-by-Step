@@ -5,7 +5,7 @@ using ObjectLifetime;
 ExplorationClassObjectReference();
 void ExplorationClassObjectReference()
 {
-    int max = 115;    
+    int max = 250;    
 
     Car myCar = new Car("Volkswagen Käfer", max, 30);
 
