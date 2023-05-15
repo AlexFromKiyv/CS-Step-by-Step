@@ -5,9 +5,17 @@ using ObjectLifetime;
 ExplorationClassObjectReference();
 void ExplorationClassObjectReference()
 {
-    int max = 250;    
+    CreateOldCar();
 
-    Car myCar = new Car("Volkswagen Käfer", max, 30);
+    void CreateOldCar()
+    {
 
-    Console.WriteLine(myCar.ToString());
+        int max = 250;
+
+        Car myCar = new Car("Volkswagen Käfer", 115, 30);
+
+        Console.WriteLine(myCar.ToString());
+        Console.WriteLine(max/ myCar.MaxSpeed);
+
+    }
 }
