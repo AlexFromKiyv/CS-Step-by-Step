@@ -19,3 +19,9 @@ void ExplorationClassObjectReference()
 
     }
 }
+
+void AllocateInMemory()
+{
+    Car car1 = new();
+    Car car2 = new();
+}
