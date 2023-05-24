@@ -81,7 +81,7 @@ void AllocateInMemory()
 
 ## Покоління об'єктів.
 
-Коли середовище виконання намагається знайти недоступні об'єкти воа не перевіряє кожен об'єкт в купі. Ця опреація може займати багато часу. Для оптимізації процесу об'єкт призначаеться до первого "покоління". Ідея поколінь досить проста : чим довше об'єкт існував в купі тим більша ймовірність шо він там залишиться. Наприклад клас який відповидае за основні єлемент управління програмою будє в пам'яті пока програма не закінчить роботу. В тойже час об'єкт методу який не виходив за його межи буде недоступний досить швидко. Кожний об'єкт в купі може належити до коллекції в одному з наступних поколінь:
+Коли середовище виконання намагається знайти недоступні об'єкти воа не перевіряє кожен об'єкт в купі. Ця опреація може займати багато часу. Для оптимізації процесу об'єкт призначаеться до спеціального "покоління". Ідея поколінь досить проста : чим довше об'єкт існував в купі тим більша ймовірність шо він там залишиться. Наприклад клас який відповидае за основні єлемент управління програмою будє в пам'яті пока програма не закінчить роботу. В тойже час об'єкт методу який не виходив за його межи буде недоступний досить швидко. Кожний об'єкт в купі може належити до коллекції в одному з наступних поколінь:
  - Покоління 0 : Це щойно розташований невеликий об'єкт якій ніколи не позначався в коллекціях. Більшисть об'єктів які обробляються збирачем сміття з поклоіння 0 і деякі виживають до покоління 1.
 
  - Покоління 1 : Це об'єкти які пережили збирання сміття. Це поколіня є буфером між короткоживучими і довго живучими. 
@@ -108,6 +108,372 @@ void AllocateInMemory()
 | Server                  | 64 MB  | 4 GB   |
 | Server with > 4 log.CPUs| 32 MB  | 2 GB   |
 | Server with > 8 log.CPUs| 16 MB  | 1 GB   |
+
+## Типи збирачів сміття.
+
+Середа виконання забезпечує два типи збирачив сміття. 
+
+Workstation garbage collection : призначеня для клієнтських програм і є типовим для автономних програм. GC на робочій станції може бути фоновим або несонкурентним.
+Server garbage collection: розроблений для сервених програм які потребують високої пропускної здатності та маштабованості. Такій GC також може працювати в фоновому режимі або неконкурентним. 
+Назви вказують на параметри за замовчуванням для програм робочої станції і сервера, але метод збирання можна налаштувати в runtimeconfig.json або в змінних системного середовища. 
+Workstation GC відбувається в тому самому потоці,і залишаєеться в тому самому пріорітеті, що і під час його запуску. Це може спричинити конкуренцію з іншими потоками. 
+Server GC виникає в кількох виділених потоках, для яких всановлено рівень пріорітету в THREAD_PRIORITY_HIGHEST. Кожен ЦП отримує виділену купу і виделиний поток для GC. Це може привести до того, що збір сміття буде потребувати ресурсів.
+
+### Фонове збирання сміття.
+
+GC збирач сміття може моти справу з призупиненням потоку, коли він очищує об'єкти в керованій купі, використовуючи фонове очищення. Це не означає що збирання стіття відбуваеться на додадкових фонових потоках виконання. Навпаки, якщо фонове збирання сміття відбуваеться для об'єктів, що живуть в нефемерному поколінні, середовище виконання може збирати в ефемерних поколіннях за допомогою виділенного фонового потоку. Такми чино ще більше скорочується час протягом якого певний поток, пов'язаний з деталями збирання, має бути призупинено. Процес очишення некерованих об'єктів що живуть в поколіннях 0 і 1 збробено аби досгти кращої продуктивності(що важливо для систем реального часу,які потребують невеликий, і передбачуваний час, зупинки GC). Це не впливає на те як ви створюєте свою програму. 
+Для всіх практичних цілей ви можете дозволити GC робити свою роботу без вашого втручання. 
+
+## System.GC
+
+Збірка mscorlib.dll надає тип классу System.GC який дозволяє програмно взаємодіяти з GC за допомогою статичних методів. Безпосередбно в вашому коді дуже рідко виникає необхідність користуватись цім класом. Як правило використовуються члени класу тільки коли створюються класи які внутрішньо використовують некеровані ресурси. Це може статися при створені класу якій здійснює виклики API на основі С використовуючи протокол виклику платформи .Net Core або через низкорівневу та складну логіку COM.
+Деякі члени цього класу.
+
+- AddMemoryPressure(), RemoveMemoryPressure() : Дозволяє вказати числове значення, яке представляє "рівень терміновості" виклику GS. Майте на увазі, що ці методи повинні одночасно змінювати тиск і, таким чином, ніколи не знімати тиск, який перевищує загальну кількість, яку ви додали.
+
+- Collect() : Змушує GC виконати збір сміття. Є перезавантаженя методу з урахуванням поколінь а також режим збору.
+
+- CollectionCount() : Повертає числове значення, яке вказує, скількі разів певне покоління було "підметено".
+
+- GetGeneration() : Повертає покоління до якого зараз належить об'єкт.
+
+- GetTotalMemory() : Повертає плановий обсяг пам'яті який виділено в керованій купі. Логічний параметр визначає, чи повинен виклик очікувати збирання сміття перед поверненням.
+
+- MaxGeneration : Повертає максимальну кількість поколінь системи.
+
+- SuppressFinalize() : Встановлює прапорець що об'ект не повинен викликати Finalize().
+
+- WaitForPendingFinalizers() : Призупиняє поточний потік, докі всі об'єкти, які можна завершити не будуть завершені. Цей метод зазвичай викликається безпосередньо після виклику GC.Collect(). 
+
+ClassSystemGC\Program.cs
+```cs
+void UsingSystemGC()
+{
+    Car car = new();
+
+    Console.WriteLine($"Estimated bytes on heap {GC.GetTotalMemory(false)}");
+    Console.WriteLine($"This OS has {GC.MaxGeneration+1} object generations."  );
+    Console.WriteLine($"Generation of car is:{GC.GetGeneration(car)}");
+}
+```
+```
+Estimated bytes on heap 111528
+This OS has 3 object generations.
+Generation of car is:0
+```
+
+## Примусове збирання сміття.
+
+Хоча середовище само виконує необхідне управління пам'ятью, в рідких випадках корисно примусити виконати збирання за допомогою GC.Collect(). Ось дві такі поширені ситуації:
+
+- Ваша програма збираеться виконати блок коду, який ви не хочете переривати можливим GC.
+
+- Програма закінчила розташування надзвичайно великої кількості об'єктів, і ви бажаете видалити стілки пам'яті скілкі можливо. 
+
+Якшо ви визначите шо буде корисним аби GC виявив недоступні об'єкти то ви можете явно запустити процес збирання сміття.
+
+```cs
+ForcingGC();
+void ForcingGC()
+{
+
+    Console.WriteLine($"Estimated bytes on heap {GC.GetTotalMemory(false)}");
+    Car car = new("VW Beetle",140,20);
+    Console.WriteLine($"Generation of car is:{GC.GetGeneration(car)}");
+
+    for (int i = 0; i < 10; i++)
+    {
+        GC.Collect();
+
+        Console.WriteLine($"Estimated bytes on heap {GC.GetTotalMemory(false)}");
+        Console.WriteLine($"Generation of car is:{GC.GetGeneration(car)}");
+    }
+
+}
+```
+```
+Estimated bytes on heap 111528
+Generation of car is:0
+Estimated bytes on heap 97808
+Generation of car is:1
+Estimated bytes on heap 98792
+Generation of car is:2
+Estimated bytes on heap 107448
+Generation of car is:2
+Estimated bytes on heap 100040
+Generation of car is:2
+Estimated bytes on heap 100040
+Generation of car is:2
+Estimated bytes on heap 100064
+Generation of car is:2
+Estimated bytes on heap 100040
+Generation of car is:2
+Estimated bytes on heap 100128
+Generation of car is:2
+Estimated bytes on heap 100464
+Generation of car is:2
+Estimated bytes on heap 116872
+Generation of car is:2
+```
+
+```cs
+ForcingGC();
+void ForcingGC()
+{
+
+    Console.WriteLine($"Estimated bytes on heap {GC.GetTotalMemory(false)}");
+    Car car = new("VW Beetle",140,20);
+    Console.WriteLine($"Generation of car is:{GC.GetGeneration(car)}");
+
+    for (int i = 0; i < 10; i++)
+    {
+        GC.Collect();
+        GC.WaitForPendingFinalizers(); // added
+
+        Console.WriteLine($"Estimated bytes on heap {GC.GetTotalMemory(false)}");
+        Console.WriteLine($"Generation of car is:{GC.GetGeneration(car)}");
+    }
+
+}
+```
+```
+Estimated bytes on heap 111528
+Generation of car is:0
+Estimated bytes on heap 122384
+Generation of car is:1
+Estimated bytes on heap 116376
+Generation of car is:2
+Estimated bytes on heap 116448
+Generation of car is:2
+Estimated bytes on heap 116424
+Generation of car is:2
+Estimated bytes on heap 124616
+Generation of car is:2
+Estimated bytes on heap 116848
+Generation of car is:2
+Estimated bytes on heap 112696
+Generation of car is:2
+Estimated bytes on heap 125040
+Generation of car is:2
+Estimated bytes on heap 125864
+Generation of car is:2
+Estimated bytes on heap 122360
+Generation of car is:2
+```
+
+Коли ви примусово збираете сміття ви повині завжди виконати метод WaitForPendingFinalizers. Тоді ви будете впевнені шо всі об'єкти які є завершувальними мали можливість очиститись для продовженя програми. Цей метод призупинить виклик потоку під час процесу збору. Це добре атже код не викличє методи об'єкту який зараз знищуеться.
+
+```cs
+ForcingGCWithGenetation();
+void ForcingGCWithGenetation()
+{
+    Console.WriteLine($"Estimated bytes on heap {GC.GetTotalMemory(false)}");
+
+    Car[] cars = new Car[1000000];
+    for (int i = 0; i < 1000000; i++)
+    {
+        cars[i] = new("VW",i,i);
+    }
+
+
+    Console.WriteLine($"Estimated bytes on heap {GC.GetTotalMemory(false)}");
+    Console.WriteLine($"Generation of cars is:{GC.GetGeneration(cars)}");
+
+    GC.Collect(0);
+    GC.WaitForPendingFinalizers();
+
+    Console.WriteLine($"Estimated bytes on heap {GC.GetTotalMemory(false)}");
+    Console.WriteLine($"Generation of cars is:{GC.GetGeneration(cars)}");
+
+}
+```
+```
+Estimated bytes on heap 111528
+Estimated bytes on heap 40145328
+Generation of cars is:2
+Estimated bytes on heap 40124000
+Generation of cars is:2
+```
+В прикладі в метод Collact передаеться параметр який вказуе найстаріще покоління збору. Також методу можна передати другий параметр який вказує як саме повинно збиратись сміття.
+
+```cs
+    //
+    // Summary:
+    //     Specifies the behavior for a forced garbage collection.
+    public enum GCCollectionMode
+    {
+        //
+        // Summary:
+        //     The default setting for this enumeration, which is currently System.GCCollectionMode.Forced.
+        Default = 0,
+        //
+        // Summary:
+        //     Forces the garbage collection to occur immediately.
+        Forced = 1,
+        //
+        // Summary:
+        //     Allows the garbage collector to determine whether the current time is optimal
+        //     to reclaim objects.
+        Optimized = 2,
+        //
+        // Summary:
+        //     Requests that the garbage collector decommit as much memory as possible.
+        Aggressive = 3
+    }
+```
+Це дозволяє більш точно вказати як збирати сміття.
+
+```cs
+ForcingGCWithGenetationAndMode();
+void ForcingGCWithGenetationAndMode() 
+{
+    Car car = new Car();
+    Console.WriteLine($"Generation of car is:{GC.GetGeneration(car)}");
+
+    object[] tonsOfObjects = new object[50000];
+
+    for (int i = 0; i < tonsOfObjects.Length; i++)
+    {
+        tonsOfObjects[i] = new();
+    }
+
+    long before = GC.GetTotalMemory(false);
+
+    Console.WriteLine($"Estimated bytes on heap before: {before}");
+
+    GC.Collect(0, GCCollectionMode.Default);
+    //GC.Collect(0, GCCollectionMode.Forced);
+    //GC.Collect(0, GCCollectionMode.Optimized);
+    //GC.Collect(2, GCCollectionMode.Aggressive, true, true);
+    GC.WaitForPendingFinalizers();
+
+    long after = GC.GetTotalMemory(false);
+
+    Console.WriteLine($"Estimated bytes on heap after: {after}");
+
+    Console.WriteLine($"before - after : {before - after}");
+
+    
+
+    Console.WriteLine($"Generation of car is:{GC.GetGeneration(car)}");
+
+    Console.WriteLine($"Generation of tonsOfObjects[9000] is:{GC.GetGeneration(tonsOfObjects[9000])}");
+
+    Console.WriteLine($"Generation 0 has ben swapt: {GC.CollectionCount(0)}");
+    Console.WriteLine($"Generation 1 has ben swapt: {GC.CollectionCount(1)}"); 
+    Console.WriteLine($"Generation 2 has ben swapt: {GC.CollectionCount(2)}");
+
+}
+```
+GCCollectionMode.Default
+```
+Generation of car is:0
+Estimated bytes on heap before: 1726016
+Estimated bytes on heap after: 1718072
+before - after : 7944
+Generation of car is:1
+Generation of tonsOfObjects[9000] is:1
+Generation 0 has ben swapt: 1
+Generation 1 has ben swapt: 0
+Generation 2 has ben swapt: 0
+```
+GCCollectionMode.Forced
+```
+Generation of car is:0
+Estimated bytes on heap before: 1726016
+Estimated bytes on heap after: 1718072
+before - after : 7944
+Generation of car is:1
+Generation of tonsOfObjects[9000] is:1
+Generation 0 has ben swapt: 1
+Generation 1 has ben swapt: 0
+Generation 2 has ben swapt: 0
+```
+GCCollectionMode.Optimized
+```
+Generation of car is:0
+Estimated bytes on heap before: 1726016
+Estimated bytes on heap after: 1726016
+before - after : 0
+Generation of car is:0
+Generation of tonsOfObjects[9000] is:0
+Generation 0 has ben swapt: 0
+Generation 1 has ben swapt: 0
+Generation 2 has ben swapt: 0
+```
+ GC.Collect(2, GCCollectionMode.Aggressive, true, true)
+```
+Generation of car is:0
+Estimated bytes on heap before: 1726016
+Estimated bytes on heap after: 1714864
+before - after : 11152
+Generation of car is:1
+Generation of tonsOfObjects[9000] is:1
+Generation 0 has ben swapt: 1
+Generation 1 has ben swapt: 1
+Generation 2 has ben swapt: 1
+```
+В прикладі створюєеться велика кількість об'єктів. Видно як режим впливає на розміщеня в купі. Як видно з режиму Optimized збирання взагалі не слід проводить в цьому випадку. 
+Крім збирання сміття ми можено створювати finalizable(можуть завершуваться) об'єкти та одноразові.
+
+# Створення finalizable об'єктів.
+
+```cs
+// System.Object
+public class Object
+{
+  ...
+  protected virtual void Finalize() {}
+}
+```
+В класі System.Object є віртуальний метод Finalize. Реалізація за замовчуванням нічого не робить. Коли ви змінюєете метод в власних классах, ви вказуєте логіку очишеня для типу. Оскільки тип protected не можливо викликати напряму з екземпляра  цей метод. Збирач сміття визове цей метод перед виділенням об'єкта. 
+Тип структур не розміщуеться в керованій купі тому цей метод там не працює. Якшо структура має некеровані рексурси, які реба очистити, ви можете реалізувати інтерфейс IDisposable.
+Більшість типів, які зрештою мають предка object, не потребує власної реалізації методу Finalize, бо більшись з них взаємодіє з керованими типами які обслуговуються середою виконання. Додадкове очищеня потрібно якшо використовуються некеровані дфскріптори файлів OC, необроблені некеровані підключнення до БД, фрагменти некерованої пам'яті та ін. На платформі .NET Core некеровані ресурси отримують шляхом прямого виклику API операційної системи за допомогою  Platform Invocation Services (PInvoke) або в результаті деяких складних сценаріїв взаємодії COM.
+Єдина вагома причина перевизначити Finalize() полягає в тому, що ваш клас C# використовує некеровані ресурси через PInvoke або складні завдання сумісності COM (зазвичай через різні члени, визначені типом System.Runtime.InteropServices.Marshal).Причина треба управляти пам'ятью якою не керує середовище виконання.
+
+## Перевизначення System.Object.Finalize()
+
+У випадку використання некерованих ресурсів ви хочете бути впевнені шо основан пам'ять звільнюється у передбачуваний керований спосіб.
+
+FinalizableОbjects\Types.cs
+```cs
+class MyResourceWrapper
+{
+    // Work with unmanaged resources 
+    // 
+    ~MyResourceWrapper() => Console.Beep();
+}
+```
+Припустимо клас використовує некеровані ресурси. Метод Finalize перевизначається незвичним методом. Ключеве слово override не підходить. Для того аби замінити метод Finalize використовується контекст деструктора. Причини альтернативного перевизначення віртуального методу полягають в тому, що компілятор додає велику чатину інфраструктури в неявне перевизначення методу.
+Фіналізатор починаеться з ~ . Вони неявно protected і не приймають модіфікаторів доступу не приймає параметрів і не перезавантажується. Один фіналізатор на клас.
+Реальний фіналізатор звільнить некеровані ресурси.
+
+```cs
+void HowInvokeFinalize()
+{
+
+    CreateObjects(10);
+    //Artificially inflate the memory pressure
+    GC.AddMemoryPressure(2147483647);
+    GC.Collect(0, GCCollectionMode.Forced);
+    GC.WaitForPendingFinalizers();
+
+
+
+    void CreateObjects(int count)
+    {
+        MyResourceWrapper[]? tonsOfObjects = new MyResourceWrapper[count];
+
+        for (int i = 0; i < count; i++)
+        {
+            tonsOfObjects[i] = new();
+        }
+
+        tonsOfObjects = null;
+    }
+}
+```
+
 
 
 
