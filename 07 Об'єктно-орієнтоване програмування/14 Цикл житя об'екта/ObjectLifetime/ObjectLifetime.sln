@@ -7,7 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ObjectLifetime", "ObjectLif
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClassSystemGC", "ClassSystemGC\ClassSystemGC.csproj", "{C8FF2F93-3B7E-487B-B8E2-1A600C08F6F4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinalizableОbjects", "FinalizableОbjects\FinalizableОbjects.csproj", "{3A35A219-6437-45C3-9116-460BB702BD2E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FinalizableОbjects", "FinalizableОbjects\FinalizableОbjects.csproj", "{3A35A219-6437-45C3-9116-460BB702BD2E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DisposableObjects", "DisposableObjects\DisposableObjects.csproj", "{1125196C-02A0-48A1-BF0F-D2E5FEBB5AE1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{3A35A219-6437-45C3-9116-460BB702BD2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3A35A219-6437-45C3-9116-460BB702BD2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3A35A219-6437-45C3-9116-460BB702BD2E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1125196C-02A0-48A1-BF0F-D2E5FEBB5AE1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1125196C-02A0-48A1-BF0F-D2E5FEBB5AE1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1125196C-02A0-48A1-BF0F-D2E5FEBB5AE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1125196C-02A0-48A1-BF0F-D2E5FEBB5AE1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
