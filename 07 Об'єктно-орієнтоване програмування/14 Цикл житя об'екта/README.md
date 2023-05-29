@@ -526,6 +526,186 @@ void UsingDisposableObjects()
 }
 ```
 Метод Dispose можна використовувати не тілки для закінчення поточного об'єкта а також виконання закінченя інщих пов'язаних або виконаня інших операцій. На відміну від Finalize() цілком безпечно взаємодіяти з іншими керованими об'єктами. Привиклику методу не завадить перевірити об'єкт на наявність до інтерфейсного типу IDisposable.
+Важливе правило: Для того аби меньше часу уходило на очищеня пам'яті і тобто більш передбачуване виконаня і продуктивнісь вcього рішеня краше самі реалізуйте IDisposable і викликайте Dispose. Якшо ви використовуєте чужий клас в якому реалізован цей інтерфейс то скоріш за все треба виконувати очищення викликаючи метод.Якшо ви це не зробите пам'ять буде очишена але на це піде більше часу.
+До цього правила є застереження. В деяких бібліотеках базових класів, які реалізовують IDisposable, надається методи яки виконують туж саму мету але мають іншу назву.
+
+```cs
+
+DisposeInLibraries();
+void DisposeInLibraries()
+{
+    FileStream fileStream = new("MyFile.txt", FileMode.OpenOrCreate);
+
+    fileStream.Close();
+    fileStream.Dispose();
+
+}
+```
+У любому випадку тип що має реалізацію інтерфейсу має відповідний метод.
+
+## using
+
+При роботі з керованим об'єктом, який реалізовує IDispose, поширеною практикою є
+використання структурованої обробки винятків щоб забезпечити виклик методу Dispose.
+
+```cs
+DisposeAndTry();
+void DisposeAndTry()
+{
+    MyResourceWrapper myResource = new MyResourceWrapper();
+
+    try
+    {
+        myResource.Resource = "My big resource";
+        Console.WriteLine(myResource.Resource);
+    }
+    finally
+    {
+        myResource.Dispose();
+    } 
+}
+```
+Оскільки постійно загортати кожен disosable тип аби потім визвати метод Dispose не дуже зручно, тому існує інший синтаксис аби досягти той самий результат.
+
+```cs
+DisposeAndUsing();
+void DisposeAndUsing()
+{
+    using(MyResourceWrapper myResource = new MyResourceWrapper()) 
+    {
+        myResource.Resource = "My big resource";
+        Console.WriteLine(myResource.Resource);
+    }
+}
+```
+```
+My big resource
+In dispose.
+```
+При компіляції порміжний CIL код буде такоїж структури як і у випадку з try з використанням методу Dispose. Компілятор покаже помилу якшо ви в using спробуєте використати не IDisposable тип.
+
+```cs
+DisposeAndUsingAndTwoVariable();
+void DisposeAndUsingAndTwoVariable()
+{
+    using (MyResourceWrapper myResource1 = new(), myResource2 = new())
+    {
+        myResource1.Resource = "My big resource 1";
+        Console.WriteLine(myResource1.Resource);
+
+        myResource2.Resource = "My big resource 2 ";
+        Console.WriteLine(myResource2.Resource);
+    }
+}
+```
+```
+My big resource 1
+My big resource 2
+In dispose.
+In dispose.
+```
+Можна створювати декілька об'єктив в межах using. Відповідно кожен об'єкт буде утілізовано.
+
+Можливо використаня тогож самого механізму в іншому синтаксисі.
+
+```cs
+UsingAsDeclatation();
+void UsingAsDeclatation()
+{
+    using MyResourceWrapper myResource = new();
+    myResource.Resource = "Hi resource.";
+    Console.WriteLine(myResource.Resource);
+}
+```
+```
+Hi resource.
+In dispose.
+```
+Замість явного блоку коду з дужками, використовуеться просто змінна в методі. 
+
+## Finalizable з Disposable об'єкти.
+
+При використані фіналізатора ви маєте душений спокій, розуміючи шо він самоочищується при необхідності збирання сміття і не потребує інших зусиль. Зіншого боку ви можете реалізувати інтерфейс IDsiposable, щоб забезпечити очистити пам'ять тоді коли об'єкт вже не потрібен. Але коли забути викликати Dispose об'єкт може "жити" в пам'яті необмежений час.
+Ці підходи можна поєднати і отримати найкрашу з обох. 
+```cs
+    class MyResourceWrapper : IDisposable
+    {
+        ~MyResourceWrapper()
+        {
+            //Clean up any internal unmanaged resources
+            // Don't call Dispose on any managed objects
+        }
+
+        public void Dispose()
+        {
+            //Clean up unmanaged resources here
+            //Call Dispose on other contained disposable objects
+            GC.SuppressFinalize(this);
+        }
+    }
+```
+Якшо користувач об'єкту пам'ятає про виклик Dispose, можна повідомити GC не робити процес фіналізації викликавши GC.SuppressFinalize(this). Такм чином інформується середовище виконання про не потрібність робити фіналізацію і меше вирачаеться ресурсів. Таким чином некеровані ресурси не будуть залишені без уваги при будь якому випадку.     
+
+## Шаблон Disposal
+
+В останньому прикладі очишеня відбувається в двух місцях шо означає дублювання коду обслуговування якого може стати кошмаром. Тому можна вивести цей код в окрему приватну допоміжну функцію. Треба врахувати, що метод Finalize() не позбуваеться керованих об'єктів, тоді як метод Dispose має робити це. Крім того користувач об'єкта може безпечно викликати Dispose не один раз. Отже враховуючи проблему був корпорація Microsoft рекомендує шаблон.
+
+```cs
+    class goodResourseWrapper : IDisposable 
+    {
+        // Used to determine if Dispose() has already been called.
+        private bool disposed = false;
+
+        public void Dispose()
+        {
+            // Call our helper method
+            // Object user triggered cleanup
+            CleanUp(true);
+
+            GC.SuppressFinalize(this);
+        }
+
+        private void CleanUp(bool disposing)
+        {
+            if (!disposed) 
+            { 
+                if (disposing)
+                {
+                    // Dispose managed resources.
+                }
+                // Clean up unmanaged resources here.
+                disposed = true;
+            }
+        }
+
+        ~goodResourseWrapper()
+        {            
+            // Call our helper method
+            // GC triggered cleanup
+            CleanUp(false);
+        }
+    }
+```
+```cs
+using FinalizableAndDisposableObjects;
+UsingDisposalPattern();
+void UsingDisposalPattern()
+{
+    goodResourseWrapper wrapper1 = new goodResourseWrapper();
+    wrapper1.Resource = "Im work";
+    Console.WriteLine(wrapper1.Resource);
+    wrapper1.Dispose();
+    wrapper1.Dispose();
+
+    goodResourseWrapper wrapper2 = new goodResourseWrapper();
+    wrapper2.Resource = "Im work again";
+    Console.WriteLine(wrapper2.Resource);
+}
+```
+В шаблоні визначено приватний допоміжний метод CleanUp. Коли користувач об'єкту ініціює очищеня метод визвиаеться з аргументом true і очищуються всі керовані і некеровані ресурси і . Але коли очищеня викикає за інііцітиви GC метод викликаеться з аргументом false і не чипає внутріні керовані об'єкти. І ше одна важлива річ шо метод після очишеня встанвлює  disposed = true. Це забезпечуж шо метод Dispose можна визивати неоднократно без помилок. 
+Як видно з використання класу можна і ініціювати збір або покластися на GC.
+
+## Відкладені об'єкти.
 
 
 
