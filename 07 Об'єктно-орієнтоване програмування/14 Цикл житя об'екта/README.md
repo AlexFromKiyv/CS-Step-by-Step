@@ -705,7 +705,120 @@ void UsingDisposalPattern()
 В шаблоні визначено приватний допоміжний метод CleanUp. Коли користувач об'єкту ініціює очищеня метод визвиаеться з аргументом true і очищуються всі керовані і некеровані ресурси і . Але коли очищеня викикає за інііцітиви GC метод викликаеться з аргументом false і не чипає внутріні керовані об'єкти. І ше одна важлива річ шо метод після очишеня встанвлює  disposed = true. Це забезпечуж шо метод Dispose можна визивати неоднократно без помилок. 
 Як видно з використання класу можна і ініціювати збір або покластися на GC.
 
-## Відкладені об'єкти.
+## Створення відкладених об'єктів. (Lazy object instantiation)
 
+Іноді при створені класів деякі змінни члени можуть займати великий обсяг пам'яті і також дуже рідко використовуються або взагалі не використовується користоувачем безпосередньо. Таким чином при кожному створені об'єкта виділяється велика кількість ресурсу яка з малою вирогідністью використовується.  
+LazyObjects\Types_v1.cs
+```cs
+    // Represents a single song.
+	class Song
+	{
+        public string Artist { get; set; }
+        public string TrackName { get; set; }
+        public double TrackLength { get; set; }
+    }
 
+    //Represents all songs on a player.
+    class AllTracks
+    {
+        private Song[] _allSongs = new Song[10000];
+
+        public AllTracks()
+        {
+            // Fill up array 
+            Console.WriteLine("Filling up the songs!");
+        }
+    }
+
+    class MediaPlayer_v1
+    {
+        public void Play() { /* Play a song */ }
+        public void Pause() { /* Pause the song */ }
+        public void Stop() { /* Stop playback */}
+        
+        private AllTracks _allTracks = new AllTracks();
+
+        public AllTracks GetAllTracks()
+        {
+            return _allTracks;
+        }
+    }
+```
+```cs
+void ManySongObjects()
+{
+    // Heare create 10000 Songs object
+    MediaPlayer_v1 mediaPlayer_v1 = new MediaPlayer_v1();
+    mediaPlayer_v1.Play();
+    mediaPlayer_v1.Stop();
+}
+```
+В прикладі клас інкапсулює операції музичного плуєра. Тут властивість _allTracks представляю всі записи на пристрої і таким чином буде створено велика кількість об'єктів в пам'яті.
+Зрозуміло шо не має бажання створювати багато об'єктів які ніхто не використовує але які навантажують GC.Можна зробити визначення так що об'єкт буде створено лише тоді коли він використовуеться за допомогою патерна фабрічний метод. Але є простіший спосіб.
+```cs
+
+    class MediaPlayer_v2
+    {
+        public void Play() { /* Play a song */ }
+        public void Pause() { /* Pause the song */ }
+        public void Stop() { /* Stop playback */}
+
+        private Lazy<AllTracks> _allTracks = new Lazy<AllTracks>();
+
+        public AllTracks GetAllTracks()
+        {
+            return _allTracks.Value;
+        }
+    }
+
+```
+```cs
+void WithoutManySongObjects()
+{
+void WithoutManySongObjects()
+{
+    // No allocation of AllTracks object here!
+    MediaPlayer_v2 mediaPlayer = new MediaPlayer_v2();
+    mediaPlayer.Play();
+    mediaPlayer.Stop();
+
+    //Allocation of AllTracks happens when you call GetAllTracks().
+    mediaPlayer.GetAllTracks();
+}
+}
+```
+Бібіліотека базових класів надає загальний клас Lazy<> в просторі імен System. Цей клас дозволяє вам визначити дані, які не будуть створені, якшо ваш кодова база не використовує їх. Оскільки це загальний тип вказуеться тип елементів. В прикладі створеня члена викладаеться до покі він не використовуеться. Зверніть увагу що змінився метод GetAllTracks. Властивість Value повертає об'єкт AllTracks з з массивом у 10000 об'єктів. При такому оновлені класу не буде виділятьися пам`ять на велику кількість об'єктів поки не буде визову GetAllTracks().
+Тип Lazy також можна використовувати коли треба викликати якісь виддаленнй метод або відкласти звязок з БД.
+
+## Налаштування об'єктів типу Lazy<T>
+
+```cs
+        // Default constructor of AllTracks is called when the Lazy<>
+        // variable is used.
+        private Lazy<AllTracks> _allTracks = new Lazy<AllTracks>();
+```
+При визначені змінною таким чином внутрішні данні створюються з використовується конструктор типу AllTracks за замовчуванням. У класа Lazy при використані є можливість не тільки виконанти додадкові конструктори типу але і виконати додадкову роботу(крім створення об'єкта).  
+```cs
+    class MediaPlayer_v3
+    {
+        public void Play() { /* Play a song */ }
+        public void Pause() { /* Pause the song */ }
+        public void Stop() { /* Stop playback */}
+
+        private Lazy<AllTracks> _allTracks = 
+            new Lazy<AllTracks>(() =>
+                {
+                    Console.WriteLine("I do something important here.");
+                    return new AllTracks();
+                }
+            );
+
+        public AllTracks GetAllTracks()
+        {
+            return _allTracks.Value;
+        }
+    }
+```
+Клас Lazy<> дозволяє вказати загальний делегат як необов'язковий параметр, який вказує метод який буде визвано під час створення об'єкту загорнутого типу. Загальний делегат має тип System.Func<>, який може вказувати на метод, який буде повертати той самий тип данних. Шоб все це спростити можно використати лямбда вираз. В прикладі лямбда вираз повинен повернути новий екземпляр типу який обгортаеться і ви можете використовувати будь-який конструктор.
+Таким чином клас Lazy<T> досить користний і може гарантувати що дорогі ресурси будуть виділятись тільки тоді коли вони потрібні.
 

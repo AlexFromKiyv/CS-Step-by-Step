@@ -11,7 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FinalizableОbjects", "Fina
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DisposableObjects", "DisposableObjects\DisposableObjects.csproj", "{1125196C-02A0-48A1-BF0F-D2E5FEBB5AE1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinalizableAndDisposableObjects", "FinalizableAndDisposableObjects\FinalizableAndDisposableObjects.csproj", "{1C73EE42-55DE-4F39-90E8-1729AF286800}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FinalizableAndDisposableObjects", "FinalizableAndDisposableObjects\FinalizableAndDisposableObjects.csproj", "{1C73EE42-55DE-4F39-90E8-1729AF286800}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LazyObjects", "LazyObjects\LazyObjects.csproj", "{6C86FA77-9288-4650-A8A6-7DB5EF426BDD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{1C73EE42-55DE-4F39-90E8-1729AF286800}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1C73EE42-55DE-4F39-90E8-1729AF286800}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1C73EE42-55DE-4F39-90E8-1729AF286800}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6C86FA77-9288-4650-A8A6-7DB5EF426BDD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C86FA77-9288-4650-A8A6-7DB5EF426BDD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C86FA77-9288-4650-A8A6-7DB5EF426BDD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C86FA77-9288-4650-A8A6-7DB5EF426BDD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
