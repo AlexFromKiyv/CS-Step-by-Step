@@ -54,4 +54,23 @@ namespace LazyObjects
         }
     }
 
+    class MediaPlayer_v3
+    {
+        public void Play() { /* Play a song */ }
+        public void Pause() { /* Pause the song */ }
+        public void Stop() { /* Stop playback */}
+
+        private Lazy<AllTracks> _allTracks =
+            new Lazy<AllTracks>(() =>
+            {
+                Console.WriteLine("I do something important here.");
+                return new AllTracks();
+            }
+            );
+
+        public AllTracks GetAllTracks()
+        {
+            return _allTracks.Value;
+        }
+    }
 }
