@@ -229,6 +229,7 @@ Rectangle [1,1],[2,2]
     }
 ```
 ```cs
+
 UsingRectangle_v1();
 void UsingRectangle_v1()
 {
@@ -237,11 +238,61 @@ void UsingRectangle_v1()
         TopLeft = new(2, 2),
         BottomRight = new(3, 3)
     };
-
     rectangle.ToConsole();
+
+    Rectangle_v1 rectangle1 = new()
+    {
+        TopLeft = new() { X = 2, Y = 3 },
+        BottomRight = new() { X = 3, Y = 4 }
+    };
+
+    rectangle1.ToConsole();
 }
 ```
 ```
 Rectangle [2,2],[3,3]
-```
 
+Rectangle [2,3],[3,4]
+```
+Ініціалізатори корисно використовувати коли поле або властивість представляє інший клас.
+
+TypesForCar.cs
+```cs
+    class Manufacturer
+    {
+        public string Name { get; set; } = string.Empty;
+    }
+    class Car
+    {
+        public Manufacturer Manufacturer { get; set; }
+        public string Model { get; set; }
+
+        public Car()
+        {
+            Manufacturer = new Manufacturer();
+            Model = string.Empty;
+        }
+
+        public Car(Manufacturer manufacturer, string model)
+        {
+            Manufacturer = manufacturer;
+            Model = model;
+        }
+
+        public void ToConsole() => Console.WriteLine($"{Manufacturer.Name} - {Model}");
+
+    }
+```
+Program.cs
+```cs
+UsefullOfInitializer();
+void UsefullOfInitializer()
+{
+    Car car = new() { Manufacturer = { Name = "VW" }, Model = "E-Golf" };
+    car.ToConsole();
+}
+```
+```
+VW - E-Golf
+```
+Зверніть увагу як встановлена властивість Manufacturer = { Name = "VW" };

@@ -63,7 +63,7 @@ void UsingRectangle()
     rectangle.ToConsole();
 }
 
-UsingRectangle_v1();
+//UsingRectangle_v1();
 void UsingRectangle_v1()
 {
     Rectangle_v1 rectangle = new()
@@ -71,6 +71,20 @@ void UsingRectangle_v1()
         TopLeft = new(2, 2),
         BottomRight = new(3, 3)
     };
-
     rectangle.ToConsole();
+
+    Rectangle_v1 rectangle1 = new()
+    {
+        TopLeft = new() { X = 2, Y = 3 },
+        BottomRight = new() { X = 3, Y = 4 }
+    };
+
+    rectangle1.ToConsole();
+}
+
+UsefullOfInitializer();
+void UsefullOfInitializer()
+{
+    Car car = new() { Manufacturer = { Name = "VW" }, Model = "E-Golf" };
+    car.ToConsole();
 }

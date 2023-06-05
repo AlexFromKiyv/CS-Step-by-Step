@@ -306,7 +306,48 @@ driverName: Jack  numberOfSeats: 30
 driverName:   numberOfSeats: 0
 ```
 
+## Деконструктори.
 
+Ця можливість дозволяє розкласти об'єкт на складові.
+
+```cs
+    internal class Car
+    {
+        public string? Manufacturer { get; set; }
+        public string? Model { get; set; }
+
+        public Car(string? manufacturer = "", string? model="")
+        {
+            Manufacturer = manufacturer;
+            Model = model;
+        }
+
+        public void Deconstruct(out string?  manufacturer, out string? model)
+        {
+            manufacturer = Manufacturer;
+            model = Model;            
+        }
+    }
+```
+```cs
+UsingDeconstruct();
+void UsingDeconstruct()
+{
+    Car car = new() { Manufacturer = "VW", Model = "E-Golf" };
+
+    (string? manufacturer, string? model) = car;
+
+    Console.WriteLine( $"{manufacturer} - {model}");
+
+    (_, string? model1) = car;
+
+    Console.WriteLine(model1);
+}
+```
+```
+VW - E-Golf
+E-Golf
+```
 
 
 

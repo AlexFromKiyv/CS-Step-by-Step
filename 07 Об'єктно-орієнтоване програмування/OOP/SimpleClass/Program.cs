@@ -57,7 +57,7 @@ void UsingChainOfConstructors()
     bus25.StateToConsol();
 }
 
-UsingConstructorWithOpionalParameter();
+//UsingConstructorWithOpionalParameter();
 
 void UsingConstructorWithOpionalParameter()
 {
@@ -75,4 +75,18 @@ void UsingConstructorWithOpionalParameter()
 
     Bus bus_5 = new(default, default);
     bus_5.ToConsol();
+}
+
+UsingDeconstruct();
+void UsingDeconstruct()
+{
+    Car car = new() { Manufacturer = "VW", Model = "E-Golf" };
+
+    (string? manufacturer, string? model) = car;
+
+    Console.WriteLine( $"{manufacturer} - {model}");
+
+    (_, string? model1) = car;
+
+    Console.WriteLine(model1);
 }
