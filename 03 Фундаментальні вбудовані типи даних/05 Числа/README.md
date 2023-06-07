@@ -95,7 +95,6 @@ static void ExplorationOfNumbers_3()
     Console.WriteLine(double.PositiveInfinity);
     Console.WriteLine(double.NegativeInfinity);
 
-
     Console.WriteLine("decimal -------------");
     decimal m = 100_000.12345M;
     Console.WriteLine(m);
@@ -105,7 +104,7 @@ static void ExplorationOfNumbers_3()
 
 }
 ```
-Треба зазначити що для типів <em> int, double </em> для відповідних літералів не треба суфіксів. Для <em>long</em> потрібен L, для <em>float</em> - F, для <em>decimal</em> - M
+Треба зазначити що для типів  int, double для відповідних літералів не треба суфіксів. Для long потрібен L, для float - F, для decimal - M
 
 В просторі імен System.Numerics; існуе типи для наукових розрахунків BigInteger який не обмежений.
 ```cs
@@ -128,7 +127,7 @@ static void UsingBigInteger()
 }
 
 ``` 
-# Використання var
+## Використання var
 
 ```cs
 UsingVar();
@@ -147,9 +146,103 @@ static void UsingVar()
     Console.WriteLine($"{myDecimal} : {myDecimal.GetType()}");
 }
 ```
+## Операціїї
+
+## Особливості унарної операції ++
+```
+IncremetAndAssign();
+void IncremetAndAssign()
+{
+    int x;
+    int y;
+
+    x = 1;
+    y = x++;
+    Console.WriteLine($"x = 1;");
+    Console.WriteLine($"y = x++;");
+    Console.WriteLine($"x:{x}  y:{y}");
+    Console.WriteLine();
+    Console.WriteLine("Good practice:");
+    x = 1;
+    x++;
+    y = x;
+    Console.WriteLine($"x = 1;");
+    Console.WriteLine("x++;");
+    Console.WriteLine($"y = x;");
+    Console.WriteLine($"x:{x}  y:{y}");
+}
+```
+
+```
+x = 1;
+y = x++;
+x:2  y:1
+
+Good practice:
+x = 1;
+x++;
+y = x;
+x:2  y:2
+```
+## Бінарні операції.
+```cs
+BinaryOperations();
+void BinaryOperations()
+{
+    int a = 11;
+    int b = 3;
+
+    Console.WriteLine($"{a} + {b}={a + b}");
+    Console.WriteLine($"{a} - {b}={a - b}");
+    Console.WriteLine($"{a} * {b}={a * b}");
+    Console.WriteLine($"{a} / {b}={a / b}");
+    Console.WriteLine($"{a} % {b}={a % b}");
+
+    double c = 11.0;
+    Console.WriteLine($"{c} / {b}={c/b}");
+
+}
+```
+
+```
+11 + 3=14
+11 - 3=8
+11 * 3=33
+11 / 3=3
+11 % 3=2
+11 / 3=3,6666666666666665
+```
+## Присваювання.
+```cs
+AssignmentOperators();
+void AssignmentOperators()
+{
+    int a = 2;
+    Console.WriteLine(a);
+    
+    a += 2;
+    Console.WriteLine(a);
+
+    a -= 2;
+    Console.WriteLine(a);
+
+    a *= 2;
+    Console.WriteLine(a);
+
+    a /= 2;
+    Console.WriteLine(a);
+}
+```
+```
+2
+4
+2
+4
+2
+```
 
 
-# Метод Parse, TryParse
+## Метод Parse, TryParse
 
 З строки можно отримати змінну типу.
 
@@ -301,18 +394,121 @@ static void UsingChacked()
 ```
 Включивши перевірку проекту ви первіряете весь код. Деяки нагружени ділянки можна послабити за допомогою ключового слова unchecked тим самим підвищити продуктивність.
 
+## Як вибрати потрібний тип.
 
+Зазвичай для цілих чисел вибирають int, але можна вибрати враховуючи діапазон.
+```cs
+RangeOfWhole();
 
+void RangeOfWhole()
+{
 
+    Console.WriteLine($"sbyte  {sbyte.MinValue}  {sbyte.MaxValue} byte:{sizeof(sbyte)}");
+    Console.WriteLine($"byte   {byte.MinValue}   {byte.MaxValue} byte:{sizeof(byte)}");
+    Console.WriteLine($"short  {short.MinValue}  {short.MaxValue} byte:{sizeof(short)} ");
+    Console.WriteLine($"ushort {ushort.MinValue} {ushort.MaxValue} byte:{sizeof(ushort)}");
+    Console.WriteLine($"int    {int.MinValue}    {int.MaxValue} byte:{sizeof(int)}");
+    Console.WriteLine($"uint   {uint.MinValue}   {uint.MaxValue} byte:{sizeof(uint)}");
+    Console.WriteLine($"long   {long.MinValue}   {long.MaxValue} byte:{sizeof(long)}");
+    Console.WriteLine($"ulong   {ulong.MinValue}   {ulong.MaxValue} byte:{sizeof(ulong)}");
+}
 
+```
+```
+sbyte  -128  127 byte:1
+byte   0   255 byte:1
+short  -32768  32767 byte:2
+ushort 0 65535 byte:2
+int    -2147483648    2147483647 byte:4
+uint   0   4294967295 byte:4
+long   -9223372036854775808   9223372036854775807 byte:8
+ulong   0   18446744073709551615 byte:8
+```
+Дивлячись на діапазон зрозуміло чому кілкість мість в вагоні не обов'язково зберігати в типі int.
 
- 
+При зберіганні реальних чисел вони перетворюються в бінарну систему обчисленяя і тому 
+в випадку з float або double не повністю точно співпадають с аналогом в 10 системі счислення. Тому треба звертати увагу як буде використовуватися змінна і наскільки важлива точність розрахунків.
 
+Розглянемо особливості типу double i decimal.
 
+Діапазони типів різні.
+```cs
+RangeOfDoubleAndDecimal();
+void RangeOfDoubleAndDecimal()
+{
+    Console.WriteLine($"double   {double.MinValue}   {double.MaxValue} byte:{sizeof(double)}");
+    Console.WriteLine($"decimal   {decimal.MinValue}   {decimal.MaxValue} byte:{sizeof(decimal)}");
+}
+```
+```
+double   -1,7976931348623157E+308   1,7976931348623157E+308 byte:8
+decimal   -79228162514264337593543950335   79228162514264337593543950335 byte:16
+```
+Хоча double займає меньше місця і має більший діапазон але в деяких випадках не відповідає вимогам точності.
+```cs
+DoubleOrDecimal();
+void DoubleOrDecimal()
+{
+    double doubleA = 0.3;
+    double doubleB = 0.2;
+    Console.WriteLine($"DoubleA:{doubleA} DoubleB:{doubleB}");
+    Console.WriteLine($"DoubleA - DoubleB = 0.1? :{(doubleA - doubleB) == 0.1 }");
+    Console.WriteLine($"DoubleA - DoubleB :{doubleA-doubleB}");
+    Console.WriteLine($"DoubleA - DoubleB -0.1 :{doubleA - doubleB - 0.1}");
 
+    Console.WriteLine();
 
+    decimal decimalA = 0.3M;
+    decimal decimalB = 0.2M;
+    Console.WriteLine($"DecimalA:{decimalA} DecimalB:{decimalB} ");
+    Console.WriteLine($"DecimalA - DecimalB = 0.1 ?:{(decimalA - decimalB) == 0.1M}");
+    Console.WriteLine($"DecimalA - DecimalB:{decimalA - decimalB}");
+}
+```
+```
+DoubleA:0,3 DoubleB:0,2
+DoubleA - DoubleB = 0.1? :False
+DoubleA - DoubleB :0,09999999999999998
+DoubleA - DoubleB -0.1 :-2,7755575615628914E-17
 
+DecimalA:0,3 DecimalB:0,2
+DecimalA - DecimalB = 0.1 ?:True
+DecimalA - DecimalB:0,1
+```
+Як видно з прикладу розахунки з використанням double не дають точного співпадіння.
+Таким чином тип double можна використовувати коли з зміною можна використовувати порівняння на > ,< але точне співпадіння не є критерієм принятя рішення. Наприклад вимірювання ваги людини і порівнювання з витривалістю велосипеда не потребують точного співпадіння. Тобто double не гаратує роботу == оскілки результат обчислень може відрізнятися на дуже маленьке значення. В інших випадках він може зберегти память.
 
+Використовуйте decimal для обліку грошей, інжинерних обчислень і всюду де потребується точність обчислень.
 
+## Особливості округлення
+```cs
+RoundingRuleDefault();
 
+void RoundingRuleDefault()
+{
+    Console.WriteLine(Math.Round(3.5));
+    Console.WriteLine(Math.Round(4.5));
+}
+```
+```
+4
+4
+```
+За замовчуванням при округленні використовується правило Banker's Rounding.Округлятиметься в більшу сторону, якщо десяткова частина дорівнює середині 0,5, а недесяткова частина є непарною, але округлятиметься в меншу сторону, якщо недесяткова частина є парною. Це відрізняеться правилам принятим в математиці.
+
+Процес округлення можна контролювати.
+
+```cs
+RoundingRuleAwayFromZero();
+
+void RoundingRuleAwayFromZero()
+{
+    Console.WriteLine(Math.Round(3.5,0,MidpointRounding.AwayFromZero));
+    Console.WriteLine(Math.Round(4.5,0, MidpointRounding.AwayFromZero));
+}
+```
+```
+4
+5
+```
 

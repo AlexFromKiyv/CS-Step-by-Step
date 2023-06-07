@@ -8,6 +8,44 @@ static void ExplorationOfBooleanType()
     Console.WriteLine($"Representation to string: {bool.TrueString}, {bool.FalseString} ");
 }
 
+//AndOrXor();
+void AndOrXor()
+{
+    bool a = true;
+    bool b = false;
+    Console.WriteLine($"AND  | True  | False    ");
+    Console.WriteLine($"True | {a & a,-5} | {a & b,-5} ");
+    Console.WriteLine($"False| {b & a,-5} | {b & b,-5} ");
+    Console.WriteLine();
+    Console.WriteLine($"OR   | True  | False    ");
+    Console.WriteLine($"True | {a | a,-5} | {a | b,-5} ");
+    Console.WriteLine($"False| {b | a,-5} | {b | b,-5} ");
+    Console.WriteLine();
+    Console.WriteLine($"XOR  | True  | False    ");
+    Console.WriteLine($"True | {a ^ a,-5} | {a ^ b,-5} ");
+    Console.WriteLine($"False| {b ^ a,-5} | {b ^ b,-5} ");
+}
+
+//ConditionalLogicalOperators();
+void ConditionalLogicalOperators()
+{
+    Console.WriteLine($"True & TrueReturn :{true & TrueReturn()}");
+    Console.WriteLine($"False & TrueReturn :{false & TrueReturn()}");
+    Console.WriteLine($"True | TrueReturn :{true | TrueReturn()}");
+    Console.WriteLine($"False | TrueReturn :{false | TrueReturn()}");
+
+    Console.WriteLine($"True && TrueReturn :{true && TrueReturn()}");
+    Console.WriteLine($"False && TrueReturn :{false && TrueReturn()}"); // No TrueReturn
+    Console.WriteLine($"True || TrueReturn :{true || TrueReturn()}"); // No TrueReturn
+    Console.WriteLine($"False || TrueReturn :{false || TrueReturn()}");
+
+    bool TrueReturn()
+    {
+        Console.Write("Im Working.  ");
+        return true;
+    }
+} 
+
 
 //UsingParse();
 
@@ -51,4 +89,3 @@ static void UsingTryParse()
         Console.WriteLine($"Cannot convert \"{myString}\" to bool.");
     }
 }
-

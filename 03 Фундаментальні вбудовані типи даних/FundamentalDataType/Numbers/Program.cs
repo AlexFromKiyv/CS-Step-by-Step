@@ -1,7 +1,5 @@
 ﻿using System.Numerics;
 //ExplorationOfNumbers_1();
-
-
 static void ExplorationOfNumbers_1()
 {
     var number1 = 100;
@@ -96,7 +94,7 @@ static void ExplorationOfNumbers_3()
 
 }
 
-UsingVar();
+//UsingVar();
 static void UsingVar()
 {
     var myInt = 100;
@@ -110,6 +108,64 @@ static void UsingVar()
     Console.WriteLine($"{myDouble} : {myDouble.GetType()}");
     Console.WriteLine($"{myFloat} : {myFloat.GetType()}");
     Console.WriteLine($"{myDecimal} : {myDecimal.GetType()}");
+}
+
+//IncremetAndAssign();
+void IncremetAndAssign()
+{
+    int x;
+    int y;
+
+    x = 1;
+    y = x++;
+    Console.WriteLine($"x = 1;");
+    Console.WriteLine($"y = x++;");
+    Console.WriteLine($"x:{x}  y:{y}");
+    Console.WriteLine();
+    Console.WriteLine("Good practice:");
+    x = 1;
+    x++;
+    y = x;
+    Console.WriteLine($"x = 1;");
+    Console.WriteLine("x++;");
+    Console.WriteLine($"y = x;");
+    Console.WriteLine($"x:{x}  y:{y}");
+}
+
+//BinaryOperations();
+void BinaryOperations()
+{
+    int a = 11;
+    int b = 3;
+
+    Console.WriteLine($"{a} + {b}={a + b}");
+    Console.WriteLine($"{a} - {b}={a - b}");
+    Console.WriteLine($"{a} * {b}={a * b}");
+    Console.WriteLine($"{a} / {b}={a / b}");
+    Console.WriteLine($"{a} % {b}={a % b}");
+
+    double c = 11.0;
+    Console.WriteLine($"{c} / {b}={c/b}");
+
+}
+
+//AssignmentOperators();
+void AssignmentOperators()
+{
+    int a = 2;
+    Console.WriteLine(a);
+    
+    a += 2;
+    Console.WriteLine(a);
+
+    a -= 2;
+    Console.WriteLine(a);
+
+    a *= 2;
+    Console.WriteLine(a);
+
+    a /= 2;
+    Console.WriteLine(a);
 }
 
 
@@ -231,4 +287,64 @@ static void UsingChacked()
     {
         Console.WriteLine(ex.Message);
     }
+}
+
+//RangeOfWhole();
+
+void RangeOfWhole()
+{
+
+    Console.WriteLine($"sbyte  {sbyte.MinValue}  {sbyte.MaxValue} byte:{sizeof(sbyte)}");
+    Console.WriteLine($"byte   {byte.MinValue}   {byte.MaxValue} byte:{sizeof(byte)}");
+    Console.WriteLine($"short  {short.MinValue}  {short.MaxValue} byte:{sizeof(short)} ");
+    Console.WriteLine($"ushort {ushort.MinValue} {ushort.MaxValue} byte:{sizeof(ushort)}");
+    Console.WriteLine($"int    {int.MinValue}    {int.MaxValue} byte:{sizeof(int)}");
+    Console.WriteLine($"uint   {uint.MinValue}   {uint.MaxValue} byte:{sizeof(uint)}");
+    Console.WriteLine($"long   {long.MinValue}   {long.MaxValue} byte:{sizeof(long)}");
+    Console.WriteLine($"ulong   {ulong.MinValue}   {ulong.MaxValue} byte:{sizeof(ulong)}");
+}
+
+
+//RangeOfDoubleAndDecimal();
+void RangeOfDoubleAndDecimal()
+{
+    Console.WriteLine($"double   {double.MinValue}   {double.MaxValue} byte:{sizeof(double)}");
+    Console.WriteLine($"decimal   {decimal.MinValue}   {decimal.MaxValue} byte:{sizeof(decimal)}");
+}
+
+
+
+//DoubleOrDecimal();
+void DoubleOrDecimal()
+{
+    double doubleA = 0.3;
+    double doubleB = 0.2;
+    Console.WriteLine($"DoubleA:{doubleA} DoubleB:{doubleB}");
+    Console.WriteLine($"DoubleA - DoubleB = 0.1? :{(doubleA - doubleB) == 0.1 }");
+    Console.WriteLine($"DoubleA - DoubleB :{doubleA-doubleB}");
+    Console.WriteLine($"DoubleA - DoubleB -0.1 :{doubleA - doubleB - 0.1}");
+
+    Console.WriteLine();
+
+    decimal decimalA = 0.3M;
+    decimal decimalB = 0.2M;
+    Console.WriteLine($"DecimalA:{decimalA} DecimalB:{decimalB} ");
+    Console.WriteLine($"DecimalA - DecimalB = 0.1 ?:{(decimalA - decimalB) == 0.1M}");
+    Console.WriteLine($"DecimalA - DecimalB:{decimalA - decimalB}");
+}
+
+//RoundingRuleDefault();
+
+void RoundingRuleDefault()
+{
+    Console.WriteLine(Math.Round(3.5));
+    Console.WriteLine(Math.Round(4.5));
+}
+
+RoundingRuleAwayFromZero();
+
+void RoundingRuleAwayFromZero()
+{
+    Console.WriteLine(Math.Round(3.5,0,MidpointRounding.AwayFromZero));
+    Console.WriteLine(Math.Round(4.5,0, MidpointRounding.AwayFromZero));
 }

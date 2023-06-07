@@ -4,7 +4,7 @@
 
 Коли ви заповнюєте якусь форму наприклад для регістрації ви можете не заповнювати деякі необовязкові поля наприклад сімейний стан або вік. Це приводить до того що в базі данних є поля які не визначені абож null. В базах даним може бути багато мість де дані не визначенні.
 
-Коли поле або об'єкт не визначенно і ми їx використовуем неналежним чином среда виконання викидує NullReferenceException і програма закінчує роботу. Оскільки виправлення помилок іноді дуже дороге задоволення було вирішено вже коли створюється код нагадувати розробнику що в цьому місті може виникнути преблема.
+Коли поле або об'єкт не визначенно і ми їx використовуем неналежним чином среда виконання викидує NullReferenceException і програма закінчує роботу. Оскільки виправлення помилок іноді дуже дороге задоволення було вирішено вже коли створюється код нагадувати розробнику що в цьому місті може виникнути преблема. В prodaction коді для всіх мість де винакає вірогідність винятку треба додавати код перевірки. 
 
 ```cs
 CrashWithNull();
@@ -421,3 +421,61 @@ class Person
 
 ```
 Як бачите цей опреатор спрощує перевірку на null. Також він корисний для подій та делегатів.
+
+## Кращі спопоби перевірки на null
+```cs
+    if (someting is not null)
+    {
+        //Action with something
+    }
+
+    if (someting is null)
+    {
+        //Action with something
+    }
+
+```
+
+## Перевірка аргументів функцій на null.
+
+Коли функція отримує аргументи їх можна первірити на null.
+
+```cs
+ValidationOfFunctionArguments();
+void ValidationOfFunctionArguments()
+{
+    try
+    {
+        //AddSum1(null);
+        AddSum2(null);
+
+    }
+    catch (Exception e)
+    {
+        Console.WriteLine(e.Message);
+    }
+
+
+    // Variant 1
+    void AddSum1(string account, decimal sum = 0)
+    {
+        if (account is null)
+        {
+            throw new ArgumentNullException(nameof(account));
+        }
+        // the rest code
+    }
+
+    // Variant 2
+    void AddSum2(string account, decimal sum = 0)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(account);
+        // the rest code
+
+    }
+}
+```
+```
+Value cannot be null. (Parameter 'account')
+```
+Перевірку на null може згенерувати VS. Для цього треба втати на аргумент(в цьому прикладі account) і натиснути на CTRL + . та вибрати Add null check.

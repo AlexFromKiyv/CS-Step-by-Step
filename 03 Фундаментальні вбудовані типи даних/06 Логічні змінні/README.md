@@ -16,7 +16,78 @@ static void ExplorationOfBooleanType()
 
 Змінна типу <em>bool</em> може мати значення або False або True. В класі System.Boolean є строкове представлення ціх значень.    
 
-# Метод Parse, TryParse
+## Логічні оператори AND &, OR |, XOR ^
+```cs
+
+AndOrXor();
+void AndOrXor()
+{
+    bool a = true;
+    bool b = false;
+    Console.WriteLine($"AND  | True  | False    ");
+    Console.WriteLine($"True | {a & a,-5} | {a & b,-5} ");
+    Console.WriteLine($"False| {b & a,-5} | {b & b,-5} ");
+    Console.WriteLine();
+    Console.WriteLine($"OR   | True  | False    ");
+    Console.WriteLine($"True | {a | a,-5} | {a | b,-5} ");
+    Console.WriteLine($"False| {b | a,-5} | {b | b,-5} ");
+    Console.WriteLine();
+    Console.WriteLine($"XOR  | True  | False    ");
+    Console.WriteLine($"True | {a ^ a,-5} | {a ^ b,-5} ");
+    Console.WriteLine($"False| {b ^ a,-5} | {b ^ b,-5} ");
+}
+```
+```
+AND  | True  | False
+True | True  | False
+False| False | False
+
+OR   | True  | False
+True | True  | True
+False| True  | False
+
+XOR  | True  | False
+True | False | True
+False| True  | False
+```
+## Умовні логічні оператори AND &&, OR ||
+```cs
+
+ConditionalLogicalOperators();
+void ConditionalLogicalOperators()
+{
+    Console.WriteLine($"True & TrueReturn :{true & TrueReturn()}");
+    Console.WriteLine($"False & TrueReturn :{false & TrueReturn()}");
+    Console.WriteLine($"True | TrueReturn :{true | TrueReturn()}");
+    Console.WriteLine($"False | TrueReturn :{false | TrueReturn()}");
+
+    Console.WriteLine($"True && TrueReturn :{true && TrueReturn()}");
+    Console.WriteLine($"False && TrueReturn :{false && TrueReturn()}");
+    Console.WriteLine($"True || TrueReturn :{true || TrueReturn()}");
+    Console.WriteLine($"False || TrueReturn :{false || TrueReturn()}");
+
+    bool TrueReturn()
+    {
+        Console.Write("Im Working.  ");
+        return true;
+    }
+} 
+```
+
+```
+Im Working.  True & TrueReturn :True
+Im Working.  False & TrueReturn :False
+Im Working.  True | TrueReturn :True
+Im Working.  False | TrueReturn :True
+Im Working.  True && TrueReturn :True
+False && TrueReturn :False
+True || TrueReturn :True
+Im Working.  False || TrueReturn :True
+```
+Як видно оператори && || долучають другий операнд тількі тоді коли це потрібно. Це може бути кориснє коли багато поерандів.
+
+
+## Метод Parse, TryParse
 
 З строки можно отримати змінну типу.
 

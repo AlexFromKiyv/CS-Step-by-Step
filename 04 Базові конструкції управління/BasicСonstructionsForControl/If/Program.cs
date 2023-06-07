@@ -1,4 +1,4 @@
-﻿LogicalExpression();
+﻿//LogicalExpression();
 
 static void LogicalExpression()
 {
@@ -85,6 +85,24 @@ static void UsingIs()
     }
 }
 
+//PatternMatchingWithIf();
+void PatternMatchingWithIf()
+{
+    Console.WriteLine(GetSquare(10));
+    Console.WriteLine(GetSquare("Hi"));
+
+    int GetSquare(object o)
+    {
+        if (o is int value)
+        {
+            return value * value;
+        }
+        else
+        {
+            return -1;
+        }
+    }
+}
 
 //UsingTypePattern();
 static void UsingTypePattern()

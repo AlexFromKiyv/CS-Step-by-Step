@@ -136,8 +136,6 @@ Console.WriteLine($"Have a nice day {name}");
 Є можливість це настроїти:
 Tools > Options > Debugging > General > Automatically close the console when debugging stops.  
 
-Для того щoб робити налагодження(debugging) коду на самій лівій сірій смужці можно встановити двойним кліком точку зупинки(breakpoint) коду. запустіть код F5 та подивиться на можливості ходу по точкам зупинки.
-
 Якшо ви хочити змініти версію .NET проекту ви можете двойним кликом нажати на назві або зайти в Properties. Прописати наприклад:
 ```
 <TargetFramework>net5.0</TargetFramework>
@@ -146,10 +144,19 @@ Tools > Options > Debugging > General > Automatically close the console when deb
 
 Шо відбуваеться "під капотом". Копілятор перетворює ваш C# код в intermediate language (IL) (код проміжниї мови) і зберігае в збірці (DLL). Опертори IL низького рівня і виконуться CLR. CLR в свою чергу можуть працювати на різних ОС(Linux,macOS,Windows). Таким чином розривається жорстка залежність від OC. 
 
+## Налагодження (debugging).
+
+Для того щoб робити налагодження(debugging) коду на самій лівій сірій смужці можно встановити двойним кліком точку зупинки(breakpoint) коду. запустіть код F5 та подивиться на можливості ходу по точкам зупинки.
+Треба зазначити шо операція Step Over в панелі пошагового налагоджування не входить в виконання функції, а Step Into переходить до шагів функції.
+
+
+## Додадково
+
 Для створення файла .gitignore існуе команда 
 ```
 dotnet new gitignore
 ```
+У редактора Visual Studio  є список комбінацій клавіш для виконання різних операцій Help > Keyboard Shortcuts Reference.
 
 ## Встановлення Visual Studio Code та створення програми.
 
@@ -165,13 +172,13 @@ VSC можна завантажити з  <a href="https://code.visualstudio.com
 
 Ось перелік найважливіших для роботи з .NET та С# :
 
-| Назва | Пошук |
-| ----------- | ----------- |
-| C# for Visual Studio Code|  ms-dotnettools.csharp |
-|.NET Interactive Notebooks | ms-dotnettools.dotnet-interactivevscode|
-|MSBuild project tools | tinytoy.msbuild-project-tools|
-|REST Client | humao.rest-client|
-|SQL Server (mssql) for Visual Studio Code | ms-mssql.mssql|
+| Назва |
+| ----------- |
+| C#|
+|Polyglot Notebooks|
+|MSBuild project tools |
+|REST Client |
+|SQL Server |
 
 У VSC можна редагувати кількома проектами як одним цілим. 
 

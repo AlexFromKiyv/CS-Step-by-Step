@@ -199,7 +199,43 @@ static void UsingStringBuilder()
 
 Особливістю використання класу є те шо коли ми робимо маніпуляцію то ми звінюемо внутрішніні символьні дані, а не отримуемо нову копію як з класом string. за замовчуванням створюеться рядок з 16 символів. Але можна зразу вказати 256.
 
+## Використовуваня рядків для передачи сирих байтів.
 
+```cs
+UsingBase64encoding();
+void UsingBase64encoding()
+{
+
+    byte[] binaryObject = new byte[128];
+    Random.Shared.NextBytes(binaryObject);
+    for (int i = 0; i < binaryObject.Length; i++)
+    {
+        Console.Write($"{binaryObject[i]:X}");
+    }
+    Console.WriteLine();
+    Console.WriteLine("------Send to network------------");
+
+    string encoded = Convert.ToBase64String(binaryObject);
+    Console.WriteLine(encoded);
+
+    Console.WriteLine();
+    Console.WriteLine("------Get from network------------");
+    byte[] newBinaryObject = Convert.FromBase64String(encoded);
+    for (int i = 0; i < newBinaryObject.Length; i++)
+    {
+        Console.Write($"{newBinaryObject[i]:X}");
+    }
+}
+```
+```
+69155CDAA39DF93C584CFA7DE3FCBDE69946F837F131C4E64FCD62D5F141E07D491568BB7D23F82C875D33ED864AB57D5C9B1F48D6C05F73AB331D339326722965E6A593D719B639C24C4C96C5BA0AF918BE8BB2BE75B2BD2598C90A8AAFA02DB626F2AE59CF1D15D6F8EB1B2CBD01B1AC2C4E11FA7A9CEC568
+------Send to network------------
+aQFVzao53wk8WEz6B94/y95pCUb4N/ExDATmT81i1fFB4H1JFWi7fSP4AsgHXTPthkoLVw1cmx9I1sBfc6szHTOTJnICll5qWT1xm2OcJMTJbFugr5GL6Lsr51sr0lmMkAqKr6AC22JvKuWc8dFdb46xssvQGxrCxOEfp6nOxWg=
+
+------Get from network------------
+69155CDAA39DF93C584CFA7DE3FCBDE69946F837F131C4E64FCD62D5F141E07D491568BB7D23F82C875D33ED864AB57D5C9B1F48D6C05F73AB331D339326722965E6A593D719B639C24C4C96C5BA0AF918BE8BB2BE75B2BD2598C90A8AAFA02DB626F2AE59CF1D15D6F8EB1B2CBD01B1AC2C4E11FA7A9CEC568
+```
+При передачі данних в мережі не відомо як відреагує мережа та ОС на ці данні тому безпечно використовувати методи ToBase64String і FromBase64String які претвотюють байти в рядок і навпаки. 
 
 
 

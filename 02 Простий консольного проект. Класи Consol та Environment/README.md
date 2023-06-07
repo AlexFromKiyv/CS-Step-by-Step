@@ -42,7 +42,7 @@ namespace ConsoleAppWithoutTopLevel
 
 Для того аби компілятор міг перетворити код програми в код виконання всі конструкції повинні відповідати конструкціям язика. Крім того C# потребуе щоб все логіка программи  було визначено в середині типу(клас, структура, ...) увигляді визначених данних та методів. В данному випадку визиваеться метод WriteLine статичного класу Console який находиться в System.  Метод Main точка входу для виконання програми. Объект классу в якому находиться метод Main називаеться application object. Може бути більше одного об`екта виконання. Компілятору можна вказати який метод використовувати як точку входу. Цю установку можна зробити в властивостях проекту в розділі Startup object.
 
-# Top-level statamens
+## Top-level statamens
 
 Додамо в рішення ше один проект.
 
@@ -53,7 +53,7 @@ namespace ConsoleAppWithoutTopLevel
 5. Next
 6. Project name: ConsoleAppWithTopLevel
 7. Next
-8. Не встановіть флажок Do not use top-level stattamens
+8. Не встановлюйте флажок Do not use top-level stattamens
 9. Create
 
 Файл Program.cs виглядає так:
@@ -73,7 +73,33 @@ Console.WriteLine("Hello, World!");
 - Додаткові типи можуть бути оголошені після всіх операторів верхнього рівня.
 - Інструкції верхнього рівня компілюються до класу під назвою Program, дозволяючи додати частковий клас Program для зберігання звичайних методів.
 
-# Передача программі параметрів з консолі.
+Краша практика створити функції , які ви будете викликати в Program.cs, в окремому файлі та вручну визначте їх у частковому класі Program. Це об’єднає їх у автоматично створений клас Program на тому самому рівні, що й метод <Main>$, а не як локальні функції всередині методу <Main>$.
+
+В проекті ConsoleAppWithTopLevel додамо класс myMath
+1. На назві проекту правий клік 
+2. Add
+3. Class з назвою Program.MyMath.cs  
+
+```cs
+    partial class Program
+    {
+        static double RoundAdd(double a,double b) => Math.Round(a+b);
+    }
+```
+В файлі Program.cs додайте
+```cs
+double result = RoundAdd(12.5434,4.34);
+Console.WriteLine(result);
+```
+```
+Hello, World!
+17
+```
+Це крашій варіант але я для компактності небуду створювати додаткових файлів і буду створювати методи в Program.cs
+
+
+
+## Передача программі параметрів з консолі.
 
 Параметри отримані программою доступні в массиві string[] args
 
@@ -105,6 +131,8 @@ for (int i = 0; i < length; i++)
 Для перевірки запустимо проект з консолі додавши параметри:
 1. В Solution Explorer на проекті правий клік > Open in Terminal
 2. В Terminal команда: dotnet run weight 65
+
+Якшо потрібно щоб пробіли були частиною аргументу візміть параметр в подвійні або одинарні дужки.
 
 В классі System.Environment є статичний метод за допомогою якого також можна отримати массив.
 ```cs
@@ -176,7 +204,8 @@ static void UsingConsoleForInputOutputString()
     Console.WriteLine("Hi {0}! {0} like {1}.", name, interests);
     Console.WriteLine("Hi {1}! {1} like {0}.", interests, name );
     Console.WriteLine($"Hi {name}! {name} like {interests}.");
-} 
+
+}
 ```
 
 Закоментуемо виклик методу.
@@ -240,7 +269,7 @@ static void UsingFormattingToGetStringObject()
 ```
 
 
-# Можливості класу System.Environment
+## Можливості класу System.Environment
 
 Додамо в рішеня проект UsingSystemEnvironment типу Console App.
 

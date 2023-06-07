@@ -128,7 +128,7 @@ static void StringInHeap()
     Console.WriteLine(myString);
 }
 
-UsingStringBuilder();
+//UsingStringBuilder();
 
 static void UsingStringBuilder()
 {
@@ -144,4 +144,29 @@ static void UsingStringBuilder()
     Console.WriteLine(mySB.Length);
 
     
+}
+
+UsingBase64encoding();
+void UsingBase64encoding()
+{
+
+    byte[] binaryObject = new byte[128];
+    Random.Shared.NextBytes(binaryObject);
+    for (int i = 0; i < binaryObject.Length; i++)
+    {
+        Console.Write($"{binaryObject[i]:X}");
+    }
+    Console.WriteLine();
+    Console.WriteLine("------Send to network------------");
+
+    string encoded = Convert.ToBase64String(binaryObject);
+    Console.WriteLine(encoded);
+
+    Console.WriteLine();
+    Console.WriteLine("------Get from network------------");
+    byte[] newBinaryObject = Convert.FromBase64String(encoded);
+    for (int i = 0; i < newBinaryObject.Length; i++)
+    {
+        Console.Write($"{newBinaryObject[i]:X}");
+    }
 }
