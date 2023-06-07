@@ -126,3 +126,66 @@ Nissan  Leaf    2005
 Undefined       Undefined
 ```
 
+## Простір імен.
+
+Зазвичай класи та інші типи об'єднуються в логічні блоки направлені на вирішення окремого кола завдань які визначаються ключовим стовом namespace. 
+
+Namespaces\Types1.cs
+```cs
+namespace Account;
+internal class Person
+{
+    string name;
+
+    public Person(string name)
+    {
+        this.name = name;
+    }
+
+    public void ToConsole() => Console.WriteLine(name);
+}
+```
+Namespaces\Types2.cs
+```cs
+namespace Vehicle
+{
+
+    namespace Cars
+    {
+        class Car
+        {
+            public string Manufacturer { get; set; } = "Undefined";
+            public string Model { get; set; } = "Undefinred";
+
+            public void ToConsole() => Console.WriteLine($"{Manufacturer}\t{Model}");
+        }
+    }
+}
+```
+```cs
+
+using Account;
+using Vehicle.Cars;
+
+ToConnectNamespace();
+void ToConnectNamespace()
+{
+    Person person = new("Viktory");
+    person.ToConsole();
+
+    Car car = new Car();
+    car.ToConsole();
+}
+```
+```
+Viktory
+Undefined       Undefinred
+```
+Простір імен може мати вкладений простір і тому терба вказувати повний ланцюг до нього.
+
+Можна підключити простір імен до всіх файлів проекту 
+```cs
+global using Vehicle.Cars;
+```
+
+Існують простори імен які дуже часто використовуються в різних шаблонах додатків тому було вирішино підключати їх на увесь проект. 
