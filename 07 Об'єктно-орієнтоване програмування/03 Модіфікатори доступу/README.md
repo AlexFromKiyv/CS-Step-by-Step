@@ -12,8 +12,7 @@ Private єлементи доступні тільки в класі або ст
 
 ### protected
 
-Protected єлементи доступні в класі в якому вони визначені а також в усіх похідних класах.
-
+Protected єлементи доступні в класі в якому вони визначені а також в усіх похідних класах. Похідний клас може бути в іншій збірці.
 (Корисний при створенні ієрархії класів)
 
 ### internal
@@ -23,7 +22,6 @@ Internal єлементи доступні в рамках збірки.
 ### protected internal 
 
 Protected internal єлементи доступні в рамках збірки та в межах похідного класу іншої збірки.  
-
 (Корсиний при створенні бібліотеки та модульних тестів) 
 
 ### private protected 
@@ -108,5 +106,83 @@ void UsingDog()
     }
 ```
 
+## Модіфікатори в рамках проекту.
 
+AllKindModifiers.cs
+```cs
+    class AllKindModifiers
+    {
+        //private only for this class
+        string VarWithEpmtyModifier = "VarWithEpmtyModifier";
+
+        //private only for this class
+        private string VarWithPrivate = "VarWithPrivate";
+        
+        // for this and inheritance classes from this project
+        protected private string VarWithProtectedPrivate = "VarWithProtectedPrivate";
+
+        // for this and inheritance classes 
+        protected string VarWithProtected = "VarWithProtected";
+
+        // for this project
+        internal string VarWithInternal = "VarWithInternal";
+
+        // for this project and inheritance classes other project
+        protected internal string VarWithProtectedInternal = "VarWithProtectedInternal";
+
+        //for all
+        public string VarWithPublic = "VarWithPublic";
+
+        //this field is private only for this class
+        void MethodWithEpmtyModifier() => Console.WriteLine("MethodWithEpmtyModifier");
+
+        //private only for this class
+        private void MethodWithPrivate() => Console.WriteLine("MethodWithPrivate");
+
+        //for this and inheritance classes from this project
+        protected private void MethodWithProtectedPrivate() => Console.WriteLine("MethodWithProtectedPrivate");
+
+        // for this and inheritance classes 
+        protected void MethodWithProtected() => Console.WriteLine("MethodWithProtected");
+
+        // for this project
+        internal void MethodWithInternal() => Console.WriteLine("MethodWithInternal");
+        
+        // for this project and inheritance classes other project
+        protected internal void MethodWithProtectedInternal() => Console.WriteLine("MethodWithProtectedInternal");
+
+        // for all
+        public void MethodWithPublic() => Console.WriteLine("MethodWithPublic");
+    }
+```
+Класс вказано без модіфікатора, тому він буде internal. Тобто він буде доступний тільки в збірці.
+Спробуємо використати в іншому класі збірки.
+
+```cs
+    internal class CallerAllKindModifiers
+    {
+        public void AttemptingToCall()
+        {
+            AllKindModifiers allDataAndMemeber = new();
+
+            // inaccessible
+            // allDataAndMemeber.VarWithEpmtyModifier 
+            // allDataAndMemeber.VarWithPrivate
+            // allDataAndMemeber.VarWithProtectedPrivate
+            // allDataAndMemeber.VarWithProtected
+            Console.WriteLine(allDataAndMemeber.VarWithInternal);
+            Console.WriteLine(allDataAndMemeber.VarWithProtectedInternal);
+            Console.WriteLine(allDataAndMemeber.VarWithPublic);
+
+            // inaccessible
+            //allDataAndMemeber.MethodWithEpmtyModifier();
+            //allDataAndMemeber.MethodWithPrivate();
+            //allDataAndMemeber.MethodWithProtected();
+            allDataAndMemeber.MethodWithInternal();
+            allDataAndMemeber.MethodWithProtectedInternal();
+            allDataAndMemeber.MethodWithPublic();
+        }
+    }
+```
+Тут явно видно як обмежується доступ.
 
