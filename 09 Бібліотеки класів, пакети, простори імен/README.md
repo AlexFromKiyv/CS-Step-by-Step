@@ -126,19 +126,67 @@ Nissan  Leaf    2005
 Undefined       Undefined
 ```
 
-# Використання пакетів.
+# Пакети Nuget.
 
 Існує багато готових бібліотек яки можна використовувати. Для цого існує менеджер пакетів Nuget.
 Nuget-пакет це архівний файл з dll та іншими файлами для роботи коду. Пакети також мають інформацію про версію. Глобальний репозіторій nuget.org туди розробники додають і завантажують звідти пакети.
 
+## Додавання пакетів.
+
+Створемо рішення Packages з проектом UsingPackages.
+
+Додамо пакет.
+
+1. В Solution Explorer на назві проекту правий клік.
+2. Manage NuGet Packages...
+3. Перейти на закладку Browse.
+4. Ввести Newtonsoft.Json
+5. Вибрати пакет Newtonsoft.Json нажати Install.
+
+ Після додавання в файлі проекту буде 
+ ```
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+ ```
+Якшо використовувати .NET CLI додати пакет в проект, можна за допомогою команди
+```
+dotnet add package Newtonsoft.Json
+```
+
+## Використання пакету
+
+Program.cs
+```cs
+using Newtonsoft.Json;
+
+UsingSerializeObject();
+void UsingSerializeObject()
+{
+    Car car = new("Tesla", "Model 3");
+
+    string carJson = JsonConvert.SerializeObject(car);
+
+    Console.WriteLine(carJson);
+}
 
 
+class Car
+{
+    public string Manufacturer { get; set; } = "Undefined";
+    public string Model { get; set; } = "Undefined";
 
-
-
-
-
-
+    public Car(string manufacturer, string model)
+    {
+        Manufacturer = manufacturer;
+        Model = model;
+    }
+}
+```
+```
+{"Manufacturer":"Tesla","Model":"Model 3"}
+```
+З прикладу видно коли пакет включено в проект його можно використовувати за допомогою using. При потребі в пакеті можна знайти документацію.
 
 ## Простір імен.
 
