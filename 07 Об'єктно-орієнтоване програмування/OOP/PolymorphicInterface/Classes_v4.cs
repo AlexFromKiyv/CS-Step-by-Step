@@ -41,7 +41,7 @@ namespace PolymorphicInterface
         {
             Company = company;
         }
-        public new void ToConsole()
+        public new void ToConsole() // change only here
         {
             base.ToConsole();
             Console.WriteLine($"Company:{Company}");
