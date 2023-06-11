@@ -35,7 +35,7 @@ void ExploreAbstractMethods()
     }
 }
 
-ExploreShadowing();
+//ExploreShadowing();
 void ExploreShadowing()
 {
     Circle_v3 circle_1 = new("VeriBiGThreeDCircle");
@@ -44,4 +44,18 @@ void ExploreShadowing()
     ThreeDCircle_v3 circle_2 = new("VeriBiGThreeDCircle");
     circle_2.Draw();
     ((Circle_v3)circle_2).Draw();
+}
+
+//DifferenceBetweenOverrideAndNew_Override();
+void DifferenceBetweenOverrideAndNew_Override()
+{
+    Person person = new Employee_v1("Viktory", "Farmak");
+    person.ToConsole();
+}
+
+DifferenceBetweenOverrideAndNew_New();
+void DifferenceBetweenOverrideAndNew_New()
+{
+    Person person = new Employee_v2("Viktory", "Farmak");
+    person.ToConsole();
 }

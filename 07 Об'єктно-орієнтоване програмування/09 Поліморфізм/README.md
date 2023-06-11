@@ -525,3 +525,75 @@ Circle()
 new можна застосовувати до (field, constant, static member, or property).
 Але в прикладі показано що можна зробити явне перетвореня до батьківського типу і визвати батьківський метод.
 
+## Різниця між перевизначенням і приховуванням методу батьківського класу.
+
+Розглянемо наступні класи.
+
+```cs
+    class Person
+    {
+        public string Name { get; set; }
+        public Person(string name)
+        {
+            Name = name;
+        }
+        public virtual void ToConsole() => Console.WriteLine($"Name:{Name}");  
+    }
+
+    class Employee_v1 : Person
+    {
+        public string Company { get; set; }
+
+        public Employee_v1(string name, string company): base(name)
+        {
+            Company = company;
+        }
+        public override void ToConsole()
+        {
+            base.ToConsole();
+            Console.WriteLine($"Company:{Company}");
+        }
+    }
+```
+```cs
+DifferenceBetweenOverrideAndNew_Override();
+void DifferenceBetweenOverrideAndNew_Override()
+{
+    Person person = new Employee_v1("Viktory", "Farmak");
+    person.ToConsole();
+} 
+```
+```
+Name:Viktory
+Company:Farmak
+```
+Хоча похідна person типу Person при виконані використовується метод превизначенного методу який знаходиться в heap. Спробуемо теж саме з прихованим методом.
+
+```cs
+    class Employee_v2 : Person
+    {
+        public string Company { get; set; }
+
+        public Employee_v2(string name, string company) : base(name)
+        {
+            Company = company;
+        }
+        public new void ToConsole() // change only here 
+        {
+            base.ToConsole();
+            Console.WriteLine($"Company:{Company}");
+        }
+    }
+```
+```cs
+DifferenceBetweenOverrideAndNew_New();
+void DifferenceBetweenOverrideAndNew_New()
+{
+    Person person = new Employee_v2("Viktory", "Farmak");
+    person.ToConsole();
+}
+```
+```
+Name:Viktory
+```
+Таким чином виконуеться метод класу Person.
