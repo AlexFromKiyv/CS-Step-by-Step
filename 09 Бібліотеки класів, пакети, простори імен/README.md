@@ -125,6 +125,20 @@ void UsingClassBus()
 Nissan  Leaf    2005
 Undefined       Undefined
 ```
+## Сумістність бібліотеки.
+
+Якшо ви відкриєте файл проекту MyLibrary ви зможете побачити строку
+
+```xml
+    <TargetFramework>net7.0</TargetFramework>
+```
+Якшо е потреба можна зробити бібліотеку сумісною з стандартом.
+
+```xml
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>11</LangVersion>
+```
+
 
 # Пакети Nuget.
 
