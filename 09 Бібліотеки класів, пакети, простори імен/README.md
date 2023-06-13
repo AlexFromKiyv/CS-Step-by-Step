@@ -315,4 +315,23 @@ global using global::System;
 global using global::System.Numerics;
 ```
 
+## Викорстання псевдоніма(alias) простору імен.
+
+```cs
+using Env = System.Environment;
+
+UsingAlias();
+void UsingAlias()
+{
+    Console.WriteLine(Env.OSVersion);
+    Console.WriteLine(Env.Version);
+    Console.WriteLine(Env.ProcessorCount);
+ }
+```
+```
+Microsoft Windows NT 10.0.19045.0
+7.0.5
+4
+```
+
 

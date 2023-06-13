@@ -1,8 +1,9 @@
 ﻿
 using Account;
 using Vehicle.Cars;
+using Env = System.Environment;
 
-ToConnectNamespace();
+//ToConnectNamespace();
 void ToConnectNamespace()
 {
     Person person = new("Viktory");
@@ -12,4 +13,10 @@ void ToConnectNamespace()
     car.ToConsole();
 }
 
-
+UsingAlias();
+void UsingAlias()
+{
+    Console.WriteLine(Env.OSVersion);
+    Console.WriteLine(Env.Version);
+    Console.WriteLine(Env.ProcessorCount);
+ }
