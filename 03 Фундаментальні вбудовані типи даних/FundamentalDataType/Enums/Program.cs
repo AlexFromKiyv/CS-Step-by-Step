@@ -1,5 +1,7 @@
 ﻿
 //SimpleEnum();
+using Enums;
+
 static void SimpleEnum()
 {
     WaterStateEnum myEnum = WaterStateEnum.Ice;
@@ -92,7 +94,7 @@ static void UsingBitwiseOperations(){
     Console.WriteLine($"Int.MaxValue =  {Convert.ToString(int.MaxValue, 2)}");
 }
 
-UsingBitwiseOperationsWithEnum();
+//UsingBitwiseOperationsWithEnum();
 static void UsingBitwiseOperationsWithEnum()
 {
     ContactPreferenceEnum contactsJulia = ContactPreferenceEnum.Email | ContactPreferenceEnum.Phone;
@@ -104,6 +106,16 @@ static void UsingBitwiseOperationsWithEnum()
     Console.WriteLine("Email - {0}", (contactsJulia | ContactPreferenceEnum.Email) == contactsJulia);
     Console.WriteLine("Phone - {0}", (contactsJulia | ContactPreferenceEnum.Phone) == contactsJulia);
     Console.WriteLine("Ukrposhta - {0}", (contactsJulia | ContactPreferenceEnum.Ukrposhta) == contactsJulia);
+}
+
+UsingEnumForPerson();
+void UsingEnumForPerson()
+{
+    Person girl = new Person();
+    girl.Name = "Vikotry";
+    girl.TrainingDays = DayOfTheWeek.Monday | DayOfTheWeek.Wednesday | DayOfTheWeek.Friday;
+
+    Console.WriteLine($"{girl.Name} is training {girl.TrainingDays}");
 }
 
 

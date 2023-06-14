@@ -206,10 +206,53 @@ enum ContactPreferenceEnum
     Ukrposhta = 8
 }
 ```
+```
+Email, Phone
+
+None - False
+Email - True
+Phone - True
+Ukrposhta - False
+```
 
 
+Ше один приклад використання Enum.
 
+Types.cs
+```cs
+class Person
+{
+    public string? Name { get; set; }
 
+    public DayOfTheWeek TrainingDays;
+}
+
+[Flags]
+public enum DayOfTheWeek : byte
+{
+    Sunday    = 0b_0000_0000, // i.e. 0
+    Monday    = 0b_0000_0001, // i.e. 1
+    Tuesday   = 0b_0000_0010, // i.e. 2
+    Wednesday = 0b_0000_0100, // i.e. 4
+    Thursday  = 0b_0000_1000, // i.e. 8
+    Friday    = 0b_0001_0000, // i.e. 16
+    Saturday  = 0b_0010_0000, // i.e. 32
+}
+```
+```cs
+UsingEnumForPerson();
+void UsingEnumForPerson()
+{
+    Person girl = new Person();
+    girl.Name = "Vikotry";
+    girl.TrainingDays = DayOfTheWeek.Monday | DayOfTheWeek.Wednesday | DayOfTheWeek.Friday;
+
+    Console.WriteLine($"{girl.Name} is training {girl.TrainingDays}");
+}
+```
+```
+Vikotry is training Monday, Wednesday, Friday
+```
 
 
 
