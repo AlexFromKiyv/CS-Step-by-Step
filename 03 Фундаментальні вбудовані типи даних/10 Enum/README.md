@@ -253,6 +253,7 @@ void UsingEnumForPerson()
 ```
 Vikotry is training Monday, Wednesday, Friday
 ```
+Робіть тип enum похідним від byte коли кількість варіантів не бульше 8, ushort для 16, uint для 32, ulong для 64.
 
 
 
