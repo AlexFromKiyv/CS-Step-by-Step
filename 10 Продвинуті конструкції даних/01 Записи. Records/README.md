@@ -1,4 +1,4 @@
-# Records
+# Записи. Records
 
 ```cs
     internal class Car

@@ -1,0 +1,86 @@
+﻿using System.Collections;
+using System.Collections.Specialized;
+
+void UsingArray()
+{
+    string[] strings = { "First", "Second", "Third" };
+
+    ArrayToConsole(strings);
+
+    Array.Reverse(strings);
+
+    ArrayToConsole(strings);
+
+
+    void ArrayToConsole(string[] array)
+    {
+        Console.WriteLine();
+        Console.WriteLine($"Type:{array}"  );
+        Console.WriteLine($"Length:{array.Length}");
+        foreach (string item in array)
+        {
+            Console.WriteLine("\t"+item);
+        }
+    }
+}
+
+//UsingArray();
+
+void ArrayHasFixedSize()
+{
+    string[] strings = { "First", "Second", "Third" };
+
+    strings[4] ="1"; 
+    //System.IndexOutOfRangeException:Index was outside the bounds of the array.
+    strings[5] ="2";
+
+    Console.WriteLine(strings[5]);
+}
+
+//ArrayHasFixedSize();
+
+
+void UsingArrayList()
+{
+    ArrayList arrayList = new() {"First","Second","Third","4","5"};
+    arrayList.Add(4);
+    arrayList.Add(5);
+    arrayList.Remove("4");
+    arrayList.RemoveAt(3);
+    ArrayListToConsole(arrayList);
+
+    Console.WriteLine();
+    arrayList.Clear();
+
+    string[] stringArray = { "First", "Second", "Third", "4", "5" };
+    arrayList.AddRange(stringArray);
+    arrayList.Add(6);
+    arrayList.AddRange(new string[] { "7", "Julia"});
+    DateTime dateTime = DateTime.Now;
+    arrayList.Add(dateTime.DayOfWeek);
+
+    ArrayListToConsole(arrayList);
+
+    arrayList.RemoveRange(0, 5);
+
+    ArrayListToConsole(arrayList);
+
+
+    void ArrayListToConsole(ArrayList arrayList)
+    {
+        Console.WriteLine($"Count:{arrayList.Count}");
+        Console.WriteLine($"Capacity:{arrayList.Capacity}");
+        foreach (var item in arrayList)
+        {
+            ObjectToConsole(item);
+        }
+    }
+
+    void ObjectToConsole(object obj)
+    {
+        Console.WriteLine($"\t{obj}\t{obj.GetType()}");
+    }
+}
+
+//UsingArrayList();
+
