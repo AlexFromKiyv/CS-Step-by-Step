@@ -84,3 +84,44 @@ void UsingArrayList()
 
 //UsingArrayList();
 
+void BoxingAndUnboxing()
+{
+    int valueTypeVariable = 10;
+    Console.WriteLine(valueTypeVariable.GetType());
+
+    //boxing
+    object referenceToValueTypeVariable = valueTypeVariable;
+    Console.WriteLine(referenceToValueTypeVariable.GetType());
+    
+    //unboxing
+    int unboxedInt = (int)referenceToValueTypeVariable;
+    Console.WriteLine(unboxedInt.GetType());
+
+    try
+    {
+        //do not work
+        long unboxingLong = (long)referenceToValueTypeVariable; 
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+}
+
+//BoxingAndUnboxing();
+
+void UsefulSystemObjectInArrayList()
+{
+    //boxing
+    ArrayList myInts = new();
+    myInts.Add(10);
+    myInts.Add(20);
+    myInts.Add(30);
+    
+    //unboxing
+    int? i = (int?)myInts[0];
+
+    Console.WriteLine(i);
+}
+
+UsefulSystemObjectInArrayList();
