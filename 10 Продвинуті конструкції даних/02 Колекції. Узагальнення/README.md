@@ -271,6 +271,28 @@ UsingSystemObjectInArrayList();
 
 ### Проблема безпеки типів.
 
+Треба враховувати в який тип іде розпакування. Він повинен співпадати з тим який був в процесі упаковки. 
+```cs
+void NoSafetyUsingArrayList()
+{
+    ArrayList myArray = new();
+
+    myArray.Add(1);
+    myArray.Add(true);
+    myArray.Add(new OperatingSystem(PlatformID.Unix,new Version()));
+    myArray.Add(new DateTime());
+
+    foreach (int item in myArray)
+    {
+        int i = item;
+    }
+}
+
+NoSafetyUsingArrayList();
+```
+В деяких випадках потрібен надгнучкий контейнер, якій може містити будь-шо. Але як бачите це небезпечно.
+В більшості випадків потрібен типобеспечний контейнер якій працює з певним типом.  
+Спробуємо створити такий контейнер власноруч.
 
 
 

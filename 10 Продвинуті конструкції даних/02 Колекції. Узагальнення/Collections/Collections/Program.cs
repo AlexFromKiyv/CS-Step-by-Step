@@ -124,4 +124,21 @@ void UsingSystemObjectInArrayList()
     Console.WriteLine(i);
 }
 
-UsingSystemObjectInArrayList();
+//UsingSystemObjectInArrayList();
+
+void NoSafetyUsingArrayList()
+{
+    ArrayList myArray = new();
+
+    myArray.Add(1);
+    myArray.Add(true);
+    myArray.Add(new OperatingSystem(PlatformID.Unix,new Version()));
+    myArray.Add(new DateTime());
+
+    foreach (int item in myArray)
+    {
+        int i = item;
+    }
+}
+
+NoSafetyUsingArrayList();
