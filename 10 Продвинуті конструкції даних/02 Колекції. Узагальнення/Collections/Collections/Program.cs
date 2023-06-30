@@ -110,18 +110,18 @@ void BoxingAndUnboxing()
 
 //BoxingAndUnboxing();
 
-void UsefulSystemObjectInArrayList()
+void UsingSystemObjectInArrayList()
 {
     //boxing
     ArrayList myInts = new();
     myInts.Add(10);
     myInts.Add(20);
     myInts.Add(30);
-    
+
     //unboxing
-    int? i = (int?)myInts[0];
+    int? i = (int?) myInts[0];
 
     Console.WriteLine(i);
 }
 
-UsefulSystemObjectInArrayList();
+UsingSystemObjectInArrayList();
