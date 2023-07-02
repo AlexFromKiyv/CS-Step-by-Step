@@ -293,6 +293,105 @@ NoSafetyUsingArrayList();
 В деяких випадках потрібен надгнучкий контейнер, якій може містити будь-шо. Але як бачите це небезпечно.
 В більшості випадків потрібен типобеспечний контейнер якій працює з певним типом.  
 Спробуємо створити такий контейнер власноруч.
+Клас об'єктів для колекції.
+Person.cs
+```cs
+ public class Person
+    {
+        public int Age { get; set; }
+        public string FirstName { get; set; } = "Undefined";
+        public string LastName { get; set; } = "Undefined"; 
+        public Person() { }
+        public Person(int age, string firstName, string lastName)
+        {
+            Age = age;
+            FirstName = firstName;
+            LastName = lastName;
+        }
+
+        public override string? ToString()
+        {
+            string fullNameAge = $"{FirstName} {LastName} {Age}";
+            return fullNameAge+"\t"+base.ToString();
+        }
+    }
+```
+Простий варіант власно-створенного класу для колекцій.
+
+```cs
+    public class PersonCollectiom : IEnumerable
+    {
+        private ArrayList arrayPeople = new();
+
+        public void Add(Person person)
+        {
+            arrayPeople.Add(person);
+        }
+
+        public void Clear() 
+        {
+            arrayPeople.Clear();
+        }
+
+        public int Count => arrayPeople.Count;
+
+        public Person GetPerson(int index) => (Person)arrayPeople[index]!;
+
+        public IEnumerator GetEnumerator() => arrayPeople.GetEnumerator();
+    }
+```
+Клас реалізовує інтерфейс IEnumerable шо дозволяє предбирати єлементи об'єкта за допомогою foreach. Також зверніть увагу шо методи Add, GetPerson протипізовані шоб працювати з типом Person, і не дозволить працювати з будьчим. Це додає впевненості в безпеці типів. 
+Використання.
+```cs
+void UsePersonCollection()
+{
+    
+    PersonCollectiom personages = new PersonCollectiom();
+    personages.Add(new("Lara", "Croft", 50));
+    personages.Add(new("Slerlock", "Holmes", 40));
+    personages.Add(new("Sara", "Connor", 35));
+    personages.Add(new("Tony", "Stark", 40));
+    personages.Add(new("Захар", "Беркут", 40));
+
+    // personages.Add((new DateTime()); // cannot convert System.DateTime to Collections.Person
+
+    foreach (Person itemPerson in personages)
+    {
+        Console.WriteLine(itemPerson);
+    }
+}
+
+UsePersonCollection();
+```   
+```
+Lara Croft 50   Collections.Person
+Slerlock Holmes 40      Collections.Person
+Sara Connor 35  Collections.Person
+Tony Stark 40   Collections.Person
+Захар Беркут 40 Collections.Person
+```
+Хоча спеціальний клас колекції забеспечує безпеку типів, цей підхід потребує створення майже однакову користувацьку колекцію для кожного унікального типу. Наприклад зробимо кастомник клас колекцій автомобілів.
+```cs
+    public class Car
+    {
+        public string Manufacturer { get; set; } = "Undefined";
+        public string Model { get; set; } = "Undefined";
+        public int Year { get; set; }
+    }
+
+    public class CarCollection : IEnumerable
+    {
+        private ArrayList arrayCars = new();
+        public void Add( Car car )
+        { 
+            arrayCars.Add(car);
+        }
+        public Car Get(int index) => (Car)arrayCars[index]!;
+        public int Count => arrayCars.Count;
+        public void Clear() => arrayCars.Clear();
+        public IEnumerator GetEnumerator() => arrayCars.GetEnumerator();
+    }
+```
 
 
 

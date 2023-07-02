@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using Collections;
+using System.Collections;
 using System.Collections.Specialized;
+using System.Net.Http.Headers;
 
 void UsingArray()
 {
@@ -141,4 +143,25 @@ void NoSafetyUsingArrayList()
     }
 }
 
-NoSafetyUsingArrayList();
+//NoSafetyUsingArrayList();
+
+
+void UsePersonCollection()
+{
+    
+    PersonCollectiom personages = new PersonCollectiom();
+    personages.Add(new("Lara", "Croft", 50));
+    personages.Add(new("Slerlock", "Holmes", 40));
+    personages.Add(new("Sara", "Connor", 35));
+    personages.Add(new("Tony", "Stark", 40));
+    personages.Add(new("Захар", "Беркут", 40));
+
+    // personages.Add((new DateTime()); // cannot convert System.DateTime to Collections.Person
+
+    foreach (Person itemPerson in personages)
+    {
+        Console.WriteLine(itemPerson);
+    }
+}
+
+UsePersonCollection();
