@@ -370,7 +370,7 @@ Sara Connor 35  Collections.Person
 Tony Stark 40   Collections.Person
 Захар Беркут 40 Collections.Person
 ```
-Хоча спеціальний клас колекції забеспечує безпеку типів, цей підхід потребує створення майже однакову користувацьку колекцію для кожного унікального типу. Наприклад зробимо кастомник клас колекцій автомобілів.
+Хоча спеціальний клас колекції забеспечує безпеку типів, цей підхід потребує створення майже однакову користувацьку колекцію для кожного унікального типу. Наприклад зробимо кастомний колекцій автомобілів.
 ```cs
     public class Car
     {
@@ -382,22 +382,18 @@ Tony Stark 40   Collections.Person
     public class CarCollection : IEnumerable
     {
         private ArrayList arrayCars = new();
-        public void Add( Car car )
-        { 
-            arrayCars.Add(car);
-        }
-        public Car Get(int index) => (Car)arrayCars[index]!;
+        public void Add( Car car ) => arrayCars.Add(car);
+        public Car? Get(int index) => (Car?)arrayCars[index];
         public int Count => arrayCars.Count;
         public void Clear() => arrayCars.Clear();
         public IEnumerator GetEnumerator() => arrayCars.GetEnumerator();
     }
 ```
+Спеціальний клас колекцій не рішає проблеми продуктивності підчас упаковування/розпаковування. В любому випадку потрібне зберігання в купі.
 
+## Перший погляд на узагальнення (generic).
 
-
-
-
-
+При використанні загальних класів усувається проеблема продуктивності при упаковувані/розпаковувані, а також проблема 
 
 
 
