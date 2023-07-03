@@ -185,6 +185,8 @@ StringCollection : IList : Цей клас забезпечує оптималь
 
 BitVector32 : IEquatable<BitVector32> : Цей клас забезпечує просту структуру, яка зберігає логічні значення та малі цілі числа в 32 бітах пам’яті.
 
+Всі члени класів колекцій можна побачити в Visual Studio > View > Object Browser.
+
 У бібліотеках базових класів .NET Core є два додаткових простору імен, орієнтованих на колекції (System.Collections.ObjectModel і System.Collections.Concurrent)
 
 З розвятком виявилась деякі проблеми з використанням неузагальнених типів. 
@@ -393,7 +395,40 @@ Tony Stark 40   Collections.Person
 
 ## Перший погляд на узагальнення (generic).
 
-При використанні загальних класів усувається проеблема продуктивності при упаковувані/розпаковувані, а також проблема 
+При використанні загальних класів усувається проеблема продуктивності при упаковувані/розпаковувані, а також проблема. Замість створення спеціальних класів з повторенням тіх самих методів можна використовувати узагальнений тип коллекції якому вказати тип об'єктів зберігання.
 
+```cs
+void UseGenericList()
+{
+    List<Person> personages = new();
+    personages.Add(new("Lara", "Croft", 50));
+    personages.Add(new("Slerlock", "Holmes", 40));
+    personages.Add(new("Sara", "Connor", 35));
+    personages.Add(new("Tony", "Stark", 40));
+    personages.Add(new("Захар", "Беркут", 40));
 
+    // personages.Add((new DateTime()); // cannot convert System.DateTime to Collections.Person
 
+    Console.WriteLine(personages[1]);
+
+    Console.WriteLine();
+
+    List<int> ints = new();
+
+    ints.Add(10);
+    ints.Add(20);
+    ints.Add(30);
+
+    Console.WriteLine(ints[1] + ints[2]);
+}
+
+UseGenericList();
+```
+```
+Slerlock Holmes 40      Collections.Person
+
+50
+```
+Як видно з прикладу не створюючи спеціального класу створено колекцію з потрібним типом.
+Об'єктр List<Person> personages може містити лише об'єкти Person тому нетреба робити приведеня. При роботі з List<int> ints немає прихованого упакування/розпакування. 
+Таким чином, узагальнення покращують продуктивність, забезпечують білшу захищеність типів та не потребують створення окремих класів для конкретних типів.
