@@ -17,11 +17,8 @@ namespace Collections
     public class CarCollection : IEnumerable
     {
         private ArrayList arrayCars = new();
-        public void Add( Car car )
-        { 
-            arrayCars.Add(car);
-        }
-        public Car Get(int index) => (Car)arrayCars[index]!;
+        public void Add( Car car ) => arrayCars.Add(car);
+        public Car? Get(int index) => (Car?)arrayCars[index];
         public int Count => arrayCars.Count;
         public void Clear() => arrayCars.Clear();
         public IEnumerator GetEnumerator() => arrayCars.GetEnumerator();
