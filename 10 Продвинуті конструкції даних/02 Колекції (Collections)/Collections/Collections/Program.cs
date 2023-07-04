@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Specialized;
 using System.Net.Http.Headers;
+using System.Runtime.ConstrainedExecution;
 
 void UsingArray()
 {
@@ -191,4 +192,22 @@ void UseGenericList()
     Console.WriteLine(ints[1] + ints[2]);
 }
 
-UseGenericList();
+//UseGenericList();
+
+void SpecifyingGenericParameters()
+{
+    List<Car> cars = new();
+    cars.Add(new Car("VW", "Beetle", 2020));
+    cars.Add(new Car("VW", "E-Buster", 2025));
+
+    Car car = cars[0];
+    car.Year = 2016;
+
+    foreach (Car? item in cars)
+    {
+        item.ToConsole();
+    }
+}
+
+SpecifyingGenericParameters();
+
