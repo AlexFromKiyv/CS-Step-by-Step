@@ -10,6 +10,7 @@ namespace Generics
     {
         public string Manufacturer { get; set; } = "Undefined";
         public string Model { get; set; } = "Undefined";
+        public int ModelId { get; set; }
         public int Year { get; set; }
 
         public Car(string manufacturer, string model, int year)
