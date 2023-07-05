@@ -194,20 +194,5 @@ void UseGenericList()
 
 //UseGenericList();
 
-void SpecifyingGenericParameters()
-{
-    List<Car> cars = new();
-    cars.Add(new Car("VW", "Beetle", 2020));
-    cars.Add(new Car("VW", "E-Buster", 2025));
 
-    Car car = cars[0];
-    car.Year = 2016;
-
-    foreach (Car? item in cars)
-    {
-        item.ToConsole();
-    }
-}
-
-SpecifyingGenericParameters();
 
