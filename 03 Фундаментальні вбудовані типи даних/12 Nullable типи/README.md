@@ -478,4 +478,4 @@ void ValidationOfFunctionArguments()
 ```
 Value cannot be null. (Parameter 'account')
 ```
-Перевірку на null може згенерувати VS. Для цього треба втати на аргумент(в цьому прикладі account) і натиснути на CTRL + . та вибрати Add null check.
+Перевірку на null може згенерувати VS. Для цього треба cтати на аргумент(в цьому прикладі account) і натиснути на CTRL + . та вибрати Add null check.
