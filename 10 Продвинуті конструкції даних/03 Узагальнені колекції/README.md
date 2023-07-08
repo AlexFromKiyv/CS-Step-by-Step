@@ -263,16 +263,40 @@ VW      New Beetle      1998
 Для більшості неузагальнених типів існують узагальнені заміни які більш корисні для використання.
 Можна знайти ряд узагальнених інтерфейсів які розширюють свій неузагальнений аналог. Наприклад, IEnumerable<T> розширює IEnumerable. Тобто реалізація в класі буде підтримувати функціональність неузагальнених інтерфейсів.
 
-Основні узагальнені інтерфейси простору.
+Основні узагальнені інтерфейси простору. Всі вони public interface
 
-public interface ICollection<T> : IEnumerable<T>, IEnumerable : Визначає загальні характеристики типових колекції(розміри,можливості перебору та безпеки потоку).
+ICollection<T> : IEnumerable<T>, IEnumerable : Визначає загальні характеристики типових колекції(розміри,можливості перебору та безпеки потоку).Дозворяє дії: Add, Remove, Clear, Contains, Count, тощо. 
 
-public interface IComparer<in T> : Визначає спосіб порівняння об'єктів.
+    IComparer<in T> : Визначає спосіб порівняння об'єктів.
 
-public interface IDictionary<TKey, TValue> : ICollection<KeyValuePair<TKey, TValue>>, IEnumerable<KeyValuePair<TKey, TValue>>, IEnumerable : Дозволяє загальному об'єкту колекції представляти свій вміст за допомогою пар ключ-значення.
+    IDictionary<TKey, TValue> : ICollection<KeyValuePair<TKey, TValue>>, IEnumerable<KeyValuePair<TKey, TValue>>, IEnumerable : Дозволяє загальному об'єкту колекції представляти свій вміст за допомогою пар ключ-значення.
 
+    IEnumerable<out T> : IEnumerable :Повертає об'ект який реалізовує інтерфейс IEnumerator<T>.
 
+    IEnumerator<out T> : IEnumerator, IDisposable : Підтримує просту ітерацію в стилі foraech над узагалненою коллекцїєю.
 
+    IList<T> : ICollection<T>, IEnumerable<T>, IEnumerable : Додає поведінку роботи з індексами. 
 
+    ISet<T> : ICollection<T>, IEnumerable<T>, IEnumerable : Надає базовий інтерфейс для абстракції множин.
+
+Простір імен також мае класи які реалізують ці ключові інтерфейси. Всі public class. Ось найбільш важливі. 
+
+    List<T> : IList<T>, IList, IReadOnlyList<T> : Узагальнений типом послідовний список з можливістю дінамічної зміни кількості елементів.
+
+    LinkedList<T> : ICollection<T>, ICollection, IReadOnlyCollection<T>, ISerializable, IDeserializationCallback : Представляє подвійно зв'язний список.
+
+    Stack<T> : IEnumerable<T>, System.Collections.ICollection, IReadOnlyCollection<T> : Узагальнена реалізація списку з принципом "first-in, first-out".
+
+    Queue<T> : IEnumerable<T>, System.Collections.ICollection,   IReadOnlyCollection<T> : Узагальнена реалізація списку з принципом "last-in, first-out".
+
+    Dictionary<TKey, TValue> : IDictionary<TKey, TValue>, IDictionary, IReadOnlyDictionary<TKey, TValue>, ISerializable, IDeserializationCallback where TKey : notnull : Словник узагальнених пар ключ-значення.
+
+    SortedDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IDictionary, IReadOnlyDictionary<TKey, TValue> where TKey : notnull : Відсортований словник пар пар ключ-значення.
+
+    SortedSet<T> : ISet<T>, ICollection<T>, ICollection, IReadOnlyCollection<T>, IReadOnlySet<T>, ISerializable, IDeserializationCallback : Колекція об'єктів яка зберігається в порядку сортування без дублювання. 
+
+Простір імен також визначає допоміжні класи та структури для роботи з певними контейнерами. Наприклад клас LinkedList<T> має член LinkedListNode<T>, який представляє вузол колекції. Або є допоміжний клас дла винятків KeyNotFoundException. 
+
+## Ініціалізація колекцій.
 
 
