@@ -299,4 +299,66 @@ ICollection<T> : IEnumerable<T>, IEnumerable : Визначає загальні
 
 ## Ініціалізація колекцій.
 
+При створені змінної об'єкта ви можете визначити його стан вказавши дані властивостей. Аналогічно можна робити з колекціями.
 
+```cs
+using System.Drawing;
+
+void InitialiazationCollection()
+{
+    int[] simpleArray = { 1, 2, 3 };
+    PrintCollection(simpleArray);
+
+    List<int> simpleList = new() { 1, 2, 3 };
+    PrintCollection(simpleList);
+
+    List<Point> listOfPoint = new()
+    {
+        new(1,2),
+        new(2,3),
+        new(3,4)
+    };
+    PrintCollection(listOfPoint);
+
+    List<Rectangle> listOfRectangle = new()
+    {
+        new(){Height =90,Width =40, Location = new(1,2) },
+        new(){Height =100,Width =50, Location = new(2,4) },
+
+    };
+    PrintCollection(listOfRectangle);
+
+    void PrintCollection(ICollection collection)
+    {
+        Console.WriteLine(collection);
+        foreach (var item in collection)
+        {
+            Console.WriteLine(item);
+        }
+        Console.WriteLine();
+    }
+}
+
+InitialiazationCollection();
+```
+```
+System.Int32[]
+1
+2
+3
+
+System.Collections.Generic.List`1[System.Int32]
+1
+2
+3
+
+System.Collections.Generic.List`1[System.Drawing.Point]
+{X=1,Y=2}
+{X=2,Y=3}
+{X=3,Y=4}
+
+System.Collections.Generic.List`1[System.Drawing.Rectangle]
+{X=1,Y=2,Width=40,Height=90}
+{X=2,Y=4,Width=50,Height=100}
+```
+Використовувати такий синтаксис можна лжеш для класів яки які підтримують метод Add який формалізований в інтерфейсах ICollection<T>/ICollection. В цьому прикладі поєднується створення об'ектів з створенням колекції. 
