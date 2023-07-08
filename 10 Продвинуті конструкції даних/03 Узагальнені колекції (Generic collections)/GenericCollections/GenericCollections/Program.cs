@@ -4,6 +4,7 @@ using Generics;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Xml;
 
 void SpecifyingGenericParameters()
 {
@@ -179,5 +180,55 @@ void UseGenericList()
 
     
 }
-UseGenericList();
+//UseGenericList();
 
+void UseGenericStack()
+{
+    Stack<Person> personages = new();
+
+    personages.Push(new("Tomy", "Stark", 40));
+    CollectionToConsole(personages);
+
+    personages.Push(new("Sara", "Connor", 30));
+    CollectionToConsole(personages);
+
+    personages.Push(new("John", "Rembo", 30));
+    CollectionToConsole(personages);
+
+
+    Person person = personages.Peek();
+    Console.WriteLine($"\n{person}\n");
+    CollectionToConsole(personages);
+
+    person = personages.Pop();
+    Console.WriteLine($"\n{person}\n");
+    CollectionToConsole(personages);
+
+    Console.WriteLine($"\n{personages.Pop()}\n");
+    Console.WriteLine($"\n{personages.Pop()}\n");
+    Console.WriteLine($"\n{personages.Pop()}");
+}
+
+//UseGenericStack();
+
+void UseGenericStackWithCheck()
+{
+    Person[] persons = 
+    {
+        new("Tomy", "Stark", 40),
+        new("Sara", "Connor", 30),
+        new("John", "Rembo", 30)
+    };
+
+    Stack<Person> personages = new(persons);
+    CollectionToConsole(personages);
+
+    Console.WriteLine();
+
+    while (personages.TryPop(out Person? person))
+    {
+        Console.WriteLine(person);
+    }
+}
+
+UseGenericStackWithCheck();

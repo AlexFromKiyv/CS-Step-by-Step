@@ -363,7 +363,7 @@ System.Collections.Generic.List`1[System.Drawing.Rectangle]
 ```
 Використовувати такий синтаксис можна лжеш для класів яки які підтримують метод Add який формалізований в інтерфейсах ICollection<T>/ICollection. В цьому прикладі поєднується створення об'ектів з створенням колекції. 
 
-## Робота з List<T>.
+## Робота з List\<T>.
 
 Створимо допоміжні методи відобаження колекції на консоль.
 ```cs
@@ -473,3 +473,115 @@ Count:3
 ```
 List<T> часто використовуваний клас який дозволяє динамічно змінювати розмір контейнера. В прикладі використовується синтаксис ініціалізації, хоча можна було використовувати метод Add декілька разів. За допомогою вказуваня індексу об'єкт додається в середину списку. Метод ToArray повертає массив об'єктів на основі вмісту списку.
 Клас List<T> має багато інших методів для роботи з списком. 
+
+## Робота з Stack\<T>.
+
+Клас Stack\<T> репрезентую колекцію яка зберігає елеиенти за принципом "last-in, first-out".
+```cs
+void UseGenericStack()
+{
+    Stack<Person> personages = new();
+
+    personages.Push(new("Tomy", "Stark", 40));
+    CollectionToConsole(personages);
+
+    personages.Push(new("Sara", "Connor", 30));
+    CollectionToConsole(personages);
+
+    personages.Push(new("John", "Rembo", 30));
+    CollectionToConsole(personages);
+
+
+    Person person = personages.Peek();
+    Console.WriteLine($"\n{person}\n");
+    CollectionToConsole(personages);
+
+    person = personages.Pop();
+    Console.WriteLine($"\n{person}\n");
+    CollectionToConsole(personages);
+
+    Console.WriteLine($"\n{personages.Pop()}\n");
+    Console.WriteLine($"\n{personages.Pop()}\n");
+    Console.WriteLine($"\n{personages.Pop()}");
+}
+
+UseGenericStack();
+```
+```
+System.Collections.Generic.Stack`1[GenericCollections.Person]
+Count:1
+
+        0.      Stark Tomy 40   GenericCollections.Person
+System.Collections.Generic.Stack`1[GenericCollections.Person]
+Count:2
+
+        0.      Connor Sara 30  GenericCollections.Person
+        1.      Stark Tomy 40   GenericCollections.Person
+System.Collections.Generic.Stack`1[GenericCollections.Person]
+Count:3
+
+        0.      Rembo John 30   GenericCollections.Person
+        1.      Connor Sara 30  GenericCollections.Person
+        2.      Stark Tomy 40   GenericCollections.Person
+
+Rembo John 30   GenericCollections.Person
+
+System.Collections.Generic.Stack`1[GenericCollections.Person]
+Count:3
+
+        0.      Rembo John 30   GenericCollections.Person
+        1.      Connor Sara 30  GenericCollections.Person
+        2.      Stark Tomy 40   GenericCollections.Person
+
+Rembo John 30   GenericCollections.Person
+
+System.Collections.Generic.Stack`1[GenericCollections.Person]
+Count:2
+
+        0.      Connor Sara 30  GenericCollections.Person
+        1.      Stark Tomy 40   GenericCollections.Person
+
+Connor Sara 30  GenericCollections.Person
+
+
+Stark Tomy 40   GenericCollections.Person
+
+Unhandled exception. System.InvalidOperationException: Stack empty.
+```
+
+Клас визначає члени Push, Peek, Pop для розміщеня, отриманя та отриманя та вилучення. Метод Peek заглядає в стек і дачить елемент який додао останнім. Як видно з прикладу при використанням методу Pop може виникнути виняток.
+```cs
+void UseGenericStackWithCheck()
+{
+    Person[] persons = 
+    {
+        new("Tomy", "Stark", 40),
+        new("Sara", "Connor", 30),
+        new("John", "Rembo", 30)
+    };
+
+    Stack<Person> personages = new(persons);
+    CollectionToConsole(personages);
+
+    Console.WriteLine();
+
+    while (personages.TryPop(out Person? person))
+    {
+        Console.WriteLine(person);
+    }
+}
+
+UseGenericStackWithCheck();
+```
+```
+System.Collections.Generic.Stack`1[GenericCollections.Person]
+Count:3
+
+        0.      Rembo John 30   GenericCollections.Person
+        1.      Connor Sara 30  GenericCollections.Person
+        2.      Stark Tomy 40   GenericCollections.Person
+
+Rembo John 30   GenericCollections.Person
+Connor Sara 30  GenericCollections.Person
+Stark Tomy 40   GenericCollections.Person
+```
