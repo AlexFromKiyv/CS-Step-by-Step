@@ -1,4 +1,4 @@
-# Узагальнення (Generic)
+# Узагальнені колекції (Generic collections)
 
 Узагальненими можуть бути класи, інтерфейси, структури і делегати. Узагальнений тип виглядає з кутавими дужками і символом.(наприклад List<T>). 
 Приклади узагальнень можна побачити Visual Studio > View > Object Browser і в пошуку ввести System.Collections.Generic. 
@@ -362,3 +362,114 @@ System.Collections.Generic.List`1[System.Drawing.Rectangle]
 {X=2,Y=4,Width=50,Height=100}
 ```
 Використовувати такий синтаксис можна лжеш для класів яки які підтримують метод Add який формалізований в інтерфейсах ICollection<T>/ICollection. В цьому прикладі поєднується створення об'ектів з створенням колекції. 
+
+## Робота з List<T>.
+
+Створимо допоміжні методи відобаження колекції на консоль.
+```cs
+void CollectionToConsole(ICollection collection)
+{
+    Console.WriteLine(collection);
+    Console.WriteLine($"Count:{collection.Count}\n");
+    // Enumerate over collection ICollection : IEnumerable
+    int index = 0;
+    foreach (var item in collection)
+    {
+        Console.Write($"\t{index}.\t");
+        Console.WriteLine(item);
+        index++;
+    }
+}
+
+void ListToConsole<T>(List<T> list)
+{
+    Console.WriteLine();
+    Console.WriteLine(list);
+    Console.WriteLine($"Count:{list.Count}");
+    Console.WriteLine($"Capacity:{list.Capacity}\n"  );
+    // Enumerate over collection ICollection : IEnumerable
+    int index = 0;
+    foreach (var item in list)
+    {
+        Console.Write($"\t{index}.\t");
+        Console.WriteLine(item);
+        index++;
+    }
+}
+```
+Дослідимо List<Person>.
+```cs
+void UseGenericList()
+{
+    // Make a List of personages
+    List<Person> personages = new()
+    {
+        new("Tomy","Stark",40),
+        new("Sara","Connor",30),
+        new("Sherlock","Holms",50),
+    };
+    // Print out
+    ListToConsole(personages);
+
+    //Add
+    Person rembo = new("John", "Rembo", 30);
+    personages.Add(rembo);
+
+    // Insert new item
+    Person bond = new("James", "Bond", 40);
+    personages.Insert(2,bond);
+
+    ListToConsole(personages);
+
+    //Remove
+    personages.Remove(bond);
+    personages.Remove(rembo);
+
+    ListToConsole(personages);
+
+    // To array 
+    Person[] arrayPersonages = personages.ToArray();
+
+    //Array : ICollection
+    CollectionToConsole(arrayPersonages);
+
+    
+}
+UseGenericList();
+```
+```
+
+System.Collections.Generic.List`1[GenericCollections.Person]
+Count:3
+Capacity:4
+
+        0.      Stark Tomy 40   GenericCollections.Person
+        1.      Connor Sara 30  GenericCollections.Person
+        2.      Holms Sherlock 50       GenericCollections.Person
+
+System.Collections.Generic.List`1[GenericCollections.Person]
+Count:5
+Capacity:8
+
+        0.      Stark Tomy 40   GenericCollections.Person
+        1.      Connor Sara 30  GenericCollections.Person
+        2.      Bond James 40   GenericCollections.Person
+        3.      Holms Sherlock 50       GenericCollections.Person
+        4.      Rembo John 30   GenericCollections.Person
+
+System.Collections.Generic.List`1[GenericCollections.Person]
+Count:3
+Capacity:8
+
+        0.      Stark Tomy 40   GenericCollections.Person
+        1.      Connor Sara 30  GenericCollections.Person
+        2.      Holms Sherlock 50       GenericCollections.Person
+GenericCollections.Person[]
+Count:3
+
+        0.      Stark Tomy 40   GenericCollections.Person
+        1.      Connor Sara 30  GenericCollections.Person
+        2.      Holms Sherlock 50       GenericCollections.Person
+```
+List<T> часто використовуваний клас який дозволяє динамічно змінювати розмір контейнера. В прикладі використовується синтаксис ініціалізації, хоча можна було використовувати метод Add декілька разів. За допомогою вказуваня індексу об'єкт додається в середину списку. Метод ToArray повертає массив об'єктів на основі вмісту списку.
+Клас List<T> має багато інших методів для роботи з списком. 

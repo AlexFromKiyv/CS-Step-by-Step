@@ -1,4 +1,5 @@
 ﻿
+using GenericCollections;
 using Generics;
 using System.Collections;
 using System.Collections.Generic;
@@ -109,4 +110,74 @@ void InitialiazationCollection()
     }
 }
 
-InitialiazationCollection();
+//InitialiazationCollection();
+
+void CollectionToConsole(ICollection collection)
+{
+    Console.WriteLine(collection);
+    Console.WriteLine($"Count:{collection.Count}\n");
+    // Enumerate over collection ICollection : IEnumerable
+    int index = 0;
+    foreach (var item in collection)
+    {
+        Console.Write($"\t{index}.\t");
+        Console.WriteLine(item);
+        index++;
+    }
+}
+
+void ListToConsole<T>(List<T> list)
+{
+    Console.WriteLine();
+    Console.WriteLine(list);
+    Console.WriteLine($"Count:{list.Count}");
+    Console.WriteLine($"Capacity:{list.Capacity}\n"  );
+    // Enumerate over collection ICollection : IEnumerable
+    int index = 0;
+    foreach (var item in list)
+    {
+        Console.Write($"\t{index}.\t");
+        Console.WriteLine(item);
+        index++;
+    }
+}
+
+
+void UseGenericList()
+{
+    // Make a List of personages
+    List<Person> personages = new()
+    {
+        new("Tomy","Stark",40),
+        new("Sara","Connor",30),
+        new("Sherlock","Holms",50),
+    };
+    // Print out
+    ListToConsole(personages);
+
+    //Add
+    Person rembo = new("John", "Rembo", 30);
+    personages.Add(rembo);
+
+    // Insert new item
+    Person bond = new("James", "Bond", 40);
+    personages.Insert(2,bond);
+
+    ListToConsole(personages);
+
+    //Remove
+    personages.Remove(bond);
+    personages.Remove(rembo);
+
+    ListToConsole(personages);
+
+    // To array 
+    Person[] arrayPersonages = personages.ToArray();
+
+    //Array : ICollection
+    CollectionToConsole(arrayPersonages);
+
+    
+}
+UseGenericList();
+
