@@ -585,3 +585,77 @@ Rembo John 30   GenericCollections.Person
 Connor Sara 30  GenericCollections.Person
 Stark Tomy 40   GenericCollections.Person
 ```
+
+## Робота з Queue\<T>.
+
+Черги (Queue) це контейнери яки забезпечують зберіганя єлементів за принципом "first-in, first-out". 
+
+```cs
+void UseGenericQueue()
+{
+    Queue<Person> sitizens = new();
+
+    // queuing
+    sitizens.Enqueue(new("Julia", "Firstenko", 25));
+    sitizens.Enqueue(new("Evgeniy", "Secandenko", 28));
+    sitizens.Enqueue(new("Nikolaj","Thirdenko",42));
+    sitizens.Enqueue(new("Pavel", "Fourtinenko", 32));
+
+    CollectionToConsole(sitizens);
+
+    // peek first 
+    Person person = sitizens.Peek();
+    Console.WriteLine($"\nWork Peek: {person}\n"  );
+
+    CollectionToConsole(sitizens);
+    
+    // dequing
+    person = sitizens.Dequeue();
+    Console.WriteLine($"\nWork Dequeue: {person}\n");
+
+    CollectionToConsole(sitizens);
+    
+    Console.WriteLine();
+
+    while (sitizens.TryDequeue(out Person? sitizen))
+    {
+        Console.WriteLine(sitizen);
+    }
+
+}
+
+UseGenericQueue();
+```
+```
+System.Collections.Generic.Queue`1[GenericCollections.Person]
+Count:4
+
+        0.      Firstenko Julia 25      GenericCollections.Person
+        1.      Secandenko Evgeniy 28   GenericCollections.Person
+        2.      Thirdenko Nikolaj 42    GenericCollections.Person
+        3.      Fourtinenko Pavel 32    GenericCollections.Person
+
+Work Peek: Firstenko Julia 25   GenericCollections.Person
+
+System.Collections.Generic.Queue`1[GenericCollections.Person]
+Count:4
+
+        0.      Firstenko Julia 25      GenericCollections.Person
+        1.      Secandenko Evgeniy 28   GenericCollections.Person
+        2.      Thirdenko Nikolaj 42    GenericCollections.Person
+        3.      Fourtinenko Pavel 32    GenericCollections.Person
+
+Work Dequeue: Firstenko Julia 25        GenericCollections.Person
+
+System.Collections.Generic.Queue`1[GenericCollections.Person]
+Count:3
+
+        0.      Secandenko Evgeniy 28   GenericCollections.Person
+        1.      Thirdenko Nikolaj 42    GenericCollections.Person
+        2.      Fourtinenko Pavel 32    GenericCollections.Person
+
+Secandenko Evgeniy 28   GenericCollections.Person
+Thirdenko Nikolaj 42    GenericCollections.Person
+Fourtinenko Pavel 32    GenericCollections.Person
+```
+Особливі методи цого клаус дозволяють поставити елемент в чергу, подивитись чія черга настала та зняти з черги елемент чия черга настала. Яшо черга пуста и викликати метод Dequeue виникне виняток.

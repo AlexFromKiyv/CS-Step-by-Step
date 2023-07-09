@@ -231,4 +231,39 @@ void UseGenericStackWithCheck()
     }
 }
 
-UseGenericStackWithCheck();
+//UseGenericStackWithCheck();
+
+void UseGenericQueue()
+{
+    Queue<Person> sitizens = new();
+
+    // queuing
+    sitizens.Enqueue(new("Julia", "Firstenko", 25));
+    sitizens.Enqueue(new("Evgeniy", "Secandenko", 28));
+    sitizens.Enqueue(new("Nikolaj","Thirdenko",42));
+    sitizens.Enqueue(new("Pavel", "Fourtinenko", 32));
+
+    CollectionToConsole(sitizens);
+
+    // peek first 
+    Person person = sitizens.Peek();
+    Console.WriteLine($"\nWork Peek: {person}\n"  );
+
+    CollectionToConsole(sitizens);
+    
+    // dequing
+    person = sitizens.Dequeue();
+    Console.WriteLine($"\nWork Dequeue: {person}\n");
+
+    CollectionToConsole(sitizens);
+    
+    Console.WriteLine();
+
+    while (sitizens.TryDequeue(out Person? sitizen))
+    {
+        Console.WriteLine(sitizen);
+    }
+
+}
+
+UseGenericQueue();
