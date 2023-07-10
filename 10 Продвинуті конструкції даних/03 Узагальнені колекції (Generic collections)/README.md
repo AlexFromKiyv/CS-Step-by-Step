@@ -709,10 +709,10 @@ Stark Tomy 35   GenericCollections.Person
         }
     }
 ```
-В цьому методі вважається що будьякий об'єкт більше за null і порівняння властивосі проводиться з викорипстанням методу int.CompareTo(int value).
+В цьому методі вважається що будь-який об'єкт більше за null і порівняння властивосі проводиться з викорипстанням методу int.CompareTo(int value).
 Тепер можна використати клас до коллекції.
 ```cs
-void UseSortedSet()
+void UseGenericSortedSet()
 {
     SortedSet<Person> personages = new(new PersonComparerByAge())
     {
@@ -743,7 +743,7 @@ void UseSortedSet()
 
 }
 
-UseSortedSet();
+UseGenericSortedSet();
 ```
 ```
 System.Collections.Generic.SortedSet`1[GenericCollections.Person]
@@ -781,7 +781,89 @@ Count:3
 ```
 Як видно з прикладу якшо не можна точно визначити порядок сортування елемента він не додається.
 
+## Dictionary\<TKey, TValue>
 
+Це зручна колекція, яка дозволяє вам зберігати елементи до яких можна звертатись через унікальний ключ призначеного типу. Коли в List\<T> можна через його внутрішній індекс типу int, тут можна вказати власний тип ключа та значення.
+```cs
+void UseGenericDictionary()
+{
 
+    //Initialization
+    Dictionary<string, Person> personages = new() 
+    {
+        {"IronMan", new("Tony", "Stark", 35) },
+        {"SpiderMan", new("Peter", "Parker", 25)}
+    };
+    CollectionToConsole(personages);
+    
+    //Get
+    Console.WriteLine($"\n{personages["IronMan"]}\n");
+
+    //Add
+    Person rembo = new("John", "Rembo", 30);
+    personages.Add("Rembo",rembo);
+    CollectionToConsole(personages);
+
+    //TryAdd
+    Person _007 = new("James", "Bond", 35);
+    bool result = personages.TryAdd("007",_007);
+    Console.WriteLine($"\nAdded {_007} successfully? : {result}");
+    CollectionToConsole(personages);
+
+    //Remove
+    personages.Remove("SpiderMan");
+    CollectionToConsole(personages);
+}
+
+UseGenericDictionary();
+```
+```
+System.Collections.Generic.Dictionary`2[System.String,GenericCollections.Person]
+Count:2
+
+        0.      [IronMan, Stark Tony 35 GenericCollections.Person]
+        1.      [SpiderMan, Parker Peter 25     GenericCollections.Person]
+
+Stark Tony 35   GenericCollections.Person
+
+System.Collections.Generic.Dictionary`2[System.String,GenericCollections.Person]
+Count:3
+
+        0.      [IronMan, Stark Tony 35 GenericCollections.Person]
+        1.      [SpiderMan, Parker Peter 25     GenericCollections.Person]
+        2.      [Rembo, Rembo John 30   GenericCollections.Person]
+
+Added Bond James 35     GenericCollections.Person successfully? : True
+System.Collections.Generic.Dictionary`2[System.String,GenericCollections.Person]
+Count:4
+
+        0.      [IronMan, Stark Tony 35 GenericCollections.Person]
+        1.      [SpiderMan, Parker Peter 25     GenericCollections.Person]
+        2.      [Rembo, Rembo John 30   GenericCollections.Person]
+        3.      [007, Bond James 35     GenericCollections.Person]
+System.Collections.Generic.Dictionary`2[System.String,GenericCollections.Person]
+Count:3
+
+        0.      [IronMan, Stark Tony 35 GenericCollections.Person]
+        1.      [Rembo, Rembo John 30   GenericCollections.Person]
+        2.      [007, Bond James 35     GenericCollections.Person]
+```
+При створені об'єкта словника треба вказати типи клячів та елементів. При додавані елементів ключи повині бути унікальні. 
+
+Існує інший синтаксис інінціалізації словника.
+```cs
+void UseOtherInizialaserGenericDictionary()
+{
+    Dictionary<string, Person> personages = new()
+    {
+        ["IronMan"] = new("Tony", "Stark", 35) ,
+        ["Rembo"] = new("John", "Rembo", 30),
+        ["SpiderMan"] = new("Peter", "Parker", 25)
+    };
+    CollectionToConsole(personages);
+}
+
+UseOtherInizialaserGenericDictionary();
+```
 
 

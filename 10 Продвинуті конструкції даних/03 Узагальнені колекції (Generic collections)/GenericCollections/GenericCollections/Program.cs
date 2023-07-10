@@ -286,7 +286,7 @@ void UseGenericPriorityQueue()
 
 //UseGenericPriorityQueue();
 
-void UseSortedSet()
+void UseGenericSortedSet()
 {
     SortedSet<Person> personages = new(new PersonComparerByAge())
     {
@@ -317,4 +317,49 @@ void UseSortedSet()
 
 }
 
-UseSortedSet();
+//UseGenericSortedSet();
+
+void UseGenericDictionary()
+{
+
+    //Initialization
+    Dictionary<string, Person> personages = new() 
+    {
+        {"IronMan", new("Tony", "Stark", 35) },
+        {"SpiderMan", new("Peter", "Parker", 25)}
+    };
+    CollectionToConsole(personages);
+    
+    //Get
+    Console.WriteLine($"\n{personages["IronMan"]}\n");
+
+    //Add
+    Person rembo = new("John", "Rembo", 30);
+    personages.Add("Rembo",rembo);
+    CollectionToConsole(personages);
+
+    //TryAdd
+    Person _007 = new("James", "Bond", 35);
+    bool result = personages.TryAdd("007",_007);
+    Console.WriteLine($"\nAdded {_007} successfully? : {result}");
+    CollectionToConsole(personages);
+
+    //Remove
+    personages.Remove("SpiderMan");
+    CollectionToConsole(personages);
+}
+
+//UseGenericDictionary();
+
+void UseOtherInizialaserGenericDictionary()
+{
+    Dictionary<string, Person> personages = new()
+    {
+        ["IronMan"] = new("Tony", "Stark", 35) ,
+        ["Rembo"] = new("John", "Rembo", 30),
+        ["SpiderMan"] = new("Peter", "Parker", 25)
+    };
+    CollectionToConsole(personages);
+}
+
+UseOtherInizialaserGenericDictionary();
