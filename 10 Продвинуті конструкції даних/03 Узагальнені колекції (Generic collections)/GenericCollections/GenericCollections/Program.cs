@@ -266,4 +266,55 @@ void UseGenericQueue()
 
 }
 
-UseGenericQueue();
+//UseGenericQueue();
+
+void UseGenericPriorityQueue()
+{
+    PriorityQueue<Person, int> personages = new();
+
+    personages.Enqueue(new("John", "Rembo", 30), 2);
+    personages.Enqueue(new("John", "Connor", 15), 1);
+    personages.Enqueue(new("Tomy", "Stark", 35), 3);
+    personages.Enqueue(new("Sara", "Connor", 35), 2);
+    personages.Enqueue(new("T", "800", 75),2);
+
+    while(personages.Count > 0)
+    {
+        Console.WriteLine(personages.Dequeue());
+    }
+}
+
+//UseGenericPriorityQueue();
+
+void UseSortedSet()
+{
+    SortedSet<Person> personages = new(new PersonComparerByAge())
+    {
+        new("Tomy","Stark",40),
+        new("Sara","Connor",30),
+        new("Sherlock","Holms",50),
+    };
+
+    CollectionToConsole(personages);
+
+    //Add
+    Person johnConnor = new("John", "Connor", 15);
+    bool result = personages.Add(johnConnor);
+    Console.WriteLine($"\nAdded {johnConnor} successfully? : {result}");
+    CollectionToConsole(personages);
+
+    //Add
+    Person rembo = new("John", "Rembo", 30);
+    result = personages.Add(rembo);
+    Console.WriteLine($"\nAdded {rembo} successfully? : {result}");
+    CollectionToConsole(personages);
+
+    //Remove
+    Person saraConnor = new("Sara", "Connor", 30);
+    result = personages.Remove(saraConnor);
+    Console.WriteLine($"\nRemoved {saraConnor} successfully? : {result}");
+    CollectionToConsole(personages);
+
+}
+
+UseSortedSet();

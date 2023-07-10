@@ -363,7 +363,7 @@ System.Collections.Generic.List`1[System.Drawing.Rectangle]
 ```
 Використовувати такий синтаксис можна лжеш для класів яки які підтримують метод Add який формалізований в інтерфейсах ICollection<T>/ICollection. В цьому прикладі поєднується створення об'ектів з створенням колекції. 
 
-## Робота з List\<T>.
+## List\<T>.
 
 Створимо допоміжні методи відобаження колекції на консоль.
 ```cs
@@ -474,7 +474,7 @@ Count:3
 List<T> часто використовуваний клас який дозволяє динамічно змінювати розмір контейнера. В прикладі використовується синтаксис ініціалізації, хоча можна було використовувати метод Add декілька разів. За допомогою вказуваня індексу об'єкт додається в середину списку. Метод ToArray повертає массив об'єктів на основі вмісту списку.
 Клас List<T> має багато інших методів для роботи з списком. 
 
-## Робота з Stack\<T>.
+## Stack\<T>.
 
 Клас Stack\<T> репрезентую колекцію яка зберігає елеиенти за принципом "last-in, first-out".
 ```cs
@@ -586,9 +586,9 @@ Connor Sara 30  GenericCollections.Person
 Stark Tomy 40   GenericCollections.Person
 ```
 
-## Робота з Queue\<T>.
+## Queue\<T>.
 
-Черги (Queue) це контейнери яки забезпечують зберіганя єлементів за принципом "first-in, first-out". 
+Черги (Queue) це контейнери яки забезпечують зберіганя eлементів за принципом "first-in, first-out". 
 
 ```cs
 void UseGenericQueue()
@@ -658,4 +658,130 @@ Secandenko Evgeniy 28   GenericCollections.Person
 Thirdenko Nikolaj 42    GenericCollections.Person
 Fourtinenko Pavel 32    GenericCollections.Person
 ```
-Особливі методи цого клаус дозволяють поставити елемент в чергу, подивитись чія черга настала та зняти з черги елемент чия черга настала. Яшо черга пуста и викликати метод Dequeue виникне виняток.
+Особливі методи цого класу дозволяють поставити елемент в чергу, подивитись чія черга настала та зняти з черги елемент чия черга настала. Якшо черга пуста и викликати метод Dequeue виникне виняток.
+
+## PriorityQueue\<TElement, TPriority>
+
+Цей клас не реалізує інтерфейси для колекцій а сворює мінімальний функціонал черги з пріорітетами.
+
+```cs
+void UseGenericPriorityQueue()
+{
+    PriorityQueue<Person, int> personages = new();
+
+    personages.Enqueue(new("John", "Rembo", 30), 2);
+    personages.Enqueue(new("John", "Connor", 15), 1);
+    personages.Enqueue(new("Tomy", "Stark", 35), 3);
+    personages.Enqueue(new("Sara", "Connor", 35), 2);
+    personages.Enqueue(new("T", "800", 75),2);
+
+    while(personages.Count > 0)
+    {
+        Console.WriteLine(personages.Dequeue());
+    }
+}
+```
+```
+Connor John 15  GenericCollections.Person
+800 T 75        GenericCollections.Person
+Connor Sara 35  GenericCollections.Person
+Rembo John 30   GenericCollections.Person
+Stark Tomy 35   GenericCollections.Person
+```
+Як бачимо з прикладу цей клас не гарантую принципу "FIFO".
+
+## SortedSet\<T>
+
+Користь класу полягає в тому, що він автоматично гарантує що елементи сортуються при додавані чи вилучені з колекції. Але класу потрібно повидомити як саме ви хочете сотрувати елементи. Для цього в конструктор передається об'єкт класу який реалізовує інтерфейс IComparer<T>.
+
+```cs
+    public class PersonComparerByAge : IComparer<Person>
+    {
+        public int Compare(Person? x, Person? y)
+        {
+            if (x != null && y != null)
+            {
+                return x.Age.CompareTo(y.Age);
+            }
+            if (x == null && y != null) return -1;
+            if (x != null && y == null) return 1;
+            return 0;
+        }
+    }
+```
+В цьому методі вважається що будьякий об'єкт більше за null і порівняння властивосі проводиться з викорипстанням методу int.CompareTo(int value).
+Тепер можна використати клас до коллекції.
+```cs
+void UseSortedSet()
+{
+    SortedSet<Person> personages = new(new PersonComparerByAge())
+    {
+        new("Tomy","Stark",40),
+        new("Sara","Connor",30),
+        new("Sherlock","Holms",50),
+    };
+
+    CollectionToConsole(personages);
+
+    //Add
+    Person johnConnor = new("John", "Connor", 15);
+    bool result = personages.Add(johnConnor);
+    Console.WriteLine($"\nAdded {johnConnor} successfully? : {result}");
+    CollectionToConsole(personages);
+
+    //Add
+    Person rembo = new("John", "Rembo", 30);
+    result = personages.Add(rembo);
+    Console.WriteLine($"\nAdded {rembo} successfully? : {result}");
+    CollectionToConsole(personages);
+
+    //Remove
+    Person saraConnor = new("Sara", "Connor", 30);
+    result = personages.Remove(saraConnor);
+    Console.WriteLine($"\nRemoved {saraConnor} successfully? : {result}");
+    CollectionToConsole(personages);
+
+}
+
+UseSortedSet();
+```
+```
+System.Collections.Generic.SortedSet`1[GenericCollections.Person]
+Count:3
+
+        0.      Connor Sara 30  GenericCollections.Person
+        1.      Stark Tomy 40   GenericCollections.Person
+        2.      Holms Sherlock 50       GenericCollections.Person
+
+Added Connor John 15    GenericCollections.Person successfully? : True
+System.Collections.Generic.SortedSet`1[GenericCollections.Person]
+Count:4
+
+        0.      Connor John 15  GenericCollections.Person
+        1.      Connor Sara 30  GenericCollections.Person
+        2.      Stark Tomy 40   GenericCollections.Person
+        3.      Holms Sherlock 50       GenericCollections.Person
+
+Added Rembo John 30     GenericCollections.Person successfully? : False
+System.Collections.Generic.SortedSet`1[GenericCollections.Person]
+Count:4
+
+        0.      Connor John 15  GenericCollections.Person
+        1.      Connor Sara 30  GenericCollections.Person
+        2.      Stark Tomy 40   GenericCollections.Person
+        3.      Holms Sherlock 50       GenericCollections.Person
+
+Removed Connor Sara 30  GenericCollections.Person successfully? : True
+System.Collections.Generic.SortedSet`1[GenericCollections.Person]
+Count:3
+
+        0.      Connor John 15  GenericCollections.Person
+        1.      Stark Tomy 40   GenericCollections.Person
+        2.      Holms Sherlock 50       GenericCollections.Person
+```
+Як видно з прикладу якшо не можна точно визначити порядок сортування елемента він не додається.
+
+
+
+
+

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace GenericCollections
 {
 
-    internal class Person 
+    public class Person 
     {
         public string FirstName { get; set; } = "Undefined";
         public string LastName { get; set; } = "Undefined";
