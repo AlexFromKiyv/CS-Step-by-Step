@@ -3,6 +3,7 @@ using GenericCollections;
 using Generics;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Drawing;
 using System.Xml;
 
@@ -362,4 +363,22 @@ void UseOtherInizialaserGenericDictionary()
     CollectionToConsole(personages);
 }
 
-UseOtherInizialaserGenericDictionary();
+//UseOtherInizialaserGenericDictionary();
+
+void UseObservableCollection()
+{
+    ObservableCollection<Person> personages = new()
+    {
+        new("Tomy","Stark",40),
+        new("Sara","Connor",30),
+        new("Sherlock","Holms",50),
+    };
+    CollectionToConsole(personages);
+
+
+
+
+}
+
+
+UseObservableCollection();
