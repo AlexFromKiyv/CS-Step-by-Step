@@ -12,7 +12,11 @@ namespace CustomGenericMethods
         public string FirstName { get; set; } = "Undefined";
         public string LastName { get; set; } = "Undefined";
         public int Age { get; set; } 
-        public Person() { }
+        public Person() 
+        {
+            FirstName = "Undefined";
+            Age = 0;
+        }
 
         public Person(int id, string firstName)
         {

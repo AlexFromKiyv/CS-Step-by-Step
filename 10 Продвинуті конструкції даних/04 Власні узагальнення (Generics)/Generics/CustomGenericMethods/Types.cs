@@ -29,6 +29,11 @@ namespace CustomGenericMethods
             a = b;
             b = temp;
         } 
+
+        internal static void BaseClass<T>()
+        {
+            Console.WriteLine(typeof(T));
+        }
     }
 
 }
