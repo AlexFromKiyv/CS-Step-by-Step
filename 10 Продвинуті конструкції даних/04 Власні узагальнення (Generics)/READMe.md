@@ -98,6 +98,7 @@ UseGenericMethodWithoutTypeParameter();
 
 ## Узагальнення структур і класів.
 
+CustomGenericTpe\Point.cs
 ```cs
     internal struct Point<T>
     {
@@ -134,6 +135,7 @@ UseGenericMethodWithoutTypeParameter();
         }
     }
 ```
+Program.cs
 ```cs
 void UseGenericStruct()
 {
@@ -167,6 +169,43 @@ UseGenericStruct();
 [ 0 , 0 ]
 
 ```
-Як видно головне правільно визначити де буде знаходитись потрібний тип і вказати замінник T.Тобто в визначені полів, властивостей і методів , . Крім того видна шо така структура стає гнучкою і може мати різні застосування.
+Як видно при визначені узагальнених структур і класів замість конкретних типів полів властивостей і в методах вказуїться параметр Т. Крім того видна шо така структура стає гнучкою і може мати різні застосування.
 Додадкову корсить в узагальненнях має ключеве слово default, оскільки дозволяє безпечно встановити значення за замовчуванням.
 
+## Використання узагальнення з шаблоном співставлення.
+```cs
+void UsePatternMatching()
+{
+    Point<int> point_1 = new(1, 2);
+    DetailOfPoint<int>(point_1);
+
+    Point<string> point_2 = new("one", "two");
+    DetailOfPoint<string>(point_2);
+ 
+
+    void DetailOfPoint<T>(Point<T> point)
+    {
+        switch (point)
+        {
+            case Point<string> pointString:
+                Console.WriteLine($"Point have string data {pointString}");
+                break;
+            case Point<double> pointDouble:
+                Console.WriteLine($"Point have real data {pointDouble}");
+                break;
+            case Point<int> pointInt:
+                Console.WriteLine($"Point have whole data {pointInt}");
+                break;
+        }
+    }
+}
+
+UsePatternMatching();
+```
+```
+Point have whole data [ 1 , 2 ]
+Point have string data [ one , two ]
+```
+В прикладі гілка виконання обираеться в результаті співставленя типу аргументу.
+
+#

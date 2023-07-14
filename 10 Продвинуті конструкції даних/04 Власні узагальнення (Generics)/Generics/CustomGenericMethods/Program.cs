@@ -31,25 +31,3 @@ void UseGenericMethodWithoutTypeParameter()
 
 //UseGenericMethodWithoutTypeParameter();
 
-void UseGenericStruct()
-{
-    Point<int> point = new(1, 2);
-    Console.WriteLine(point);
-
-    Point<double> point1 = new(1.01, 2.02);
-    Console.WriteLine(point1);
-
-    Point<string> point2 = new("one", "two");
-    Console.WriteLine(point2);
-
-    point1.Reset();
-    Console.WriteLine(point1);
-
-    point2.Reset();
-    Console.WriteLine(point2);
-
-    Point<long> point3 = default;
-    Console.WriteLine(point3);
-}
-
-UseGenericStruct();
