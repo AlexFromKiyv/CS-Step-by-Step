@@ -49,4 +49,10 @@ void UsePatternMatching()
     }
 }
 
-UsePatternMatching();
+//UsePatternMatching();
+
+void UseWhereForGeneric_1()
+{
+    // Car must be ... parameterless constuctor 
+    //MyGeneticWithDefaultConstructor<Car> recoverieCary;
+}
