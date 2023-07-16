@@ -79,6 +79,8 @@
 
 </li></ol>
 
+Не забути ObservableCollection<T> 10 гл.
+
 
 
 
