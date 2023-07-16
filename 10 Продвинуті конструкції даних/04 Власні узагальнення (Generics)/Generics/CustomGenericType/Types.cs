@@ -47,4 +47,14 @@ namespace CustomGenericType
             return 1;
         }
     }
+
+    class BadMath<T>
+    {
+        //public T Add(T x, T y)
+        //{
+        //    return x + y; // Operator + cannot be applied to operands of type T
+        //}
+    }
+
+
 }
