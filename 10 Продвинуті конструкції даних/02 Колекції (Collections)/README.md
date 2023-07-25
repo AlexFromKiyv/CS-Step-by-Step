@@ -108,6 +108,15 @@ void UsingArrayList()
     arrayList.Add(5);
     arrayList.Remove("4");
     arrayList.RemoveAt(3);
+
+    Console.WriteLine(arrayList[0]);
+    Console.WriteLine(arrayList[1]);
+    Console.WriteLine(arrayList[2]);
+    Console.WriteLine(arrayList[3]);
+
+    Console.WriteLine();
+
+
     ArrayListToConsole(arrayList);
 
     Console.WriteLine();
@@ -146,6 +155,11 @@ void UsingArrayList()
 UsingArrayList();
 ```
 ```
+First
+Second
+Third
+4
+
 Count:5
 Capacity:8
         First   System.String
@@ -164,13 +178,13 @@ Capacity:16
         6       System.Int32
         7       System.String
         Julia   System.String
-        Wednesday       System.DayOfWeek
+        Monday  System.DayOfWeek
 Count:4
 Capacity:16
         6       System.Int32
         7       System.String
         Julia   System.String
-        Wednesday       System.DayOfWeek
+        Monday  System.DayOfWeek
 ```
 Клас ArrayList предоставляє вам контейнер в якій можна додавати, видаляти об'єкти і цей контейнер автоматично змінюється від потреб. Аналогічно за допомогою документації можна дослідити Stack, Queue, т.д.
 В реальних проетах набагаточастіше використовуються узагальнені аналоги ціх класів з простори імен System.Collections.Generic. 

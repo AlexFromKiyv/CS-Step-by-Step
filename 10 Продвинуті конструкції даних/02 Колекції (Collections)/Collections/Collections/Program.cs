@@ -50,6 +50,15 @@ void UsingArrayList()
     arrayList.Add(5);
     arrayList.Remove("4");
     arrayList.RemoveAt(3);
+
+    Console.WriteLine(arrayList[0]);
+    Console.WriteLine(arrayList[1]);
+    Console.WriteLine(arrayList[2]);
+    Console.WriteLine(arrayList[3]);
+
+    Console.WriteLine();
+
+
     ArrayListToConsole(arrayList);
 
     Console.WriteLine();
@@ -85,7 +94,7 @@ void UsingArrayList()
     }
 }
 
-//UsingArrayList();
+UsingArrayList();
 
 void BoxingAndUnboxing()
 {
