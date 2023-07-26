@@ -192,3 +192,51 @@ Index:IronMan   Item:Tony Stark Indexers.Person
 ## Перезавантаження індексаторів.
 
 В класі або структурі можна мати декілька індексаторів з різними параметрами. Таким чином можна реалізувати доступ ло елементів як через числові так і через рядкові індекси. 
+
+Приклад індексатора з ADO.NET.
+```cs
+public sealed class DataTableCollection : InternalDataCollectionBase
+{
+...
+  // Overloaded indexers!
+  public DataTable this[int index] { get; }
+  public DataTable this[string name] { get; }
+  public DataTable this[string name, string tableNamespace] { get; }
+}
+```
+Тут об'єкт можна отриматни за порядковим номером таблиці або назві таблиці.
+В бібліотеках базових класів зазвичай типи підтримують індексатори. Тому навіть якщо ваш проект не потребує індексатора багато типив мають їх. 
+
+## Багатовимірні індексатори.
+
+Так само як масиви можкть бути двовимірні, множину об'єктів можна розмітити в матриці.
+
+```cs
+public class SomeContainer
+{
+  private int[,] myMatrix = new int[10, 10];
+  public int this[int row, int column]
+  {  /* get or set value */  }
+}
+```
+В ADO.Net багатовимірний індексатор використовується для отриманя даних з таблиці.
+```cs
+static void MultiIndexerWithDataTable()
+{
+  // Make a simple DataTable with 3 columns.
+  DataTable myTable = new DataTable();
+  myTable.Columns.Add(new DataColumn('FirstName'));
+  myTable.Columns.Add(new DataColumn('LastName'));
+  myTable.Columns.Add(new DataColumn('Age'));
+  // Now add a row to the table.
+  myTable.Rows.Add('Mel', 'Appleby', 60);
+  // Use multidimension indexer to get details of first row.
+  Console.WriteLine('First Name: {0}', myTable.Rows[0][0]);
+  Console.WriteLine('Last Name: {0}', myTable.Rows[0][1]);
+  Console.WriteLine('Age : {0}', myTable.Rows[0][2]);
+}
+```
+Багатовимірні індексатори створюються якщо вних є потреба і як видно їх використання досить просте. Тому індексатор і реалізован.
+
+## Індексатори в інтерфейсах.
+
