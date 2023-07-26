@@ -86,4 +86,18 @@ void UseStringIndexer()
     }
 }
 
-UseStringIndexer();
+//UseStringIndexer();
+
+void UseIndexerInterface()
+{
+    List<string> strings = new() { "in", "in front", "next to", "under", "on" };
+
+    SomeStrings words = new(strings);
+
+    for (int i = 0; i < words.Count; i++)
+    {
+        Console.WriteLine(words[i]);
+    }
+}
+
+UseIndexerInterface();

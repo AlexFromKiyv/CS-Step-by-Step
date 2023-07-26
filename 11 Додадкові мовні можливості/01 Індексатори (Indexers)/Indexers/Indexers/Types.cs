@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections;
+
 
 namespace Indexers
 {
@@ -52,6 +47,27 @@ namespace Indexers
             dictionaryOfPerson.Clear();
         }
         IEnumerator IEnumerable.GetEnumerator() => dictionaryOfPerson.GetEnumerator();
+    }
+
+    public interface IStringContainer
+    {
+        string this[int index] { get; set; }
+    }
+
+    class SomeStrings : IStringContainer
+    {
+        private List<string> myString = new();
+
+        public SomeStrings(List<string> myString)
+        {
+            this.myString = myString;
+        }
+        public int Count => myString.Count;
+        public string this[int index]
+        {
+            get => myString[index];
+            set => myString[index] = value;
+        }
     }
 
 

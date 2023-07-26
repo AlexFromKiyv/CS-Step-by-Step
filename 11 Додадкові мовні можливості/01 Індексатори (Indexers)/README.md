@@ -240,3 +240,50 @@ static void MultiIndexerWithDataTable()
 
 ## Індексатори в інтерфейсах.
 
+Функціональність індексаторів можна описати в інтерфейсах для подальшої імплементації.
+
+```cs
+    public interface IStringContainer
+    {
+        string this[int index] { get; set; }
+    }
+
+    class SomeStrings : IStringContainer
+    {
+        private List<string> myString = new();
+
+        public SomeStrings(List<string> myString)
+        {
+            this.myString = myString;
+        }
+        public int Count => myString.Count;
+        public string this[int index]
+        {
+            get => myString[index];
+            set => myString[index] = value;
+        }
+    }
+```
+```cs
+void UseIndexerInterface()
+{
+    List<string> strings = new() { "in", "in front", "next to", "under", "on" };
+
+    SomeStrings words = new(strings);
+
+    for (int i = 0; i < words.Count; i++)
+    {
+        Console.WriteLine(words[i]);
+    }
+}
+
+UseIndexerInterface();
+```
+```
+in
+in front
+next to
+under
+on
+```
+В данному випадку інтерфейс це протокол який вказує яким повинен бути індексатор.
