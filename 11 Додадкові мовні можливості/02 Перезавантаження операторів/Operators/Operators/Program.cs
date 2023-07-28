@@ -60,4 +60,14 @@ void UseEqualityOperators()
     Console.WriteLine(point1 == point3);
 }
 
-UseEqualityOperators();
+//UseEqualityOperators();
+
+void UseComparisonOperators()
+{
+    Point_v6 point1 = new(1, 1);
+    Point_v6 point2 = new(1, 2);
+
+    Console.WriteLine(point1 <= point2);
+}
+
+//UseComparisonOperators();

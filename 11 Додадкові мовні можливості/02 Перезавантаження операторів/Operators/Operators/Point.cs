@@ -97,4 +97,35 @@ namespace Operators
         }
     }
 
+    class Point_v6 : Point, IComparable
+    {
+        public Point_v6(int x, int y) : base(x, y)
+        {
+        }
+
+        public int CompareTo(object? obj)
+        {
+            if (obj is not Point_v6)
+            {
+                throw new ArgumentException();
+            }
+
+            Point_v6 other = (Point_v6)obj;
+
+            double distance = Math.Sqrt(X) + Math.Sqrt(Y);
+            double distanceObj = Math.Sqrt(other.X) + Math.Sqrt(other.Y);
+
+            return distance.CompareTo(distanceObj);
+        }
+
+        public static bool operator <(Point_v6 point1, Point_v6 point2) =>
+            point1.CompareTo(point2) < 0;
+        public static bool operator >(Point_v6 point1, Point_v6 point2) =>
+            point1.CompareTo(point2) > 0;
+        public static bool operator <=(Point_v6 point1, Point_v6 point2) =>
+            point1.CompareTo(point2) <= 0;
+        public static bool operator >=(Point_v6 point1, Point_v6 point2) =>
+            point1.CompareTo(point2) >= 0;
+    }
+
 }

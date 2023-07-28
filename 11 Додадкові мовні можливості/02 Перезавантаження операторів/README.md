@@ -215,5 +215,58 @@ UseEqualityOperators();
 True
 False
 ```
-Простіше поріанювати об'єкти опертором == ніж визивати Equals.
+Трохи виразніше і простіше порівнювати об'єкти опертором == ніж визивати Equals.
 
+## Перезавантаження операторів порівняння.
+
+Для порівняння об'єктів класа в ньому можна реалізувати інтерфейс IComparable. На додаток можна перезавантажити опреатори > , < і подібні.
+
+```cs
+    class Point_v6 : Point, IComparable
+    {
+        public Point_v6(int x, int y) : base(x, y)
+        {
+        }
+
+        public int CompareTo(object? obj)
+        {
+            if (obj is not Point_v6)
+            {
+                throw new ArgumentException();
+            }
+
+            Point_v6 other = (Point_v6)obj;
+
+            double distance = Math.Sqrt(X) + Math.Sqrt(Y);
+            double distanceObj = Math.Sqrt(other.X) + Math.Sqrt(other.Y);
+
+            return distance.CompareTo(distanceObj);
+        }
+
+        public static bool operator <(Point_v6 point1, Point_v6 point2) =>
+            point1.CompareTo(point2) < 0;
+        public static bool operator >(Point_v6 point1, Point_v6 point2) =>
+            point1.CompareTo(point2) > 0;
+        public static bool operator <=(Point_v6 point1, Point_v6 point2) =>
+            point1.CompareTo(point2) <= 0;
+        public static bool operator >=(Point_v6 point1, Point_v6 point2) =>
+            point1.CompareTo(point2) >= 0;
+    }
+```
+```cs
+void UseComparisonOperators()
+{
+    Point_v6 point1 = new(1, 1);
+    Point_v6 point2 = new(1, 2);
+
+    Console.WriteLine(point1 <= point2);
+}
+
+UseComparisonOperators();
+```
+```
+True
+```
+Вимагається, шо якщо ви перезамантажили оперетор > то ви мусите перезавантажити і < також. При перезавантажені операторів є сенс використовувати вже реалізовану логіку методу CompareTo.
+
+Як бачите мова дозволяє створювати в типи перезавантажені оператори які зможуть вам спротити подальше їхне використання. Але треба розуміти шо перезавантаженя оператору має мати сенс. Не для всіх типів має сенс презаванажувати оператори. Наприклад немає сенсу перезавантажувати оператор множеня для типу транспортних засобів. Перезавантаженя опереторів бульше підходить для атомарних об'єктів векторів, фігур, набори. Якшо зрозуміти перезавантаженя складно не треба його робити. 
