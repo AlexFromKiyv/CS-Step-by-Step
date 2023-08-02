@@ -11,6 +11,7 @@
 
 Накладаються обмеження на методи розширеня шо вони повині бути визначені у статичному класі і бути статичними оскільки працюють на рівні типу. 
 
+MyExtensions.cs
 ```cs
     public static class MyExtensions
     {
@@ -82,6 +83,126 @@ this представляє елемент який розширюється. Ц
 Перший метод використовувати для будь якого об'єкту. Він відображає назву збірки шо містить відповідний тип. Оскільки object є батьком для всіх типів то цей метод з'явится для будьякої змінної.
 Другий метод дозволяє для будь якого int перевернути цифри.Зверніть увагу як this визначено як модіфікатор перед типом параметра. Перший параметр представляє тип що розширюється. 
 Метод розширення може мати декілька параметрів але лише перший визначає тип до якого він буде використаний.
+
+Коли ви маєте визначені методи розширеня вони визначені в просторі імен. Коли ви імпортуєте цей простір імен (using ...) вам стоють доступні методи розширення. Це треба робити явно для файлів коду які використовують методи. Може здатися що методи розширеня глобальні але вони обмежени простором імен в якому визначені. 
+Розширення структур має такий самий синтаксис.
+
+## Методи розширення для інтерфейсів.
+
+AnnoyingExtensions.cs
+```cs
+    static class AnnoyingExtensions
+    {
+        public static void Print(this System.Collections.IEnumerable iterator)
+        {
+            foreach (var item in iterator) 
+            {
+                Console.WriteLine(item);
+                Console.Beep();
+            }
+        }
+    }
+```
+```cs
+void ExtentionForInterface()
+{
+    string[] strings = { "Hi", "girl", "!", "How", "are", "you", "?" };
+
+    strings.Print();
+
+    List<int> ints = new() { 1, 2, 3, };
+
+    ints.Print();
+}
+
+ExtentionForInterface();
+```
+```
+Hi
+girl
+!
+How
+are
+you
+?
+1
+2
+3
+
+```
+Якшо існує інтерфейс то для цього інтерфейсу можна додати методи розширення. Елементи класу який реалізовує інтерфейс зможуть використовувати ці методи. Тобто коли клас реалізовує інтерфейс вин також отримує додадкові члени.
+
+Методи розширення відіграють ключову роль для LINQ API. Найбільш пошире розширення  інтерфейсу IEnumerable<T>.
+
+## GetEnumerator як метод розширення.
+
+Аби клас стрврював контейнер який буде перебирати колекцію за допомогою foreach можна в ному реалізувати метод  GetEnumerator. Для типу можна також зробити такий метод розширення.
+Types.cs
+```cs
+internal class Car
+{
+    public string Name { get; set; } = "";
+    public int CurrentSpeed { get; set; }
+
+    public Car(string name, int currentSpeed)
+    {
+        Name = name;
+        CurrentSpeed = currentSpeed;
+    }
+    public Car()
+    {
+    }
+
+    public override string? ToString() => $"{Name} {CurrentSpeed}"; 
+
+}
+
+class Garage
+{
+    public Car[] Cars { get; set; }
+
+    public Garage(Car[] cars)
+    {
+        Cars = cars;
+    }
+}
+
+static class GarageExtentions
+{
+    // Extention method
+    public static IEnumerator GetEnumerator(this Garage garage)
+        => garage.Cars.GetEnumerator();
+}
+```
+```cs
+void GetEnumeratorAsExtention()
+{
+    Car[] cars = 
+    {
+        new("VW Beetle",30),
+        new("VW Golf",40),
+        new("VW Passat",35)
+    };
+
+    Garage garage = new(cars);
+
+    foreach (var item in garage)
+    {
+        Console.WriteLine(item);
+    }
+
+}
+
+GetEnumeratorAsExtention();
+```
+```
+VW Beetle 30
+VW Golf 40
+VW Passat 35
+```
+Клас Garage не реалізовує IEnumerable та немає методу GetEnumerator. Таким чином можно не змінюючи клас можна використовувати його для перебору елементів.
+
+
 
 
 
