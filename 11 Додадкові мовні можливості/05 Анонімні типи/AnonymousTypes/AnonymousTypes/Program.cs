@@ -22,23 +22,40 @@ void DefiningAnonymousType()
 
 //DefiningAnonymousType();
 
+
+void ReflectObjectContent(object @object)
+{
+    Type type = @object.GetType();
+
+    Console.WriteLine($"\nObject is instance of {type.Name}");
+    Console.WriteLine($"Base class of {type.Name} is {type.BaseType}");
+    Console.WriteLine($"object.ToString() == {@object}");
+    Console.WriteLine($"@object.GetHashCode() == {@object.GetHashCode()}");
+}
+
 void ExplorationAnonimusTypes()
 {
     var girl = new { Name = "Julia", Age = 35 };
 
     ReflectObjectContent(girl);
 
-    void ReflectObjectContent(object @object)
-    {
-        Type type = @object.GetType();
-
-        Console.WriteLine($"Object is instance of {type.Name}");
-        Console.WriteLine($"Base class of {type.Name} is {type.BaseType}");
-        Console.WriteLine($"object.ToString() == {@object}");
-        Console.WriteLine($"@object.GetHashCode() == {@object.GetHashCode()}");
-    }
-
     // girl.Name = "Olga"; It isn't works. it is readonly
 }
 
-ExplorationAnonimusTypes();
+//ExplorationAnonimusTypes();
+
+void MethodEqualsIntoAnonymousType()
+{
+    var girl1 = new { Name = "Olga", Age = 35 };
+    var girl2 = new { Name = "Olga", Age = 35 };
+
+    ReflectObjectContent(girl1);
+    ReflectObjectContent(girl2);
+
+    Console.WriteLine();
+
+    Console.WriteLine($"girl1.Equals(girl2): {girl1.Equals(girl2)} ");
+    Console.WriteLine($"girl1 == girl2: {girl1 == girl2}");
+
+}
+MethodEqualsIntoAnonymousType();

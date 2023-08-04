@@ -45,23 +45,23 @@ DefiningAnonymousType();
 Всі анонімни типи автоматично походять від System.Object. 
 
 ```cs
+void ReflectObjectContent(object @object)
+{
+    Type type = @object.GetType();
+
+    Console.WriteLine($"\nObject is instance of {type.Name}");
+    Console.WriteLine($"Base class of {type.Name} is {type.BaseType}");
+    Console.WriteLine($"object.ToString() == {@object}");
+    Console.WriteLine($"@object.GetHashCode() == {@object.GetHashCode()}");
+}
+
 void ExplorationAnonimusTypes()
 {
     var girl = new { Name = "Julia", Age = 35 };
 
     ReflectObjectContent(girl);
 
-    void ReflectObjectContent(object @object)
-    {
-        Type type = @object.GetType();
-
-        Console.WriteLine($"Object is instance of {type.Name}");
-        Console.WriteLine($"Base class of {type.Name} is {type.BaseType}");
-        Console.WriteLine($"object.ToString() == {@object}");
-        Console.WriteLine($"@object.GetHashCode() == {@object.GetHashCode()}");
-    }
-
-   // girl.Name = "Olga"; It is not work. it is readonly
+    // girl.Name = "Olga"; It isn't works. it is readonly
 }
 
 ExplorationAnonimusTypes();
@@ -72,7 +72,47 @@ Base class of <>f__AnonymousType0`2 is System.Object
 object.ToString() == { Name = Julia, Age = 35 }
 @object.GetHashCode() == 366485669
 ```
-Об'єкт має тип <>f__AnonymousType0`2 який призначає компілятор і не доступне в коді. Всі властивості в цьому класі readonly.  
+Об'єкт має тип <>f__AnonymousType0`2 який призначає компілятор і не доступне в коді. Всі властивості в цьому класі readonly. Як видно з прикладу при створені класу компілятор перевизначає метод ToString. Так само превизначаються Equals(), GetHashCode(). 
+
+## Як працює Equals.
+
+GetHashCode обчислює хещ-значеня виходячи з кожного значеня поля як вхідні данні для типу System.Collections.Generic.EqualityComparer<T>. Ця реалізація передбачає два таки обєкта еквівалентні якшо співпадають всі їх значення. Анонімні типи добре підходять для розміщеня в контейнері Hashtable.
+
+```cs
+void MethodEqualsIntoAnonymousType()
+{
+    var girl1 = new { Name = "Olga", Age = 35 };
+    var girl2 = new { Name = "Olga", Age = 35 };
+
+    ReflectObjectContent(girl1);
+    ReflectObjectContent(girl2);
+
+    Console.WriteLine();
+
+    Console.WriteLine($"girl1.Equals(girl2): {girl1.Equals(girl2)} ");
+    Console.WriteLine($"girl1 == girl2: {girl1 == girl2}");
+
+}
+MethodEqualsIntoAnonymousType();
+```
+```
+
+Object is instance of <>f__AnonymousType0`2
+Base class of <>f__AnonymousType0`2 is System.Object
+object.ToString() == { Name = Olga, Age = 35 }
+@object.GetHashCode() == -522252693
+
+Object is instance of <>f__AnonymousType0`2
+Base class of <>f__AnonymousType0`2 is System.Object
+object.ToString() == { Name = Olga, Age = 35 }
+@object.GetHashCode() == -522252693
+
+girl1.Equals(girl2): True
+girl1 == girl2: False
+
+```
+По перше ми бачено компілятор використовує один і той самий тип для створення об'єктів. Тобто якшо анонімний клас по визначенню типів підходить він використовує його а не робить новий. По друге метод Equals порівнює об'єкти по значенням а не по посиланню(використовує семантіку на основі значень).
+Аноанімні типи не отримуєть перезавантажені методи == тому в цьому випадку порівнюються посилання.
 
 
 
