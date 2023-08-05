@@ -1,6 +1,8 @@
 ﻿
+using System.Drawing;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Xml.Schema;
 
 void DefiningAnonymousType()
 {
@@ -58,4 +60,22 @@ void MethodEqualsIntoAnonymousType()
     Console.WriteLine($"girl1 == girl2: {girl1 == girl2}");
 
 }
-MethodEqualsIntoAnonymousType();
+//MethodEqualsIntoAnonymousType();
+
+void MoreSophisticatedAnonymousType()
+{
+    var purshaseItem = new
+    {
+        TimeBought = DateTime.Now,
+        ItemBought = new
+        {
+            Manufacturer = "VW",
+            Model = "ID4",
+            Color = "Grey"
+        },
+        Price = 34.000M
+    };
+
+    ReflectObjectContent(purshaseItem);
+}
+MoreSophisticatedAnonymousType();
