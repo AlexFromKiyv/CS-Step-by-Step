@@ -203,6 +203,36 @@ static void UsingRefModifier()
 }
 
 
+void ReferenceAsResult()
+{
+    int[] ints = { 3, 4, 5, 6 };
+
+
+    ref int referenceOfItem = ref Find(5, ints);
+
+    referenceOfItem = 100;
+
+    foreach (var item in ints)
+    {
+        Console.WriteLine(item);
+    }
+
+    ref int Find(int number, int[] numbers)
+    {
+        for (int i = 0; i < numbers.Length; i++)
+        {
+            if (numbers[i] == number)
+            {
+                return ref numbers[i];
+            }
+        }
+        throw new ArgumentException("Invalid input parameter.");
+    }
+
+}
+
+ReferenceAsResult();
+
 
 //UsingInModifier();
 
@@ -362,7 +392,7 @@ static void CheckParameterForNull()
     }
 }
 
-Documenting();
+//Documenting();
 void Documenting()
 {
     Console.WriteLine(RoundedSquare(10.23,12.34));

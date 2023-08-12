@@ -263,6 +263,48 @@ static void UsingRefModifier()
 
 При використовувані ref модіфікатора параметри повині бути ініціалізовані до визову функції. Функція впливає на зміні шо за її межами і параметри передаються як посилання на існуючу в пам'яті змінну.
 
+## Посилання як результат методу.
+
+```cs
+void ReferenceAsResult()
+{
+    int[] ints = { 3, 4, 5, 6 };
+
+
+    ref int referenceOfItem = ref Find(5, ints);
+
+    referenceOfItem = 100;
+
+    foreach (var item in ints)
+    {
+        Console.WriteLine(item);
+    }
+
+    ref int Find(int number, int[] numbers)
+    {
+        for (int i = 0; i < numbers.Length; i++)
+        {
+            if (numbers[i] == number)
+            {
+                return ref numbers[i];
+            }
+        }
+        throw new ArgumentException("Invalid input parameter.");
+    }
+
+}
+
+ReferenceAsResult();
+```
+```
+3
+4
+100
+6
+```
+В цьому прикладі показано як можна використати зміну яка є посиляннам аби знайти елемент массиву та змінити цей елемент.
+
+
 ## in параметри.
 
 Модіфікатор in для параметрів передае значення за посиланям і не дозволяє методу його змінювати.
