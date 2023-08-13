@@ -39,4 +39,9 @@ static class GarageExtentions
 {
     public static IEnumerator GetEnumerator(this Garage garage)
         => garage.Cars.GetEnumerator();
+
+    public static void ToDisplay(this Car car)
+    {
+        Console.WriteLine(car);
+    }
 }

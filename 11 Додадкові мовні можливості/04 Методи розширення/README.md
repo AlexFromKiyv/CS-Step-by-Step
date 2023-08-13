@@ -172,6 +172,11 @@ static class GarageExtentions
     // Extention method
     public static IEnumerator GetEnumerator(this Garage garage)
         => garage.Cars.GetEnumerator();
+
+    public static void ToDisplay(this Car car)
+    {
+        Console.WriteLine(car);
+    }
 }
 ```
 ```cs
@@ -186,9 +191,9 @@ void GetEnumeratorAsExtention()
 
     Garage garage = new(cars);
 
-    foreach (var item in garage)
+    foreach (Car item in garage)
     {
-        Console.WriteLine(item);
+        item.ToDisplay();
     }
 
 }
@@ -201,6 +206,7 @@ VW Golf 40
 VW Passat 35
 ```
 Клас Garage не реалізовує IEnumerable та немає методу GetEnumerator. Таким чином можно не змінюючи клас можна використовувати його для перебору елементів.
+Також в прикладі додано метод розширення для відображення об'єкта Car. 
 
 
 

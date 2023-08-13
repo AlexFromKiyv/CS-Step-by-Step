@@ -46,9 +46,9 @@ void GetEnumeratorAsExtention()
 
     Garage garage = new(cars);
 
-    foreach (var item in garage)
+    foreach (Car item in garage)
     {
-        Console.WriteLine(item);
+        item.ToDisplay();
     }
 
 }
