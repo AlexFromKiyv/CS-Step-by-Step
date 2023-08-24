@@ -13,7 +13,7 @@ void UseSimpleDelegate()
     Console.WriteLine(biIntOp.Invoke(10,10));
 }
 
-UseSimpleDelegate();
+//UseSimpleDelegate();
 
 
 void DelegateIsTypeSafe()
@@ -28,6 +28,27 @@ void DelegateIsTypeSafe()
 
 
 
+void InvestigatingDelegateObject()
+{
+    BinaryIntOp intOp = new(SimpleMath.Add);
+    DisplayDelegateInfo(intOp);
+
+    MyMath myMath = new();
+    BinaryIntOp intOp1 = new(myMath.AddTwoInt);
+    DisplayDelegateInfo(intOp1);
+}
+
+InvestigatingDelegateObject();
+
+static void DisplayDelegateInfo(Delegate delegateObject)
+{
+    foreach (Delegate @delegate in delegateObject.GetInvocationList())
+    {
+        Console.WriteLine($"Method name:{@delegate.Method}");
+        Console.WriteLine($"Type name:{@delegate.Target}");
+    }
+}
+
 //...
 
 // Additional type definitions must be placed at the end of the
@@ -36,3 +57,4 @@ void DelegateIsTypeSafe()
 // This delegate can point to any method,
 // taking two integers and returning an integer.
 public delegate int BinaryIntOp(int x, int y);
+

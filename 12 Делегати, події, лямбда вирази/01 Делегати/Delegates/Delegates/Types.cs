@@ -14,5 +14,10 @@ namespace Delegates
 
     }
 
+    public class MyMath
+    {
+        public int AddTwoInt(int x, int y) => x + y;
+    }
+
 
 }

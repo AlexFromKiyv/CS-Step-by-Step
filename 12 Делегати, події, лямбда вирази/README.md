@@ -171,6 +171,189 @@ void DelegateIsTypeSafe()
 ```
 Компілятор покаже помилку якшо ви спробуєте створити об'єкт делегату який не буде відповідати шаблону.
 
+## Об'єкт делегату.
+
+Створимо метод який видає сладові делегата.
+
+Types.cs
+```cs
+    public class MyMath
+    {
+        public int AddTwoInt(int x, int y) => x + y;
+    }
+```
+Program.cs
+```cs
+static void DisplayDelegateInfo(Delegate delegateObject)
+{
+    foreach (Delegate @delegate in delegateObject.GetInvocationList())
+    {
+        Console.WriteLine($"Method name:{@delegate.Method}");
+        Console.WriteLine($"Type name:{@delegate.Target}");
+    }
+}
+void InvestigatingDelegateObject()
+{
+    BinaryIntOp intOp = new(SimpleMath.Add);
+    DisplayDelegateInfo(intOp);
+
+    MyMath myMath = new();
+    BinaryIntOp intOp1 = new(myMath.AddTwoInt);
+    DisplayDelegateInfo(intOp1);
+}
+
+InvestigatingDelegateObject();
+```
+```
+Method name:Int32 Add(Int32, Int32)
+Type name:
+Method name:Int32 AddTwoInt(Int32, Int32)
+Type name:Delegates.MyMath
+```
+Допоміжний метод отримує об'єкт далаегата та виводить назви методу що підтримує делегат а також назву класу що визначає метод. Список методів видає метод GetInvocationList(). 
+Зауважте шо якшо метод статичний він не є частиною об'єкта і тому не вивиодиться. Якшо метод приналежить об'екту тип об'єкту зберігаеться в Target.
+
+## Використання делегата при зміні стану об'єкта.
+
+Зрозуміло шо просте використання делегата не має великої користі, тому шо метод можна використати на пряму. Користь делегатів виявляється коли потрібно створювати гнучкий механізм виклику. 
+Щоб продемонструвати більш реальний варіант використання делегата, давайте використаемо делегат для визначеня класу Car, якій може інформувати зовнішнім сутностям про стан двигуна. Для цього в класі треба:
+1. Визначити тип делегата який буде використовуватися для сповішеня зовнішнього викликаючого.
+2. Оголосити зміну як член класу цього типу делегата.
+3. Створити допоміжну функцію класу яка дозволить зовнішньому викликаючому  встановити метод для зворотнього виклику.
+4. Використати метод Accelerate для запуску методів списку делегата при певних обставинах.
+
+Припустимо в нас є базова частина класу Car.
+```cs
+    internal class Car
+    {
+        // State data
+        public string Name { get; set; } = string.Empty;
+        public int MaxSpeed { get; set; } = 100;
+        public int CurrentSpeed { get; set; }
+
+        private bool _isDead;
+
+        //Constructors
+        public Car(string name, int maxSpeed, int currentSpeed )
+        {
+            Name = name;
+            MaxSpeed = maxSpeed;
+            CurrentSpeed = currentSpeed;
+        }
+        public Car()
+        {
+        }
+    }    
+```
+Додамо можливості роботи делегата.
+```cs
+        // For delegate work
+
+        //Define delegate type
+        public delegate void CarEngineHandler(string messageForCaller);
+
+        //Variable for delegate
+        private CarEngineHandler _listOfHandlers;
+
+        //For external caller allows register method for call 
+        public void RegisterCarEngineHandler(CarEngineHandler methodToCall)
+        {
+            _listOfHandlers = methodToCall;
+        } 
+```
+Зауважте делегат визначений в межах класу шо означає шо він працює з цім класом. Це не об'язково. Тип делегату може вказувати на будьякий метод який приймає в якості параметра string і нічого не повертає. Далі визнчаетья зміна для об'екту делегата і допоміжна функція яка дозволяє вказати методи на які буде вказувати делегат. Зміну можна було б зробити public і таким чином не треба булоб робит додадковий метод регістрації. Але в данній реалізацію служба інкапсуляції робить рішеня бульш безпечним.
+Тепер треба зробити метод який буде використовувати методи.
+
+```cs
+        public void Accelerate(int delta)
+        {
+            if (_isDead)
+            {
+                _listOfHandlers?.Invoke("Sorry, this car is dead!");
+            }
+            else
+            {
+                CurrentSpeed += delta;
+                
+
+                if (CurrentSpeed > MaxSpeed)
+                {
+                    _isDead = true;
+                    _listOfHandlers?.Invoke("Car dead!");
+                }
+                else
+                {
+                    Console.WriteLine($"Current speed {Name}: {CurrentSpeed}");
+                }
+
+                if ((MaxSpeed - CurrentSpeed) < 10 && !_isDead )
+                {
+                    _listOfHandlers?.Invoke($"Careful buddy! Gonna blow! Current speed:{CurrentSpeed}");
+                }
+            }
+        }
+```
+Зверніть увагу що відбуваеться перевірка змінної на null перед викликом методу Invoke. Завдяки цьому, якшо визиваючий код не назначить метод, на який буде вказувати делегат, під ча виконання не виникне виняток NullReferenceException.
+Таким чином інфраструктура делегата зроблена можна її використати.
+```cs
+using NotificationsWithDelegate;
+
+void UseDelegateInfrastructure()
+{
+  Car carGrey = new("VW E-Golf Grey",150,130);
+
+	for (int i = 0; i < 10; i++)
+	{
+		carGrey.Accelerate(3);
+	}
+
+    Console.WriteLine("\n\n");
+
+  Car carRed = new("VW E-Golf Red", 150, 130);
+	carRed.RegisterCarEngineHandler(OnCarEngineEvent);
+
+  for (int i = 0; i < 10; i++)
+  {
+		carRed.Accelerate(3);
+	}
+
+	void OnCarEngineEvent(string message)
+	{
+		Console.WriteLine($"  Message from car engine: {message}");
+	}
+}
+UseDelegateInfrastructure();
+``` 
+```
+Current speed VW E-Golf Grey: 133
+Current speed VW E-Golf Grey: 136
+Current speed VW E-Golf Grey: 139
+Current speed VW E-Golf Grey: 142
+Current speed VW E-Golf Grey: 145
+Current speed VW E-Golf Grey: 148
+
+
+
+Current speed VW E-Golf Red: 133
+Current speed VW E-Golf Red: 136
+Current speed VW E-Golf Red: 139
+Current speed VW E-Golf Red: 142
+  Message from car engine: Careful buddy! Gonna blow! Current speed:142
+Current speed VW E-Golf Red: 145
+  Message from car engine: Careful buddy! Gonna blow! Current speed:145
+Current speed VW E-Golf Red: 148
+  Message from car engine: Careful buddy! Gonna blow! Current speed:148
+  Message from car engine: Car dead!
+  Message from car engine: Sorry, this car is dead!
+  Message from car engine: Sorry, this car is dead!
+  Message from car engine: Sorry, this car is dead!
+```
+Перший об'єкт не призначає обробника для сповішення стану двигуна, тому сповіщень про стан немає. Другий об'єкт региструє обробника і відповідно спрацьлвує метод Invoke який визиває метод. 
+Важливий момент цього прикладу що метод сповіщеня знаходиться в коді роботи з об'єктом а не в ному. Вся логіка сповіщення знаходиться в об'єкті а процес відображення зовні. Знову ж таки метод відповідає сігнатурі делегата. 
+
+
+
+
 
 
 
