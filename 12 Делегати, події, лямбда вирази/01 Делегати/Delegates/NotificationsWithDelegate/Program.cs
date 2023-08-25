@@ -64,6 +64,25 @@ void UseMulticasting()
 
 }
 
-UseMulticasting();
+//UseMulticasting();
 
+void UseMethodGroupConversion()
+{
+    Car car = new("BMW i3", 180, 160);
 
+    car.RegisterCarEngineHandler(OnCarEngineEvent);
+    car.UnRegisterCarEngineHandlers(OnCarEngineEvent);
+    car.RegisterCarEngineHandlers(OnCarEngineEvent);
+
+    for (int i = 0; i < 7; i++)
+    {
+        car.Accelerate(3);
+    }
+
+    void OnCarEngineEvent(string message)
+    {
+        Console.WriteLine($"\t{message.ToUpper()}");
+    }
+}
+
+//UseMethodGroupConversion();

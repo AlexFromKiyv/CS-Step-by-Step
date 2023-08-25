@@ -442,7 +442,104 @@ Current speed Mercedes W123: 148
 ```
 Таким чином можна працювати з списком виклику.
 
-##
+## Спрощений синтаксис з перетворенням.
+
+В попередніх прикладах для регістрації обробника ми створювали екземпляр об'єкта делегата в конструктор якого передавали назву метода. Коли треба використати можливості класу MulticastDelegate та Delegate це має сенс. В більшрості випадків такий об'єкт потрібен тільки для того шоб отримати назву метода на виконання або списку таких. Тому зробили спрощення яке називаеться method group conversion (перетворення групи методів). Це дозволяє вказати замість об'єкта делегати назву метода, підчас виклику метода який примає тип делегата як аргумент.
+```cs
+void UseMethodGroupConversion()
+{
+    Car car = new("BMW i3", 180, 160);
+
+    car.RegisterCarEngineHandler(OnCarEngineEvent);
+    car.UnRegisterCarEngineHandlers(OnCarEngineEvent);
+    
+    car.RegisterCarEngineHandlers(OnCarEngineEvent);
+
+    for (int i = 0; i < 7; i++)
+    {
+        car.Accelerate(3);
+    }
+
+    void OnCarEngineEvent(string message)
+    {
+        Console.WriteLine($"\t{message.ToUpper()}");
+    }
+}
+
+UseMethodGroupConversion();
+```
+```
+Current speed BMW i3: 163
+Current speed BMW i3: 166
+Current speed BMW i3: 169
+Current speed BMW i3: 172
+        CAREFUL BUDDY! GONNA BLOW! CURRENT SPEED:172
+Current speed BMW i3: 175
+        CAREFUL BUDDY! GONNA BLOW! CURRENT SPEED:175
+Current speed BMW i3: 178
+        CAREFUL BUDDY! GONNA BLOW! CURRENT SPEED:178
+        CAR DEAD!
+```
+Якшо метод не підійде по сігнатурі делегата то компілятор видасть помилку.
+
+## Узагальнені делегати.
+
+Можна створити делегата з узагальненями. Наприклад делегата якій отримує один параметре якогось типу а повертає void.
+ 
+GenericDelegate\Types.cs
+```cs
+// This generic delegate can represent any method
+// returning void and taking a single parameter of type T.
+public delegate void MyDenericDelegate<T>(T arg);
+
+``` 
+Зверніть увагу шо визначення MyDenericDelegate<T> вказує єдиний параметр типу, який реперезентуе який буде тип аргументу цьлового методу.
+Отже це узагальнене визначеня який має бути метод.
+
+```cs
+void UseMyGenericDelegate()
+{
+    MyDenericDelegate<string> workWithString = new(StringTarget);
+    workWithString += StringTarget; //work
+    workWithString("Hi");
+
+    MyDenericDelegate<int> workWithInt = new(IntTarget);
+    workWithInt += IntTarget;
+ // workWithInt += StringTarget;  // don't work 
+    workWithInt(3);
+
+    workWithString += StringTarget; //work
+
+
+
+    void StringTarget(string text)
+    {
+        Console.WriteLine(text.ToUpper());
+    }
+
+    void IntTarget(int count)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            Console.WriteLine(i);
+        }
+    }
+}
+
+UseMyGenericDelegate();
+```
+```
+HI
+HI
+0
+1
+2
+0
+1
+2
+```
+Як бачимо об'ект делегаат не зможе додати до списку виконання метод який не співпадає по сігнатурі.
+
 
 
 
