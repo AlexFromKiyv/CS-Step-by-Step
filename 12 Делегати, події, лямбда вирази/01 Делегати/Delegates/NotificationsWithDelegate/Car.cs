@@ -38,8 +38,18 @@ namespace NotificationsWithDelegate
         public void RegisterCarEngineHandler(CarEngineHandler methodToCall)
         {
             _listOfHandlers = methodToCall;
-        } 
-        
+        }
+
+        public void RegisterCarEngineHandlers(CarEngineHandler methodToCall)
+        {
+            _listOfHandlers += methodToCall;
+        }
+
+        public void UnRegisterCarEngineHandlers(CarEngineHandler methodToCall)
+        {
+            _listOfHandlers -= methodToCall;
+        }
+
         public void Accelerate(int delta)
         {
             if (_isDead)

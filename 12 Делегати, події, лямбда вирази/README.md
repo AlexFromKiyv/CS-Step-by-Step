@@ -300,7 +300,7 @@ using NotificationsWithDelegate;
 
 void UseDelegateInfrastructure()
 {
-  Car carGrey = new("VW E-Golf Grey",150,130);
+    Car carGrey = new("VW E-Golf Grey",150,130);
 
 	for (int i = 0; i < 10; i++)
 	{
@@ -309,11 +309,11 @@ void UseDelegateInfrastructure()
 
     Console.WriteLine("\n\n");
 
-  Car carRed = new("VW E-Golf Red", 150, 130);
-	carRed.RegisterCarEngineHandler(OnCarEngineEvent);
+    Car carRed = new("VW E-Golf Red", 150, 130);
+	carRed.RegisterCarEngineHandler(new Car.CarEngineHandler(OnCarEngineEvent));
 
-  for (int i = 0; i < 10; i++)
-  {
+    for (int i = 0; i < 10; i++)
+    {
 		carRed.Accelerate(3);
 	}
 
@@ -351,8 +351,98 @@ Current speed VW E-Golf Red: 148
 Перший об'єкт не призначає обробника для сповішення стану двигуна, тому сповіщень про стан немає. Другий об'єкт региструє обробника і відповідно спрацьлвує метод Invoke який визиває метод. 
 Важливий момент цього прикладу що метод сповіщеня знаходиться в коді роботи з об'єктом а не в ному. Вся логіка сповіщення знаходиться в об'єкті а процес відображення зовні. Знову ж таки метод відповідає сігнатурі делегата. 
 
+## Додавання та вилучання декількох обробників.
+
+Об'єкт типу делегата може отримувати декілька методів і зберігати список на виконання.
+
+```cs
+
+        public void RegisterCarEngineHandlers(CarEngineHandler methodToCall)
+        {
+            _listOfHandlers += methodToCall;
+        }
+
+        public void UnRegisterCarEngineHandlers(CarEngineHandler methodToCall)
+        {
+            _listOfHandlers -= methodToCall;
+        }
+```
+Тут замість оператора = використовуються перезавантажені версії += та -=. При роботі ці операторо використовують методи класу Combine та Remove.
+
+```cs
+void UseMulticasting()
+{
+    Car car = new("VW E-Golf", 150, 133);
+    car.RegisterCarEngineHandlers(new Car.CarEngineHandler(OnCarEngineEvent1));
+    car.RegisterCarEngineHandlers(new Car.CarEngineHandler(OnCarEngineEvent2));
+
+    for (int i = 0; i < 7; i++)
+    {
+        car.Accelerate(3);
+    }
+
+    Console.WriteLine("\n\n");
+
+    Car car1 = new("Mercedes W123", 150, 133);
 
 
+    Car.CarEngineHandler handler = new Car.CarEngineHandler(OnCarEngineEvent1);
+    car1.RegisterCarEngineHandlers(handler);
+    car1.RegisterCarEngineHandlers(new Car.CarEngineHandler(OnCarEngineEvent2));
+    car1.UnRegisterCarEngineHandlers(handler);
+
+    for (int i = 0; i < 7; i++)
+    {
+        car1.Accelerate(3);
+    }
+
+
+    void OnCarEngineEvent1(string message)
+    {
+        Console.WriteLine($"\t{message}");
+    }
+    void OnCarEngineEvent2(string message)
+    {
+        Console.WriteLine($"\t{message.ToUpper()}");
+    }
+
+}
+
+UseMulticasting();
+```
+```
+Current speed VW E-Golf: 136
+Current speed VW E-Golf: 139
+Current speed VW E-Golf: 142
+        Careful buddy! Gonna blow! Current speed:142
+        CAREFUL BUDDY! GONNA BLOW! CURRENT SPEED:142
+Current speed VW E-Golf: 145
+        Careful buddy! Gonna blow! Current speed:145
+        CAREFUL BUDDY! GONNA BLOW! CURRENT SPEED:145
+Current speed VW E-Golf: 148
+        Careful buddy! Gonna blow! Current speed:148
+        CAREFUL BUDDY! GONNA BLOW! CURRENT SPEED:148
+        Car dead!
+        CAR DEAD!
+        Sorry, this car is dead!
+        SORRY, THIS CAR IS DEAD!
+
+
+
+Current speed Mercedes W123: 136
+Current speed Mercedes W123: 139
+Current speed Mercedes W123: 142
+        CAREFUL BUDDY! GONNA BLOW! CURRENT SPEED:142
+Current speed Mercedes W123: 145
+        CAREFUL BUDDY! GONNA BLOW! CURRENT SPEED:145
+Current speed Mercedes W123: 148
+        CAREFUL BUDDY! GONNA BLOW! CURRENT SPEED:148
+        CAR DEAD!
+        SORRY, THIS CAR IS DEAD!
+```
+Таким чином можна працювати з списком виклику.
+
+##
 
 
 
