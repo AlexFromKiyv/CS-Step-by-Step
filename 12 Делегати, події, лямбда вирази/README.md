@@ -508,10 +508,6 @@ void UseMyGenericDelegate()
  // workWithInt += StringTarget;  // don't work 
     workWithInt(3);
 
-    workWithString += StringTarget; //work
-
-
-
     void StringTarget(string text)
     {
         Console.WriteLine(text.ToUpper());
@@ -539,6 +535,105 @@ HI
 2
 ```
 Як бачимо об'ект делегаат не зможе додати до списку виконання метод який не співпадає по сігнатурі.
+
+## Делегати Action<> та Func<>
+
+В попередніх прикладах при використані делегатів ми виконували наступні кроки:
+
+    1. Визначаємо спеціальний тип делегата, який відповідає методам на яки буде вказувати.
+    2. Створює екземпляр типу спеціального типу делегата та передаем назву метода як аргумент конструктора.
+    3. Викликаємо метод опосередковано через виклмк Invoke об'єкта делегата.
+
+Коли ви використовуєте цей підхід ви створюєте декілька спеціальних делегатів які використовує тільки в поточному завданні. При цому значення має сігнатура делегата яка може повоторюватись. Хоча може бути шо назва має значення для конкретного проекту. У багатьох випадках вам потрібен "якийсь" делегат який ортимує параметри та можливо повертає значення відмінне від void. В таких випадках платформа має вбудованиі типи делегатів Action<> та Func<>.
+Загальний делегат Action визначено в просторі імен System і ви можете використати цей загальний делегат, щоб вказати на метод, який приймає до 16 аргументів і повертає void. Оскільки він загальний потрібно вказати тип кожного параметра.
+
+```cs
+void UseActionDelegate()
+{
+    Action<string, ConsoleColor, int> printToConsole = new(MessageToConsole);
+
+    printToConsole("Hi!", ConsoleColor.Yellow, 3);
+
+
+    void MessageToConsole(string message,ConsoleColor txtColor, int printCount)
+    {
+        ConsoleColor previousColor = Console.ForegroundColor;
+        Console.ForegroundColor = txtColor;
+
+        for (int i = 0; i < printCount; i++)
+        {
+            Console.WriteLine(message);
+        }
+
+        Console.ForegroundColor = previousColor;
+    }
+}
+
+UseActionDelegate();
+```
+```
+Hi!
+Hi!
+Hi!
+```
+Замість того аби створювати власний делегат необхідної сігнатури ми використовуємо вбудований загальний делегат Action 
+
+```cs
+ public delegate void Action<in T1, in T2, in T3>(T1 arg1, T2 arg2, T3 arg3);
+```
+Вказавши необхідні типи та метод виклику ми створи об'єкт який вказує на метод який треба викликати. Таким чином ми не створювали власний делегат і не придумували йому назву, тобто виключили пункт 1 з списку того шо ми робим коли створюємо зворотній виклик. 
+Делегат Action може вказувати на методи які приймають аргументи та повертає void. Якшо вам потрібен делегат який буде вказувати на методи яки вертають значення можна використати вбудований делегат Func<>. Загальний делегат Func може вказувати на методи з 16-ма параметрами та повертає вказаний тип.
+
+```cs
+void UseFuncDelegate()
+{
+    Func<int, int, int> biIntOp = Add;
+    int result = biIntOp(5,5);
+    Console.WriteLine(result);
+
+    biIntOp += Subtract;
+    foreach (var item in biIntOp.GetInvocationList())
+    {
+        Console.WriteLine(biIntOp.Method);
+    }
+    result = biIntOp.Invoke(5,5);
+    Console.WriteLine(result);
+
+    Func<string?> getNumberAsString = InputString;
+    Console.WriteLine(getNumberAsString());
+
+    // Local function for delegates
+    static int Add(int x,int y) =>  x + y;
+
+    static int Subtract(int x, int y) => x - y;
+
+    static string? InputString()
+    {
+        Console.Write("Input whole number:");
+        string? input = Console.ReadLine();
+
+        return int.TryParse(input,out int _) ? input : null;
+    } 
+}
+UseFuncDelegate();
+```
+```
+10
+Int32 <<Main>$>g__Subtract|0_4(Int32, Int32)
+Int32 <<Main>$>g__Subtract|0_4(Int32, Int32)
+0
+Input whole number:5
+5
+```
+Тут ми бачимо перша чатина це той самий приклад який був в пункті "Визанчення типу делегату" на почтаку статті в якій ми вказували на методи Add та Subtract. Різниця в тому шо ми не створюємо власний тип делегату delegate int BinaryIntOp(int x, int y) а користуемся вбудованим. Майте на увазі шо останій параметр вказує на тип значення шо повертає метод.
+Оскілки такий підхід трохи простіший встає питання:чи постійно використовувати делегати Action і Func? Відповід як в багатох випадках программовання "залежить від завдання". У багатьох випадках ці делегати підходять. 
+Коли вам потрібно передати більше значення делегата, для домену завданя можна встановити власну назву делегата. Це додає лише один рябок коду. 
+
+
+
+
+
+
 
 
 

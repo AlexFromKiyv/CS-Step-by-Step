@@ -11,10 +11,6 @@ void UseMyGenericDelegate()
  // workWithInt += StringTarget;  // don't work 
     workWithInt(3);
 
-    workWithString += StringTarget; //work
-
-
-
     void StringTarget(string text)
     {
         Console.WriteLine(text.ToUpper());
