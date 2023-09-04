@@ -321,7 +321,197 @@ SimplifyingCodingHandler();
 Зверніть увагу код-заглушка має правільний формат який відповідає визначенню делегата. 
 IntelliSense доступний для всіх подій .Net, ваших спеціальних подій та подій базової бібіліотеки класів. Ця функйія дозволяє єкономити час. Це позбавляє потребит шукати дані про делегат та формат цільового методу делегата.
 
+## Шаблон подій з використанням EventArgs. 
 
+Використаня подій в базових бібліотеках має свій шаблон. Це рекомендований шаблон для подій від Microsoft. Бібіліотеки базових класів використовують події в яких базовий делегат має перший параметр System.Object, а другий параметр нашадок System.EventArgs.
+Аргумент System.Object пердставляє посилання на об'єкт, який надіслав подію(наприклад екземпляр Car). Другий параметр представляє інформацію про поточну подію. Базовий клас представляє подію, яка не надсилає жодної спеціальної додадкової інформації.
+```cs
+    //
+    // Summary:
+    //     Represents the base class for classes that contain event data, and provides a
+    //     value to use for events that do not include event data.
+    public class EventArgs
+    {
+        //
+        // Summary:
+        //     Provides a value to use with events that do not have event data.
+        public static readonly EventArgs Empty;
+
+        //
+        // Summary:
+        //     Initializes a new instance of the System.EventArgs class.
+        public EventArgs();
+    }
+``` 
+Для простих подій можна відправити безпосередньо екземпляр класу EventArgs, тобто без додадкової інформації про подію. Якшо ви хочете передати спеціальні дані, слід створити підходящий клас що походить від EventArgs
+
+UseEventArgs\CarEventArgs.cs
+```cs
+    public class CarEventArgs : EventArgs 
+    {
+        public readonly string message;
+        public CarEventArgs(string message)
+        {
+            this.message = message;
+        }
+    }
+```
+Маючи цей клас можна оновити клас Car який визначає делегат.
+
+```cs
+    internal class Car
+    {
+        // State data
+        public string Name { get; set; } = string.Empty;
+        public int MaxSpeed { get; set; } = 100;
+        public int CurrentSpeed { get; set; }
+
+        private bool _isDead;
+
+        //Constructors
+        public Car(string name, int maxSpeed, int currentSpeed)
+        {
+            Name = name;
+            MaxSpeed = maxSpeed;
+            CurrentSpeed = currentSpeed;
+        }
+        public Car()
+        {
+        }
+
+        //Define delegate type
+        public delegate void CarEngineHandler(object sender, CarEventArgs e);
+
+
+        // This car can send these events
+        public event CarEngineHandler AboutToBlow;
+        public event CarEngineHandler Exploded;
+
+        //This is a method of changing the current speed
+        public void Accelerate(int delta)
+        {
+            if (_isDead)
+            {
+                Exploded?.Invoke(this,new CarEventArgs("Sorry, this car is dead!"));
+            }
+            else
+            {
+                CurrentSpeed += delta;
+
+                if (CurrentSpeed > MaxSpeed)
+                {
+                    _isDead = true;
+                    CurrentSpeed = 0;
+                    Exploded?.Invoke(this, new CarEventArgs("Car dead!"));
+                }
+                else
+                {
+                    Console.WriteLine($"\tCurrent speed {Name}: {CurrentSpeed}");
+                }
+
+                if ((MaxSpeed - CurrentSpeed) < 10 && !_isDead)
+                {
+                    AboutToBlow?.Invoke(this, new CarEventArgs($"Careful buddy! Gonna blow! Current speed:{CurrentSpeed}"));
+                }
+            }
+        }
+    }
+```
+В класі оновлено визначення делегата та метод який використовує події. Передається посилання на поточний об'єкт за допомогою this та посилання на екземпляр класу CarEventArgs з відповідним значенням для конструктора.
+При таких змінах визиваючий код теж повитен мати методи які відповідають делегату.
+```cs
+void UseEventPattern()
+{
+    Car car = new("Volkswagen Käfer", 105, 83);
+    car.AboutToBlow += Car_AboutToBlow;
+    car.Exploded += Car_Exploded;
+
+    car.Accelerate(5);
+    car.Accelerate(5);
+    car.Accelerate(5);
+    car.Accelerate(5);
+    car.Accelerate(5);
+    car.Accelerate(5);
+}
+
+void Car_Exploded(object sender, CarEventArgs e)
+{
+    if (sender is Car car)
+    {
+        Console.WriteLine($"{car.Name} : {e.message}");
+    }
+}
+void Car_AboutToBlow(object sender, CarEventArgs e)
+{
+    if (sender is Car car)
+    {
+        Console.WriteLine($"Critical message from {car.Name} : {e.message}"  );
+    }
+}
+
+UseEventPattern();
+```
+```
+        Current speed Volkswagen Kafer: 88
+        Current speed Volkswagen Kafer: 93
+        Current speed Volkswagen Kafer: 98
+Critical message from Volkswagen Kafer : Careful buddy! Gonna blow! Current speed:98
+        Current speed Volkswagen Kafer: 103
+Critical message from Volkswagen Kafer : Careful buddy! Gonna blow! Current speed:103
+Volkswagen Kafer : Car dead!
+Volkswagen Kafer : Sorry, this car is dead!
+```
+Зовнішній код отримує посилання на відправника та об'єкт події. Цього достатньо шоб отримпати повну інформацію про подію.
+
+## Узагальнений делегат EventHandler<T>.
+
+В поппередньому прикладі визначення делегато мало чіткий шаблон перший параметр System.Object, другий екземпляр типу похідного від EventArgs.
+Оскільки визначення делегата шаблонне то немає сенсу вигадувати і постійно визначати нові делегати типу:
+```cs
+        public delegate void CarEngineHandler(object sender, CarEventArgs e);
+```
+Можна використовувати загальний вбудований делегат:
+
+```cs
+public delegate void EventHandler<TEventArgs>(object? sender, TEventArgs e);
+```
+В нашому випадку TEventArgs це CarEventArgs. Тому в класі Car можна зробити такі зміни
+
+```cs
+    internal class Car
+    {
+
+        ...
+
+        // This car can send these events
+        public event EventHandler<CarEventArgs> AboutToBlow;
+        public event EventHandler<CarEventArgs> Exploded;
+
+        ...
+
+    }
+```
+При цьому не треба визначати делегата. В методах визиваючого коду тілки треба вказати перший параметр як object?.
+
+```cs
+void Car_Exploded(object? sender, CarEventArgs e)
+{
+    if (sender is Car car)
+    {
+        Console.WriteLine($"{car.Name} : {e.message}");
+    }
+}
+void Car_AboutToBlow(object? sender, CarEventArgs e)
+{
+    if (sender is Car car)
+    {
+        Console.WriteLine($"Critical message from {car.Name} : {e.message}");
+    }
+}
+```
+
+
+ 
 
 
 

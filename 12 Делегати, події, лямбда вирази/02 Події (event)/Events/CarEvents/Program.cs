@@ -56,4 +56,5 @@ void Car_Exploded(string? messageForCaller)
     throw new NotImplementedException();
 }
 
-SimplifyingCodingHandler();
+//SimplifyingCodingHandler();
+
