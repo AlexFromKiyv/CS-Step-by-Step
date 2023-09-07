@@ -98,4 +98,63 @@ void AccessLocalVariables()
     Console.WriteLine(aboutToBlowCounter);
 }
 
-AccessLocalVariables();
+//AccessLocalVariables();
+
+void IsolationLocalFunction()
+{
+
+    Console.WriteLine(AddWrapperWithStatic(1,2));
+
+    int AddWrapperWithStatic(int x, int y)
+    {
+        //Do some validation here
+        return Add(x, y);
+   
+        static int Add(int x, int y)
+        {
+            return x + y;
+        }
+    }
+}
+
+//IsolationLocalFunction();
+
+
+void StaticAnonymousMethods()
+{
+    int aboutToBlowCounter = 0;
+
+    Car car = new("VW e-up", 130, 110);
+
+    // Now it is static
+    car.AboutToBlow += static delegate
+    {
+        //aboutToBlowCounter++; //A static anonymous function cannot contain а reference  
+        Console.WriteLine("Hey! Going too fast!");
+    };
+
+    for (int i = 0; i < 8; i++)
+    {
+        car.Accelerate(3);
+    }
+}
+
+void DiscardsMethodParameters()
+{
+    Console.WriteLine(ReturnResult(10));
+
+    string ReturnResult(int _)
+    {
+        return "Hi";
+    }
+}
+//DiscardsMethodParameters();
+
+void DiscardInAnonymousMethod()
+{
+    Func<int, string> sayHi = delegate (int _) { return "Hi"; };
+    
+    Console.WriteLine(sayHi(3));
+}
+
+DiscardInAnonymousMethod();

@@ -268,3 +268,89 @@ Hey! Going too fast!
 - Не можуть мати зміну з назвою яка є в методі в якому вони визначені.
 - Анонімний метод може отримати доступ до змінних екземпляра (або статичних змінних, у відповідних випадках) у зовнішній області класу.
 - Анонімний метод може оголошувати локальні змінні з тим самим іменем, що й зовнішні змінні-члени класу (локальні змінні мають окрему область і приховують зовнішні змінні-члени класу).
+
+## static анонімні методи.
+
+В попередьному прикладі метод використовував зовнішню змінну. Але це пагана практика оскільки порушується інкапсуляція і може викликати небажані побічні ефекти в програмі.
+Локалні функції можна ізолювати від коду зробивши їх статичними 
+
+```cs
+
+void IsolationLocalFunction()
+{
+
+    Console.WriteLine(AddWrapperWithStatic(1,2));
+
+    int AddWrapperWithStatic(int x, int y)
+    {
+        //Do some validation here
+        return Add(x, y);
+   
+        static int Add(int x, int y)
+        {
+            return x + y;
+        }
+    }
+}
+
+IsolationLocalFunction();
+```
+Цю можливість, ізоляції коду ,можна використати для анонімних методів вказавши їх як статік. Тоді зовнішні змінні стануть недоступні.
+```cs
+void StaticAnonymousMethods()
+{
+    int aboutToBlowCounter = 0;
+
+    Car car = new("VW e-up", 130, 110);
+
+    // Now it is static
+    car.AboutToBlow += static delegate
+    {
+        //aboutToBlowCounter++; //A static anonymous function cannot contain а reference  
+        Console.WriteLine("Hey! Going too fast!");
+    };
+
+    for (int i = 0; i < 8; i++)
+    {
+        car.Accelerate(3);
+    }
+}
+```
+При визначені методу як static компілятор покаже недоступність змінної.
+
+## Відкідання параметрів в анонімних методах.
+
+В методі можна ігнорувати вхідні аргуметни.
+
+```cs
+void DiscardsMethodParameters()
+{
+    Console.WriteLine(ReturnResult(10));
+    Console.WriteLine(ReturnResult(20));
+
+    string ReturnResult(int _)
+    {
+        return "Hi";
+    }
+}
+DiscardsMethodParameters();
+```
+```
+Hi
+Hi
+```
+Це саме можна використати для анонімних методів.
+```cs
+void DiscardInAnonymousMethod()
+{
+    Func<int, string> sayHi = delegate (int _) { return "Hi"; };
+    
+    Console.WriteLine(sayHi(3));
+}
+
+DiscardInAnonymousMethod();
+```
+```
+Hi
+```
+
