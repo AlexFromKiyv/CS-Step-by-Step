@@ -19,5 +19,11 @@ namespace IntroducionToLambdaExpressions
         {
             _mmDelegate?.Invoke("Adding has complited!", x + y);
         }
+
+
+
     }
+
+
+
 }

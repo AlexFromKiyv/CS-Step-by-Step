@@ -112,10 +112,75 @@ void MoreSimpleLambdaWithMiltipeParameters()
     SimpleMath simpleMath = new();
 
     simpleMath.SetMathMessageHandler( (message, result) => 
+    
     Console.WriteLine($"Message:{message}\nResult:{result}")
+    
     );
 
     simpleMath.Add(1, 2);
 }
 
-MoreSimpleLambdaWithMiltipeParameters();
+//MoreSimpleLambdaWithMiltipeParameters();
+
+void LambdaWithoutParameters()
+{
+    Call call = new();
+
+    call.SetVSDelegate(() => "Hi girl!");
+
+    call.SaySomething();
+}
+
+//LambdaWithoutParameters();
+
+void LambdaAndOuterVariables()
+{
+    int outerVariable = 0;
+
+    Func<int, int, int> sum = (x, y) =>
+    {
+        outerVariable++;
+        return x + y;
+    };
+
+    sum(1, 2);
+    sum(1, 2);
+
+    Console.WriteLine(outerVariable);
+}
+
+//LambdaAndOuterVariables();
+
+void StaticLambda()
+{
+    int outerVariable = 0;
+
+    Func<int, int, int> sum = static (x, y) =>
+    {
+        // A compilation error occurs here.
+        // Cannot a reference to ...
+        //outerVariable++;
+        return x + y;
+    };
+
+    sum(1, 2);
+    sum(1, 2);
+
+    Console.WriteLine(outerVariable);
+}
+
+void DiscardsWithLambda()
+{
+    int counter = 0;
+    Func<int, bool> tik = (_) =>
+    {
+        counter++;
+        return true;
+    };
+
+    Console.WriteLine(tik(1));
+    Console.WriteLine(tik(2));
+    Console.WriteLine(counter);
+}
+
+DiscardsWithLambda();

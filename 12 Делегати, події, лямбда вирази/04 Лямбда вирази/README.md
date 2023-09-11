@@ -277,6 +277,343 @@ MoreSimpleLambdaWithMiltipeParameters();
 Message:Adding has complited!
 Result:3
 ```
+В більшості випадків компілятор здатний виявити тип необхідних паратетрів, тому неявна типізація досить компактний і зручний спосіб побудови виразу.
 
+Лямбда-вираз може бути без параметрів
+```cs
+    internal class Call
+    {
+        public delegate string VerySimpleDelegate();
+        private VerySimpleDelegate? _vsDelegate;
+        public void SetVSDelegate(VerySimpleDelegate vsDelegate)
+        {
+            _vsDelegate = vsDelegate;
+        }
 
+        public void SaySomething()
+        {
+            Console.WriteLine(_vsDelegate?.Invoke());
+        }
+    }
+```
+```cs
+void LambdaWithoutParameters()
+{
+    Call call = new();
+
+    call.SetVSDelegate(() => "Hi girl!");
+
+    call.SaySomething();
+}
+
+LambdaWithoutParameters();
+```
+```
+Hi girl!
+```
+Коли ви взаємодієте з делегатом який зовсім не приймає параметрів тоді лямбда вираз починається з () => . 
+
+## static лямбда-вирази.
+
+Так само як і для методів для лямбда-виразів доступні зовнішні змінні.
+```cs
+void LambdaAndOuterVariables()
+{
+    int outerVariable = 0;
+
+    Func<int, int, int> sum = (x, y) =>
+    {
+        outerVariable++;
+        return x + y;
+    };
+
+    sum(1, 2);
+    sum(1, 2);
+
+    Console.WriteLine(outerVariable);
+}
+
+LambdaAndOuterVariables();
+```
+```
+2
+```
+Перед лямбда-виразом можна використати ключове слово static.
+```cs
+void StaticLambda()
+{
+    int outerVariable = 0;
+
+    Func<int, int, int> sum = static (x, y) =>
+    {
+        // A compilation error occurs here.
+        // Cannot a reference to ...
+        //outerVariable++;
+        return x + y;
+    };
+
+    sum(1, 2);
+    sum(1, 2);
+
+    Console.WriteLine(outerVariable);
+}
+```
+При визначені лямбда-виразу як статичний зовнішні змінні стають недоступними.
+
+## Відкидання параметрів для лямбда-виразів.
+
+```cs
+void DiscardsWithLambda()
+{
+    int counter = 0;
+    Func<int, bool> tik = (_) =>
+    {
+        counter++;
+        return true;
+    };
+
+    Console.WriteLine(tik(1));
+    Console.WriteLine(tik(2));
+    Console.WriteLine(counter);
+}
+
+DiscardsWithLambda();
+```
+```
+True
+True
+2
+```
+Якшо вхідні параметри не мають значеня їх можна відкинути в лямбда-виразі.
+
+## Лямбда-вирази для EventArgs.
+
+В базових бібліотеках класів широко використовується шаблон подій з використанням класу EventArgs. Створимо лямбда-вирази для таких випадків.
+
+Нехай ми маємо наступні класи.
+
+LambdaAndEventArgs\
+
+```cs
+    class CarEventArgs : EventArgs
+    {
+        public readonly string message;
+        public CarEventArgs(string message)
+        {
+            this.message = message;
+        }
+    }
+```
+```cs
+    class Car
+    {
+        // State data
+        public string Name { get; set; } = string.Empty;
+        public int MaxSpeed { get; set; } = 100;
+        public int CurrentSpeed { get; set; }
+
+        private bool _isDead;
+
+        //Constructors
+        public Car(string name, int maxSpeed, int currentSpeed)
+        {
+            Name = name;
+            MaxSpeed = maxSpeed;
+            CurrentSpeed = currentSpeed;
+        }
+        public Car()
+        {
+        }
+
+        public override string? ToString() => Name;
+
+        // This car can send these events
+        public event EventHandler<CarEventArgs> AboutToBlow;
+        public event EventHandler<CarEventArgs> Exploded;
+
+        //This is a method of changing the current speed
+        public void Accelerate(int delta)
+        {
+            if (_isDead)
+            {
+                Exploded?.Invoke(this, new CarEventArgs("Sorry, this car is dead!"));
+            }
+            else
+            {
+                CurrentSpeed += delta;
+
+                if (CurrentSpeed > MaxSpeed)
+                {
+                    _isDead = true;
+                    CurrentSpeed = 0;
+                    Exploded?.Invoke(this, new CarEventArgs("Car dead!"));
+                }
+                else
+                {
+                    Console.WriteLine($"\tCurrent speed {Name}: {CurrentSpeed}");
+                }
+
+                if ((MaxSpeed - CurrentSpeed) < 10 && !_isDead)
+                {
+                    AboutToBlow?.Invoke(this, new CarEventArgs($"Careful buddy! Gonna blow! Current speed:{CurrentSpeed}"));
+                }
+            }
+        }
+    }
+```
+В класі Car має дві події які мають тип EventHandler<CarEventArgs>, сігнатура якого наступна.
+```cs
+public delegate void EventHandler<CarEventArgs>(object? sender, CarEventArgs e);
+```
+Без використання лямбда-виразу використати класи можна було наступним чином.
+
+```cs
+void UseEventWithoutLambda()
+{
+    Car car = new("Volkswagen Käfer", 105, 83);
+    
+    car.AboutToBlow += delegate (object? sender, CarEventArgs e)
+    {
+        if (sender is Car c)
+        {
+            Console.WriteLine($"Critical message from engine {c.Name} : {e.message}");
+        }
+
+    };
+
+    car.Exploded += delegate (object? sender, CarEventArgs e)
+    {
+        if (sender is Car c)
+        {
+            Console.WriteLine($"Fatal message from engine {c.Name} : {e.message}");
+        }
+
+    };
+
+    for (int i = 0; i < 5; i++)
+    {
+        car.Accelerate(5);
+    }
+
+}
+
+UseEventWithoutLambda();
+```
+Використаємо лямбда-вирази.
+
+```cs
+void UseEventWithLambda()
+{
+    Car car = new("Volkswagen Käfer", 105, 83);
+
+    car.AboutToBlow += (sender, e) => 
+    Console.WriteLine($"Critical message from engine {sender} : {e.message}");
+    
+    car.Exploded += (sender, e) =>
+    Console.WriteLine($"Fatal message from engine {sender} : {e.message}");
+
+    for (int i = 0; i < 5; i++)
+    {
+        car.Accelerate(5);
+    }
+
+}
+
+UseEventWithLambda();
+```
+Вся причина використаня лямб-да виразів в чикому і стислому способі визначення анонімних методів. Таким чином спорщується робота з делегатами.
+
+## Лямбда-вирази як вираз з тілом в якості члена класу.
+
+Лямбда-вирази можна використовувати для спрощення визначеня членів класу.
+Наприклад маємо клас.
+```cs
+    static class SimpleMath
+    {
+        public static int Multiplying(int x, int y)
+        {
+            return x * y;
+        }
+        public static void PrintMultiplying(int x, int y)
+        {
+            Console.WriteLine(x * y);
+        }
+    }
+```
+Використовуючи лямбда вирази його можна визначити так.
+```cs
+    static class MoreSimpleMath
+    {
+        public static int Multiplying(int x, int y) =>  x * y;
+        
+        public static void PrintMultiplying(int x, int y) => Console.WriteLine( x * y );
+    }
+```
+
+Якшо є метод або властивіст, які складається з одного або кількох дій, немає необхідності визначати окремий блок з return, а можна використати => . Це називають "expression-bodied member." (вираз з тілом). Цей синтаксис можна використовувати для конструкторів, фіналізаторів та для акссерорів та властивостей.
+Також такий синтаксис можна використовувати будь-де і він не прив'язаний до делегатів.
+
+```cs
+void UseLambda()
+{
+    PrintSquared(5);
+
+    void PrintSquared(int x) => MoreSimpleMath.PrintMultiplying(x,x); 
+}
+
+UseLambda();
+```
+```
+25
+```
+Можна використати лямбда для визначення властивості.
+```cs
+class Car
+{
+    public string? Name { get; set; }
+    
+    private int _maxSpeed;
+    public int MaxSpeed => _maxSpeed;
+    public Car()
+    {
+    }
+    public Car(string? name, int maxSpeed)
+    {
+        Name = name;
+        _maxSpeed = maxSpeed;
+    }
+}
+```
+```cs
+void UseLambdaAsAccessor()
+{
+    Car car = new("VW Golf", 160);
+
+    Console.WriteLine(car.MaxSpeed);
+}
+
+UseLambdaAsAccessor();
+```
+```
+160
+```
+При необхідности лямбда-вираз завжди можна розкласти в метод і навпаки.
+
+```cs
+ArgumentsToProcess => StatementsToProcessThem
+
+//or
+ArgumentsToProcess => 
+{
+    StatementsToProcessThem
+}
+
+//to
+MethodName(ArgumentsToProcess)
+{
+ StatementsToProcessThem
+}
+```
+
+Лямбда-вирази значною мірою використвуються в LINQ щоб спростити кодування.
 
