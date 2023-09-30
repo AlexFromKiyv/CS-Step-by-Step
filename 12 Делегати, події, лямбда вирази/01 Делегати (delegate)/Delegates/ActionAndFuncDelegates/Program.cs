@@ -54,4 +54,28 @@ void UseFuncDelegate()
         return int.TryParse(input,out int _) ? input : null;
     } 
 }
-UseFuncDelegate();
+//UseFuncDelegate();
+
+void UsePredicateDelegate()
+{
+    
+    Predicate<int> IsAdult = (age) => age > 18;
+
+    void TestAge(int age)
+    {
+        if (IsAdult(age))
+        {
+            Console.WriteLine($"{age}. You are adult.");
+        }
+        else
+        {
+            Console.WriteLine($"{age}. You are child.");
+        }
+    }
+
+    TestAge(10);
+    TestAge(20);
+    TestAge(30);
+}
+
+UsePredicateDelegate();
