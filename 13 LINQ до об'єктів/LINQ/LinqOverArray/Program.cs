@@ -1,4 +1,12 @@
-﻿void QuryesOverStringsArray()
+﻿void CollectionToConsole<T>( IEnumerable<T> collection)
+{
+    foreach (var item in collection)
+    {
+        Console.WriteLine(item);
+    }
+}
+
+void QuryesOverStringsArray()
 {
     string[] games =
     {
@@ -18,10 +26,63 @@
         orderby ng
         select ng;
 
-    foreach (var item in longNames)
+    CollectionToConsole(longNames);
+}
+
+//QuryesOverStringsArray();
+
+void QuryesOverStringsArrayWithExtentionMethods()
+{
+    string[] games =
     {
-        Console.WriteLine(item);
+        "Morrowind",
+        "Uncharted 2",
+        "Fallout 3",
+        "Daxter",
+        "System Shock 2"
+    };
+
+    IEnumerable<string> longNames =
+        games.Where(ng => ng.Contains(" ")).OrderBy(ng => ng).Select(ng => ng);
+
+    CollectionToConsole(longNames);
+}
+
+//QuryesOverStringsArrayWithExtentionMethods();
+
+void QueryOverStringsWithoutLINQ()
+{
+    string[] games =
+{
+        "Morrowind",
+        "Uncharted 2",
+        "Fallout 3",
+        "Daxter",
+        "System Shock 2"
+    };
+
+    string[] gamesWithSpace = new string[5];
+
+    // Selection
+    for (int i = 0; i < games.Length; i++)
+    {
+        if (games[i].Contains(" "))
+        {
+            gamesWithSpace[i] = games[i]; 
+        }
+    }
+
+    //Sort
+    Array.Sort(gamesWithSpace);
+
+    //Print
+    foreach (string s in gamesWithSpace)
+    {
+        if (s != null)
+        {        
+            Console.WriteLine(s);
+        }
     }
 }
 
-QuryesOverStringsArray();
+QueryOverStringsWithoutLINQ();
