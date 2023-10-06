@@ -131,8 +131,8 @@ void ExploreResultSetExtensionMethods()
     IEnumerable<string> longNames =
         games
         .Where(ng => ng.Contains(" "))
-        .OrderBy(ng => ng);
-        //.Select(ng => ng);
+        .OrderBy(ng => ng)
+        .Select(ng => ng);
 
     ReflectOverQueryResult(longNames,"Extension Methods.");
 }
