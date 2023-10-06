@@ -85,4 +85,56 @@ void QueryOverStringsWithoutLINQ()
     }
 }
 
-QueryOverStringsWithoutLINQ();
+//QueryOverStringsWithoutLINQ();
+
+
+void ReflectOverQueryResult(object resultSet, string queryType = "Query Expressions")
+{
+    Console.WriteLine($"Query type:{queryType}");
+    Console.WriteLine($"Result is type of:{resultSet.GetType()}");
+    Console.WriteLine($"This type locate:{resultSet.GetType().Assembly.GetName().Name}");
+}
+
+void ExploreResultSetQueryExpression()
+{
+    string[] games =
+{
+        "Morrowind",
+        "Uncharted 2",
+        "Fallout 3",
+        "Daxter",
+        "System Shock 2"
+    };
+
+    IEnumerable<string> longNames =
+        from ng in games
+        where ng.Contains(" ")
+        orderby ng
+        select ng;
+
+    ReflectOverQueryResult(longNames);
+}
+
+//ExploreResultSetQueryExpression();
+
+void ExploreResultSetExtensionMethods()
+{
+    string[] games =
+{
+        "Morrowind",
+        "Uncharted 2",
+        "Fallout 3",
+        "Daxter",
+        "System Shock 2"
+    };
+
+    IEnumerable<string> longNames =
+        games
+        .Where(ng => ng.Contains(" "))
+        .OrderBy(ng => ng);
+        //.Select(ng => ng);
+
+    ReflectOverQueryResult(longNames,"Extension Methods.");
+}
+
+ExploreResultSetExtensionMethods();

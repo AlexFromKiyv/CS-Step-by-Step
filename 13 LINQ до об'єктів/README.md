@@ -319,3 +319,80 @@ Uncharted 2
 ```
 Таким чином видно що LINQ можна використовувати для радикального спрощеня вилученоя і отримання підмножин набору даних. Замість створення вкладених циклів та складних умов логіки компілятор зробить цю роботу від вашого імені, коли ви створите відповідний запит LINQ. 
 
+## Рефлексія (видслідковуваня власної структури під час виконання) над наборами результатів LINQ.
+
+Для визначення деталей типів наборів результатів LINQ використаємо допоміжний метод.
+```cs
+void ReflectOverQueryResult(object resultSet, string queryType = "Query Expressions")
+{
+    Console.WriteLine($"Query type:{queryType}");
+    Console.WriteLine($"Result is type of:{resultSet.GetType()}");
+    Console.WriteLine($"This type locate:{resultSet.GetType().Assembly.GetName().Name}");
+}
+```
+Використаємо його для дослідження запиту LINQ.
+```cs
+void ExploreResultSetQueryExpression()
+{
+    string[] games =
+{
+        "Morrowind",
+        "Uncharted 2",
+        "Fallout 3",
+        "Daxter",
+        "System Shock 2"
+    };
+
+    IEnumerable<string> longNames =
+        from ng in games
+        where ng.Contains(" ")
+        orderby ng
+        select ng;
+
+    ReflectOverQueryResult(longNames);
+}
+
+ExploreResultSetQueryExpression();
+
+```
+```
+Query type:Query Expressions
+Result is type of:System.Linq.OrderedEnumerable`2[System.String,System.String]
+This type locate:System.Linq
+```
+Ми бачимо що змінна результату екземпляр типу OrderedEnumerable<TElement,TKey> яка є внутрішнфм абстрактним типом, що міститься в збірці System.Linq.
+
+Зробито такеж саме дослідження для LINQ у вигляді методів розширення.
+```cs
+void ExploreResultSetExtensionMethods()
+{
+    string[] games =
+{
+        "Morrowind",
+        "Uncharted 2",
+        "Fallout 3",
+        "Daxter",
+        "System Shock 2"
+    };
+
+    IEnumerable<string> longNames =
+        games
+        .Where(ng => ng.Contains(" "))
+        .OrderBy(ng => ng)
+        .Select(ng => ng);
+
+    ReflectOverQueryResult(longNames,"Extension Methods.");
+}
+
+ExploreResultSetExtensionMethods();
+```
+```
+Query type:Extension Methods.
+Result is type of:System.Linq.Enumerable+SelectIPartitionIterator`2[System.String,System.String]
+This type locate:System.Linq
+```
+Як бачимо змінна підмножини є екземпляр типу SelectIPartitionIterator. Якщо виділити Select(ng => ng) ми матимемо той сами тип OrderedEnumerable<TElement,TKey>. 
+Обидва типи походять від IEnumerable<T> обидва можуть повторюватися, та обидва можуть створювати список або масив із своїх значень.
+
+
+
