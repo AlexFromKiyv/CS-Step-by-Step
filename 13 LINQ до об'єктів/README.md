@@ -394,5 +394,70 @@ This type locate:System.Linq
 Як бачимо змінна підмножини є екземпляр типу SelectIPartitionIterator. Якщо виділити Select(ng => ng) ми матимемо той сами тип OrderedEnumerable<TElement,TKey>. 
 Обидва типи походять від IEnumerable<T> обидва можуть повторюватися, та обидва можуть створювати список або масив із своїх значень.
 
+## LINQ та неявне типізовані локальні змінні.
+
+Хоча в попередньому прикладі можна було охопити що результат може бути об'єкт, яки можно перебрати по елементах шо є строками (IEnumerable<string>), але не досі ясно шо зміна є типу OrderedEnumerable<TElement,TKey>.
+Враховуючи що набори результатів можуть бути представлені за допомогою великої кількісті типів у різних просторах імен, орієнтованих на LINQ, утомливо визначати визначати належний тип для зберігання результату. В багатох випадках базовий тип може бути неочевидним. У деяких випадках тип генерується під час компіляції.
+
+Розглянемо приклад
+```cs
+void QueryOverInts()
+{
+    int[] ints = { 10, 20, 30, 40, 1, 2, 3, 8 };
+
+    IEnumerable<int> intsLeesThan10 =
+        from i in ints
+        where i < 10
+        select i;
+
+    foreach (var item in intsLeesThan10)
+    {
+        Console.WriteLine(item);
+    }
+
+    ReflectOverQueryResult(intsLeesThan10);
+}
+
+QueryOverInts();
+```
+```
+1
+2
+3
+8
+
+Query type: Query Expressions
+Result is type of:WhereArrayIterator`1
+This type locate:System.Linq
+```
+У цьому випадку змінна підмножини має зовсім інший базовий тип. Цього разу типом що реалізує інтерфейс IEnumerable<int> є низкорівневий клас  WhereArrayIterator<T>.
+Ці приклади використати IEnumerable<T> для зміних підмножин, де T це тип даних.
+Оскілки IEnumerable<T> розширює IEnumerable можна булоб використати цей тип.
+В цій ситуацію спрощує створеня запитів неявна типізація.
+
+```cs
+void QueryOverIntsUseImplicitlyTypedLocalVariables()
+{
+    int[] ints = { 10, 20, 30, 40, 1, 2, 3, 8 };
+
+    var intsLeesThan10 =
+        from i in ints
+        where i < 10
+        select i;
+
+    CollectionToConsole(intsLeesThan10);
+}
+
+QueryOverIntsUseImplicitlyTypedLocalVariables();
+```
+Як правило нам не потібно знати точне значеня типу який повертає запит. Важливо що в більшості випадків він реалізовує інтерфейс який походить від IEnumerable, наприклад IEnumerable<T>. В операторі foreach також можна використоваувати var до елементів.
+
+## LINQ і методи розширення.
+
+Хоча в прикладах не створювалися методи розширеня, вони використовуються в як основа  в фоновому режиті. Вирази запиту LINQ можна використовувати для повернення контейнерів даних, які реалізовують загальний інтерфейс IEnumerable<T>. Але System.Array не реалізовує цей інтерфейс.
+```cs
+public abstract class Array : ICollection, IEnumerable, IList, IStructuralComparable, IStructuralEquatable, ICloneable
+```
+Він опосередковано отримує необхідну функціональнисть через статичний клас System.Linq.Enumerable. Цей службовий клас визначає велику кількість методів розширення( Aggregate<T>(), First<T>(), Max<T>(),...) які Array набуває у фоновому режимі. Тому коли поставити крапу після масиву можна побачити велику кількість методів, які не визначені в Array.   
 
 

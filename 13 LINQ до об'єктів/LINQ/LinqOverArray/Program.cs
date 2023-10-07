@@ -90,8 +90,8 @@ void QueryOverStringsWithoutLINQ()
 
 void ReflectOverQueryResult(object resultSet, string queryType = "Query Expressions")
 {
-    Console.WriteLine($"Query type:{queryType}");
-    Console.WriteLine($"Result is type of:{resultSet.GetType()}");
+    Console.WriteLine($"\nQuery type: {queryType}");
+    Console.WriteLine($"Result is type of:{resultSet.GetType().Name}");
     Console.WriteLine($"This type locate:{resultSet.GetType().Assembly.GetName().Name}");
 }
 
@@ -137,4 +137,39 @@ void ExploreResultSetExtensionMethods()
     ReflectOverQueryResult(longNames,"Extension Methods.");
 }
 
-ExploreResultSetExtensionMethods();
+//ExploreResultSetExtensionMethods();
+
+void QueryOverInts()
+{
+    int[] ints = { 10, 20, 30, 40, 1, 2, 3, 8 };
+
+    IEnumerable<int> intsLeesThan10 =
+        from i in ints
+        where i < 10
+        select i;
+
+    foreach (var item in intsLeesThan10)
+    {
+        Console.WriteLine(item);
+    }
+
+    ReflectOverQueryResult(intsLeesThan10);
+}
+
+//QueryOverInts();
+
+void QueryOverIntsUseImplicitlyTypedLocalVariables()
+{
+    int[] ints = { 10, 20, 30, 40, 1, 2, 3, 8 };
+
+    var intsLeesThan10 =
+        from i in ints
+        where i < 10
+        select i;
+
+    CollectionToConsole(intsLeesThan10);
+
+}
+
+//QueryOverIntsUseImplicitlyTypedLocalVariables();
+
