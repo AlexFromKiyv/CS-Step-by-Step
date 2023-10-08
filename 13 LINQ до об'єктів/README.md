@@ -460,4 +460,75 @@ public abstract class Array : ICollection, IEnumerable, IList, IStructuralCompar
 ```
 Він опосередковано отримує необхідну функціональнисть через статичний клас System.Linq.Enumerable. Цей службовий клас визначає велику кількість методів розширення( Aggregate<T>(), First<T>(), Max<T>(),...) які Array набуває у фоновому режимі. Тому коли поставити крапу після масиву можна побачити велику кількість методів, які не визначені в Array.   
 
+## Роль відкладенного виконання.
 
+Для запитів LINQ dажливо визначити, що коли вони повертають послідовність, вони не визначать значеня до тих пір пока не буде ітерації над послідовністю. виконання визначення відкладається. Перевага підходу полягає в тому що можна застосовувати той самий запит кілька разів до того самого контейнера. Прицому ви будете отримувати найновіший результат.
+
+```cs
+void DeferredExecution()
+{
+    Console.WriteLine("Use query expression.");
+
+    int[] ints = { 10, 20, 30, 40, 1, 2, 3, 8 };
+
+    var result = from i in ints where i < 10 select i;
+
+    // query executed here
+    CollectionToConsole(result);
+    Console.WriteLine("\n");
+
+    ints[0] = 4;
+    
+    // and execute again
+    CollectionToConsole(result);
+
+    Console.WriteLine("\nUse extentions method."  );
+
+    var result1 = ints.Where(n => n < 10).Select(n => n);
+
+    CollectionToConsole(result1);
+    Console.WriteLine("\n");
+
+    ints[2] = 5;
+    
+    CollectionToConsole(result1);
+
+}
+
+
+DeferredExecution();
+```
+```
+Use query expression.
+1
+2
+3
+8
+
+
+4
+1
+2
+3
+8
+
+Use extentions method.
+4
+1
+2
+3
+8
+
+
+4
+5
+1
+2
+3
+8
+```
+Виключеня із правила коли вибираеться один елемент за допомогою методів First/FirstOrDefault, Single/SingleOrDefault або будь-який оператор агрегації. В цьому випадку запит виконуеться одразу.   
+
+При роботі з налагодженям коду в Visual Studio є корисний інструмент. Якшо поставити точку зупинки в місті де починається визначатися послідовність, можна побачити складові послідоності в Result View. Для цього треба підвести курсор до зміної.
+
+![View result](/13%20LINQ%20до%20об'єктів/Result.jpg "View result in VS").

@@ -173,3 +173,35 @@ void QueryOverIntsUseImplicitlyTypedLocalVariables()
 
 //QueryOverIntsUseImplicitlyTypedLocalVariables();
 
+void DeferredExecution()
+{
+    Console.WriteLine("Use query expression.");
+
+    int[] ints = { 10, 20, 30, 40, 1, 2, 3, 8 };
+
+    var result = from i in ints where i < 10 select i;
+
+    // query executed here
+    CollectionToConsole(result);
+    Console.WriteLine("\n");
+
+    ints[0] = 4;
+    
+    // and execute again
+    CollectionToConsole(result);
+
+    Console.WriteLine("\nUse extentions method."  );
+
+    var result1 = ints.Where(n => n < 10).Select(n => n);
+
+    CollectionToConsole(result1);
+    Console.WriteLine("\n");
+
+    ints[2] = 5;
+    
+    CollectionToConsole(result1);
+
+}
+
+
+DeferredExecution();
