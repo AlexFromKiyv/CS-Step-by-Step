@@ -203,5 +203,82 @@ void DeferredExecution()
 
 }
 
+//DeferredExecution();
 
-DeferredExecution();
+void UseDefaultIfEmpty()
+{
+    int[] ints = { 10, 20, 30, 40, 1, 2, 3, 8 };
+
+    CollectionToConsole(ints.DefaultIfEmpty());
+
+    Console.WriteLine();
+
+    var result = from i in ints where i > 99 select i;
+
+    CollectionToConsole(result.DefaultIfEmpty(404));
+}
+
+//UseDefaultIfEmpty();
+
+void ImmediateExecution()
+{
+    int[] ints = { 10, 20, 30, 40, 1, 2, 3, 8 };
+    Console.WriteLine( $"int[] ints = {{ 10, 20, 30, 40, 1, 2, 3, 8 }};");
+
+    int number = (from i in ints select i).First();
+    Console.WriteLine($"(from i in ints select i).First() : {number}");
+
+    number = (from i in ints orderby i select i).First();
+    Console.WriteLine($"(from i in ints orderby i select i).First() : {number}");
+
+    number = (from i in ints where i > 30 select i).Single();
+    Console.WriteLine($"(from i in ints where i > 30 select i).Single() : {number}");
+
+    number = (from i in ints where i >0 select i).FirstOrDefault();
+    Console.WriteLine($"(from i in ints where i >0 select i).FirstOrDefault() : {number}");
+
+    number = (from i in ints where i > 99 select i).FirstOrDefault();
+    Console.WriteLine($"(from i in ints where i > 99 select i).FirstOrDefault() : {number}");
+
+    number = (from i in ints where i > 99 select i).SingleOrDefault();
+    Console.WriteLine($"(from i in ints where i > 99 select i).SingleOrDefault() : {number}");
+
+    try
+    {
+        number = (from i in ints where i > 99 select i).First();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+
+    try
+    {
+        number = (from i in ints where i > 10 select i).Single();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+
+    // Get data right now
+    int[] intsAsArray = (from i in ints where i < 5 select i).ToArray();
+    CollectionToConsole(intsAsArray);
+
+    // Get data right now
+    List<int> intsAsList = (from i in ints where i < 5 select i).ToList();
+    CollectionToConsole(intsAsList);
+}
+
+ImmediateExecution();
+
+void SetDefaultValue()
+{
+    int[] ints = Array.Empty<int>();
+
+    var query = from i in ints where i > 0 select i;
+    var number = query.FirstOrDefault(404);
+
+    Console.WriteLine(number);
+}
+SetDefaultValue();

@@ -532,3 +532,100 @@ Use extentions method.
 При роботі з налагодженям коду в Visual Studio є корисний інструмент. Якшо поставити точку зупинки в місті де починається визначатися послідовність, можна побачити складові послідоності в Result View. Для цього треба підвести курсор до зміної.
 
 ![View result](/13%20LINQ%20до%20об'єктів/Result.jpg "View result in VS").
+
+Метод розширення DefaultIfEmpty повертає послідовність без змін або значення за замовчуванням якщо послідосність порожня.
+
+```cs
+void ImmediateExecution()
+{
+    int[] ints = { 10, 20, 30, 40, 1, 2, 3, 8 };
+    Console.WriteLine( $"int[] ints = {{ 10, 20, 30, 40, 1, 2, 3, 8 }};");
+
+    int number = (from i in ints select i).First();
+    Console.WriteLine($"(from i in ints select i).First() : {number}");
+
+    number = (from i in ints orderby i select i).First();
+    Console.WriteLine($"(from i in ints orderby i select i).First() : {number}");
+
+    number = (from i in ints where i > 30 select i).Single();
+    Console.WriteLine($"(from i in ints where i > 30 select i).Single() : {number}");
+
+    number = (from i in ints where i >0 select i).FirstOrDefault();
+    Console.WriteLine($"(from i in ints where i >0 select i).FirstOrDefault() : {number}");
+
+    number = (from i in ints where i > 99 select i).FirstOrDefault();
+    Console.WriteLine($"(from i in ints where i > 99 select i).FirstOrDefault() : {number}");
+
+    number = (from i in ints where i > 99 select i).SingleOrDefault();
+    Console.WriteLine($"(from i in ints where i > 99 select i).SingleOrDefault() : {number}");
+
+    try
+    {
+        number = (from i in ints where i > 99 select i).First();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+
+    try
+    {
+        number = (from i in ints where i > 10 select i).Single();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+
+    // Get data right now
+    int[] intsAsArray = (from i in ints where i < 5 select i).ToArray();
+    CollectionToConsole(intsAsArray);
+
+    // Get data right now
+    List<int> intsAsList = (from i in ints where i < 5 select i).ToList();
+    CollectionToConsole(intsAsList);
+}
+
+ImmediateExecution();
+```
+```
+int[] ints = { 10, 20, 30, 40, 1, 2, 3, 8 };
+(from i in ints select i).First() : 10
+(from i in ints orderby i select i).First() : 1
+(from i in ints where i > 30 select i).Single() : 40
+(from i in ints where i >0 select i).FirstOrDefault() : 10
+(from i in ints where i > 99 select i).FirstOrDefault() : 0
+(from i in ints where i > 99 select i).SingleOrDefault() : 0
+Sequence contains no elements
+Sequence contains more than one element
+1
+2
+3
+1
+2
+3
+```
+Метод First повертае перший елемент послідовності(і краше шоб використовувався з OrderBy() чи OrderByDescending()).  FirstOrDefault повертає значеня за замовченям якшо послідовність пуста , інакще перший елемент. Метод Single передбачає що в послідовності повинен бути лише один елемент який задоволняє крітерію. Якшо це так поверає цей елемент, інакще викилується виняток. SingleOrDefault повертае значеня за замовчуванням якшо елемента не знайдено.
+Якшо жодного елемента запит не знаходить методи First та Single викидають виняток, тому FirstOrDefault, SingleOrDefault не потребують додадкових перевірок і більш практичні.
+В прикладі запити в дужках аби привести його до правільного базового типу для якого можна викликати методи розширення.
+Також слід зазначити що для методів ToArray(),ToList() компілятор сам однозначно визначає базовий тип (тобто фактично виконує ToArray<int>(), ToList<int>() ).
+Негайне визначення послідовності потрібно для роботи визиваючого коду.
+
+Для методів FirstOrDefault, SingleOrDefault та схожі можна встановити значення яке буде повертатися у разі якщо запит не занйшов відповідних значень.
+
+```cs
+void SetDefaultValue()
+{
+    int[] ints = Array.Empty<int>();
+
+    var query = from i in ints where i > 0 select i;
+    var number = query.FirstOrDefault(404);
+
+    Console.WriteLine(number);
+}
+SetDefaultValue();
+```
+```
+404
+```
+
