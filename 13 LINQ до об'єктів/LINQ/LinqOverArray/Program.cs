@@ -270,7 +270,7 @@ void ImmediateExecution()
     CollectionToConsole(intsAsList);
 }
 
-ImmediateExecution();
+//ImmediateExecution();
 
 void SetDefaultValue()
 {
