@@ -281,4 +281,36 @@ void SetDefaultValue()
 
     Console.WriteLine(number);
 }
-SetDefaultValue();
+//SetDefaultValue();
+
+
+void LinqReturnValues()
+{
+
+    CollectionToConsole(GetAllWithRed());    
+
+    IEnumerable<string> GetAllWithRed()
+    {
+        string[] colors = { "Light Red", "Green", "Yellow", "Dark Red", "Red", "Purple" };
+
+        IEnumerable<string> result = from c in colors where c.Contains("Red") select c;
+        return result; 
+    }
+}
+
+//LinqReturnValues();
+
+void LinqReturnValuesAfterExecution()
+{
+    CollectionToConsole(GetAllWithRed());
+
+    string[] GetAllWithRed()
+    {
+        string[] colors = { "Light Red", "Green", "Yellow", "Dark Red", "Red", "Purple" };
+
+        IEnumerable<string> query = from c in colors where c.Contains("Red") select c;
+        return query.ToArray();
+    }
+}
+
+LinqReturnValuesAfterExecution();

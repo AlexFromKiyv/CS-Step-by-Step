@@ -629,3 +629,54 @@ SetDefaultValue();
 404
 ```
 
+## Повернення результату запиту LINQ.
+
+Можна визначити поле класу або структури значення якого є результат запиту LINQ. Але при цьому не можна використовувати неявну типізацію. Крім того метою запиту не може бути дані рівня екземпляра, тому він має бути статичним. Враховуючи це ця можливість використовується рідко.
+Часто запити LINQ визначабть в межах методу або властивості. Зміна яка використовуєтся для зберігання результату визначається за допомогою var як неявна типізована. Неявнотипізовані зміни не можна використовувати длдя визначення параметрів, значень поверненя методу або полів стуктур. Враховуючи це повстає питання як саме ви можете повернути результат запиту зовнішньому коду шо його запитує. Відповідь для кожного випадку різна і залежить від контексту і потреб. Якщо у вас є набір результатів із строго типізованих даних, таких як масив рядків або List<Car> можна відмовитися від використання var і використовувати IEnumerable<T> або IEnumerable.  
+```cs
+void LinqReturnValues()
+{
+
+    CollectionToConsole(GetAllWithRed());    
+
+    IEnumerable<string> GetAllWithRed()
+    {
+        string[] colors = { "Light Red", "Green", "Yellow", "Dark Red", "Red", "Purple" };
+
+        IEnumerable<string> result = from c in colors where c.Contains("Red") select c;
+        return result; 
+    }
+}
+
+LinqReturnValues();
+```
+```
+Light Red
+Dark Red
+Red
+```
+Таким чином виконуючи сторгу типізацію можна повернути результат запиту. 
+
+Якшо працювати з IEnumerable<T> трохи незручно, можна виконати запит а потім повернути результат.
+
+```cs
+void LinqReturnValuesAfterExecution()
+{
+    CollectionToConsole(GetAllWithRed());
+
+    string[] GetAllWithRed()
+    {
+        string[] colors = { "Light Red", "Green", "Yellow", "Dark Red", "Red", "Purple" };
+
+        IEnumerable<string> query = from c in colors where c.Contains("Red") select c;
+        return query.ToArray();
+    }
+}
+
+LinqReturnValuesAfterExecution();
+```
+```
+Light Red
+Dark Red
+Red
+```
