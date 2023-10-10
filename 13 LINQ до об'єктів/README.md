@@ -680,3 +680,95 @@ Light Red
 Dark Red
 Red
 ```
+
+# Застосування запитів LINQ до коллекції об'єктів.
+
+Запити LINQ можна застосовувати не лише до простих масивів, а також маніпулюватими в членах простору імен до коллекцій з классу System.Collections.Generic. Наприклад такіх як List<T>.
+
+## Доступ до підоб'єктів.
+
+Застосування запиту до узагальненого контейнера ні чим не відрізняється від застосування до звичайного массиву, окрім того шо в контейнері можуе бути колекція більш скаладних даних. LINQ можна використовувати до будь-якого типу шо реалізує IEnumerable<T>.
+
+Розглянемо коллекцію. 
+
+LinqOverCollections\Car.cs
+```cs
+    internal class Car
+    {
+        public string PetName { get; set; } = "";
+        public string Color { get; set; } = "";
+        public int Speed { get; set; }
+        public string Make { get; set; } = "";
+
+        public override string? ToString()
+        {
+            return $"{PetName}\t{Color}\t{Speed}\t{Make}\t\t"+base.ToString();
+        }
+    }
+```
+
+```cs
+List<Car> myCar = new()
+{
+    new Car{ PetName = "Henry", Color = "Silver", Speed = 100, Make = "BMW"},
+    new Car{ PetName = "Daisy", Color = "Tan", Speed = 90, Make = "BMW"},
+    new Car{ PetName = "Mary", Color = "Black", Speed = 55, Make = "VW"},
+    new Car{ PetName = "Clunker", Color = "Rust", Speed = 5, Make = "Yugo"},
+    new Car{ PetName = "Melvin", Color = "White", Speed = 43, Make = "Ford"}
+};
+```
+Додамо допоміжний метод.
+```cs
+void CollectionToConsole<T>(IEnumerable<T>? collection)
+{
+    if (collection == null) return;
+
+    foreach (var item in collection)
+    {
+        Console.WriteLine(item);
+    }
+}
+```
+Виканоємо запит.
+```cs
+void UseLinqForComplexObject()
+{
+    GetFastCars(myCar);
+
+    void GetFastCars(List<Car> cars)
+    {
+        var queryFastCars = from c in cars where c.Speed > 55 select c;
+
+        CollectionToConsole(queryFastCars);
+    }
+}
+
+UseLinqForComplexObject();
+```
+```
+Henry   Silver  100     BMW             LinqOverCollections.Car
+Daisy   Tan     90      BMW             LinqOverCollections.Car
+```
+Таким чином можна робити вибор враховуючи властивості об'єктів колекції. Але умови вибору можна робити біль складнішими.
+
+```cs
+void UseLinqForComplexObjectWithComplexCriteria()
+{
+    GetFastCars(myCar);
+
+    void GetFastCars(List<Car> cars)
+    {
+        var queryFastCars = from c in cars where c.Speed > 90 && c.Make == "BMW" select c;
+
+        CollectionToConsole(queryFastCars);
+    }
+}
+
+UseLinqForComplexObjectWithComplexCriteria();
+```
+```
+Henry   Silver  100     BMW             LinqOverCollections.Car
+```
+Як видно це можно зробити за допомогою усладнення логічного виразу.
+
+
