@@ -833,5 +833,75 @@ FilteringNoGenericCollection();
 ```
 Якшо методу TypeOf<T> вказати певний тип він проводячи трасформацію відбере в ітерації всі елементи які відповідають цтому типу.
 
-# Оператори LINQ.
+# Вирази запросів LINQ .
+
+В С# є багато операторів для запиту LINQ. Крім операторів в проторі імен System.Linq.Enumerable є методи розширення яки не мають прямої скороченної нотації в С#.
+Де які зазвичай часто викорустовуємі оператори.
+
+    from, in : Використовуються для визначення з якого контейнера брати данні.
+
+    where : Використовуються як обмеження для визначення які елементів брати із  контейнера.
+
+    select : Для вказівкі що брати із контейнера.
+
+    join, on, equals, into: Виконує об'єднання на основі вказаного ключа. Пам’ятайте, що ці «з’єднання» не обов’язково мають бути пов’язані з даними в реляційній базі даних.
+
+    orderby, ascending, descending : Дозволяє впорядкувати отриману підмножину в різних порядках(зростання спадання).
+
+    groupby : видає підмножину з даним, згрупованим за вказаним значенням.
+
+Для розгляду виразів Linq використаємо наступний контекст.
+
+LinqExpressions\ProductInfo.cs
+```cs
+    internal class ProductInfo
+    {
+        public string Name { get; set; } = "";
+        public string Description { get; set; } = "";
+        public int NumberInStock { get; set; } = 0;
+        public override string? ToString()
+        {
+            return string.Format("{0,-30}{1,-30}{2,-20}", Name, Description, NumberInStock);
+        }
+    }
+```
+```cs
+ProductInfo[] itemsInStock = new[] 
+{
+    new ProductInfo{ Name = "Mac's Coffee", Description = "Coffee with TEETH", NumberInStock = 24},
+    new ProductInfo{ Name = "Milk Maid Milk", Description = "Milk cow's love", NumberInStock = 100},
+    new ProductInfo{ Name = "Pure Silk Tofu", Description = "Bland as Possible", NumberInStock = 120},
+    new ProductInfo{ Name = "Crunchy Pops", Description = "Cheezy, peppery goodness", NumberInStock = 2},
+    new ProductInfo{ Name = "RipOff Water", Description = "From the tap to your wallet", NumberInStock = 100},
+    new ProductInfo{ Name = "Classic Valpo Pizza", Description = "Everyone loves pizza!",  NumberInStock = 73}
+};
+
+void CollectionToConsole<T>(IEnumerable<T>? collection)
+{
+    if (collection == null) return;
+
+    foreach (var item in collection)
+    {
+        Console.WriteLine(item);
+    }
+}
+
+CollectionToConsole(itemsInStock);
+```
+```
+Mac's Coffee                  Coffee with TEETH             24
+Milk Maid Milk                Milk cow's love               100
+Pure Silk Tofu                Bland as Possible             120
+Crunchy Pops                  Cheezy, peppery goodness      2
+RipOff Water                  From the tap to your wallet   100
+Classic Valpo Pizza           Everyone loves pizza!         73
+```
+
+
+
+
+
+
+
+
 
