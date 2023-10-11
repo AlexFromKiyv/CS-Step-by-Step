@@ -771,4 +771,67 @@ Henry   Silver  100     BMW             LinqOverCollections.Car
 ```
 Як видно це можно зробити за допомогою усладнення логічного виразу.
 
+## Як застосовувати LINQ до неузагальнених коллекцій.
+
+LINQ розроблені для роботи з будь-яким типом шо реалізує інтерфейс IEnumerable<T>.
+Неузагальнені(застарілі) контейнети з System.Сollection теж мають можливість використовувати інфраструктуру яка є в System.Array.
+```cs
+void LinqOverArrayList()
+{
+    // Here is a nongeneric collection of cars.
+    ArrayList myCars = new ArrayList() 
+    {
+        new Car{ PetName = "Henry", Color = "Silver", Speed = 100, Make = "BMW"},
+        new Car{ PetName = "Daisy", Color = "Tan", Speed = 90, Make = "BMW"},
+        new Car{ PetName = "Mary", Color = "Black", Speed = 55, Make = "VW"},
+        new Car{ PetName = "Clunker", Color = "Rust", Speed = 5, Make = "Yugo"},
+        new Car{ PetName = "Melvin", Color = "White", Speed = 43, Make = "Ford"}
+    };
+
+    // Transform ArrayList into an IEnumerable<Car>-compatible type.
+    var myCarsGeneric = myCar.OfType<Car>();
+
+    var queryFastCars = from c in myCarsGeneric where c.Speed > 55 select c;
+
+    CollectionToConsole(queryFastCars);
+
+}
+
+LinqOverArrayList();
+```
+```
+Henry   Silver  100     BMW             LinqOverCollections.Car
+Daisy   Tan     90      BMW             LinqOverCollections.Car
+```
+Для того аби маніпулювати данними з неузагальненого контейнера можна використати метод розширення OfType<T> який трансформує коллекцію в IEnumerable<T>.
+
+Контейнер неузагальненого типу скоадаеться із елементів які є прототипом System.Object і відповідно в коллекції можуть бути будь-які данні.
+За допомогою методу OfType<T> можна провести фільтрацію неузагальненого списку.
+
+```cs
+void FilteringNoGenericCollection()
+{
+    ArrayList myStuff = new();
+
+    myStuff.AddRange(new object[]
+    {
+        10, 400, 8, false, new Car(), "Hi girl"
+    }); 
+
+    var myInts = myStuff.OfType<int>();
+
+    CollectionToConsole(myInts);
+    
+}
+
+FilteringNoGenericCollection();
+```
+```
+10
+400
+8
+```
+Якшо методу TypeOf<T> вказати певний тип він проводячи трасформацію відбере в ітерації всі елементи які відповідають цтому типу.
+
+# Оператори LINQ.
 

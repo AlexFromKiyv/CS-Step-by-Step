@@ -1,4 +1,5 @@
 ﻿using LinqOverCollections;
+using System.Collections;
 
 List<Car> myCar = new()
 {
@@ -45,4 +46,44 @@ void UseLinqForComplexObjectWithComplexCriteria()
     }
 }
 
-UseLinqForComplexObjectWithComplexCriteria();
+//UseLinqForComplexObjectWithComplexCriteria();
+
+void LinqOverArrayList()
+{
+    // Here is a nongeneric collection of cars.
+    ArrayList myCars = new ArrayList() 
+    {
+        new Car{ PetName = "Henry", Color = "Silver", Speed = 100, Make = "BMW"},
+        new Car{ PetName = "Daisy", Color = "Tan", Speed = 90, Make = "BMW"},
+        new Car{ PetName = "Mary", Color = "Black", Speed = 55, Make = "VW"},
+        new Car{ PetName = "Clunker", Color = "Rust", Speed = 5, Make = "Yugo"},
+        new Car{ PetName = "Melvin", Color = "White", Speed = 43, Make = "Ford"}
+    };
+
+    // Transform ArrayList into an IEnumerable<Car>-compatible type.
+    var myCarsGeneric = myCar.OfType<Car>();
+
+    var queryFastCars = from c in myCarsGeneric where c.Speed > 55 select c;
+
+    CollectionToConsole(queryFastCars);
+
+}
+
+//LinqOverArrayList();
+
+void FilteringNoGenericCollection()
+{
+    ArrayList myStuff = new();
+
+    myStuff.AddRange(new object[]
+    {
+        10, 400, 8, false, new Car(), "Hi girl"
+    }); 
+
+    var myInts = myStuff.OfType<int>();
+
+    CollectionToConsole(myInts);
+    
+}
+
+FilteringNoGenericCollection();
