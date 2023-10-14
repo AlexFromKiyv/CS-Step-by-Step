@@ -896,12 +896,379 @@ Crunchy Pops                  Cheezy, peppery goodness      2
 RipOff Water                  From the tap to your wallet   100
 Classic Valpo Pizza           Everyone loves pizza!         73
 ```
+Для виразів запросу LINQ запросів порядок операторів критичний. Більшість запросів мають оператори from, in, and select. Зальний шаблон такий:
+```cs
+var result =
+  from matchingItem in container
+  select matchingItem;
+```
+Елемент після оператору from представляє елемент, який відповідає крітеріям запиту LINQ і його можна назвати як завгодно. Елемент після опертору in представляє контейнер даних для пошуку( массив, коллекція, документ XML, тощо).
+
+## Базовий вибор за допомогою select
+
+Виберемо всі дані контейнера без будь яких додадкових дій і обмежень.
+```cs
+void SelectAllContainer()
+{
+    SelectEverything(itemsInStock);
+
+    void SelectEverything(ProductInfo[] products)
+    {
+        //Get everything.
+        var allProducts = from p in products select p;
+        CollectionToConsole(allProducts);
+    }       
+}
+
+SelectAllContainer();
+```
+```
+Mac's Coffee                  Coffee with TEETH             24
+Milk Maid Milk                Milk cow's love               100
+Pure Silk Tofu                Bland as Possible             120
+Crunchy Pops                  Cheezy, peppery goodness      2
+RipOff Water                  From the tap to your wallet   100
+Classic Valpo Pizza           Everyone loves pizza!         73
+```
+Особливої користі від такого запиту немає. Його можна модіфікувати аби отримати окреме поле.
+```cs
+void SelectAllNames()
+{
+    SelectEveryNames(itemsInStock);
+
+    void SelectEveryNames(ProductInfo[] products)
+    {
+        //Get names.
+        var allNames = from p in products select p.Name;
+        CollectionToConsole(allNames);
+    }
+}
+
+SelectAllNames();
+```
+```
+Mac's Coffee
+Milk Maid Milk
+Pure Silk Tofu
+Crunchy Pops
+RipOff Water
+Classic Valpo Pizza
+```
+
+## Отримання підмножин даних.
+
+Для отриманя специфічних підмножин з контейнера даних можна поставить обмеження за допомогою where. Загальний шаблон такий:
+
+```cs
+var result =
+  from item  in container
+  where BooleanExpression
+  select item;
+```
+Оператор where очикує результат логічного виразу. 
+
+```cs
+void UseOperatorWhere()
+{
+    SelectOverstock(itemsInStock,25);
+
+    void SelectOverstock(ProductInfo[] products, int quantity)
+    {
+        var overstock =
+            from p in products
+            where p.NumberInStock > quantity
+            select p;
+
+        CollectionToConsole(overstock);
+    }
+}
+
+UseOperatorWhere();
+```
+```
+Milk Maid Milk                Milk cow's love               100
+Pure Silk Tofu                Bland as Possible             120
+RipOff Water                  From the tap to your wallet   100
+Classic Valpo Pizza           Everyone loves pizza!         73
+```
+При створені логічного виразу використовується змінна яка вказана в from. Для where логічний вираз може бути складнішим але повиненбути валідним. 
+```cs
+void UseOperatorWhereWithComplexClause()
+{
+    SelectWithMilk(itemsInStock, 0);
+
+    void SelectWithMilk(ProductInfo[] products, int quantity)
+    {
+        var overstock =
+            from p in products
+            where p.NumberInStock > quantity && p.Name.Contains("Milk")
+            select p;
+
+        CollectionToConsole(overstock);
+    }
+}
+
+UseOperatorWhereWithComplexClause();
+```
+```
+Milk Maid Milk                Milk cow's love               100
+```
+
+## Вибір частинами. (paging data)
+
+Якшо потрібно отримати певну кількість записів з виборки можна використати методи Take()/TakeWhile()/TakeLast() и Skip()/SkipWhile()/SkipLast(). Ці методи визначені в IEnumerable, тому можна їх викаристати до результату запиту LINQ або в випдку методів розширення безпосередньо. Ці методи також видкладають виконання.   
+
+### Take
+
+```cs
+void UseTake()
+{
+    CollectionToConsole(itemsInStock);
+    Console.WriteLine("\n");
+
+    SelectWithTake(itemsInStock, 2);
+
+    void SelectWithTake(ProductInfo[] products, int quantity)
+    {
+        var query = from p in products select p;
+        var result = query.Take(quantity); //!!!
+        CollectionToConsole(result);
+    }
+}
+
+UseTake();
+```
+```
+Mac's Coffee                  Coffee with TEETH             24
+Milk Maid Milk                Milk cow's love               100
+Pure Silk Tofu                Bland as Possible             120
+Crunchy Pops                  Cheezy, peppery goodness      2
+RipOff Water                  From the tap to your wallet   100
+Classic Valpo Pizza           Everyone loves pizza!         73
 
 
+Mac's Coffee                  Coffee with TEETH             24
+Milk Maid Milk                Milk cow's love               100
+```
+Метод Take повертає вказану кількисть записів з послідовності результату.
+
+### TakeWhile
+
+```cs
+void UseTakeWhile()
+{
+    CollectionToConsole(itemsInStock);
+    Console.WriteLine("\n");
+
+    SelectWithTakeWhile(itemsInStock, 20);
+
+    void SelectWithTakeWhile(ProductInfo[] products, int quantityProduct)
+    {
+        var query = from p in products select p;
+        var result = query.TakeWhile(sp => sp.NumberInStock > quantityProduct);//!!!
+        CollectionToConsole(result);
+    }
+}
+
+UseTakeWhile();
+```
+```
+Mac's Coffee                  Coffee with TEETH             24
+Milk Maid Milk                Milk cow's love               100
+Pure Silk Tofu                Bland as Possible             120
+Crunchy Pops                  Cheezy, peppery goodness      2
+RipOff Water                  From the tap to your wallet   100
+Classic Valpo Pizza           Everyone loves pizza!         73
 
 
+Mac's Coffee                  Coffee with TEETH             24
+Milk Maid Milk                Milk cow's love               100
+Pure Silk Tofu                Bland as Possible             120
+```
+
+TakeWhile бере записи з послідовності результату до тих пір покі виконується умова. Умова складається з лямда-виразу. Якшо навести курсор на цей метод можна побачити більш детальний осип шо визначає компілятор як параметр та як він типізований.
+
+IEnumerable<ProductInfo> IEnumerable<ProductInfo>.TakeWhile<ProductInfo>(Func<ProductInfo, bool> predicate);
+
+З щого видно що лямда-вираз по суті є функція яка отримує з послідовності об'єкт типу ProductInfo та повертає логічний результат типу Boolain.
+Якшо, наприклад треба виконання умови для всіх елементів результату, можна його попередньо відсортувати.
+
+### TakeLast
+
+```cs
+void UseTakeLast()
+{
+    CollectionToConsole(itemsInStock);
+    Console.WriteLine("\n");
+
+    SelectWithTakeLast(itemsInStock, 2);
+
+    void SelectWithTakeLast(ProductInfo[] products, int count)
+    {
+        var query = from p in products select p;
+        var result = query.TakeLast(count);//!!!
+        CollectionToConsole(result);
+    }
+}
+
+UseTakeLast();
+```
+```
+Mac's Coffee                  Coffee with TEETH             24
+Milk Maid Milk                Milk cow's love               100
+Pure Silk Tofu                Bland as Possible             120
+Crunchy Pops                  Cheezy, peppery goodness      2
+RipOff Water                  From the tap to your wallet   100
+Classic Valpo Pizza           Everyone loves pizza!         73
 
 
+RipOff Water                  From the tap to your wallet   100
+Classic Valpo Pizza           Everyone loves pizza!         73
+```
+TakeLast повертає задану кількість останіх записів.
+
+Методи Skip, SkipWhile та SkipLast працюють в тій самій манері, тілки пропускають записи замість їx видбирання.
 
 
+### Skip
+
+```cs
+void UseSkip()
+{
+    CollectionToConsole(itemsInStock);
+    Console.WriteLine("\n");
+
+    SelectWithTake(itemsInStock, 2);
+
+    void SelectWithTake(ProductInfo[] products, int quantity)
+    {
+        var query = from p in products select p;
+        var result = query.Skip(quantity); //!!!
+        CollectionToConsole(result);
+    }
+}
+
+UseSkip();
+```
+```
+Mac's Coffee                  Coffee with TEETH             24
+Milk Maid Milk                Milk cow's love               100
+Pure Silk Tofu                Bland as Possible             120
+Crunchy Pops                  Cheezy, peppery goodness      2
+RipOff Water                  From the tap to your wallet   100
+Classic Valpo Pizza           Everyone loves pizza!         73
+
+
+Pure Silk Tofu                Bland as Possible             120
+Crunchy Pops                  Cheezy, peppery goodness      2
+RipOff Water                  From the tap to your wallet   100
+Classic Valpo Pizza           Everyone loves pizza!         73
+```
+Skip пропускає вказану кількість записів і повертає що залишилися.
+
+### SkipWhile
+
+```cs
+void UseSkipWhile()
+{
+    CollectionToConsole(itemsInStock);
+    Console.WriteLine("\n");
+
+    SelectWithSkipWhile(itemsInStock, 20);
+
+    void SelectWithSkipWhile(ProductInfo[] products, int quantityProduct)
+    {
+        var query = from p in products select p;
+        var result = query.SkipWhile(sp => sp.NumberInStock > quantityProduct);//!!!
+        CollectionToConsole(result);
+    }
+}
+
+UseSkipWhile();
+```
+```
+Mac's Coffee                  Coffee with TEETH             24
+Milk Maid Milk                Milk cow's love               100
+Pure Silk Tofu                Bland as Possible             120
+Crunchy Pops                  Cheezy, peppery goodness      2
+RipOff Water                  From the tap to your wallet   100
+Classic Valpo Pizza           Everyone loves pizza!         73
+
+
+Crunchy Pops                  Cheezy, peppery goodness      2
+RipOff Water                  From the tap to your wallet   100
+Classic Valpo Pizza           Everyone loves pizza!         73
+```
+SkipWhile пропускає записи покі виконується умова. Так само як і TakeWhile цей метод корисно використовувати в парі з сортуванням.
+
+### SkipLast
+
+```cs
+void UseSkipLast()
+{
+    CollectionToConsole(itemsInStock);
+    Console.WriteLine("\n");
+
+    SelectWithSkipLast(itemsInStock, 2);
+
+    void SelectWithSkipLast(ProductInfo[] products, int count)
+    {
+        var query = from p in products select p;
+        var result = query.SkipLast(count);//!!!
+        CollectionToConsole(result);
+    }
+}
+
+UseSkipLast();
+```
+```
+Mac's Coffee                  Coffee with TEETH             24
+Milk Maid Milk                Milk cow's love               100
+Pure Silk Tofu                Bland as Possible             120
+Crunchy Pops                  Cheezy, peppery goodness      2
+RipOff Water                  From the tap to your wallet   100
+Classic Valpo Pizza           Everyone loves pizza!         73
+
+
+Mac's Coffee                  Coffee with TEETH             24
+Milk Maid Milk                Milk cow's love               100
+Pure Silk Tofu                Bland as Possible             120
+Crunchy Pops                  Cheezy, peppery goodness      2
+```
+SkipLast пропускає вказану кількість останіх записів.
+
+### Комбінація.
+
+Можна використовувати комбінації ціх методів.
+
+```cs
+void UseSkipAndTake()
+{
+    CollectionToConsole(itemsInStock);
+    Console.WriteLine("\n");
+
+    SelectWithSkipAndTake(itemsInStock, 3, 2);
+
+    void SelectWithSkipAndTake(ProductInfo[] products, int skip, int take)
+    {
+        var query = from p in products select p;
+        var result = query.Skip(skip).Take(take);//!!!
+        CollectionToConsole(result);
+    }
+}
+
+UseSkipAndTake();
+```
+```
+Mac's Coffee                  Coffee with TEETH             24
+Milk Maid Milk                Milk cow's love               100
+Pure Silk Tofu                Bland as Possible             120
+Crunchy Pops                  Cheezy, peppery goodness      2
+RipOff Water                  From the tap to your wallet   100
+Classic Valpo Pizza           Everyone loves pizza!         73
+
+
+Crunchy Pops                  Cheezy, peppery goodness      2
+RipOff Water                  From the tap to your wallet   100
+```
 
