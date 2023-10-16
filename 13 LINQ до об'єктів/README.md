@@ -1239,7 +1239,7 @@ SkipLast пропускає вказану кількість останіх з�
 
 ### Комбінація.
 
-Можна використовувати комбінації ціх методів.
+Можна використовувати комбінації ціх методів щоб отримати дані для "сторінок".
 
 ```cs
 void UseSkipAndTake()
@@ -1247,7 +1247,7 @@ void UseSkipAndTake()
     CollectionToConsole(itemsInStock);
     Console.WriteLine("\n");
 
-    SelectWithSkipAndTake(itemsInStock, 3, 2);
+    SelectWithSkipAndTake(itemsInStock, 2, 2);
 
     void SelectWithSkipAndTake(ProductInfo[] products, int skip, int take)
     {
@@ -1268,7 +1268,205 @@ RipOff Water                  From the tap to your wallet   100
 Classic Valpo Pizza           Everyone loves pizza!         73
 
 
+Pure Silk Tofu                Bland as Possible             120
 Crunchy Pops                  Cheezy, peppery goodness      2
-RipOff Water                  From the tap to your wallet   100
 ```
+### Вибір частинами в діапазоні.
 
+Метод Take підтримує використання діапазонів. Це дало змогу не комбінувати методи Skip та Take. 
+
+```cs
+void PagingWithRanges()
+{
+    IEnumerable<ProductInfo> selectedProducts;
+    var queryForSelectedProduct = from p in itemsInStock select p;
+
+
+    selectedProducts = queryForSelectedProduct.Take(..3);
+    WriteResult("The first three item",selectedProducts);
+
+    selectedProducts = queryForSelectedProduct.Take(3..);
+    WriteResult("Skippint the first three", selectedProducts);
+
+    selectedProducts = queryForSelectedProduct.Take(3..5);
+    WriteResult("Skip three take two", selectedProducts);
+
+    selectedProducts = queryForSelectedProduct.Take(^2..);
+    WriteResult("The last two", selectedProducts);
+
+    selectedProducts = queryForSelectedProduct.Take(..^2);
+    WriteResult("Skip the last two", selectedProducts);
+
+    void WriteResult(string message, IEnumerable<ProductInfo> products)
+    {
+        Console.Clear();
+        Console.WriteLine("\tAll product");
+        CollectionToConsole(itemsInStock);
+
+        Console.WriteLine("\n\t"+message);
+        CollectionToConsole(products);
+        Console.ReadLine();
+    }
+}
+
+PagingWithRanges();
+```
+Цей приклад вивовдить по черзі вказані діапазони.
+
+
+### Вибір фрагмента (Chunk).
+
+```cs
+void PagingWithChunks()
+{
+    var queryForSelectedProduct = from p in itemsInStock select p;
+
+    IEnumerable<ProductInfo[]> chunks = queryForSelectedProduct.Chunk(2);
+
+    var counter = 1;
+    foreach (var item in chunks)
+    {
+        WriteResult($"Chunk {counter}", item);
+        counter++;
+    }
+
+    void WriteResult(string message, IEnumerable<ProductInfo> products)
+    {
+        Console.Clear();
+        Console.WriteLine("\tAll product");
+        CollectionToConsole(itemsInStock);
+
+        Console.WriteLine("\n\t" + message);
+        CollectionToConsole(products);
+        Console.ReadLine();
+    }
+}
+
+PagingWithChunks();
+```
+Цей приклад виводить по черзі по два елементи. Метод дере один параметр size, а потім ділить джерело даних на частини цього розміру створючи об'єкт IEnumerable<ProductInfo[]>, тобто послідовність з массивів.
+
+## Проекція нових типів даних.
+На основі існуючої послідовності даних можна проектувати нові форми даних. 
+```cs
+void ProjectingNewDataType()
+{
+    GetNameAndDescription(itemsInStock);
+
+    void GetNameAndDescription(ProductInfo[] products)
+    {
+        var prodeuctNameAndDescription =
+            from p in products
+            select new { p.Name, p.Description };
+
+        CollectionToConsole(prodeuctNameAndDescription);
+        Console.WriteLine("\n"+prodeuctNameAndDescription.GetType());
+    }
+}
+
+ProjectingNewDataType();
+```
+```
+{ Name = Mac's Coffee, Description = Coffee with TEETH }
+{ Name = Milk Maid Milk, Description = Milk cow's love }
+{ Name = Pure Silk Tofu, Description = Bland as Possible }
+{ Name = Crunchy Pops, Description = Cheezy, peppery goodness }
+{ Name = RipOff Water, Description = From the tap to your wallet }
+{ Name = Classic Valpo Pizza, Description = Everyone loves pizza! }
+
+System.Linq.Enumerable+SelectArrayIterator`2[LinqExpressions.ProductInfo,<>f__AnonymousType0`2[System.String,System.String]]
+```
+В цьому прикладі з массиву об'єктів створюється нова послідовність з новим анонімним типом. Тип який створює послідовність надто складний аби визначать його і визначається під час компіляції, тому тут без неявної типізації не обійтись. Крім того не можна зробити метод який поверне результат запиту з використанням var.
+
+```cs
+//Do not work
+static var GetProjectedSubset(ProductInfo[] products)
+{
+ ...
+}
+
+```
+Коли потрібно повернути нову спроектовану послідовність визиваючому коду, одним із підходів є перетворення результатів запиту в мвссив за допомогою методу розширення ToArray.  
+
+```cs
+void ReturnProjection()
+{
+    var arrayOfNewType = GetNameAndDescription(itemsInStock);
+
+    foreach (var item in arrayOfNewType)
+    {
+        Console.WriteLine(item);
+    }
+
+    Array GetNameAndDescription(ProductInfo[] products)
+    {
+        var productNameAndDescription =
+            from p in products
+            select new { p.Name, p.Description };
+
+        return productNameAndDescription.ToArray();
+
+    }
+}
+
+ReturnProjection();
+```
+```
+{ Name = Mac's Coffee, Description = Coffee with TEETH }
+{ Name = Milk Maid Milk, Description = Milk cow's love }
+{ Name = Pure Silk Tofu, Description = Bland as Possible }
+{ Name = Crunchy Pops, Description = Cheezy, peppery goodness }
+{ Name = RipOff Water, Description = From the tap to your wallet }
+{ Name = Classic Valpo Pizza, Description = Everyone loves pizza! }
+
+```
+Зверніть увагу шо для визначення масиву використовується літерал Array шо означає тип System.Array. Це зробленно тому що ми не знаємо точне визначення якє зробив компілятор для анонімного типу. Також ми не вказуємо типу для узагальненого методу ToArray з тоїж самої причини. Втрачається жорста типізація і таким чином кожен елемент є System.Object.
+Коли треба повернути результат запиту потрібне така трансформація.
+
+## Проектування на різних типах.
+
+Окрім проектування в анонімні типи є можливість на базі послідовності проектувати з використанням спеціально вказаних вами типів. 
+
+Створимо необхідний нам тип.
+```cs
+    internal class ProductNameDescription
+    {
+        public string Name { get; set; } = "";
+        public string Description { get; set; } = "";
+        public override string? ToString()
+        {
+            return string.Format("{0,-30}{1,-30}{2,-20}", Name, Description);
+        }
+    }
+
+```
+Тепер можно створити проекцію за допомогою цого типу
+
+```cs
+void ProjectionWithProductNameDescription()
+{
+    CollectionToConsole( GetNameAndDescription(itemsInStock) );
+
+    
+
+    IEnumerable<ProductNameDescription> GetNameAndDescription(ProductInfo[] products)
+    {
+        var productNameAndDescription =
+            from p in products
+            select new ProductNameDescription { Name = p.Name, Description = p.Description };
+        return productNameAndDescription;
+    }
+}
+
+ProjectionWithProductNameDescription();
+
+```
+```
+Mac's Coffee                  Coffee with TEETH
+Milk Maid Milk                Milk cow's love
+Pure Silk Tofu                Bland as Possible
+Crunchy Pops                  Cheezy, peppery goodness
+RipOff Water                  From the tap to your wallet
+Classic Valpo Pizza           Everyone loves pizza!
+```
+Таким чином врезультаті запиту ми отримуємо коллекцію з необхідним нам типом. Таким чином, залежно від потреб, можна мати вібір як робити проекцію.  

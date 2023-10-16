@@ -193,7 +193,7 @@ void UseSkipAndTake()
     CollectionToConsole(itemsInStock);
     Console.WriteLine("\n");
 
-    SelectWithSkipAndTake(itemsInStock, 3, 2);
+    SelectWithSkipAndTake(itemsInStock, 2, 2);
 
     void SelectWithSkipAndTake(ProductInfo[] products, int skip, int take)
     {
@@ -203,4 +203,124 @@ void UseSkipAndTake()
     }
 }
 
-UseSkipAndTake();
+//UseSkipAndTake();
+
+
+void PagingWithRanges()
+{
+    IEnumerable<ProductInfo> selectedProducts;
+    var queryForSelectedProduct = from p in itemsInStock select p;
+
+
+    selectedProducts = queryForSelectedProduct.Take(..3);
+    WriteResult("The first three item",selectedProducts);
+
+    selectedProducts = queryForSelectedProduct.Take(3..);
+    WriteResult("Skippint the first three", selectedProducts);
+
+    selectedProducts = queryForSelectedProduct.Take(3..5);
+    WriteResult("Skip three take two", selectedProducts);
+
+    selectedProducts = queryForSelectedProduct.Take(^2..);
+    WriteResult("The last two", selectedProducts);
+
+    selectedProducts = queryForSelectedProduct.Take(..^2);
+    WriteResult("Skip the last two", selectedProducts);
+
+    void WriteResult(string message, IEnumerable<ProductInfo> products)
+    {
+        Console.Clear();
+        Console.WriteLine("\tAll product");
+        CollectionToConsole(itemsInStock);
+
+        Console.WriteLine("\n\t"+message);
+        CollectionToConsole(products);
+        Console.ReadLine();
+    }
+}
+
+//PagingWithRanges();
+
+
+void PagingWithChunks()
+{
+    var queryForSelectedProduct = from p in itemsInStock select p;
+
+    IEnumerable<ProductInfo[]> chunks = queryForSelectedProduct.Chunk(2);
+
+    var counter = 1;
+    foreach (var item in chunks)
+    {
+        WriteResult($"Chunk {counter}", item);
+        counter++;
+    }
+
+    void WriteResult(string message, IEnumerable<ProductInfo> products)
+    {
+        Console.Clear();
+        Console.WriteLine("\tAll product");
+        CollectionToConsole(itemsInStock);
+
+        Console.WriteLine("\n\t" + message);
+        CollectionToConsole(products);
+        Console.ReadLine();
+    }
+}
+
+//PagingWithChunks();
+
+void ProjectingNewDataType()
+{
+    GetNameAndDescription(itemsInStock);
+
+    void GetNameAndDescription(ProductInfo[] products)
+    {
+        var prodeuctNameAndDescription =
+            from p in products
+            select new { p.Name, p.Description };
+
+        CollectionToConsole(prodeuctNameAndDescription);
+        Console.WriteLine("\n"+prodeuctNameAndDescription.GetType());
+    }
+}
+
+//ProjectingNewDataType();
+
+void ReturnProjection()
+{
+    var arrayOfNewType = GetNameAndDescription(itemsInStock);
+
+    foreach (var item in arrayOfNewType)
+    {
+        Console.WriteLine(item);
+    }
+
+    Array GetNameAndDescription(ProductInfo[] products)
+    {
+        var productNameAndDescription =
+            from p in products
+            select new { p.Name, p.Description };
+
+        return productNameAndDescription.ToArray();
+
+    }
+}
+
+//ReturnProjection();
+
+void ProjectionWithProductNameDescription()
+{
+    CollectionToConsole( GetNameAndDescription(itemsInStock) );
+
+    
+
+    IEnumerable<ProductNameDescription> GetNameAndDescription(ProductInfo[] products)
+    {
+        var productNameAndDescription =
+            from p in products
+            select new ProductNameDescription { Name = p.Name, Description = p.Description };
+        return productNameAndDescription;
+    }
+}
+
+ProjectionWithProductNameDescription();
