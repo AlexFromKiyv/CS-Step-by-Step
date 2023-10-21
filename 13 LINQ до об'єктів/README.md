@@ -1470,3 +1470,591 @@ RipOff Water                  From the tap to your wallet
 Classic Valpo Pizza           Everyone loves pizza!
 ```
 Таким чином врезультаті запиту ми отримуємо коллекцію з необхідним нам типом. Таким чином, залежно від потреб, можна мати вібір як робити проекцію.  
+
+## Отримання кількості елементів (Count).
+
+Частою потребою в проектувані нових пакетів даних є визначення загальної кількості елементів.
+
+```cs
+void UseEnumerableMethodCount()
+{
+    string[] games = { "Morrowind", "Uncharted 2", "Fallout 3", "Daxter", "System Shock 2" };
+
+    var queryNameBigerThan6 =
+        from g in games
+        where g.Length > 6
+        select g;
+
+    Console.WriteLine(GetCount(queryNameBigerThan6));
+
+
+    int GetCount<T>(IEnumerable<T> collection)
+    {
+        return collection.Count();
+    }
+}
+
+UseEnumerableMethodCount();
+```
+```
+4
+```
+
+## Отримання кількості ненумерованої послідовносту.
+
+Метод TryGetNonEnumeratedCount намагається отримати загальну кількість елементів без хактичного перерахунку елементів і таким чином прискорює процес виконання.
+
+```cs
+void UseTryGetNonEnumeratedCount()
+{
+    WriteCount(itemsInStock);
+
+    void WriteCount(ProductInfo[] products)
+    {
+        var query = from p in products select p;
+        bool result = query.TryGetNonEnumeratedCount(out int count);
+        if (result)
+        {
+            Console.WriteLine(count);
+        }
+        else
+        {
+            Console.WriteLine("Try get count failed."  );
+        }
+    }
+
+}
+
+UseTryGetNonEnumeratedCount();
+```
+```
+6
+```
+Не всі колекції працюють дають результат з цім методом.
+
+```cs
+void NoWorkTryGetNonEnumeratedCount()
+{
+    var collection = GetProducts(itemsInStock);
+
+    bool result = collection.TryGetNonEnumeratedCount(out int count);
+
+    if (result)
+    {
+        Console.WriteLine(count);
+    }
+    else
+    {
+        Console.WriteLine("Try get count failed.");
+    }
+
+    Console.WriteLine(collection.Count());
+
+    static IEnumerable<ProductInfo> GetProducts(ProductInfo[] products)
+    {
+        for (int i = 0; i < products.Length; i++)
+        {
+           yield return products[i];
+        }
+    }
+}
+
+NoWorkTryGetNonEnumeratedCount();
+```
+```
+Try get count failed.
+6
+```
+В цьому випадку немає готового значення кількості при виконанні.
+цей метод корисний при великих виборках.
+
+## Реверс результату.
+
+Отримати зворотній порядок елементів можна застосувавши метод розширення Reverse.
+
+```cs
+
+void UseReverse()
+{
+    CollectionToConsole(itemsInStock);
+
+    Console.WriteLine("\n");
+
+    CollectionToConsole( SelectWithRevers(itemsInStock) );
+
+
+    IEnumerable<ProductInfo> SelectWithRevers(ProductInfo[] products)
+    {
+        var queryForAllProduct =
+            from p in products
+            select p;
+
+        return queryForAllProduct.Reverse();
+    }
+}
+
+UseReverse();
+```
+```
+Mac's Coffee                  Coffee with TEETH             24
+Milk Maid Milk                Milk cow's love               100
+Pure Silk Tofu                Bland as Possible             120
+Crunchy Pops                  Cheezy, peppery goodness      2
+RipOff Water                  From the tap to your wallet   100
+Classic Valpo Pizza           Everyone loves pizza!         73
+
+
+Classic Valpo Pizza           Everyone loves pizza!         73
+RipOff Water                  From the tap to your wallet   100
+Crunchy Pops                  Cheezy, peppery goodness      2
+Pure Silk Tofu                Bland as Possible             120
+Milk Maid Milk                Milk cow's love               100
+Mac's Coffee                  Coffee with TEETH             24
+```
+## Сортування результату.(orderby)
+
+За допомогою оператора orderby можна відсортувати послідовнисть за вказаним значенням.
+
+```cs
+void UseOrderByName()
+{
+    CollectionToConsole(itemsInStock);
+
+    Console.WriteLine("\n");
+
+    CollectionToConsole(SelectWithOrderby(itemsInStock));
+
+
+
+    IEnumerable<ProductInfo> SelectWithOrderby(ProductInfo[] products)
+    {
+       var queryForAllWithSorting =
+            from p in products
+            orderby p.Name
+            select p;
+
+        return queryForAllWithSorting;
+    }
+}
+
+UseOrderByName();
+```
+```
+Mac's Coffee                  Coffee with TEETH             24
+Milk Maid Milk                Milk cow's love               100
+Pure Silk Tofu                Bland as Possible             120
+Crunchy Pops                  Cheezy, peppery goodness      2
+RipOff Water                  From the tap to your wallet   100
+Classic Valpo Pizza           Everyone loves pizza!         73
+
+
+Classic Valpo Pizza           Everyone loves pizza!         73
+Crunchy Pops                  Cheezy, peppery goodness      2
+Mac's Coffee                  Coffee with TEETH             24
+Milk Maid Milk                Milk cow's love               100
+Pure Silk Tofu                Bland as Possible             120
+RipOff Water                  From the tap to your wallet   100
+```
+Якшо вказано сортувати по Name послідовність сортуеться по алфавітному порядку цього рядка. Для чисел сортування по замовченню іде від меньших до більших. Тобто по замовенню сортування ведеться по зростанню (ascending). Такитй самий результат якшо запит буде таким:
+```cs
+       var queryForAllWithSorting =
+            from p in products
+            orderby p.Name ascending
+            select p;
+```
+
+Але порядок сортування модна змінити.
+```cs
+void UseOrderByNameDescending()
+{
+    CollectionToConsole(itemsInStock);
+
+    Console.WriteLine("\n");
+
+    CollectionToConsole(SelectWithOrderby(itemsInStock));
+
+
+
+    IEnumerable<ProductInfo> SelectWithOrderby(ProductInfo[] products)
+    {
+        var queryForAllWithSorting =
+             from p in products
+             orderby p.Name descending
+             select p;
+
+        return queryForAllWithSorting;
+    }
+}
+
+UseOrderByNameDescending();
+```
+```
+Mac's Coffee                  Coffee with TEETH             24
+Milk Maid Milk                Milk cow's love               100
+Pure Silk Tofu                Bland as Possible             120
+Crunchy Pops                  Cheezy, peppery goodness      2
+RipOff Water                  From the tap to your wallet   100
+Classic Valpo Pizza           Everyone loves pizza!         73
+
+
+RipOff Water                  From the tap to your wallet   100
+Pure Silk Tofu                Bland as Possible             120
+Milk Maid Milk                Milk cow's love               100
+Mac's Coffee                  Coffee with TEETH             24
+Crunchy Pops                  Cheezy, peppery goodness      2
+Classic Valpo Pizza           Everyone loves pizza!         73
+```
+
+## LINQ як краший инструмент діаграми Венна.
+
+Клас Enumerable має набір методів розширення, що дозволяють викороистовувати два або більше запитів LINQ як основу для пошуку об'єднань, відиіностей, конкатинацій та перетинів даних. 
+
+Нехайц ми маємо наступні дані та допоміжний метод.
+```cs
+List<string> myCars = new List<string> { "Yugo", "Aztec", "BMW" };
+List<string> yourCars = new List<string> { "BMW", "Saab", "Aztec" };
+
+void ListCarToConsole<T>(IEnumerable<T> collection, string note = "Collection")
+{
+    Console.Write($"{note}\t:\t ");
+    foreach (var item in collection)
+    {
+        Console.Write(item +"\t"  );
+    }
+    Console.WriteLine();
+}
+```
+
+
+### Except. (крім, за винятком)  
+
+```cs
+void UseExcept()
+{
+    var queryMyCars =
+        from c in myCars
+        select c;
+    var queryYourCars =
+        from c in yourCars
+        select c;
+    ListCarToConsole(queryMyCars,"My    ");
+    ListCarToConsole(queryYourCars, "Your  ");
+
+    Console.WriteLine();
+
+    var carDiff = queryMyCars.Except(yourCars);//!!!
+    ListCarToConsole(carDiff, "Except");
+}
+UseExcept();
+```
+```
+My      :        Yugo   Aztec   BMW
+Your    :        BMW    Saab    Aztec
+
+Except  :        Yugo
+```
+Except повертає набір результатів LINQ якій містить зізницю між двома контейнерами.
+
+### Intersect (перетинаються).
+```cs
+void UseIntersect()
+{
+    var queryMyCars =
+        from c in myCars
+        select c;
+    var queryYourCars =
+        from c in yourCars
+        select c;
+    ListCarToConsole(queryMyCars, "My      ");
+    ListCarToConsole(queryYourCars, "Your    ");
+
+    Console.WriteLine();
+
+    var carIntersect = queryMyCars.Intersect(yourCars);//!!!
+    ListCarToConsole(carIntersect, "Intersect");
+}
+UseIntersect();
+```
+```
+My              :        Yugo   Aztec   BMW
+Your            :        BMW    Saab    Aztec
+
+Intersect       :        Aztec  BMW
+```
+Intersect повертає загальні для обох контейнеров елементи.
+
+### Union (з'єднання).
+
+```cs
+void UseUnion()
+{
+    var queryMyCars =
+        from c in myCars
+        select c;
+    var queryYourCars =
+        from c in yourCars
+        select c;
+    ListCarToConsole(queryMyCars, "My  ");
+    ListCarToConsole(queryYourCars, "Your ");
+
+    Console.WriteLine();
+
+    var carIntersect = queryMyCars.Union(yourCars);//!!!
+    ListCarToConsole(carIntersect, "Union");
+}
+UseUnion();
+```
+```
+My      :        Yugo   Aztec   BMW
+Your    :        BMW    Saab    Aztec
+
+Union   :        Yugo   Aztec   BMW     Saab
+```
+Union  повертає всі члени обох контейнерів. Як в будь-якому правільному об'єднанні, якщо значеня зявилося воно не повторюється.
+
+### Concat (зчеплення).
+```cs
+void UseConcat()
+{
+    var queryMyCars =
+        from c in myCars
+        select c;
+    var queryYourCars =
+        from c in yourCars
+        select c;
+    ListCarToConsole(queryMyCars, "My  ");
+    ListCarToConsole(queryYourCars, "Your ");
+
+    Console.WriteLine();
+
+    var carConcat = queryMyCars.Concat(yourCars);//!!!
+    ListCarToConsole(carConcat, "Concat");
+}
+```
+```
+My      :        Yugo   Aztec   BMW
+Your    :        BMW    Saab    Aztec
+
+Concat  :        Yugo   Aztec   BMW     BMW     Saab    Aztec
+```
+Concat до першого контейнера просто додає другий.
+
+### Діаграма Венна з селектором.
+
+Для методів що об'єднують, виднімають і перетинають набори данихї доаона можливість вказувати селектори. Сетлектори використовують певні властивості об'єктів, шоб визначити дію, яку потрібно виконати.
+
+Допоміжний метод:
+```cs
+void CollectionToConsoleInLine<T>(IEnumerable<T> collection, string aboutCollection)
+{
+    Console.Write(aboutCollection);
+    foreach (var item in collection)
+    {
+        Console.Write(item + "\t");
+    }
+    Console.WriteLine();
+}
+```
+```cs
+
+void UseExceptWithSelector()
+{
+    var first = new (string Name, int Age)[] { ("Francis", 20), ("Lindsey", 30), ("Ashley", 40) };
+    var second = new (string Name, int Age)[] { ("Claire", 30), ("Pat", 30), ("Drew", 33) };
+
+    CollectionToConsoleInLine(first, "First     :");
+    CollectionToConsoleInLine(second, "Second    :");
+
+    var exceptBy = first.ExceptBy(second.Select(x => x.Age), fp => fp.Age); //!!!
+    CollectionToConsoleInLine(exceptBy, "ExceptBy  :");
+
+}
+UseExceptWithSelector();
+```
+```
+First     :(Francis, 20)        (Lindsey, 30)   (Ashley, 40)
+Second    :(Claire, 30) (Pat, 30)       (Drew, 33)
+ExceptBy  :(Francis, 20)        (Ashley, 40)
+```
+Метод розширення ExceptBy() використовує селектор для видалення записів із першого набору, де значення селектора існує в другому наборі. Наступний метод створює два списки кортежів і використовує властивість Age для селектора. І Клер, і Пет мають той самий вік, що й Ліндсі, але значення віку для Френсіса та Ешлі не входять до другого списку. 
+
+```cs
+void UseIntersectByWithSelector()
+{
+    var first = new (string Name, int Age)[] { ("Francis", 20), ("Lindsey", 30), ("Ashley", 40) };
+    var second = new (string Name, int Age)[] { ("Claire", 30), ("Pat", 30), ("Drew", 33) };
+
+    CollectionToConsoleInLine(first, "First     :");
+    CollectionToConsoleInLine(second, "Second    :");
+
+    var intersectBy = first.IntersectBy(second.Select(x => x.Age), fp => fp.Age); //!!!
+    CollectionToConsoleInLine(intersectBy, "IntersectBy:");
+
+}
+UseIntersectByWithSelector();
+```
+```
+First     :(Francis, 20)        (Lindsey, 30)   (Ashley, 40)
+Second    :(Claire, 30) (Pat, 30)       (Drew, 33)
+IntersectBy:(Lindsey, 30)
+```
+Метод IntersectBy() поверне набір результатів, який містить загальні елементи даних у наборі контейнерів на основі селектора. Зауважте, що хоча Клер і Пет також мають те саме значення віку, що й Ліндсі, вони не повертаються, оскільки метод IntersectBy() повертає лише один результат на значення селектора.
+
+### Відкідання повторювань (Distinct).
+
+В багатьох випадках треба уникати дублювання в послідовності.
+
+```cs
+void UseDistinct()
+{
+    var queryMyCars =
+        from c in myCars
+        select c;
+    var queryYourCars =
+        from c in yourCars
+        select c;
+    ListCarToConsole(queryMyCars, "My          ");
+    ListCarToConsole(queryYourCars, "Your        ");
+
+    Console.WriteLine();
+
+    var carConcat = queryMyCars.Concat(yourCars);
+    ListCarToConsole(carConcat, "Concat     ");
+
+    var carConacatDistinct = carConcat.Distinct();//!!! 
+    ListCarToConsole(carConacatDistinct, "Concat Distinct");
+}
+
+UseDistinct();
+```
+```
+My              :        Yugo   Aztec   BMW
+Your            :        BMW    Saab    Aztec
+
+Concat          :        Yugo   Aztec   BMW     BMW     Saab    Aztec
+Concat Distinct :        Yugo   Aztec   BMW     Saab
+```
+Як бачите метод просто прибирає повторення не змінюючит порядок.
+
+### Вилучення повторень з селектором.
+```cs
+void UseDistinctWithSelector()
+{
+    var first = new (string Name, int Age)[] { ("Francis", 20), ("Lindsey", 30), ("Ashley", 40) };
+    var second = new (string Name, int Age)[] { ("Claire", 30), ("Pat", 30), ("Drew", 33) };
+
+    
+    CollectionToConsoleInLine(first,"First     :");
+    CollectionToConsoleInLine(second, "Second    :");
+
+    var concat = first.Concat(second);
+    CollectionToConsoleInLine(concat, "Concat    :");
+
+    var concatDistinctBy = concat.DistinctBy(x => x.Age);
+    CollectionToConsoleInLine(concatDistinctBy,"DistinctBy:");
+
+}
+UseDistinctWithSelector();
+```
+```
+First     :(Francis, 20)        (Lindsey, 30)   (Ashley, 40)
+Second    :(Claire, 30) (Pat, 30)       (Drew, 33)
+Concat    :(Francis, 20)        (Lindsey, 30)   (Ashley, 40)    (Claire, 30)    (Pat, 30)       (Drew, 33)
+DistinctBy:(Francis, 20)        (Lindsey, 30)   (Ashley, 40)    (Drew, 33)
+```
+
+## Методи для агрегації.
+
+Результат, який отриманий в результаті виконання запиту, можна додадково обробити методами які агрегують данні. Один із методів вже розглянули це Count. Клас Enumerable має інші методи агрегації.
+
+```cs
+void UseAggregateOperations()
+{
+    double[] winterTemperatures = { 2.0, -21.3, 8, -4, 0, 8.2 };
+
+    PrintAll(winterTemperatures);
+
+    var quertAllTemperatures = from t in winterTemperatures select t;
+
+    double max = quertAllTemperatures.Max();
+    PrintResult(max, "Max");
+
+    double min = quertAllTemperatures.Min();
+    PrintResult(min, "Min");
+
+    double average = quertAllTemperatures.Average();
+    PrintResult(average, "Average");
+
+    double sum = quertAllTemperatures.Sum();
+    PrintResult(sum, "Sum");
+
+
+    void PrintResult(double value, string note)
+    {
+        Console.WriteLine($"{note}\t:{value}");
+    }
+
+    void PrintAll(double[] collection)
+    {
+        foreach (var item in collection)
+        {
+            Console.Write($"{item}\t");
+        }
+        Console.WriteLine();
+    }
+}
+UseAggregateOperations();
+```
+```
+2       -21,3   8       -4      0       8,2
+Max     :8,2
+Min     :-21,3
+Average :-1,1833333333333336
+Sum     :-7,100000000000001
+```
+
+## Операції агрегації з селектором
+
+```cs
+
+void UseAggregateOperationsWithSelector()
+{
+
+    CollectionToConsole(itemsInStock);
+
+    Console.WriteLine("\n");
+
+    Console.WriteLine("Product with maximum instock" );
+    Console.WriteLine(SelectWithMaxBy(itemsInStock));
+    Console.WriteLine("Product with minimum instock");
+    Console.WriteLine(SelectWithMinBy(itemsInStock));
+
+    ProductInfo? SelectWithMaxBy(ProductInfo[] products)
+    {
+       return products.MaxBy(p => p.NumberInStock);
+    }
+    ProductInfo? SelectWithMinBy(ProductInfo[] products)
+    {
+        return products.MinBy(p => p.NumberInStock);
+    }
+
+}
+UseAggregateOperationsWithSelector();
+```
+```
+Mac's Coffee                  Coffee with TEETH             24
+Milk Maid Milk                Milk cow's love               100
+Pure Silk Tofu                Bland as Possible             120
+Crunchy Pops                  Cheezy, peppery goodness      2
+RipOff Water                  From the tap to your wallet   100
+Classic Valpo Pizza           Everyone loves pizza!         73
+
+
+Product with maximum instock
+Pure Silk Tofu                Bland as Possible             120
+Product with minimum instock
+Crunchy Pops                  Cheezy, peppery goodness      2
+
+```
+Агрегація виконується з використанням властивості об'єктів послідовності
+

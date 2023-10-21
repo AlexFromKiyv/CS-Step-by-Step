@@ -1,5 +1,7 @@
 ﻿// This array will be the basis of our testing...
 using LinqExpressions;
+using System.Collections.ObjectModel;
+using System.Runtime.CompilerServices;
 
 ProductInfo[] itemsInStock = new[] 
 {
@@ -323,4 +325,373 @@ void ProjectionWithProductNameDescription()
     }
 }
 
-ProjectionWithProductNameDescription();
+//ProjectionWithProductNameDescription();
+
+
+void UseEnumerableMethodCount()
+{
+    string[] games = { "Morrowind", "Uncharted 2", "Fallout 3", "Daxter", "System Shock 2" };
+
+    var queryNameBigerThan6 =
+        from g in games
+        where g.Length > 6
+        select g;
+
+    Console.WriteLine(GetCount(queryNameBigerThan6));
+
+
+    int GetCount<T>(IEnumerable<T> collection)
+    {
+        return collection.Count();
+    }
+}
+
+//UseEnumerableMethodCount();
+
+void UseTryGetNonEnumeratedCount()
+{
+    WriteCount(itemsInStock);
+
+    void WriteCount(ProductInfo[] products)
+    {
+        var query = from p in products select p;
+        bool result = query.TryGetNonEnumeratedCount(out int count);
+        if (result)
+        {
+            Console.WriteLine(count);
+        }
+        else
+        {
+            Console.WriteLine("Try get count failed."  );
+        }
+    }
+
+}
+
+//UseTryGetNonEnumeratedCount();
+
+void NoWorkTryGetNonEnumeratedCount()
+{
+    var collection = GetProducts(itemsInStock);
+
+    bool result = collection.TryGetNonEnumeratedCount(out int count);
+
+    if (result)
+    {
+        Console.WriteLine(count);
+    }
+    else
+    {
+        Console.WriteLine("Try get count failed.");
+    }
+
+    Console.WriteLine(collection.Count());
+
+    static IEnumerable<ProductInfo> GetProducts(ProductInfo[] products)
+    {
+        for (int i = 0; i < products.Length; i++)
+        {
+           yield return products[i];
+        }
+    }
+}
+
+//NoWorkTryGetNonEnumeratedCount();
+
+void UseReverse()
+{
+    CollectionToConsole(itemsInStock);
+
+    Console.WriteLine("\n");
+
+    CollectionToConsole( SelectWithRevers(itemsInStock) );
+
+
+    IEnumerable<ProductInfo> SelectWithRevers(ProductInfo[] products)
+    {
+        var queryForAllProduct =
+            from p in products
+            select p;
+
+        return queryForAllProduct.Reverse();
+    }
+}
+
+//UseReverse();
+
+
+void UseOrderByName()
+{
+    CollectionToConsole(itemsInStock);
+
+    Console.WriteLine("\n");
+
+    CollectionToConsole(SelectWithOrderby(itemsInStock));
+
+
+
+    IEnumerable<ProductInfo> SelectWithOrderby(ProductInfo[] products)
+    {
+       var queryForAllWithSorting =
+            from p in products
+            orderby p.Name
+            select p;
+
+        return queryForAllWithSorting;
+    }
+}
+
+//UseOrderByName();
+
+
+void UseOrderByNameDescending()
+{
+    CollectionToConsole(itemsInStock);
+
+    Console.WriteLine("\n");
+
+    CollectionToConsole(SelectWithOrderby(itemsInStock));
+
+
+
+    IEnumerable<ProductInfo> SelectWithOrderby(ProductInfo[] products)
+    {
+        var queryForAllWithSorting =
+             from p in products
+             orderby p.Name descending
+             select p;
+
+        return queryForAllWithSorting;
+    }
+}
+
+//UseOrderByNameDescending();
+
+List<string> myCars = new List<string> { "Yugo", "Aztec", "BMW" };
+List<string> yourCars = new List<string> { "BMW", "Saab", "Aztec" };
+
+void ListCarToConsole<T>(IEnumerable<T> collection, string note = "Collection")
+{
+    Console.Write($"{note}\t:\t ");
+    foreach (var item in collection)
+    {
+        Console.Write(item +"\t"  );
+    }
+    Console.WriteLine();
+}
+
+void UseExcept()
+{
+    var queryMyCars =
+        from c in myCars
+        select c;
+    var queryYourCars =
+        from c in yourCars
+        select c;
+    ListCarToConsole(queryMyCars,"My    ");
+    ListCarToConsole(queryYourCars, "Your  ");
+
+    Console.WriteLine();
+
+    var carDiff = queryMyCars.Except(yourCars);//!!!
+    ListCarToConsole(carDiff, "Except");
+}
+//UseExcept();
+
+void UseIntersect()
+{
+    var queryMyCars =
+        from c in myCars
+        select c;
+    var queryYourCars =
+        from c in yourCars
+        select c;
+    ListCarToConsole(queryMyCars, "My      ");
+    ListCarToConsole(queryYourCars, "Your    ");
+
+    Console.WriteLine();
+
+    var carIntersect = queryMyCars.Intersect(yourCars);//!!!
+    ListCarToConsole(carIntersect, "Intersect");
+}
+//UseIntersect();
+
+void UseUnion()
+{
+    var queryMyCars =
+        from c in myCars
+        select c;
+    var queryYourCars =
+        from c in yourCars
+        select c;
+    ListCarToConsole(queryMyCars, "My  ");
+    ListCarToConsole(queryYourCars, "Your ");
+
+    Console.WriteLine();
+
+    var carIntersect = queryMyCars.Union(yourCars);//!!!
+    ListCarToConsole(carIntersect, "Union");
+}
+//UseUnion();
+
+void UseConcat()
+{
+    var queryMyCars =
+        from c in myCars
+        select c;
+    var queryYourCars =
+        from c in yourCars
+        select c;
+    ListCarToConsole(queryMyCars, "My  ");
+    ListCarToConsole(queryYourCars, "Your ");
+
+    Console.WriteLine();
+
+    var carConcat = queryMyCars.Concat(yourCars);//!!!
+    ListCarToConsole(carConcat, "Concat");
+}
+
+//UseConcat();
+
+void CollectionToConsoleInLine<T>(IEnumerable<T> collection, string aboutCollection)
+{
+    Console.Write(aboutCollection);
+    foreach (var item in collection)
+    {
+        Console.Write(item + "\t");
+    }
+    Console.WriteLine();
+}
+
+
+void UseExceptWithSelector()
+{
+    var first = new (string Name, int Age)[] { ("Francis", 20), ("Lindsey", 30), ("Ashley", 40) };
+    var second = new (string Name, int Age)[] { ("Claire", 30), ("Pat", 30), ("Drew", 33) };
+
+    CollectionToConsoleInLine(first, "First     :");
+    CollectionToConsoleInLine(second, "Second    :");
+
+    var exceptBy = first.ExceptBy(second.Select(x => x.Age), fp => fp.Age); //!!!
+    CollectionToConsoleInLine(exceptBy, "ExceptBy  :");
+
+}
+//UseExceptWithSelector();
+
+void UseIntersectByWithSelector()
+{
+    var first = new (string Name, int Age)[] { ("Francis", 20), ("Lindsey", 30), ("Ashley", 40) };
+    var second = new (string Name, int Age)[] { ("Claire", 30), ("Pat", 30), ("Drew", 33) };
+
+    CollectionToConsoleInLine(first, "First     :");
+    CollectionToConsoleInLine(second, "Second    :");
+
+    var intersectBy = first.IntersectBy(second.Select(x => x.Age), fp => fp.Age); //!!!
+    CollectionToConsoleInLine(intersectBy, "IntersectBy:");
+
+}
+//UseIntersectByWithSelector();
+
+void UseDistinct()
+{
+    var queryMyCars =
+        from c in myCars
+        select c;
+    var queryYourCars =
+        from c in yourCars
+        select c;
+    ListCarToConsole(queryMyCars, "My          ");
+    ListCarToConsole(queryYourCars, "Your        ");
+
+    Console.WriteLine();
+
+    var carConcat = queryMyCars.Concat(yourCars);
+    ListCarToConsole(carConcat, "Concat     ");
+
+    var carConacatDistinct = carConcat.Distinct();//!!! 
+    ListCarToConsole(carConacatDistinct, "Concat Distinct");
+}
+
+//UseDistinct();
+
+void UseDistinctWithSelector()
+{
+    var first = new (string Name, int Age)[] { ("Francis", 20), ("Lindsey", 30), ("Ashley", 40) };
+    var second = new (string Name, int Age)[] { ("Claire", 30), ("Pat", 30), ("Drew", 33) };
+
+    
+    CollectionToConsoleInLine(first,"First     :");
+    CollectionToConsoleInLine(second, "Second    :");
+
+    var concat = first.Concat(second);
+    CollectionToConsoleInLine(concat, "Concat    :");
+
+    var concatDistinctBy = concat.DistinctBy(x => x.Age);
+    CollectionToConsoleInLine(concatDistinctBy,"DistinctBy:");
+
+}
+//UseDistinctWithSelector();
+
+
+void UseAggregateOperations()
+{
+    double[] winterTemperatures = { 2.0, -21.3, 8, -4, 0, 8.2 };
+
+    PrintAll(winterTemperatures);
+
+    var quertAllTemperatures = from t in winterTemperatures select t;
+
+    double max = quertAllTemperatures.Max();
+    PrintResult(max, "Max");
+
+    double min = quertAllTemperatures.Min();
+    PrintResult(min, "Min");
+
+    double average = quertAllTemperatures.Average();
+    PrintResult(average, "Average");
+
+    double sum = quertAllTemperatures.Sum();
+    PrintResult(sum, "Sum");
+
+
+    void PrintResult(double value, string note)
+    {
+        Console.WriteLine($"{note}\t:{value}");
+    }
+
+    void PrintAll(double[] collection)
+    {
+        foreach (var item in collection)
+        {
+            Console.Write($"{item}\t");
+        }
+        Console.WriteLine();
+    }
+}
+//UseAggregateOperations();
+
+
+void UseAggregateOperationsWithSelector()
+{
+
+    CollectionToConsole(itemsInStock);
+
+    Console.WriteLine("\n");
+
+    Console.WriteLine("Product with maximum instock" );
+    Console.WriteLine(SelectWithMaxBy(itemsInStock));
+    Console.WriteLine("Product with minimum instock");
+    Console.WriteLine(SelectWithMinBy(itemsInStock));
+
+    ProductInfo? SelectWithMaxBy(ProductInfo[] products)
+    {
+       return products.MaxBy(p => p.NumberInStock);
+    }
+    ProductInfo? SelectWithMinBy(ProductInfo[] products)
+    {
+        return products.MinBy(p => p.NumberInStock);
+    }
+
+}
+UseAggregateOperationsWithSelector();
+
