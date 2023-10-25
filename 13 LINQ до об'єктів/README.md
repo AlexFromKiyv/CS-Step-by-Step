@@ -2058,3 +2058,206 @@ Crunchy Pops                  Cheezy, peppery goodness      2
 ```
 Агрегація виконується з використанням властивості об'єктів послідовності
 
+# Внутрішне представлення запитів LINQ.
+
+Використовуючи оператори from, in, select, where можна створити вирази запитів. API деяких функцію LINQ можно отримати під час виклику методів розширення класу Enumerable. При компіляції оператори запитів LINQ перетворюються в виклики методів класу Enumerable. Велика кількість методів була прототипована для прийому делегатів як аргумент. Для багатьох методів потрібен загальний депутат Func<>. 
+```cs
+public static IEnumerable<TSource> Where<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
+
+public static IEnumerable<TSource> Where<TSource>(this IEnumerable<TSource> source, Func<TSource, int, bool> predicate)
+```
+Делегат Func представляє шаблон для заданої функції з набором до 16 аргументів і значенням що повертається.
+```cs
+public delegate TResult Func<TResult>()
+public delegate TResult Func<T1,T2,T3,T4,TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4)
+```
+Враховуючи, що багато методів System.Linq.Enumerable вимагають делегата як вхідні данні, під час їх виклику, можна вручну створити новий тип та створити необхідні цільові методи, використати анонімний метод  або створити правільний лямбда-вираз. Давайте розглянемо кожен з ціх підходів.
+
+## Як простіше стоврювати запити.
+
+Ше раз розлянемо простий запит.
+
+```cs
+void QueryStringWithOretators()
+{
+    string[] games = { "Morrowind", "Uncharted 2", "Fallout 3", "Daxter", "System Shock 2" };
+
+    var subset =
+        from game in games
+        where game.Contains(" ")
+        select game;
+
+    CollectionToConsoleInLine(subset);      
+
+}
+QueryStringWithOretators();
+
+```
+```
+Uncharted 2     Fallout 3       System Shock 2
+
+```
+Очевидна перевага використання операторів для створення запиту полягає в тому, що делегати Func та виклики типу Enumerable аьстрагуються від вашого коду. Компілятор сам виконує цей переклад. Побудова запитів таким чином найпоширений і найпростіший підхід.
+
+## Побудова виразів запиту з використанням типу Enumerable та лябда-виразів.
+
+Оператори запитів є скорченими версіями виклику методів роширення класу Enumerable. 
+
+```cs
+void QueryStringWithEnumerableAndLambdas()
+{
+    string[] games = { "Morrowind", "Uncharted 2", "Fallout 3", "Daxter", "System Shock 2" };
+    CollectionToConsoleInLine(games);
+
+    var subset = games
+        .Where(game => game.Contains(" "))
+        .OrderBy(game => game)
+        .Select(game => game);
+    CollectionToConsoleInLine(subset);
+}
+QueryStringWithEnumerableAndLambdas();
+```
+```
+Morrowind       Uncharted 2     Fallout 3       Daxter  System Shock 2
+Fallout 3       System Shock 2  Uncharted 2
+
+```
+В цьому прикладі безпосередьно викликаються методи розширення. З початку викликається метод Where для масиву рядків. Цей метод клас Array отримує як метод розширення з класу Enumerable. Для методу потрібен делегат System.Func<T1, TResult>. Перший переметр тип сумістний з коллекцією даних а другий є результатом виразу над елементом послідовності який може бути лямбда виразом. Результатом роботи методу є теж послідовність типу Enumerable для якої знову використовується метод розширення OrderBy. Для цього методу знову потрібен делегат Func. Цього разу ви передаєте кожен елемент почерзі через відповідний лямда вираз вказуючи шо ключ сортування є самє значення елементу. В результаті методу ми оримуємо кпорядковану послідовність. Аналогічно при визові Select в лямбда виразі ми вказуемо шо ми вибираємо самє значення.
+Визови методів трохи складніши ніж оперетори запиту. Цю послідовність визовів можна розгянути окремо.
+```cs
+void QueryStringWithEnumerableAndLambdasLong()
+{
+    string[] games = { "Morrowind", "Uncharted 2", "Fallout 3", "Daxter", "System Shock 2" };
+    CollectionToConsoleInLine(games);
+
+    var subset = games
+        .Where(game => game.Contains(" "))
+        .OrderBy(game => game)
+        .Select(game => game);
+    CollectionToConsoleInLine(subset);
+
+    Console.WriteLine("\n");
+    
+    CollectionToConsoleInLine(games);
+
+    var gamesWithSpaces = games
+        .Where(game => game.Contains(" "));
+    CollectionToConsoleInLine(gamesWithSpaces);
+    
+    var gamesWithSpacesAndOrderby = gamesWithSpaces
+        .OrderBy(game => game);
+    CollectionToConsoleInLine(gamesWithSpacesAndOrderby);
+
+    var gamesWithSpacesAndOrderbyAndSelect = gamesWithSpacesAndOrderby
+        .Select(game => game);
+    CollectionToConsoleInLine(gamesWithSpacesAndOrderbyAndSelect);
+
+}
+QueryStringWithEnumerableAndLambdasLong();
+```
+```
+Morrowind       Uncharted 2     Fallout 3       Daxter  System Shock 2
+Fallout 3       System Shock 2  Uncharted 2
+
+
+Morrowind       Uncharted 2     Fallout 3       Daxter  System Shock 2
+Uncharted 2     Fallout 3       System Shock 2
+Fallout 3       System Shock 2  Uncharted 2
+Fallout 3       System Shock 2  Uncharted 2
+```
+Використовуючи методи ми вказуємо більш детально складові ніж використовуючи оператори. Крім того треба створювати цільові методи делегатів як параметри методів. 
+
+## Побудова виразів запиту з використанням типу Enumerable та анонімних типів.
+
+Враховуючи що лямбда-вираз це скороченя нотація анонімних методів, вираз запиту можна записати інакше.
+
+```cs
+void QueryStringWithWithAnonymousMethods()
+{
+    string[] games = { "Morrowind", "Uncharted 2", "Fallout 3", "Daxter", "System Shock 2" };
+    CollectionToConsoleInLine(games);
+
+    // Build the necessary Func<> delegates using anonymous methods.
+    Func<string,bool> searchFilter = delegate(string gameName)
+    {
+        return gameName.Contains(" ");
+    };
+    Func<string, string> itemToProcess = delegate (string gameName)
+    {
+        return gameName;
+    };
+
+    var subset = games
+        .Where(searchFilter)
+        .OrderBy(itemToProcess)
+        .Select(itemToProcess);
+
+    CollectionToConsoleInLine(subset);
+
+}
+QueryStringWithWithAnonymousMethods();
+```
+```
+Morrowind       Uncharted 2     Fallout 3       Daxter  System Shock 2
+Fallout 3       System Shock 2  Uncharted 2
+```
+Цей варіант ще більше багатослівний оскільки створюються окремі методі делегатів. Позитивним є те, що синтаксис анонімного методу зберігає всю обробку делегату в одному визначенні методу.
+
+## Побудова виразів запиту з використанням розширенного створеня делегатів.
+
+Самий великий за кодом варіант не використовувати скороченя які дають анонімні методи. 
+
+```cs
+internal class VeryComplexQueryExpression
+{
+    //MethodForCall
+    public static void QueryStringsWithRawDelegates()
+    {
+        string[] games = { "Morrowind", "Uncharted 2", "Fallout 3", "Daxter", "System Shock 2" };
+        CollectionToConsoleInLine(games);
+
+        // Build the necessary Func<> delegates.
+        Func<string, bool> searchFilter = new Func<string, bool>(Filter);
+        Func<string, string> itemToProcess = new Func<string, string>(ProcessItem);
+
+        var subset = games
+            .Where(searchFilter)
+            .OrderBy(itemToProcess)
+            .Select(itemToProcess);
+        CollectionToConsoleInLine(subset);            
+
+    }
+
+    // Delegate targets.
+    public static bool Filter(string item)
+    {
+        return item.Contains(" ");
+    }
+
+    public static string ProcessItem(string  item)
+    {
+        return item;
+    }
+
+    // Helper mathod
+    public static void CollectionToConsoleInLine<T>(IEnumerable<T>? collection)
+    {
+        if (collection == null) return;
+
+        foreach (var item in collection)
+        {
+            Console.Write(item + "\t");
+        }
+        Console.WriteLine();
+    }
+}
+
+```
+```cs
+VeryComplexQueryExpression.QueryStringsWithRawDelegates();
+```
+```
+Morrowind       Uncharted 2     Fallout 3       Daxter  System Shock 2
+Fallout 3       System Shock 2  Uncharted 2
+```
+В цьому варіанти створені окремі методи яки використовуються.
