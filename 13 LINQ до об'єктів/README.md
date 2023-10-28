@@ -821,7 +821,6 @@ void FilteringNoGenericCollection()
     var myInts = myStuff.OfType<int>();
 
     CollectionToConsole(myInts);
-    
 }
 
 FilteringNoGenericCollection();
@@ -830,8 +829,36 @@ FilteringNoGenericCollection();
 10
 400
 8
+
 ```
 Якшо методу TypeOf<T> вказати певний тип він проводячи трасформацію відбере в ітерації всі елементи які відповідають цтому типу.
+Метод TypeOf<T> може бути корисним якшо треба зробити фільтр в іерархії типів.
+```cs
+void FilteringByType()
+{
+    List<Exception> exceptions = new()
+    {
+      new ArgumentException(),
+      new SystemException(),
+      new IndexOutOfRangeException(),
+      new InvalidOperationException(),
+      new NullReferenceException(),
+      new InvalidCastException(),
+      new OverflowException(),
+      new DivideByZeroException(),
+      new ApplicationException()
+    };
+
+var queryArithmeticException = exceptions.OfType<ArithmeticException>();
+
+CollectionToConsole(queryArithmeticException);
+}
+FilteringByType();
+```
+```
+System.OverflowException: Arithmetic operation resulted in an overflow.
+System.DivideByZeroException: Attempted to divide by zero.
+```
 
 # Вирази запросів LINQ .
 

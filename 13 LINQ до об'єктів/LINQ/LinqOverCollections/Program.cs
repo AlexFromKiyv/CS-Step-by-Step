@@ -1,4 +1,5 @@
 ﻿using LinqOverCollections;
+using System;
 using System.Collections;
 
 List<Car> myCar = new()
@@ -83,7 +84,27 @@ void FilteringNoGenericCollection()
     var myInts = myStuff.OfType<int>();
 
     CollectionToConsole(myInts);
-    
 }
 
-FilteringNoGenericCollection();
+//FilteringNoGenericCollection();
+
+void FilteringByType()
+{
+    List<Exception> exceptions = new()
+    {
+      new ArgumentException(),
+      new SystemException(),
+      new IndexOutOfRangeException(),
+      new InvalidOperationException(),
+      new NullReferenceException(),
+      new InvalidCastException(),
+      new OverflowException(),
+      new DivideByZeroException(),
+      new ApplicationException()
+    };
+
+var queryArithmeticException = exceptions.OfType<ArithmeticException>();
+
+CollectionToConsole(queryArithmeticException);
+}
+FilteringByType();
