@@ -509,6 +509,28 @@ void UseLet()
 }
 //UseLet();
 
+void SelectionFromTwoSource()
+{
+    List<Place> places = new()
+    {
+        new("Job"),
+        new("Home")
+    };
+
+    List<Person> people = new()
+    {
+        new("Valja"),
+        new("Fedja")
+    };
+
+    var regularLife = from place in places
+                      from person in people
+                      select new { Person = person.Name, Place = place.Name };
+
+    CollectionToConsole(regularLife);
+}
+SelectionFromTwoSource();
+
 void UseExcept()
 {
     var queryMyCars =

@@ -1789,6 +1789,45 @@ Car { Manufacturer = Mercedes, Name = Vaito, Year = 2000 }
 ```
 Як бачимо досить зручно використовувати проміжні змінні в запиті. В методах рожширеня такої можливості немає.
 
+## Отримання даних з декількох джерел.
+
+За допомогою LINQ можна отримани дані з декількох джерел.
+
+LinqExpressions\Types.cs
+```cs
+    record class Place(string Name);
+    record class Person(string Name);
+```
+```cs
+void SelectionFromTwoSource()
+{
+    List<Place> places = new()
+    {
+        new("Job"),
+        new("Home")
+    };
+
+    List<Person> people = new()
+    {
+        new("Valja"),
+        new("Fedja")
+    };
+
+    var regularLife = from place in places
+                      from person in people
+                      select new { Person = person.Name, Place = place.Name };
+
+    CollectionToConsole(regularLife);
+}
+SelectionFromTwoSource();
+```
+```
+{ Person = Valja, Place = Job }
+{ Person = Fedja, Place = Job }
+{ Person = Valja, Place = Home }
+{ Person = Fedja, Place = Home }
+```
+Таким чином кожному елементу першої коллекції співставляється кожний елемент другої.
 
 
 ## LINQ як краший инструмент діаграми Венна.
