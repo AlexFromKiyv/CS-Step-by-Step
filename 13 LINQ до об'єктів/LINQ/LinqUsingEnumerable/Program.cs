@@ -35,7 +35,7 @@ void QueryStringWithOretators()
     CollectionToConsoleInLine(subset);      
 
 }
-//QueryStringWithOretators();
+QueryStringWithOretators();
 
 void QueryStringWithEnumerableAndLambdas()
 {
@@ -106,5 +106,5 @@ void QueryStringWithWithAnonymousMethods()
 }
 //QueryStringWithWithAnonymousMethods();
 
-VeryComplexQueryExpression.QueryStringsWithRawDelegates();
+//VeryComplexQueryExpression.QueryStringsWithRawDelegates();
 

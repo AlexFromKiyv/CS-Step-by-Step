@@ -11,7 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LinqOverCollections", "Linq
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LinqExpressions", "LinqExpressions\LinqExpressions.csproj", "{ED197384-7D6E-4B93-AA2D-E815AF34B8F4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinqUsingEnumerable", "LinqUsingEnumerable\LinqUsingEnumerable.csproj", "{75AB9FE4-CE43-4711-AB81-14E2DBABE4D5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LinqUsingEnumerable", "LinqUsingEnumerable\LinqUsingEnumerable.csproj", "{75AB9FE4-CE43-4711-AB81-14E2DBABE4D5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp1", "..\..\..\..\Temp\ConsoleApp1\ConsoleApp1.csproj", "{93A3C215-FA0C-4660-B2B6-16058DAB0254}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{75AB9FE4-CE43-4711-AB81-14E2DBABE4D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{75AB9FE4-CE43-4711-AB81-14E2DBABE4D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{75AB9FE4-CE43-4711-AB81-14E2DBABE4D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{93A3C215-FA0C-4660-B2B6-16058DAB0254}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{93A3C215-FA0C-4660-B2B6-16058DAB0254}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{93A3C215-FA0C-4660-B2B6-16058DAB0254}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{93A3C215-FA0C-4660-B2B6-16058DAB0254}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

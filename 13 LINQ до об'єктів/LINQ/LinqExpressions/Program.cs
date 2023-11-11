@@ -480,6 +480,35 @@ void ListCarToConsole<T>(IEnumerable<T> collection, string note = "Collection")
     Console.WriteLine();
 }
 
+
+List<Car> garage = new List<Car>
+{
+    new("VW","T2",1995),
+    new("VW","Caddy",2001),
+    new("VW","LT",2001),
+    new("Mercedes","Sprinter",1998),
+    new("Mercedes","Vaito",2000)
+};
+
+void UseLet()
+{
+    CollectionToConsole(garage);
+    Console.WriteLine();
+
+    var otherGarage = from c in garage
+                      let model = $"{c.Manufacturer} {c.Name}"
+                      let age = DateTime.Now.Year - c.Year
+                      where age > 23
+                      select new
+                      {
+                          Model = model,
+                          Age = age
+                      };
+    CollectionToConsole(otherGarage);
+
+}
+//UseLet();
+
 void UseExcept()
 {
     var queryMyCars =
@@ -693,5 +722,5 @@ void UseAggregateOperationsWithSelector()
     }
 
 }
-UseAggregateOperationsWithSelector();
+//UseAggregateOperationsWithSelector();
 
