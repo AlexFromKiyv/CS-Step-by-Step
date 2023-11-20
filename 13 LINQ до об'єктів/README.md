@@ -931,7 +931,7 @@ var result =
 ```
 Елемент після оператору from представляє елемент, який відповідає крітеріям запиту LINQ і його можна назвати як завгодно. Елемент після опертору in представляє контейнер даних для пошуку( массив, коллекція, документ XML, тощо).
 
-## Базовий вибор за допомогою select
+## select. Базовий вибор за допомогою select
 
 Виберемо всі дані контейнера без будь яких додадкових дій і обмежень.
 ```cs
@@ -982,7 +982,7 @@ RipOff Water
 Classic Valpo Pizza
 ```
 
-## Отримання підмножин даних.
+## where. Отримання підмножин даних.
 
 Для отриманя специфічних підмножин з контейнера даних можна поставить обмеження за допомогою where. Загальний шаблон такий:
 
@@ -1040,6 +1040,47 @@ UseOperatorWhereWithComplexClause();
 ```
 Milk Maid Milk                Milk cow's love               100
 ```
+
+## Фільтрація більш складних об'єктів.
+
+Припустимо ми маємо тип 
+```cs
+    record class Person(string Name, int Age, List<string> Languages);
+```
+В колекції такіх об'єктів кожен елемент маже мати колекцію рядків по якій треба зробити додадкову фільтрацію.
+
+```cs
+void UseWhereForComplexObject()
+{
+    List<Person> people = new()
+    {
+        new("Fedja",25,new(){"Russian"}),
+        new("Anna",40,new(){"Russian","Deutch"}),
+        new("Julia",30,new(){"Russian","Ukraine","English" }),
+        new("Sava",28,new(){"Russain","Deutch"}),
+        new("Olga",25,new(){ "Ukrainian", "English","Russian"}),
+        new("Mikola",25,new(){ "Ukrainian", "English"}),
+        new("Alex",30,new(){ "Ukrainian", "English","Russian","C#"})
+    };
+
+    var selected = from person in people
+                   from language in person.Languages
+                   where person.Age < 26
+                   where language == "English"
+                   select person.Name;
+
+    CollectionToConsole(selected);
+
+}
+UseWhereForComplexObject();
+
+```
+```
+Olga
+Mikola
+```
+Тут колекція фільтруеться по властівослі об'єкту а також по властивості яка є коллекцією.
+
 
 ## Вибір частинами. (paging data)
 
@@ -1496,7 +1537,61 @@ Crunchy Pops                  Cheezy, peppery goodness
 RipOff Water                  From the tap to your wallet
 Classic Valpo Pizza           Everyone loves pizza!
 ```
-Таким чином врезультаті запиту ми отримуємо коллекцію з необхідним нам типом. Таким чином, залежно від потреб, можна мати вібір як робити проекцію.  
+Таким чином врезультаті запиту ми отримуємо коллекцію з необхідним нам типом. Таким чином, залежно від потреб, можна мати вібір як робити проекцію. 
+
+## Змінні в запросах та оператор let.
+
+В межах запиту можан визначити зміну для проміжних обчислень.
+
+Припустимо у нас є класс.
+LinqExpressions\Types.cs
+```cs
+    record class Car(string Manufacturer, string Name, int Year);
+```
+Ми можемо створити наступний запит.
+
+```cs
+void UseLet()
+{
+    List<Car> garage = new List<Car>
+    {
+        new("VW","T2",1995),
+        new("VW","Caddy",2001),
+        new("VW","LT",2001),
+        new("Mercedes","Sprinter",1998),
+        new("Mercedes","Vaito",2000)
+    };
+
+    CollectionToConsole(garage);
+    Console.WriteLine();
+
+    var otherGarage = from c in garage
+                      let model = $"{c.Manufacturer} {c.Name}"
+                      let age = DateTime.Now.Year - c.Year
+                      where age > 23
+                      select new
+                      {
+                          Model = model,
+                          Age = age
+                      };
+    CollectionToConsole(otherGarage);
+}
+UseLet();
+
+```
+```
+Car { Manufacturer = VW, Name = T2, Year = 1995 }
+Car { Manufacturer = VW, Name = Caddy, Year = 2001 }
+Car { Manufacturer = VW, Name = LT, Year = 2001 }
+Car { Manufacturer = Mercedes, Name = Sprinter, Year = 1998 }
+Car { Manufacturer = Mercedes, Name = Vaito, Year = 2000 }
+
+{ Model = VW T2, Age = 28 }
+{ Model = Mercedes Sprinter, Age = 25 }
+
+```
+Як бачимо досить зручно використовувати проміжні змінні в запиті. В методах рожширеня такої можливості немає.
+
 
 ## Отримання кількості елементів (Count).
 
@@ -1733,61 +1828,6 @@ Crunchy Pops                  Cheezy, peppery goodness      2
 Classic Valpo Pizza           Everyone loves pizza!         73
 ```
 
-## Змінні в запросах та оператор let.
-
-В межах запиту можан визначити зміну для проміжних обчислень.
-
-Припустимо у нас є класс.
-LinqExpressions\Types.cs
-```cs
-    record class Car(string Manufacturer, string Name, int Year);
-```
-Та наступний список.
-```cs
-List<Car> garage = new List<Car>
-{
-    new("VW","T2",1995),
-    new("VW","Caddy",2001),
-    new("VW","LT",2001),
-    new("Mercedes","Sprinter",1998),
-    new("Mercedes","Vaito",2000)
-};
-```
-Ми можемо створити наступний запит.
-
-```cs
-void UseLet()
-{
-    CollectionToConsole(garage);
-    Console.WriteLine();
-
-    var otherGarage = from c in garage
-                      let model = $"{c.Manufacturer} {c.Name}"
-                      let age = DateTime.Now.Year - c.Year
-                      where age > 23
-                      select new
-                      {
-                          Model = model,
-                          Age = age
-                      };
-    CollectionToConsole(otherGarage);
-
-}
-UseLet();
-
-```
-```
-Car { Manufacturer = VW, Name = T2, Year = 1995 }
-Car { Manufacturer = VW, Name = Caddy, Year = 2001 }
-Car { Manufacturer = VW, Name = LT, Year = 2001 }
-Car { Manufacturer = Mercedes, Name = Sprinter, Year = 1998 }
-Car { Manufacturer = Mercedes, Name = Vaito, Year = 2000 }
-
-{ Model = VW T2, Age = 28 }
-{ Model = Mercedes Sprinter, Age = 25 }
-
-```
-Як бачимо досить зручно використовувати проміжні змінні в запиті. В методах рожширеня такої можливості немає.
 
 ## Отримання даних з декількох джерел.
 
@@ -1796,7 +1836,8 @@ Car { Manufacturer = Mercedes, Name = Vaito, Year = 2000 }
 LinqExpressions\Types.cs
 ```cs
     record class Place(string Name);
-    record class Person(string Name);
+
+    record class Person(string Name, int Age, List<string>? Languages);
 ```
 ```cs
 void SelectionFromTwoSource()
@@ -1809,12 +1850,12 @@ void SelectionFromTwoSource()
 
     List<Person> people = new()
     {
-        new("Valja"),
-        new("Fedja")
+        new("Valja",25,null),
+        new("Fedja",30,null)
     };
 
-    var regularLife = from place in places
-                      from person in people
+    var regularLife = from person in people
+                      from place in places
                       select new { Person = person.Name, Place = place.Name };
 
     CollectionToConsole(regularLife);
@@ -1823,8 +1864,8 @@ SelectionFromTwoSource();
 ```
 ```
 { Person = Valja, Place = Job }
-{ Person = Fedja, Place = Job }
 { Person = Valja, Place = Home }
+{ Person = Fedja, Place = Job }
 { Person = Fedja, Place = Home }
 ```
 Таким чином кожному елементу першої коллекції співставляється кожний елемент другої.
@@ -1935,7 +1976,9 @@ Your    :        BMW    Saab    Aztec
 
 Union   :        Yugo   Aztec   BMW     Saab
 ```
-Union  повертає всі члени обох контейнерів. Як в будь-якому правільному об'єднанні, якщо значеня зявилося воно не повторюється.
+Union  повертає всі члени обох контейнерів. Як в будь-якому правільному об'єднанні, якщо значеня зявилося воно не повторюється. 
+
+Коли послідовності складаються з складний об'єктів то при об'єднанні, для порівняння  використовуються методи GetHeshCode() та Equals. Якщо потрібно можно перевизначити ці методі в класі і тоді однакові за цією логікою об'єкти не будуть повторюватися. По замовченю ці об'єкти будуть порівнюватися за адресами в пам'яті.  
 
 ### Concat (зчеплення).
 ```cs
@@ -2183,6 +2226,431 @@ Crunchy Pops                  Cheezy, peppery goodness      2
 ```
 Агрегація виконується з використанням властивості об'єктів послідовності
 
+## group .. by. Групування.
+
+Коллекцію об'єктів можна згрупувати за властивостю.
+```cs
+record class Car(string Manufacturer, string Name, int Year);
+```
+```cs
+void UseGroupBy()
+{
+    Car[] garage =
+    {
+        new("VW","e-UP",2015),
+        new("Mercedes","W164",2005),
+        new("VW","Käfer",1937),
+        new("ЗАЗ","ЗАЗ-1102 Таврія",1992),
+        new("Mercedes","W123",1981),
+        new("ЗАЗ","ЗАЗ-965",1965),
+        new("VW","Golf",1975),
+        new("ЗАЗ","Lanos",2010),
+    };
+
+    var carGroups = from car in garage
+                    group car by car.Manufacturer;
+
+    foreach (var group in carGroups)
+    {
+        Console.WriteLine("\t"+group.Key);
+        CollectionToConsole(group);
+        Console.WriteLine();
+    }
+
+    // same with method
+    var carGroupByMethod = garage.GroupBy(c => c.Manufacturer);
+}
+
+UseGroupBy();
+
+```
+```
+        VW
+Car { Manufacturer = VW, Name = e-UP, Year = 2015 }
+Car { Manufacturer = VW, Name = Kafer, Year = 1937 }
+Car { Manufacturer = VW, Name = Golf, Year = 1975 }
+
+        Mercedes
+Car { Manufacturer = Mercedes, Name = W164, Year = 2005 }
+Car { Manufacturer = Mercedes, Name = W123, Year = 1981 }
+
+        ЗАЗ
+Car { Manufacturer = ЗАЗ, Name = ЗАЗ-1102 Тавр?я, Year = 1992 }
+Car { Manufacturer = ЗАЗ, Name = ЗАЗ-965, Year = 1965 }
+Car { Manufacturer = ЗАЗ, Name = Lanos, Year = 2010 }
+
+```
+Оператору group вказується шо треба групувати і за яким крітерієм. Результатом є набір об'єктів IGrouping<K,V>, тобто групп елементів початкової колеції зрупованих по крітерію. Цей крітерій групи можна отримати з властивості Key. 
+
+### Групування з створенням нових об'єктів
+
+Маючи колекцію груп можна створювати нові сутності.
+
+```cs
+void GroupingWithNewObjects()
+{
+    Car[] garage =
+    {
+        new("VW","e-UP",2015),
+        new("Mercedes","W164",2005),
+        new("VW","Käfer",1937),
+        new("ЗАЗ","ЗАЗ-1102 Таврія",1992),
+        new("Mercedes","W123",1981),
+        new("ЗАЗ","ЗАЗ-965",1965),
+        new("VW","Golf",1975),
+        new("ЗАЗ","Lanos",2010),
+    };
+
+    var manufacturers = from car in garage
+                    group car by car.Manufacturer into carGroup
+                    select new { Manufacturer = carGroup.Key, Count = carGroup.Count() };
+    
+    CollectionToConsole(manufacturers);
+
+    //same with method
+    var manufacturerByMethod = garage
+        .GroupBy(c => c.Manufacturer)
+        .Select(g => new { Manufacturer = g.Key, Count = g.Count() });
+}
+
+GroupingWithNewObjects();
+```
+```
+{ Manufacturer = VW, Count = 3 }
+{ Manufacturer = Mercedes, Count = 2 }
+{ Manufacturer = ЗАЗ, Count = 3 }
+```
+В цьому прикладі за допомогою into визначається змінна яка зберігає групу. Даці ця змінна використоаується для стоврення нового анонімного типу. 
+
+### Вкладені запити.
+
+Оскілки при групувані створюється колекція до неє можна зробити додадковий запит.
+
+```cs
+void NestedQuery()
+{
+    Car[] garage =
+    {
+        new("VW","e-UP",2015),
+        new("Mercedes","W164",2005),
+        new("VW","Käfer",1937),
+        new("ЗАЗ","ЗАЗ-1102 Таврія",1992),
+        new("Mercedes","W123",1981),
+        new("ЗАЗ","ЗАЗ-965",1965),
+        new("VW","Golf",1975),
+        new("ЗАЗ","Lanos",2010),
+    };
+
+    var garageByManufacturer = from car in garage
+                               group car by car.Manufacturer into carGroup
+                               select new
+                               {
+                                   Manufacturer = carGroup.Key,
+                                   Count = carGroup.Count(),
+                                   Cars = from c in carGroup select c
+                               };
+
+    foreach (var group in garageByManufacturer)
+    {
+        Console.WriteLine($"\tManufacturer:{group.Manufacturer} Count:{group.Count}");
+        CollectionToConsole(group.Cars);
+        Console.WriteLine();
+    }
+
+    //same with method
+    var garageByManufacturerWithMethod = garage
+        .GroupBy(c => c.Manufacturer)
+        .Select(g => new
+        {
+            Manufacturer = g.Key,
+            Count = g.Count(),
+            Cars = g.Select(car => car)
+        });
+}
+
+NestedQuery();
+```
+```
+        Manufacturer:VW Count:3
+Car { Manufacturer = VW, Name = e-UP, Year = 2015 }
+Car { Manufacturer = VW, Name = Kafer, Year = 1937 }
+Car { Manufacturer = VW, Name = Golf, Year = 1975 }
+
+        Manufacturer:Mercedes Count:2
+Car { Manufacturer = Mercedes, Name = W164, Year = 2005 }
+Car { Manufacturer = Mercedes, Name = W123, Year = 1981 }
+
+        Manufacturer:ЗАЗ Count:3
+Car { Manufacturer = ЗАЗ, Name = ЗАЗ-1102 Тавр?я, Year = 1992 }
+Car { Manufacturer = ЗАЗ, Name = ЗАЗ-965, Year = 1965 }
+Car { Manufacturer = ЗАЗ, Name = Lanos, Year = 2010 }
+```
+Для об'єкта анонімного типу властивость Cars створюеться за допомогою запиту до щойностворенної групи, який вибирає всі елементи групи. 
+
+## join. Приєднання однієї колекції до іншої.
+
+## Оператор join.
+
+Дві разнотипні коллекції можуть мати щось спільне. Маючи крітерій спільності можно з'єднувати колеції.
+
+Оператор join можно описати наступним псевдо-кодом
+
+```cs
+from object1 in collection1
+join object2 in collection2 
+on object2.PropertyFromClasc2 equals object1.ProperyFromClass1 
+```
+Тут до об'єкту першої коллекції приєднується об'єкт другої якшо його властивість співпадає звластивість до якого іде приєднання.
+
+Нехай у нас є наступні класи.
+```cs
+record class Cart_item(int Id, int Product_Id, int Quantyty);
+record class Product(int Id, string Name, double Price);
+```
+Тут Cart_item слугує для зберігання одного рядка кошику купівлі товарів які зберігаються в Product. Спільеі властивості які можуть їх пов'язувати це Cart_item.Product_Id та Product.Id 
+
+```cs
+void UseOperatorJoin()
+{
+    Product[] products =
+    {
+        new(1,"Jacket",100),
+        new(2,"Shirt",15),
+        new(3,"Head",20),
+        new(4,"Toothbrash",2),
+        new(5,"Eggs",2.5),
+        new(6,"Bread",0.5)
+    };
+
+    List<Cart_item> cart = new()
+    {
+        new(1,3,1),
+        new(2,5,1),
+        new(3,6,2),
+        new(4,10,1)
+    };
+
+    CollectionToConsole(cart);
+
+    var cartAndProduct = from item in cart
+                         join product in products
+                         on item.Product_Id equals product.Id
+                         select new
+                         {
+                             Item = item,
+                             Product = product
+                         };
+
+    CollectionToConsole(cartAndProduct); Console.WriteLine();
+
+    var purshase = from item in cart
+                   join product in products
+                   on item.Product_Id equals product.Id
+                   select new
+                   {
+                       N = item.Id,
+                       Name = product.Name,
+                       Price = product.Price,
+                       Quantity = item.Quantyty,
+                       Amount = item.Quantyty * product.Price
+                   };
+
+    CollectionToConsole(purshase);
+
+    var purshaseSum = purshase.Sum(i => i.Amount);
+    Console.WriteLine(purshaseSum);
+}
+UseOperatorJoin();
+```
+```
+Cart_item { Id = 1, Product_Id = 3, Quantyty = 1 }
+Cart_item { Id = 2, Product_Id = 5, Quantyty = 1 }
+Cart_item { Id = 3, Product_Id = 6, Quantyty = 2 }
+Cart_item { Id = 4, Product_Id = 10, Quantyty = 1 }
+
+{ Item = Cart_item { Id = 1, Product_Id = 3, Quantyty = 1 }, Product = Product { Id = 3, Name = Head, Price = 20 } }
+{ Item = Cart_item { Id = 2, Product_Id = 5, Quantyty = 1 }, Product = Product { Id = 5, Name = Eggs, Price = 2,5 } }
+{ Item = Cart_item { Id = 3, Product_Id = 6, Quantyty = 2 }, Product = Product { Id = 6, Name = Bread, Price = 0,5 } }
+
+
+{ N = 1, Name = Head, Price = 20, Quantity = 1, Amount = 20 }
+{ N = 2, Name = Eggs, Price = 2,5, Quantity = 1, Amount = 2,5 }
+{ N = 3, Name = Bread, Price = 0,5, Quantity = 2, Amount = 1 }
+
+23,5
+```
+Як ми бачимо в результат запиту до об'єктів першої послідовності приє'днуються об'єкти другою які відповідають крітерію. Також зверніть увагу шо якшо в послідоності яка приєднується нема об'єкта шо задовольняє крітерію то в резутьтат не попадає і об'єкт першої послідовності.
+
+### Метод Join.
+
+Аналогічно оператору коллекції можно поєднати за допомогою методу.
+
+```cs
+void UseMethodJoin()
+{
+    Product[] products =
+    {
+        new(1,"Jacket",100),
+        new(2,"Shirt",15),
+        new(3,"Head",20),
+        new(4,"Toothbrash",2),
+        new(5,"Eggs",2.5),
+        new(6,"Bread",0.5)
+    };
+
+    List<Cart_item> cart = new()
+    {
+        new(1,3,1),
+        new(2,5,1),
+        new(3,6,2),
+        new(4,10,1)
+    };
+
+    CollectionToConsole(cart);
+
+    var purshase = cart.Join(
+        products,
+        item => item.Product_Id,
+        product => product.Id,
+        (item, product) => new
+        {
+            N = item.Id,
+            Name = product.Name,
+            Price = product.Price,
+            Quantity = item.Quantyty,
+            Amount = item.Quantyty * product.Price
+
+        }
+        );
+
+    CollectionToConsole(purshase);
+
+    Console.WriteLine(purshase.Sum(p=>p.Amount));
+}
+UseMethodJoin();
+```
+```
+Cart_item { Id = 1, Product_Id = 3, Quantyty = 1 }
+Cart_item { Id = 2, Product_Id = 5, Quantyty = 1 }
+Cart_item { Id = 3, Product_Id = 6, Quantyty = 2 }
+Cart_item { Id = 4, Product_Id = 10, Quantyty = 1 }
+
+{ N = 1, Name = Head, Price = 20, Quantity = 1, Amount = 20 }
+{ N = 2, Name = Eggs, Price = 2,5, Quantity = 1, Amount = 2,5 }
+{ N = 3, Name = Bread, Price = 0,5, Quantity = 2, Amount = 1 }
+
+23,5
+```
+Метод Join має декілька праметрів значення яких можна подивитись в документації ставши на метод та нажавши F12.
+```cs
+        //
+        // Summary:
+        //     Correlates the elements of two sequences based on matching keys. The default
+        //     equality comparer is used to compare keys.
+        //
+        // Parameters:
+        //   outer:
+        //     The first sequence to join.
+        //
+        //   inner:
+        //     The sequence to join to the first sequence.
+        //
+        //   outerKeySelector:
+        //     A function to extract the join key from each element of the first sequence.
+        //
+        //   innerKeySelector:
+        //     A function to extract the join key from each element of the second sequence.
+        //
+        //   resultSelector:
+        //     A function to create a result element from two matching elements.
+        //
+        // Type parameters:
+        //   TOuter:
+        //     The type of the elements of the first sequence.
+        //
+        //   TInner:
+        //     The type of the elements of the second sequence.
+        //
+        //   TKey:
+        //     The type of the keys returned by the key selector functions.
+        //
+        //   TResult:
+        //     The type of the result elements.
+        //
+        // Returns:
+        //     An System.Collections.Generic.IEnumerable`1 that has elements of type TResult
+        //     that are obtained by performing an inner join on two sequences.
+        //
+        // Exceptions:
+        //   T:System.ArgumentNullException:
+        //     outer or inner or outerKeySelector or innerKeySelector or resultSelector is null.
+        public static IEnumerable<TResult> Join<TOuter, TInner, TKey, TResult>(this IEnumerable<TOuter> outer, IEnumerable<TInner> inner, Func<TOuter, TKey> outerKeySelector, Func<TInner, TKey> innerKeySelector, Func<TOuter, TInner, TResult> resultSelector);
+```
+Метод потребує такі параметри:
+Список що приєднуеться.
+Делегат шо визначає властивість об'єкта з поточного списку по якому йде приєднання.
+Делегат шо визначає властивість об'єкта з другого списку по якому йде приєднання.
+Делегат що визначає новий об'єкт результату.
+
+### GroupJoin
+Цей метод встановлює співвідношення між двоам коллекціями і групує результат.
+
+Нехай в нас є класи.
+```cs
+record class Driver(string Name, int Experience);
+record class Vehile(string Name, Driver Owner);
+```
+Створимо запит над двома коллекціями.
+```cs
+void UseGroupJoin()
+{
+    Driver petja = new("Petro", 5);
+    Driver viktor = new("Viktor", 3);
+    Driver olga = new("Olga", 2);
+
+    List<Driver> drivers = new() { petja, viktor, olga };
+
+    List<Vehile> garage = new()
+    {
+        new("Mersedes Sprinter",petja),
+        new("VW Caddy", viktor),
+        new("Peugeot Partner", olga),
+        new("Mersedes Vito",viktor),
+        new("VW Transorter",petja)
+    };
+
+    var query = drivers.GroupJoin(
+        garage,
+        driver => driver,
+        vehile => vehile.Owner,
+        (d, vehileCollection) => new
+        {
+            Driver = d,
+            Cars = vehileCollection.Select(c => c.Name)
+        });
+
+    foreach (var item in query)
+    {
+        Console.WriteLine(item.Driver);
+        CollectionToConsole(item.Cars);
+    }
+}
+UseGroupJoin();
+```
+```
+Driver { Name = Petro, Experience = 5 }
+Mersedes Sprinter
+VW Transorter
+
+Driver { Name = Viktor, Experience = 3 }
+VW Caddy
+Mersedes Vito
+
+Driver { Name = Olga, Experience = 2 }
+Peugeot Partner
+```
+Метод GroupJoin приймає тіж самі параметри що Join окрім останнього. Останій параметр делегат який приймає парметр по якому йде группування і параметр групи з яких можна скласти новий анонімний тип який буде в результаті.
+
 # Внутрішне представлення запитів LINQ.
 
 Використовуючи оператори from, in, select, where можна створити вирази запитів. API деяких функцію LINQ можно отримати під час виклику методів розширення класу Enumerable. При компіляції оператори запитів LINQ перетворюються в виклики методів класу Enumerable. Велика кількість методів була прототипована для прийому делегатів як аргумент. Для багатьох методів потрібен загальний депутат Func<>. 
@@ -2222,7 +2690,7 @@ QueryStringWithOretators();
 Uncharted 2     Fallout 3       System Shock 2
 
 ```
-Очевидна перевага використання операторів для створення запиту полягає в тому, що делегати Func та виклики типу Enumerable аьстрагуються від вашого коду. Компілятор сам виконує цей переклад. Побудова запитів таким чином найпоширений і найпростіший підхід.
+Очевидна перевага використання операторів для створення запиту полягає в тому, що делегати Func та виклики типу Enumerable абстрагуються від вашого коду. Компілятор сам виконує цей переклад. Побудова запитів таким чином найпоширений і найпростіший підхід.
 
 ## Побудова виразів запиту з використанням типу Enumerable та лябда-виразів.
 

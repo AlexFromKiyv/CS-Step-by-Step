@@ -21,6 +21,7 @@ void CollectionToConsole<T>(IEnumerable<T>? collection)
     {
         Console.WriteLine(item);
     }
+    Console.WriteLine();
 }
 
 //CollectionToConsole(itemsInStock);
@@ -86,6 +87,31 @@ void UseOperatorWhereWithComplexClause()
 }
 
 //UseOperatorWhereWithComplexClause();
+
+void UseWhereForComplexObject()
+{
+    List<Person> people = new()
+    {
+        new("Fedja",25,new(){"Russian"}),
+        new("Anna",40,new(){"Russian","Deutch"}),
+        new("Julia",30,new(){"Russian","Ukraine","English" }),
+        new("Sava",28,new(){"Russain","Deutch"}),
+        new("Olga",25,new(){ "Ukrainian", "English","Russian"}),
+        new("Mikola",25,new(){ "Ukrainian", "English"}),
+        new("Alex",30,new(){ "Ukrainian", "English","Russian","C#"})
+    };
+
+    var selected = from person in people
+                   from language in person.Languages
+                   where person.Age < 26
+                   where language == "English"
+                   select person.Name;
+
+    CollectionToConsole(selected);
+
+}
+//UseWhereForComplexObject();
+
 
 void UseTake()
 {
@@ -327,6 +353,34 @@ void ProjectionWithProductNameDescription()
 
 //ProjectionWithProductNameDescription();
 
+void UseLet()
+{
+    List<Car> garage = new List<Car>
+    {
+        new("VW","T2",1995),
+        new("VW","Caddy",2001),
+        new("VW","LT",2001),
+        new("Mercedes","Sprinter",1998),
+        new("Mercedes","Vaito",2000)
+    };
+
+    CollectionToConsole(garage);
+    Console.WriteLine();
+
+    var otherGarage = from c in garage
+                      let model = $"{c.Manufacturer} {c.Name}"
+                      let age = DateTime.Now.Year - c.Year
+                      where age > 23
+                      select new
+                      {
+                          Model = model,
+                          Age = age
+                      };
+    CollectionToConsole(otherGarage);
+}
+//UseLet();
+
+
 
 void UseEnumerableMethodCount()
 {
@@ -481,34 +535,6 @@ void ListCarToConsole<T>(IEnumerable<T> collection, string note = "Collection")
 }
 
 
-List<Car> garage = new List<Car>
-{
-    new("VW","T2",1995),
-    new("VW","Caddy",2001),
-    new("VW","LT",2001),
-    new("Mercedes","Sprinter",1998),
-    new("Mercedes","Vaito",2000)
-};
-
-void UseLet()
-{
-    CollectionToConsole(garage);
-    Console.WriteLine();
-
-    var otherGarage = from c in garage
-                      let model = $"{c.Manufacturer} {c.Name}"
-                      let age = DateTime.Now.Year - c.Year
-                      where age > 23
-                      select new
-                      {
-                          Model = model,
-                          Age = age
-                      };
-    CollectionToConsole(otherGarage);
-
-}
-//UseLet();
-
 void SelectionFromTwoSource()
 {
     List<Place> places = new()
@@ -519,17 +545,17 @@ void SelectionFromTwoSource()
 
     List<Person> people = new()
     {
-        new("Valja"),
-        new("Fedja")
+        new("Valja",25,null),
+        new("Fedja",30,null)
     };
 
-    var regularLife = from place in places
-                      from person in people
+    var regularLife = from person in people
+                      from place in places
                       select new { Person = person.Name, Place = place.Name };
 
     CollectionToConsole(regularLife);
 }
-SelectionFromTwoSource();
+//SelectionFromTwoSource();
 
 void UseExcept()
 {
@@ -745,4 +771,237 @@ void UseAggregateOperationsWithSelector()
 
 }
 //UseAggregateOperationsWithSelector();
+
+
+void UseGroupBy()
+{
+    Car[] garage =
+    {
+        new("VW","e-UP",2015),
+        new("Mercedes","W164",2005),
+        new("VW","Käfer",1937),
+        new("ЗАЗ","ЗАЗ-1102 Таврія",1992),
+        new("Mercedes","W123",1981),
+        new("ЗАЗ","ЗАЗ-965",1965),
+        new("VW","Golf",1975),
+        new("ЗАЗ","Lanos",2010),
+    };
+
+    var carGroups = from car in garage
+                    group car by car.Manufacturer;
+
+    foreach (var group in carGroups)
+    {
+        Console.WriteLine("\t"+group.Key);
+        CollectionToConsole(group);
+        Console.WriteLine();
+    }
+
+    // same with method
+    var carGroupByMethod = garage.GroupBy(c => c.Manufacturer);
+}
+
+//UseGroupBy();
+
+void GroupingWithNewObjects()
+{
+    Car[] garage =
+    {
+        new("VW","e-UP",2015),
+        new("Mercedes","W164",2005),
+        new("VW","Käfer",1937),
+        new("ЗАЗ","ЗАЗ-1102 Таврія",1992),
+        new("Mercedes","W123",1981),
+        new("ЗАЗ","ЗАЗ-965",1965),
+        new("VW","Golf",1975),
+        new("ЗАЗ","Lanos",2010),
+    };
+
+    var manufacturers = from car in garage
+                    group car by car.Manufacturer into carGroup
+                    select new { Manufacturer = carGroup.Key, Count = carGroup.Count() };
+    
+    CollectionToConsole(manufacturers);
+
+    //same with method
+
+    var manufacturerByMethod = garage
+        .GroupBy(c => c.Manufacturer)
+        .Select(g => new { Manufacturer = g.Key, Count = g.Count() });
+}
+
+//GroupingWithNewObjects();
+
+void NestedQuery()
+{
+    Car[] garage =
+    {
+        new("VW","e-UP",2015),
+        new("Mercedes","W164",2005),
+        new("VW","Käfer",1937),
+        new("ЗАЗ","ЗАЗ-1102 Таврія",1992),
+        new("Mercedes","W123",1981),
+        new("ЗАЗ","ЗАЗ-965",1965),
+        new("VW","Golf",1975),
+        new("ЗАЗ","Lanos",2010),
+    };
+
+    var garageByManufacturer = from car in garage
+                               group car by car.Manufacturer into carGroup
+                               select new
+                               {
+                                   Manufacturer = carGroup.Key,
+                                   Count = carGroup.Count(),
+                                   Cars = from c in carGroup select c
+                               };
+
+    foreach (var group in garageByManufacturer)
+    {
+        Console.WriteLine($"\tManufacturer:{group.Manufacturer} Count:{group.Count}");
+        CollectionToConsole(group.Cars);
+        Console.WriteLine();
+    }
+
+    //same with method
+    var garageByManufacturerWithMethod = garage
+        .GroupBy(c => c.Manufacturer)
+        .Select(g => new
+        {
+            Manufacturer = g.Key,
+            Count = g.Count(),
+            Cars = g.Select(car => car)
+        });
+}
+
+//NestedQuery();
+
+void UseOperatorJoin()
+{
+    Product[] products =
+    {
+        new(1,"Jacket",100),
+        new(2,"Shirt",15),
+        new(3,"Head",20),
+        new(4,"Toothbrash",2),
+        new(5,"Eggs",2.5),
+        new(6,"Bread",0.5)
+    };
+
+    List<Cart_item> cart = new()
+    {
+        new(1,3,1),
+        new(2,5,1),
+        new(3,6,2),
+        new(4,10,1)
+    };
+
+    CollectionToConsole(cart);
+
+    var cartAndProduct = from item in cart
+                         join product in products
+                         on item.Product_Id equals product.Id
+                         select new
+                         {
+                             Item = item,
+                             Product = product
+                         };
+
+    CollectionToConsole(cartAndProduct); Console.WriteLine();
+
+    var purshase = from item in cart
+                   join product in products
+                   on item.Product_Id equals product.Id
+                   select new
+                   {
+                       N = item.Id,
+                       Name = product.Name,
+                       Price = product.Price,
+                       Quantity = item.Quantyty,
+                       Amount = item.Quantyty * product.Price
+                   };
+
+    CollectionToConsole(purshase);
+
+    var purshaseSum = purshase.Sum(i => i.Amount);
+    Console.WriteLine(purshaseSum);
+}
+//UseOperatorJoin();
+
+void UseMethodJoin()
+{
+    Product[] products =
+    {
+        new(1,"Jacket",100),
+        new(2,"Shirt",15),
+        new(3,"Head",20),
+        new(4,"Toothbrash",2),
+        new(5,"Eggs",2.5),
+        new(6,"Bread",0.5)
+    };
+
+    List<Cart_item> cart = new()
+    {
+        new(1,3,1),
+        new(2,5,1),
+        new(3,6,2),
+        new(4,10,1)
+    };
+
+    CollectionToConsole(cart);
+
+    var purshase = cart.Join(
+        products,
+        item => item.Product_Id,
+        product => product.Id,
+        (item, product) => new
+        {
+            N = item.Id,
+            Name = product.Name,
+            Price = product.Price,
+            Quantity = item.Quantyty,
+            Amount = item.Quantyty * product.Price
+
+        }
+        );
+
+    CollectionToConsole(purshase);
+
+    Console.WriteLine(purshase.Sum(p=>p.Amount));
+}
+//UseMethodJoin();
+
+void UseGroupJoin()
+{
+    Driver petja = new("Petro", 5);
+    Driver viktor = new("Viktor", 3);
+    Driver olga = new("Olga", 2);
+
+    List<Driver> drivers = new() { petja, viktor, olga };
+
+    List<Vehile> garage = new()
+    {
+        new("Mersedes Sprinter",petja),
+        new("VW Caddy", viktor),
+        new("Peugeot Partner", olga),
+        new("Mersedes Vito",viktor),
+        new("VW Transorter",petja)
+    };
+
+    var query = drivers.GroupJoin(
+        garage,
+        driver => driver,
+        vehile => vehile.Owner,
+        (d, vehileCollection) => new
+        {
+            Driver = d,
+            Cars = vehileCollection.Select(c => c.Name)
+        });
+
+    foreach (var item in query)
+    {
+        Console.WriteLine(item.Driver);
+        CollectionToConsole(item.Cars);
+    }
+}
+UseGroupJoin();
 
