@@ -2634,6 +2634,16 @@ void UseGroupJoin()
         Console.WriteLine(item.Driver);
         CollectionToConsole(item.Cars);
     }
+
+    //same with operator
+    var queryO = from person in drivers
+                 join car in garage
+                 on person equals car.Owner into g
+                 select new
+                 {
+                     Driver = person,
+                     Cars = from c in g select c.Name
+                 };
 }
 UseGroupJoin();
 ```
@@ -2650,6 +2660,163 @@ Driver { Name = Olga, Experience = 2 }
 Peugeot Partner
 ```
 Метод GroupJoin приймає тіж самі параметри що Join окрім останнього. Останій параметр делегат який приймає парметр по якому йде группування і параметр групи з яких можна скласти новий анонімний тип який буде в результаті.
+
+# Методи перевірки та отриманя даних з коллекції.
+
+## All
+
+```cs
+void UseAll()
+{
+    List<Person> people = new()
+    {
+        new("Olja",28,new()),
+        new("Petja",20,new())
+    };
+
+    bool moreThanEighteen = people.All(p => p.Age >18);
+
+    Console.WriteLine(moreThanEighteen);
+
+    bool lengthNameIs3 = people.All(p => p.Name.Length == 3);
+
+    Console.WriteLine(lengthNameIs3);
+
+}
+UseAll();
+```
+```
+True
+False
+```
+Метод приймає в якості параметра делегат Func(Person,bool) predicate. Це умова яка провіряється для всіх елементів 
+коллеції. Метод поверає true якшо умова виконується для всіх.
+
+## Any
+```cs
+void UseAny()
+{
+    List<Person> people = new()
+    {
+        new("Olja",18,new()),
+        new("Petja",20,new())
+    };
+
+    bool IsSomeoneOlderEighteen = people.Any(p => p.Age > 18);
+
+    Console.WriteLine(IsSomeoneOlderEighteen);
+
+    bool IsShortName = people.Any(p => p.Name.Length == 3);
+
+    Console.WriteLine(IsShortName);
+}
+UseAny();
+```
+```
+True
+False
+```
+Метод приймає в якості параметра делегат Func(Person,bool) predicate. Це умова для елементів коллеції. Метод поверає true якшо хоча б для одиного елемента виконується умова.
+
+## Contains
+
+```cs
+void UseConains()
+{
+    Person girl1 = new("Olga", 25, new());
+    Person girl2 = new("Julia", 30, new());
+    Person boy1 = new("Vova", 30, new());
+    Person boy2 = new("Vitja", 28, new());
+
+    List<Person> meeting = new()
+    {
+        girl1,girl2,boy1
+    };
+
+    bool IsSheOnMeeting = meeting.Contains(girl2);
+    Console.WriteLine(IsSheOnMeeting);
+
+    bool IsHeOnMeeting = meeting.Contains(boy2);
+    Console.WriteLine(IsHeOnMeeting);
+}
+UseConains();
+```
+```
+True
+False
+
+```
+Для порівняння об'єктів використовується метод System.Object.Equlas.
+Icнyє перезагрузка методу з другим параметром тип якого IComparer.
+
+## First/FirstOrDefault
+
+Метод повертає перший елемент з вказаною умовою або просто самої послідовності.
+```cs
+void UseFirsAndFirsOrDefault()
+{
+    List<Person> people = new()
+    {
+        new("Ira",27,new()),
+        new("Petro",32,new()),
+        new("Mikola",62,new()),
+        new("Olga",30,new()),
+        new("Marina",35,new())
+    };
+    
+    CollectionToConsole(people);
+
+    Console.WriteLine("people.First()");
+    Console.WriteLine(people.First());  Console.WriteLine("\n");
+
+    Console.WriteLine("people.First(p => p.Age == 30)");
+    Console.WriteLine(people.First(p => p.Age == 30)); Console.WriteLine("\n");
+
+    Console.WriteLine("people.FirstOrDefault(p => p.Age == 40)"); 
+    Console.WriteLine($"Default is null:"+(people.FirstOrDefault(p => p.Age == 40) is null)); Console.WriteLine("\n");
+
+    Console.WriteLine("people.FirstOrDefault(p => p.Age == 40, new(\"Someone\", 40, new()))"); 
+    Console.WriteLine(people.FirstOrDefault(p=>p.Age == 40,new("Someone",40,new()))); Console.WriteLine("\n");
+
+
+    Console.WriteLine("people.First(p => p.Age == 40)");
+    Console.WriteLine(people.First(p => p.Age == 40));
+
+}
+
+UseFirsAndFirsOrDefault();
+```
+```
+Person { Name = Marina, Age = 35, Languages = System.Collections.Generic.List`1[System.String] }
+
+people.First()
+Person { Name = Ira, Age = 27, Languages = System.Collections.Generic.List`1[System.String] }
+
+
+people.First(p => p.Age == 30)
+Person { Name = Olga, Age = 30, Languages = System.Collections.Generic.List`1[System.String] }
+
+
+people.FirstOrDefault(p => p.Age == 40)
+Default is null:True
+
+
+people.FirstOrDefault(p => p.Age == 40, new("Someone", 40, new()))
+Person { Name = Someone, Age = 40, Languages = System.Collections.Generic.List`1[System.String] }
+
+
+people.First(p => p.Age == 40)
+Unhandled exception. System.InvalidOperationException: Sequence contains no matching element
+   at System.Linq.ThrowHelper.ThrowNoMatchException()
+   at System.Linq.Enumerable.First[TSource](IEnumerable`1 source, Func`2 predicate)
+   at Program.<<Main>$>g__UseFirsAndFirsOrDefault|0_47() in D:\MyWork\CS-Step-by-Step\13 LINQ до об'єкт?в\LINQ\LinqExpressions\Program.cs:line 1102
+   at Program.<Main>$(String[] args) in D:\MyWork\CS-Step-by-Step\13 LINQ до об'єкт?в\LINQ\LinqExpressions\Program.cs:line 1106
+```
+Треба зауважити, коли в послідовності немає елемента який відповідає умові, або якщо послідовність порожня система генерує виняток як показанов прикладі. З цієї причини більш практично використовувати метод FirstOrDefault який вже робить перевірку і в який в якості другого параметру можна передати знасеня за замовчуванням.
+
+## Last/LastOrDefault
+
+Ці методи аналогічні First/FirstOrDefault з тією різницею шо шукають елементи з кінця послідовності.
 
 # Внутрішне представлення запитів LINQ.
 

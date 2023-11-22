@@ -1002,6 +1002,105 @@ void UseGroupJoin()
         Console.WriteLine(item.Driver);
         CollectionToConsole(item.Cars);
     }
-}
-UseGroupJoin();
 
+    //same with operator
+    var queryO = from person in drivers
+                 join car in garage
+                 on person equals car.Owner into g
+                 select new
+                 {
+                     Driver = person,
+                     Cars = from c in g select c.Name
+                 };
+}
+//UseGroupJoin();
+
+void UseAll()
+{
+    List<Person> people = new()
+    {
+        new("Olja",28,new()),
+        new("Petja",20,new())
+    };
+
+    bool moreThanEighteen = people.All(p => p.Age >18);
+
+    Console.WriteLine(moreThanEighteen);
+
+    bool lengthNameIs3 = people.All(p => p.Name.Length == 3);
+
+    Console.WriteLine(lengthNameIs3);
+
+}
+//UseAll();
+
+void UseAny()
+{
+    List<Person> people = new()
+    {
+        new("Olja",18,new()),
+        new("Petja",20,new())
+    };
+
+    bool IsSomeoneOlderEighteen = people.Any(p => p.Age > 18);
+
+    Console.WriteLine(IsSomeoneOlderEighteen);
+
+    bool IsShortName = people.Any(p => p.Name.Length == 3);
+
+    Console.WriteLine(IsShortName);
+}
+//UseAny();
+
+void UseConains()
+{
+    Person girl1 = new("Olga", 25, new());
+    Person girl2 = new("Julia", 30, new());
+    Person boy1 = new("Vova", 30, new());
+    Person boy2 = new("Vitja", 28, new());
+
+    List<Person> meeting = new()
+    {
+        girl1,girl2,boy1
+    };
+
+    bool IsSheOnMeeting = meeting.Contains(girl2);
+    Console.WriteLine(IsSheOnMeeting);
+
+    bool IsHeOnMeeting = meeting.Contains(boy2);
+    Console.WriteLine(IsHeOnMeeting);
+}
+//UseConains();
+
+void UseFirsAndFirsOrDefault()
+{
+    List<Person> people = new()
+    {
+        new("Ira",27,new()),
+        new("Petro",32,new()),
+        new("Mikola",62,new()),
+        new("Olga",30,new()),
+        new("Marina",35,new())
+    };
+    
+    CollectionToConsole(people);
+
+    Console.WriteLine("people.First()");
+    Console.WriteLine(people.First());  Console.WriteLine("\n");
+
+    Console.WriteLine("people.First(p => p.Age == 30)");
+    Console.WriteLine(people.First(p => p.Age == 30)); Console.WriteLine("\n");
+
+    Console.WriteLine("people.FirstOrDefault(p => p.Age == 40)"); 
+    Console.WriteLine($"Default is null:"+(people.FirstOrDefault(p => p.Age == 40) is null)); Console.WriteLine("\n");
+
+    Console.WriteLine("people.FirstOrDefault(p => p.Age == 40, new(\"Someone\", 40, new()))"); 
+    Console.WriteLine(people.FirstOrDefault(p=>p.Age == 40,new("Someone",40,new()))); Console.WriteLine("\n");
+
+
+    Console.WriteLine("people.First(p => p.Age == 40)");
+    Console.WriteLine(people.First(p => p.Age == 40));
+
+}
+
+UseFirsAndFirsOrDefault();
