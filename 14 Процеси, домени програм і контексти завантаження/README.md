@@ -72,6 +72,50 @@ System.Diagnostics.Process також визначає кілька корисн
 
     Start() : Цей метод запускає процес.
 
+## Перегляд працюючих процесів.
+
+Process\Program.cs
+```cs
+using System.Diagnostics;
+
+static void GetAllRunningProcesses()
+{
+    var runningProcesses = from p in Process.GetProcesses(".")
+                           orderby p.Id
+                           select p;
+
+    foreach (var p in runningProcesses)
+    {
+        string aboutProcess = $"{p.Id} {p.ProcessName}";
+        Console.WriteLine(aboutProcess);
+    }
+
+    Console.WriteLine($"\nTotal number of processes:{runningProcesses.Count()}");
+}
+GetAllRunningProcesses(); 
+
+```
+```
+0 Idle
+4 System
+108 Registry
+432 smss
+448 svchost
+516 ServiceHub.TestWindowStoreHost
+556 csrss
+
+...
+
+15924 conhost
+16064 chrome
+16936 SecurityHealthSystray
+17088 ctfmon
+17156 chrome
+17336 ServiceHub.IndexingService
+
+Total number of processes:194
+```
+Статичний метод Process.GetProcesses() повертає массив об'єктів Process, які представляють процеси шо виконуються на поточному компьютері. Праметр крапка вказує на локальний компьютер.
 
 
 
