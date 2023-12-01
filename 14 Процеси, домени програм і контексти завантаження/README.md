@@ -336,5 +336,48 @@ Module:OLEAUT32.dll
 ``` 
 Як бачимо навіть простий консольий проект завантажує велику кількість модулів.
 
-##
+## Запуск та зупинка процесу програмно.
+
+В класі System.Diagnostics.Process є методи Start() та Kill().
+
+```cs
+void UseStartAndKill()
+{
+    Process? process = null;
+    
+    // Start
+    try
+    {
+      process = Process.Start(@"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe", "http://www.sclass.kiev.ua");
+
+    }
+    catch (InvalidOperationException ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+
+    Console.WriteLine($"Нажмiть Enter аби закрити {process?.ProcessName}");
+    Console.ReadLine();
+
+    //Kill
+    try
+    {
+        foreach (var p in Process.GetProcessesByName("msedge"))
+        {
+            p.Kill(true);
+        }
+
+    }
+    catch (InvalidOperationException ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+}
+UseStartAndKill();
+```
+```
+Нажмiть Enter аби закрити msedge
+```
+Метод Start має декілька перезавантажень одне з яких ми використали. Після запуску процесу метод повертає посилання на активований процес. 
+У цьому прикладі, оскільки Microsoft Edge запускає багато процесів, ви виконуєте цикл, щоб знищити всі запущені процеси. Важливо обгорнути процес Kill() в блок try .. catch оскільки процес може бути закінчений в інший спосіб
 

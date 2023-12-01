@@ -77,4 +77,38 @@ void GetModulesOfProcess()
         Console.WriteLine($"Module:{module.ModuleName}");
     }
 }
-GetModulesOfProcess();
+//GetModulesOfProcess();
+
+void UseStartAndKill()
+{
+    Process? process = null;
+    
+    // Start
+    try
+    {
+      process = Process.Start(@"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe", "http://www.sclass.kiev.ua");
+
+    }
+    catch (InvalidOperationException ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+
+    Console.WriteLine($"Нажмiть Enter аби закрити {process?.ProcessName}");
+    Console.ReadLine();
+
+    //Kill
+    try
+    {
+        foreach (var p in Process.GetProcessesByName("msedge"))
+        {
+            p.Kill(true);
+        }
+
+    }
+    catch (InvalidOperationException ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+}
+UseStartAndKill();
