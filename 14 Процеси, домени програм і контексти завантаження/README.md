@@ -117,6 +117,224 @@ Total number of processes:194
 ```
 Статичний метод Process.GetProcesses() повертає массив об'єктів Process, які представляють процеси шо виконуються на поточному компьютері. Праметр крапка вказує на локальний компьютер.
 
+## Дослідження окремого процесу.
+
+Крім отриманя колекції процесів на конкретній машині є можливість отримати об'єкт конкретного процесу по PID за допомогою статичного методу Process.GetProcessById(). Якшо за такім індентіфікаторм процесу не існує викидається винаток. 
+```cs
+Process? GetSpecificProcess()
+{
+    GetAllRunningProcesses();
+
+    Console.Write("Enter PID of the process:");
+    int.TryParse(Console.ReadLine(),out int pidOfProcess);
+
+    //Process theProcess = null;
+    try
+    {
+        Process theProcess = Process.GetProcessById(pidOfProcess);
+        Console.WriteLine(theProcess.ProcessName);
+        return theProcess;
+    }
+    catch (ArgumentException ex)
+    {
+        Console.WriteLine(ex.Message);
+        return null;
+    }
+    
+}
+```
+```
+0 Idle
+4 System
+108 Registry
+432 smss
+448 svchost
+516 ServiceHub.TestWindowStoreHost
+556 csrss
+560 svchost
+648 wininit
+
+...
+
+15524 svchost
+15732 CancelAutoPlay_df
+15888 dotnet
+15892 RuntimeBroker
+16064 chrome
+16484 MicrosoftEdgeUpdate
+16488 MSBuild
+16936 SecurityHealthSystray
+17088 ctfmon
+17336 ServiceHub.IndexingService
+
+Total number of processes:196
+Enter PID of the process:15888
+dotnet
+```
+Тиким чином можна виконати пошук об'єкта процесу по PID.
+Клас Process дозволяє виявити набір поточних потоків і бібліотек, які використовуються в данному процесі. 
+
+## Дослідження набору потоків процесу.
+
+Набір потоків процесу представлений суворо типізованою колекцією ProcessThreadCollection, яка містить певну кількість об'єктів ProcessThread.  
+
+```cs
+void GetThreadsOfProcess()
+{
+    Process? theProcess = GetSpecificProcess();
+
+    if (theProcess == null) return;
+
+    Console.WriteLine($"\nIvestigating the process : {theProcess.ProcessName}");
+
+    ProcessThreadCollection theThreads = theProcess.Threads;
+
+    foreach (ProcessThread thread in theThreads) 
+    {
+        string info =
+
+            $"Thread Id:{thread.Id}\t" +
+            $"StartTime:{thread.StartTime.ToShortDateString()}\t" +
+            $"PriorityLevel:{thread.PriorityLevel}";
+
+        Console.WriteLine(info);
+    }
+}
+GetThreadsOfProcess();
+```
+```
+0 Idle
+4 System
+108 Registry
+432 smss
+448 svchost
+492 ServiceHub.IntellicodeModelService
+556 csrss
+560 svchost
+648 wininit
+716 PerfWatson2
+
+...
+
+16604 msedge
+16712 msedge
+16944 winlogon
+17164 msedge
+17360 chrome
+
+Total number of processes:194
+Enter PID of the process:17360
+chrome
+
+Ivestigating the process : chrome
+Thread Id:17008 StartTime:30.11.2023    PriorityLevel:AboveNormal
+Thread Id:9384  StartTime:30.11.2023    PriorityLevel:Normal
+Thread Id:15820 StartTime:30.11.2023    PriorityLevel:Normal
+Thread Id:7044  StartTime:30.11.2023    PriorityLevel:Normal
+Thread Id:1124  StartTime:30.11.2023    PriorityLevel:Normal
+Thread Id:9768  StartTime:30.11.2023    PriorityLevel:-3
+Thread Id:380   StartTime:30.11.2023    PriorityLevel:AboveNormal
+Thread Id:10964 StartTime:30.11.2023    PriorityLevel:Normal
+Thread Id:5044  StartTime:30.11.2023    PriorityLevel:Normal
+Thread Id:6940  StartTime:30.11.2023    PriorityLevel:Normal
+Thread Id:3812  StartTime:30.11.2023    PriorityLevel:AboveNormal
+Thread Id:2820  StartTime:30.11.2023    PriorityLevel:Normal
+Thread Id:15204 StartTime:30.11.2023    PriorityLevel:Lowest
+Thread Id:7200  StartTime:30.11.2023    PriorityLevel:Normal
+```
+Властивість Threads об'єкту System.Diagnostics.Process надає доступ до колекції потоків у вигляді об'єкту класу ProcessThreadCollection. 
+
+Тип ProcessThread має додаткові цікаві члени приведені нижче.
+
+    Id : Отримує унікальний індентіфікатор потоку.
+
+    CurrentPriority : Отримує поточний пріоритет потоку.
+
+    PriorityLevel : Отримує або встановлює рівень пріоритету потоку.
+
+    IdealProcessor : Встановлює бажаний процесор для роботи цього потоку.
+
+    ProcessorAffinity : Встановлює процесори, на яких може працювати відповідний потік.
+
+    StartAddress : Отримує адресу пам'яті функції, викликаної операційною системою, яка запустила цей потік.
+
+    StartTime : Отримує час, коли операційна система запустила потік
+
+    ThreadState : Отримує поточний стан цього потоку.
+
+    TotalProcessorTime : Отримує загальну кількість часу, який цей потік витратив на використання процесора.
+
+    WaitReason : Отримує причину того, що потік очікує.
 
 
+Тип ProcessThread не є сутністю, яку використовують для створення, призупинення або завершення потоків на платформі .Net Core. Швидше, ProcessThread — це засіб, який використовується для отримання діагностичної інформації для активних потоків Windows у запущеному процесі.
+
+## Дослідженя набору модулів процесу.
+
+Модуль це загалний термін який використоаується для опису *.dll або *.exe, який розміщується певним процесом. Через властивість Process.Modules можна отримату об'єкт типу ProcessModuleCollection який і є коллкуцією шо представляють модулі. 
+
+```cs
+void GetModulesOfProcess()
+{
+    Process? theProcess = GetSpecificProcess();
+
+    if (theProcess == null) return;
+
+    Console.WriteLine($"\nIvestigating the process : {theProcess.ProcessName}");
+
+    ProcessModuleCollection theModules = theProcess.Modules;
+
+    foreach(ProcessModule module in theModules)
+    {
+        Console.WriteLine($"Module:{module.ModuleName} File:{module.FileName}");
+    }
+}
+GetModulesOfProcess();
+```
+```
+0 Idle
+4 System
+72 WUDFHost
+108 Registry
+424 smss
+528 msedge
+
+...
+
+12096 svchost
+12260 dotnet
+
+Total number of processes:189
+Enter PID of the process:7592
+Process
+
+Ivestigating the process : Process
+Module:Process.exe
+Module:ntdll.dll
+Module:KERNEL32.DLL
+Module:KERNELBASE.dll
+Module:USER32.dll
+Module:win32u.dll
+Module:GDI32.dll
+Module:gdi32full.dll
+Module:msvcp_win.dll
+Module:ucrtbase.dll
+Module:SHELL32.dll
+Module:ADVAPI32.dll
+Module:msvcrt.dll
+Module:sechost.dll
+Module:RPCRT4.dll
+Module:IMM32.DLL
+Module:hostfxr.dll
+Module:hostpolicy.dll
+Module:coreclr.dll
+Module:ole32.dll
+Module:combase.dll
+Module:OLEAUT32.dll
+...
+
+``` 
+Як бачимо навіть простий консольий проект завантажує велику кількість модулів.
+
+##
 
