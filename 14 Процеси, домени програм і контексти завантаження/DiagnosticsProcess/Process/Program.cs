@@ -111,4 +111,57 @@ void UseStartAndKill()
         Console.WriteLine(ex.Message);
     }
 }
-UseStartAndKill();
+//UseStartAndKill();
+
+void StartWithProcessStartInfo()
+{
+    Process? process = null;
+
+    // Start
+    try
+    {
+        ProcessStartInfo processStartInfo = new("MsEdge", "www.facebook.com");
+        processStartInfo.UseShellExecute = true;
+        process = Process.Start(processStartInfo);
+    }
+    catch (InvalidOperationException ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+
+    Console.WriteLine($"Нажмiть Enter аби закрити {process?.ProcessName}");
+    Console.ReadLine();
+
+    //Kill
+    try
+    {
+        foreach (var p in Process.GetProcessesByName("msedge"))
+        {
+            p.Kill(true);
+        }
+
+    }
+    catch (InvalidOperationException ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+}
+
+//StartWithProcessStartInfo();
+
+void UseApplicationVerbs()
+{
+    ProcessStartInfo processStartInfo = new(@"D:\TheGirl.txt");
+
+    foreach (string? verb in processStartInfo.Verbs)
+    {
+        Console.WriteLine(verb);
+    }
+
+    processStartInfo.WindowStyle = ProcessWindowStyle.Maximized;
+    processStartInfo.Verb = "open";
+    processStartInfo.UseShellExecute = true;
+    Process.Start(processStartInfo);
+}
+
+//UseApplicationVerbs();

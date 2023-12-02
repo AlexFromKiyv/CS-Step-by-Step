@@ -381,3 +381,111 @@ UseStartAndKill();
 Метод Start має декілька перезавантажень одне з яких ми використали. Після запуску процесу метод повертає посилання на активований процес. 
 У цьому прикладі, оскільки Microsoft Edge запускає багато процесів, ви виконуєте цикл, щоб знищити всі запущені процеси. Важливо обгорнути процес Kill() в блок try .. catch оскільки процес може бути закінчений в інший спосіб
 
+## Контроль за запуском процесу використовуючи клас ProcessStartInfo.
+
+В якості параметра в метод Start можна передати об'єкт типу ProcessStartInfo, з налаштуваннями стосовно того як треба запускати процес.
+
+Нижче деякі визначення цього класу.
+
+```cs
+public sealed class ProcessStartInfo : object
+{
+  public ProcessStartInfo();
+  public ProcessStartInfo(string fileName);
+  public ProcessStartInfo(string fileName, string arguments);
+  public string Arguments { get; set; }
+  public bool CreateNoWindow { get; set; }
+  public StringDictionary EnvironmentVariables { get; }
+  public bool ErrorDialog { get; set; }
+  public IntPtr ErrorDialogParentHandle { get; set; }
+  public string FileName { get; set; }
+  public bool LoadUserProfile { get; set; }
+  public SecureString Password { get; set; }
+  public bool RedirectStandardError { get; set; }
+  public bool RedirectStandardInput { get; set; }
+  public bool RedirectStandardOutput { get; set; }
+  public Encoding StandardErrorEncoding { get; set; }
+  public Encoding StandardOutputEncoding { get; set; }
+  public bool UseShellExecute { get; set; }
+  public string Verb { get; set; }
+  public string[] Verbs { get; }
+  public ProcessWindowStyle WindowStyle { get; set; }
+  public string WorkingDirectory { get; set; }
+}
+```
+Запустимо процес за допомогою класу налаштувань.
+
+```cs
+void StartWithProcessStartInfo()
+{
+    Process? process = null;
+
+    // Start
+    try
+    {
+        ProcessStartInfo processStartInfo = new("MsEdge", "www.facebook.com");
+        processStartInfo.UseShellExecute = true;
+        process = Process.Start(processStartInfo);
+    }
+    catch (InvalidOperationException ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+
+    Console.WriteLine($"Нажмiть Enter аби закрити {process?.ProcessName}");
+    Console.ReadLine();
+
+    //Kill
+    try
+    {
+        foreach (var p in Process.GetProcessesByName("msedge"))
+        {
+            p.Kill(true);
+        }
+
+    }
+    catch (InvalidOperationException ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+}
+
+StartWithProcessStartInfo();
+
+```
+```
+Нажмiть Enter аби закрити msedge
+```
+В цьому прикладі процес запускається за допомогою того шо в Windows є ассосціяція між скороченя(ярлика) "MsEdge" і відповідним файлом який треба запустити. Крім того аби такий звязок система могла визначити треба задати UseShellExecute в true. Тоді спрацює така частину коду:
+```cs
+Process.Start('msedge');
+```   
+
+## Використання властивості Verb налаштувань ProcessStartInfo.
+
+Крім викорситання ярликів програм для запуску можна використати ассоціації файлів Windows. Якшо на файлі кляцнути правою кнопкою то з ним можна виконати різні дії наприклад роздрукувати. За допомогою ProcessStartInfo можна виявити шо можно виконати з файлом.
+
+```cs
+void UseApplicationVerbs()
+{
+    ProcessStartInfo processStartInfo = new(@"D:\TheGirl.txt");
+
+    foreach (string? verb in processStartInfo.Verbs)
+    {
+        Console.WriteLine(verb);
+    }
+
+    processStartInfo.WindowStyle = ProcessWindowStyle.Maximized;
+    processStartInfo.Verb = "open";
+    processStartInfo.UseShellExecute = true;
+    Process.Start(processStartInfo);
+}
+
+UseApplicationVerbs();
+```
+```
+open
+print
+printto
+```
+Тут за допомогою властивості WindowStyle вікно робиться на весь екран і далі зв допомогою Verb вказується дія. 
