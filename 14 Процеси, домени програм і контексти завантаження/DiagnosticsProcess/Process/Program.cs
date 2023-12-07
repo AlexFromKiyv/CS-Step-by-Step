@@ -14,7 +14,7 @@ static void GetAllRunningProcesses()
 
     Console.WriteLine($"\nTotal number of processes:{runningProcesses.Count()}");
 }
-//GetAllRunningProcesses(); 
+//GetAllRunningProcesses();
 
 Process? GetSpecificProcess()
 {

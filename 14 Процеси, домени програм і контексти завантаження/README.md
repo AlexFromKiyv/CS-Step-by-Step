@@ -3,9 +3,9 @@
 При виконанні програми середовище виконання певним чином розміщує змірку. Створюється зв'язок між процесами, доменами додатків і контекстами об'єктів.
 Домен додадку це логічний підрозділ в межах данного процесу який містить набір пов'язаних збірок .Net Core. Як ви побачите, AppDomain далі поділяється на контекстні межі, які використовуються для групування однодумних об’єктів .NET Core. Використовуючи поняття контексту, середовище виконання може гарантувати, що об’єкти зі спеціальними вимогами обробляються належним чином. Розуміння цих тем є важливим під час роботи з численними API .NET Core, включаючи багатопотоковість, паралельну обробку та серіалізація об'єкта.
 
-## Процес
+# Процес
 
-Процес це програма що виконується. Це концепція на рівні операційної системи, яка використовуеться для опису набору ресурсів(наприклад, зовнішніх бібліотек та основного потоку) ш необхідного розподілу пам'яті, що використовуються працюючою програмою. Для кожної .Net Core програми, завантаженої в пам'ять, ОС створює окремий ізольований процес для використання протягом всіого часу роботи програми.
+Процес це програма що виконується. Це концепція на рівні операційної системи, яка використовуеться для опису набору ресурсів(наприклад, зовнішніх бібліотек та основного потоку) і необхідного розподілу пам'яті, що використовуються працюючою програмою. Для кожної .Net Core програми, завантаженої в пам'ять, ОС створює окремий ізольований процес для використання протягом всіого часу роботи програми.
 Використовуючи цей підхід для ізоляції програми, результатом є набагато більш надійне та стабільне середовише виконання, оскількі збій одного процесе не впливає на фунціонування іншого. Крім того дані одного процесу не можуть напряму доступні іншому, якшо не використовуються умисно спеціальні бібіліотеки(System.IO.Pipes,MemoryMappedFile). Таким чином процес можна розглядати як фіксовану безпечну межу для програми шо виконується.
 Кожному процесу Windows присвоюється унікальний індентіфікатор процессу(PID). Ці індентіфікатори можна побачити в "Диспечері завдань Windows"(Ctrl+Shift+Esc) на закладці Details.
 
@@ -463,7 +463,7 @@ Process.Start('msedge');
 
 ## Використання властивості Verb налаштувань ProcessStartInfo.
 
-Крім викорситання ярликів програм для запуску можна використати ассоціації файлів Windows. Якшо на файлі кляцнути правою кнопкою то з ним можна виконати різні дії наприклад роздрукувати. За допомогою ProcessStartInfo можна виявити шо можно виконати з файлом.
+Крім викорситання ярликів програм для запуску також можна використати ассоціації файлів Windows. Якшо на файлі кляцнути правою кнопкою то з ним можна виконати різні дії наприклад роздрукувати. За допомогою ProcessStartInfo можна виявити шо можно виконати з файлом.
 
 ```cs
 void UseApplicationVerbs()
@@ -489,3 +489,232 @@ print
 printto
 ```
 Тут за допомогою властивості WindowStyle вікно робиться на весь екран і далі зв допомогою Verb вказується дія. 
+
+# .NET Домени додатків (Application Domains).
+
+На платформі .Net виконувальні файли не розміщуються безпосередьно в процесі Windows, як це відбуваеться в традиційних некерованих програмах. Навпаки, .Net виконувальні файли розміщуються в логічному розділі процесу, який називається доменом програми. Це дає кілька переваг.
+
+    Домени додатків є ключовим аспектом нейтрального щодо ОС характеру платформи .NET Core, враховуючи, що цей логічний поділ абстрагує відмінності в тому, як базова ОС представляє завантажений виконуваний файл.
+
+    Домени додатків набагато дешевші з точки зору обчислювальної потужності та пам’яті, ніж повномасштабний процес. Таким чином, CoreCLR може завантажувати та вивантажувати домени додатків набагато швидше, ніж формальний процес, і може значно покращити масштабованість серверних додатків.
+
+Домени додатків повністю і повністю ізольовані від інших додатків у межах процесу. Враховуючи цей факт, майте на увазі, що програма, яка працює в одному AppDomain, не може отримати будь-які дані (глобальні змінні чи статичні поля) в іншому AppDomain, якщо вони не використовують розподілений протокол програмування.
+
+## Клас System.AppDomain.
+
+Хоча цей клас можна рахувати застарілим є функції які корисні.
+
+AppDomainClass\Program.cs
+```cs
+static void InvestigationAppDomain()
+{
+    AppDomain appDomain = AppDomain.CurrentDomain;
+
+    Console.WriteLine($"FriendlyName: {appDomain.FriendlyName}");
+    Console.WriteLine($"Id: {appDomain.Id}");
+    Console.WriteLine($"IsDefaultAppDomain: {appDomain.IsDefaultAppDomain}");
+    Console.WriteLine($"BaseDirectory: {appDomain.BaseDirectory}");
+    Console.WriteLine($"SetupInformation.ApplicationBase: {appDomain.SetupInformation.ApplicationBase}");
+    Console.WriteLine($"SetupInformation.TargetFrameworkName: {appDomain.SetupInformation.TargetFrameworkName}");
+    Console.WriteLine($"{appDomain}");
+}
+InvestigationAppDomain();
+```
+```
+FriendlyName: AppDomainClass
+Id: 1
+IsDefaultAppDomain: True
+BaseDirectory: D:\MyWork\...\AppDomainClass\AppDomainClass\bin\Debug\net8.0\
+SetupInformation.ApplicationBase: D:\MyWork\...\AppDomainClass\AppDomainClass\bin\Debug\net8.0\
+SetupInformation.TargetFrameworkName: .NETCoreApp,Version=v8.0
+```
+Програма має доступ до домену програми за замовчуванням завдяки властивості CurrentDomain.
+Маючи такий об'єкт можна дослідити властивості домену. 
+Назва домену додадку співпадає з назвою виконуваного файлу. Також зауважте, що значення базового каталогу, яке використовуватиметься для пошуку зовнішніх приватних збірок, відповідає поточному розташуванню розгорнутого виконуваного файлу.
+
+## Перегляд завантажених збірок.
+
+У певному домені можна виявити всі завантажені збірки за допомогою методу GetAssemblies().
+```cs
+using System.Reflection;
+
+...
+
+void GetAssemliesOfAppDomain()
+{
+    AppDomain appDomain = AppDomain.CurrentDomain;
+
+    Assembly[] assemblies = appDomain.GetAssemblies();
+
+    Console.WriteLine($"Assemlies of {appDomain.FriendlyName}\n");
+
+    foreach (var assembly in assemblies)
+    {
+        Console.WriteLine($"{assembly.GetName().Name} {assembly.GetName().Version}");
+    }
+}
+GetAssemliesOfAppDomain();
+```
+```
+Assemlies of AppDomainClass
+
+System.Private.CoreLib 8.0.0.0
+AppDomainClass 1.0.0.0
+System.Runtime 8.0.0.0
+Microsoft.Extensions.DotNetDeltaApplier 17.0.0.0
+System.IO.Pipes 8.0.0.0
+System.Linq 8.0.0.0
+System.Collections 8.0.0.0
+System.Console 8.0.0.0
+```
+Метод повертає масив об'єктів Assembly. Домен програими, у якому розміщено виконувальний файли використовує бібліотеки які предсталени ціми об'єктами. Цей список може змінюватися коли створюється новий код C# і додається використання інших бібіліотек.
+
+```cs
+
+void GetAssemliesOfAppDomainWithChange()
+{
+    AppDomain appDomain = AppDomain.CurrentDomain;
+
+    Assembly[] assemblies = appDomain.GetAssemblies();
+
+    Array.Reverse(assemblies);
+
+    Console.WriteLine($"\nAssemlies of {appDomain.FriendlyName}\n");
+
+    foreach (var assembly in assemblies)
+    {
+        Console.WriteLine($"{assembly.GetName().Name} {assembly.GetName().Version}");
+    }
+}
+GetAssemliesOfAppDomain();
+GetAssemliesOfAppDomainWithChange();
+```
+```
+Assemlies of AppDomainClass
+
+System.Private.CoreLib 8.0.0.0
+AppDomainClass 1.0.0.0
+System.Runtime 8.0.0.0
+Microsoft.Extensions.DotNetDeltaApplier 17.0.0.0
+System.IO.Pipes 8.0.0.0
+System.Linq 8.0.0.0
+System.Collections 8.0.0.0
+System.Console 8.0.0.0
+
+Assemlies of AppDomainClass
+
+System.Threading.Overlapped 8.0.0.0
+System.Runtime.InteropServices 8.0.0.0
+System.Text.Encoding.Extensions 8.0.0.0
+System.Threading 8.0.0.0
+System.Collections.Concurrent 8.0.0.0
+System.Console 8.0.0.0
+System.Collections 8.0.0.0
+System.Linq 8.0.0.0
+System.IO.Pipes 8.0.0.0
+Microsoft.Extensions.DotNetDeltaApplier 17.0.0.0
+System.Runtime 8.0.0.0
+AppDomainClass 1.0.0.0
+System.Private.CoreLib 8.0.0.0
+```
+Як ви бачите зміна коду впливає на тє які збірки завантажуються в пам'ять.
+
+## Ізоляція збірки з AssemblyLoadContext.
+
+Як шойно бачили, AppDomains - це логічний розділ, який використовується для розміщеня збірок .Net. Крім того домен програми може бути додадково поділена на числені межі контексту завантаження. Концептуально, контекст завантаження створює область для завантаженя, вирішення та потенційно вивантаження набору збірок. Контекст завантаження .Net Core надає можливість для одного AppDomain створити "конкретний дім" для певного об'єкта. Більшість програм .Net не вимагає роботи з контекстами об'єктів але розуміня процесів і доменів важлива.
+Клас AssemblyLoadContext предоставляє можливість завантажувати додадкові збірки у власні контексти. 
+Для розляду питання додако власну бібіліотеку до рішення.
+
+1. На ярлику Solution "App..." правий-клік
+2. Add > New project > Class Lirbary > Next
+3. Project name: MyLibrary
+4. Create
+5. На проекті "AppDomainClass" правий-клік.
+6. Add > Project Reference > MyLibrary
+7. Вадалити з MyLibrary Class1.cs
+
+Додамо в MyLibrary клас Car
+
+```cs
+namespace MyLibrary
+{
+    public class Car
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Make { get; set; } = string.Empty;
+        public int Speed { get; set; }
+    }
+}
+```
+В початок файлу AppDomainClass\Program.cs додайте:
+```cs
+using System.Reflection;
+using System.Runtime.Loader;
+```
+```cs
+static void LoadAdditionalAssembliesDifferentContexts()
+{
+    var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "MyLibrary.dll");
+  
+    AssemblyLoadContext assemblyLoadContext1 = new("NewContext1", false);
+    var assembly1 = assemblyLoadContext1.LoadFromAssemblyPath(path);
+    var class1 = assembly1.CreateInstance("MyLibrary.Car");
+
+    AssemblyLoadContext assemblyLoadContext2 = new("NewContext2", false);
+    var assembly2 = assemblyLoadContext2.LoadFromAssemblyPath(path);
+    var class2 = assembly2.CreateInstance("MyLibrary.Car");
+
+    Console.WriteLine($"assembly1.Equals(assembly2) : {assembly1.Equals(assembly2)}");
+    Console.WriteLine($"assembly1 == assembly2 : {assembly1 == assembly2}");
+   
+    Console.WriteLine($"class1.Equals(class2) : {class1?.Equals(class2)}");
+    Console.WriteLine($"class1 == class2 : {class1 == class2}");
+}
+
+LoadAdditionalAssembliesDifferentContexts();
+```
+```
+assembly1.Equals(assembly2) : False
+assembly1 == assembly2 : False
+class1.Equals(class2) : False
+class1 == class2 : False
+```
+Перший рядок створює католог для збірки MyLibrary.dll. Створений об'єкт AssemblyLoadContext використовується для завантаженя збірки я потім і для створеня об'єкта цієї збірки. Потім ценй процес повторюється. 
+Це демонструє, що ту саму збірку завантажено двічі в домен програми. Класи також різні, як і слід було очікувати.
+
+Завантаженя можна зробити з тим самим  AssemblyLoadContext.
+```cs
+static void LoadAdditionalAssembliesSameContext()
+{
+    var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "MyLibrary.dll");
+
+    AssemblyLoadContext assemblyLoadContext1 = new(null, false);
+    var assembly1 = assemblyLoadContext1.LoadFromAssemblyPath(path);
+    var class1 = assembly1.CreateInstance("MyLibrary.Car");
+       
+    var assembly2 = assemblyLoadContext1.LoadFromAssemblyPath(path);
+    var class2 = assembly2.CreateInstance("MyLibrary.Car");
+
+    Console.WriteLine($"assembly1.Equals(assembly2) : {assembly1.Equals(assembly2)}");
+    Console.WriteLine($"assembly1 == assembly2 : {assembly1 == assembly2}");
+
+    Console.WriteLine($"class1.Equals(class2) : {class1?.Equals(class2)}");
+    Console.WriteLine($"class1 == class2 : {class1 == class2}");
+}
+
+LoadAdditionalAssembliesSameContext();
+```
+```
+assembly1.Equals(assembly2) : True
+assembly1 == assembly2 : True
+class1.Equals(class2) : False
+class1 == class2 : False
+```
+В цьому варівнті створюється один AssemblyLoadContext. Тепер, коли збірка MyLibrary завантажується двічі, друга збірка є просто покажчиком на перший примірник збірки.
+
+## Пудсумки
+
+Здебільшого .NET Core автоматично обробляє деталі процесів, домени програм і контексти завантаження від вашого імені. Ця інформація забезпечує надійну основу для розуміння багатопотокового програмування на платформі .NET Core.
+Як ви бачили, колишне уявлення про процес Windows було змінено, щоб відповідати потребам CoreCLR. Один процес (яким можна програмно керувати за допомогою типу System.Diagnostics.Process) тепер складається з домену програми, який представляє ізольовані та незалежні межі в межах процесу. Домен програми здатний розміщувати та виконувати будь-яку кількість пов’язаних збірок. Крім того, один домен програми може містити будь-яку кількість контекстів завантаження для подальшої ізоляції збірки. Використовуючи цей додатковий рівень ізоляції типів, CoreCLR може забезпечити правильну обробку спеціальних об’єктів.
+
+
