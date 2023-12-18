@@ -20,3 +20,19 @@ static void ExtractCurrentThreadExecutionContext()
     Console.WriteLine(executionContext);
 }
 //ExtractCurrentThreadExecutionContext();
+
+void ExplorationTheThread()
+{
+    Thread primaryThread = Thread.CurrentThread;
+    primaryThread.Name = "ThePrimaryThread";
+
+    Console.WriteLine($"Name :{primaryThread.Name}");
+    Console.WriteLine($"ManagedThreadId :{primaryThread.ManagedThreadId}");
+    Console.WriteLine($"IsAlive :{primaryThread.IsAlive}");
+    Console.WriteLine($"Priority :{primaryThread.Priority}");
+    Console.WriteLine($"ThreadState :{primaryThread.ThreadState}"); 
+    Console.WriteLine($"IsThreadPoolThread :{primaryThread.IsThreadPoolThread}");
+    Console.WriteLine($"CurrentCulture :{primaryThread.CurrentCulture}");
+}
+
+ExplorationTheThread();
