@@ -173,7 +173,7 @@ CurrentCulture :uk-UA
 Знову ж таки, якщо планувальник потоків зайнятий певним завданням (наприклад, синхронізація об’єкта, перемикання потоків або переміщення потоків), рівень пріоритету, швидше за все, буде відповідно змінено. Однак за всіх рівних умов .NET Core Runtime зчитує ці значення та вказує планувальнику потоків, як найкраще розподілити часові проміжки. Потоки з ідентичним пріоритетом мають отримати однакову кількість часу для виконання своєї роботи.
 У більшості випадків вам рідко (якщо взагалі взагалі) потрібно буде безпосередньо змінити рівень пріоритету потоку.
 
-### Мануальне створення вторинного потоку.
+## Мануальне створення вторинного потоку.
 
 Для відкритя додадкового потоку, який буде виконувати одиницю навантаження, притримуйтесь наступних пунктів при використані типів System.Threading
 
@@ -186,6 +186,87 @@ CurrentCulture :uk-UA
 Можна використовувати два типи делегатів ParameterizedThreadStart або ThreadStart, щоб "вказати" метод, який буде виконувати вторинний потік. ThreadStart делегат може вказувати на будь який метод який не приймає аргументів і нічого не повертає. Цей делегат може бути корисним, якщо метод призначений для простого виконання у фоновому режимі без подальшої взаємодії.
 Обмеження ThreadStart полягає в тому, що ви не можете передати параметри для обробки. Однак тип делегату ParameterizedThreadStart допускає один параметр типу System.Object. Враховуючи те, що будь-що може бути представлено як System.Object, ви можете передати будь-яку кількість параметрів через спеціальний клас або структуру.
 Однак зауважте, що делегати ThreadStart і ParameterizedThreadStart можуть вказувати лише на методи, які повертають void.
+
+## Робота з делегатом ThreadStart.
+
+Давайте продемонструємо корисність багатопоточності. Створемо проект типу Console Application з назвою SimpleMultiThreadApp, який дозволяє кінцевому користувачеві вибирати, чи виконуватиме програма свої обов'язки за допомогою єдиного основного потоку, чи розділить своє робоче навантаження за допомогою двох окремих потоків виконання.
+
+Додамо клас
+```cs
+namespace SimpleMultiThreadApp
+{
+    public class Printer
+    {
+        public void PrintNumbers()
+        {
+            Console.WriteLine($"{Thread.CurrentThread.Name} id executing PrintNumbers()");
+
+            Console.WriteLine("Your numbers: ");
+            for (int i = 0; i < 10; i++)
+            {
+                Console.Write($"{i} ");
+                Thread.Sleep(2000);
+            }
+            Console.WriteLine();
+        }
+    }
+}
+
+```
+Клас має метод який досить повільно працює і таким чином є для нас аналогом складної одиниці роботи в реальній програмі. Цей метод для додадкового потоку. 
+Спробуємо використання цього методу з одним і двума потоками.
+```cs
+void OneAndTwoThread()
+{
+    Console.Write("Do you want 1 or 2 threads? [1/2]:");
+
+    string? threadCount = Console.ReadLine();
+
+    //Assigning the name of current thread.
+    Thread primaryThread = Thread.CurrentThread;
+    primaryThread.Name = "Primary";
+
+    Console.WriteLine($"{Thread.CurrentThread.Name} is execution method in Top-level");
+
+    Printer printer = new();
+
+    switch (threadCount)
+    {
+        case "2":
+            Thread backgroungThread = new Thread(new ThreadStart(printer.PrintNumbers));
+            backgroungThread.Name = "Secondary";
+            backgroungThread.Start();
+            break;
+        case "1":
+        default:
+            printer.PrintNumbers();
+            break;
+    }
+    //Do some addition work.
+    Console.WriteLine("This is on the main thread, and we are finished.");
+}
+OneAndTwoThread();
+```
+1
+```
+Do you want 1 or 2 threads? [1/2]:1
+Primary is execution method in Top-level
+Primary is executing PrintNumbers()
+Your numbers:
+0 1 2 3 4 5 6 7 8 9
+This is on the main thread, and we are finished.
+```
+2
+```
+Do you want 1 or 2 threads? [1/2]:2
+Primary is execution method in Top-level
+This is on the main thread, and we are finished.
+Secondary is executing PrintNumbers()
+Your numbers:
+0 1 2 3 4 5 6 7 8 9
+```
+В прикладі користоувачеві надається можливість виконати "повільний" метод або в одному потоці з основиним потоком або застосувати окремий потік. Для додадкового потоку створюється делегат ThreadStart який вказує на метод PrintNumbers. Потім цей об'єкт передається конструктору Thread. Після додавання назви потоку визивається метод Start, щоб повідомити .Net Runtime, шо цей потік готовий до обробки.
+Таким чином можна вивільними основний поток від "повільного" методу і дозволити робити додадкову роботу або реагувати на дії користувача. За виконаня "тяжкого" методу в окремому потоці відповідає об'єкт Thread.
 
 
 
