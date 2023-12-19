@@ -199,12 +199,12 @@ namespace SimpleMultiThreadApp
     {
         public void PrintNumbers()
         {
-            Console.WriteLine($"{Thread.CurrentThread.Name} id executing PrintNumbers()");
+            Console.WriteLine($"{Thread.CurrentThread.Name} is executing PrintNumbers()");
 
-            Console.WriteLine("Your numbers: ");
+            Console.WriteLine("Starting slow work: : ");
             for (int i = 0; i < 10; i++)
             {
-                Console.Write($"{i} ");
+                Console.WriteLine($"\nIt's done step {i}");
                 Thread.Sleep(2000);
             }
             Console.WriteLine();
@@ -216,7 +216,7 @@ namespace SimpleMultiThreadApp
 Клас має метод який досить повільно працює і таким чином є для нас аналогом складної одиниці роботи в реальній програмі. Цей метод для додадкового потоку. 
 Спробуємо використання цього методу з одним і двума потоками.
 ```cs
-void OneAndTwoThread()
+void WorkingWithThreadStart()
 {
     Console.Write("Do you want 1 or 2 threads? [1/2]:");
 
@@ -243,30 +243,134 @@ void OneAndTwoThread()
             break;
     }
     //Do some addition work.
-    Console.WriteLine("This is on the main thread, and we are finished.");
+    Console.WriteLine("For finishe prass End");
+    ConsoleKey consoleKey = ConsoleKey.Home;
+    while (consoleKey != ConsoleKey.End)
+    {
+        consoleKey = Console.ReadKey().Key;
+        Console.Beep();
+    }
+    
+    Console.WriteLine("\nThis is on the main thread, and we are finished.");
 }
-OneAndTwoThread();
+WorkingWithThreadStart();
 ```
 1
 ```
-Do you want 1 or 2 threads? [1/2]:1
-Primary is execution method in Top-level
 Primary is executing PrintNumbers()
-Your numbers:
-0 1 2 3 4 5 6 7 8 9
+Starting slow work: :
+
+It's done step 0
+
+It's done step 1
+
+It's done step 2
+
+It's done step 3
+
+It's done step 4
+
+It's done step 5
+
+It's done step 6
+
+It's done step 7
+
+It's done step 8
+
+It's done step 9
+
+For finishe prass End
+Only now I can do something
 This is on the main thread, and we are finished.
 ```
 2
 ```
 Do you want 1 or 2 threads? [1/2]:2
 Primary is execution method in Top-level
-This is on the main thread, and we are finished.
+For finishe prass End
 Secondary is executing PrintNumbers()
-Your numbers:
-0 1 2 3 4 5 6 7 8 9
+Starting slow work: :
+
+It's done step 0
+I
+It's done step 1
+do
+It's done step 2
+some
+It's done step 3
+thing
+It's done step 4
+
+It's done step 5
+
+This is on the main thread, and we are finished.
+
+It's done step 6
+
+It's done step 7
+
+It's done step 8
+
+It's done step 9
 ```
 В прикладі користоувачеві надається можливість виконати "повільний" метод або в одному потоці з основиним потоком або застосувати окремий потік. Для додадкового потоку створюється делегат ThreadStart який вказує на метод PrintNumbers. Потім цей об'єкт передається конструктору Thread. Після додавання назви потоку визивається метод Start, щоб повідомити .Net Runtime, шо цей потік готовий до обробки.
 Таким чином можна вивільними основний поток від "повільного" методу і дозволити робити додадкову роботу або реагувати на дії користувача. За виконаня "тяжкого" методу в окремому потоці відповідає об'єкт Thread.
+
+## Робота з делегатом ParameterizedThreadStart
+
+Делегат ThreadStart може вказувати лише на метод який повертає void i не має аргументів. Якшо цього не достатьно і потрібно передати данні у вторинний потік можна використати тип делегату ParameterizedThreadStart. Цей делегат може вказувати на метод який отримую в якості параметра System.Object. Створемо клас, об'єкти якого будуть слугувати аргументами.
+
+```cs
+namespace SimpleMultiThreadApp
+{
+    internal class AddParams
+    {
+        public int a, b;
+        public AddParams(int a, int b)
+        {
+            this.a = a;
+            this.b = b;
+        }
+    }
+}
+```
+
+Створемо метод який буде відповідати вимогам делегата и робити певну роботу.
+
+```cs
+void Add(object? data)
+{
+
+    if (data is AddParams ap)
+    {
+        Console.WriteLine($"ID of thread in Add() method : {Thread.CurrentThread.ManagedThreadId}");
+        Thread.Sleep(4000);
+        Console.WriteLine($"{ap.a} + {ap.b} is {ap.a + ap.b}");
+    }
+}
+
+Використання делегата ParameterizedThreadStart досить просте.
+
+void WorkingWithParameterizedThreadStart()
+{
+    Console.WriteLine($"ID of main thread : {Thread.CurrentThread.ManagedThreadId}");
+
+    AddParams addParams = new(1, 2);
+    Thread thread = new(new ParameterizedThreadStart(Add));
+    thread.Start(addParams);
+
+    Thread.Sleep(2000);
+    Console.WriteLine("The main thread is finished.");
+}
+WorkingWithParameterizedThreadStart();
+```
+```
+ID of main thread : 1
+ID of thread in Add() method : 8
+The main thread is finished.
+1 + 2 is 3
+```
 
 
 

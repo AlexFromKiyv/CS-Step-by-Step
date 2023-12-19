@@ -1,6 +1,6 @@
 ﻿using SimpleMultiThreadApp;
 
-void OneAndTwoThread()
+void WorkingWithThreadStart()
 {
     Console.Write("Do you want 1 or 2 threads? [1/2]:");
 
@@ -27,7 +27,40 @@ void OneAndTwoThread()
             break;
     }
     //Do some addition work.
-    Console.WriteLine("This is on the main thread, and we are finished.");
+    Console.WriteLine("For finishe prass End");
+    ConsoleKey consoleKey = ConsoleKey.Home;
+    while (consoleKey != ConsoleKey.End)
+    {
+        consoleKey = Console.ReadKey().Key;
+        Console.Beep();
+    }
+    
+    Console.WriteLine("\nThis is on the main thread, and we are finished.");
 }
-OneAndTwoThread();
+//WorkingWithThreadStart();
 
+
+void Add(object? data)
+{
+
+    if (data is AddParams ap)
+    {
+        Console.WriteLine($"ID of thread in Add() method : {Thread.CurrentThread.ManagedThreadId}");
+        Thread.Sleep(4000);
+        Console.WriteLine($"{ap.a} + {ap.b} is {ap.a + ap.b}");
+    }
+}
+
+
+void WorkingWithParameterizedThreadStart()
+{
+    Console.WriteLine($"ID of main thread : {Thread.CurrentThread.ManagedThreadId}");
+
+    AddParams addParams = new(1, 2);
+    Thread thread = new(new ParameterizedThreadStart(Add));
+    thread.Start(addParams);
+
+    Thread.Sleep(2000);
+    Console.WriteLine("The main thread is finished.");
+}
+WorkingWithParameterizedThreadStart();
