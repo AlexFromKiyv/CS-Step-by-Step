@@ -341,36 +341,175 @@ namespace SimpleMultiThreadApp
 ```cs
 void Add(object? data)
 {
-
     if (data is AddParams ap)
     {
-        Console.WriteLine($"ID of thread in Add() method : {Thread.CurrentThread.ManagedThreadId}");
-        Thread.Sleep(4000);
+        Console.WriteLine($"Start work in method Add() into thread with ID : {Thread.CurrentThread.ManagedThreadId}");
         Console.WriteLine($"{ap.a} + {ap.b} is {ap.a + ap.b}");
     }
+    Console.WriteLine("The method Add is finished.");
 }
 
 Використання делегата ParameterizedThreadStart досить просте.
 
 void WorkingWithParameterizedThreadStart()
 {
-    Console.WriteLine($"ID of main thread : {Thread.CurrentThread.ManagedThreadId}");
+    Console.WriteLine($"Start work in main thread with ID : {Thread.CurrentThread.ManagedThreadId}");
 
     AddParams addParams = new(1, 2);
     Thread thread = new(new ParameterizedThreadStart(Add));
     thread.Start(addParams);
-
-    Thread.Sleep(2000);
+    Thread.Sleep(5);
     Console.WriteLine("The main thread is finished.");
 }
 WorkingWithParameterizedThreadStart();
 ```
 ```
-ID of main thread : 1
-ID of thread in Add() method : 8
-The main thread is finished.
+Start work in main thread with ID : 1
+Start work in method Add() into thread with ID : 9
 1 + 2 is 3
+The method Add is finished.
+The main thread is finished.
+
 ```
+При виконані видно що потоки відрізняються і по різному закінчують свою роботу.
+
+## Клас AutoResetEvent.
+
+У цих перших кількох прикладах немає чистого способу дізнатися, коли вторинний потік завершив свою роботу. В останньому прикладі код Thread.Sleep(5); спеціально гальмує основний поток, щоб вториний виконався раніше його закінчення. Одним із простих і безпечним для потоків способом змусити потік очікувати, поки не завершиться інший, є використання класу AutoResetEvent.
+
+```cs
+AutoResetEvent _waitHandler = new AutoResetEvent(false);
+void AddWithSet(object? data)
+{
+    if (data is AddParams ap)
+    {
+        Console.WriteLine($"Start work in method Add() into thread with ID : {Thread.CurrentThread.ManagedThreadId}");
+        Console.WriteLine($"{ap.a} + {ap.b} is {ap.a + ap.b}");
+    }
+    Console.WriteLine("The method Add is finished.");
+    _waitHandler.Set();
+}
+
+void WorkingWithClassAutoResetEvent()
+{
+    
+
+    Console.Write("Wait for finish second thread (Y/N):");
+    string? toWait = Console.ReadLine();
+
+
+    Console.WriteLine($"Start work method from main thread with ID : {Thread.CurrentThread.ManagedThreadId}");
+    AddParams addParams = new(1, 2);
+    Thread thread = new(new ParameterizedThreadStart(AddWithSet));
+    thread.Start(addParams);
+
+    if(toWait != null && (toWait == "Y" || toWait == "y"))
+    {
+        _waitHandler.WaitOne();
+    }
+    Console.WriteLine("The main thread is finished.");
+}
+WorkingWithClassAutoResetEvent();
+```
+```
+Wait for finish second thread (Y/N):n
+Start work method from main thread with ID : 1
+The main thread is finished.
+Start work in method Add() into thread with ID : 10
+1 + 2 is 3
+The method Add is finished.
+```
+```
+Wait for finish second thread (Y/N):Y
+Start work method from main thread with ID : 1
+Start work in method Add() into thread with ID : 10
+1 + 2 is 3
+The method Add is finished.
+The main thread is finished.
+
+```
+У потоці що повинен чекати створюється екземпляр класу. При створені в конструктор передається False, що означає що він ще не сповіщені. В момент коли треба чекати виконання вторинного потоку визиваеться метод WaitOne(). Коли вторинний потік закінчиє роботу він викличе метод Set у тому самому екземплярі класу.
+
+## Передні і фонові потоки.
+
+Отже як ми бачили потокі можуть мати різного рівня. Формально визначаються наступні потоки.
+
+    Передні потоки (Foreground threads) можуть запобігти завершенню поточної програми. .Net Runtime не вимикає програму (не вигружає розміщений AppDomain ) поки не завершаться всі потоки переднього плану.
+
+    Фонові потоки (Background threads іноді називають daemon threads) розгладаються .Net Runtime як витратні шляхи виконання, які можна ігнорувати в будь який момент часу. Таким чином, якщо всі потоки переднього плану завершилися, усі фонові потоки автоматично припиняються, коли домен програми вивантажується. 
+
+Важливо зауважити, що передні і фоновий потоки не є синонімами основного та робочого потоків. За замовчуванням кожен потік, який ви створюєте за допомогою методу Thread.Start(), автоматично стає потоком переднього плану. Це означає, що AppDomain не буде вивантажено, доки всі потоки виконання не завершать свої одиниці роботи. У більшості випадків це саме та поведінка, яка вам потрібна.
+
+Спробуємо створити фотоний потік
+```cs
+void UseIsBackground()
+{
+    Console.Write("Do you want make worker thread backgrounded? (Y/N):");
+    string? isBackgrounded = Console.ReadLine();
+
+    Console.WriteLine($"Start the method from primary thread with ID : {Thread.CurrentThread.ManagedThreadId}");
+
+    Printer printer = new();
+    
+    Thread workThread = new Thread(new ThreadStart(printer.PrintNumbers));
+    workThread.Name = "Worker thread";
+    workThread.IsBackground = (isBackgrounded == "Y" || isBackgrounded == "y");
+    workThread.Start();
+
+    Console.ReadLine();
+
+    Console.WriteLine("The primary thread is finished.");
+}
+
+UseIsBackground();
+```
+```
+Do you want make worker thread backgrounded? (Y/N):Y
+Start the method from primary thread with ID : 1
+Worker thread is executing PrintNumbers()
+Starting slow work.
+
+It's done step 0
+
+It's done step 1
+
+The primary thread is finished.
+```
+```
+Do you want make worker thread backgrounded? (Y/N):n
+Start the method from primary thread with ID : 1
+Worker thread is executing PrintNumbers()
+Starting slow work.
+
+It's done step 0
+
+It's done step 1
+
+It's done step 2
+
+It's done step 3
+
+The primary thread is finished.
+
+It's done step 4
+
+It's done step 5
+
+It's done step 6
+
+It's done step 7
+
+It's done step 8
+
+It's done step 9
+
+```
+Треба зазначити для того щоб потік міг бути фоновим треба щоб метод на який вказує тип Thread ( через делегата ParameterizedThreadStart або ThreadStart) повинен мати модливість безпечно зупинитися щойно всі передні потоки закінять свою роботу.
+В прикладі видно коли працює основний потік і створиений нами потік фоновий, тоді при переривані основного потоку другий теж закінчує роботу і програма закінчує роботу повністю. У випадку коли робочий поток стає на передньому плані програма закінчить свою роботу тільки коли він закінчить роботу. 
+Здебільшого налаштування потоку для роботи у фоновому режимі може бути корисним, коли відповідний робочий потік виконує некритичне завдання, яке більше не потрібно після завершення основного завдання програми. Наприклад, ви можете створити програму, яка кожні кілька хвилин перевіряє сервер електронної пошти на наявність нових електронних листів, оновлює поточні погодні умови або виконує інше некритичне завдання.
+
+
+
 
 
 

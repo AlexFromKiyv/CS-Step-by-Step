@@ -42,25 +42,79 @@ void WorkingWithThreadStart()
 
 void Add(object? data)
 {
-
     if (data is AddParams ap)
     {
-        Console.WriteLine($"ID of thread in Add() method : {Thread.CurrentThread.ManagedThreadId}");
-        Thread.Sleep(4000);
+        Console.WriteLine($"Start work in method Add() into thread with ID : {Thread.CurrentThread.ManagedThreadId}");
         Console.WriteLine($"{ap.a} + {ap.b} is {ap.a + ap.b}");
     }
+    Console.WriteLine("The method Add is finished.");
 }
+
+
 
 
 void WorkingWithParameterizedThreadStart()
 {
-    Console.WriteLine($"ID of main thread : {Thread.CurrentThread.ManagedThreadId}");
+    Console.WriteLine($"Start work in main thread with ID : {Thread.CurrentThread.ManagedThreadId}");
 
     AddParams addParams = new(1, 2);
     Thread thread = new(new ParameterizedThreadStart(Add));
     thread.Start(addParams);
-
-    Thread.Sleep(2000);
+    //Thread.Sleep(5);
     Console.WriteLine("The main thread is finished.");
 }
-WorkingWithParameterizedThreadStart();
+//WorkingWithParameterizedThreadStart();
+
+AutoResetEvent _waitHandler = new AutoResetEvent(false);
+void AddWithSet(object? data)
+{
+    if (data is AddParams ap)
+    {
+        Console.WriteLine($"Start work in method Add() into thread with ID : {Thread.CurrentThread.ManagedThreadId}");
+        Console.WriteLine($"{ap.a} + {ap.b} is {ap.a + ap.b}");
+    }
+    Console.WriteLine("The method Add is finished.");
+    _waitHandler.Set();
+}
+
+void WorkingWithClassAutoResetEvent()
+{
+    
+
+    Console.Write("Wait for finish second thread (Y/N):");
+    string? toWait = Console.ReadLine();
+
+
+    Console.WriteLine($"Start work method from main thread with ID : {Thread.CurrentThread.ManagedThreadId}");
+    AddParams addParams = new(1, 2);
+    Thread thread = new(new ParameterizedThreadStart(AddWithSet));
+    thread.Start(addParams);
+
+    if(toWait != null && (toWait == "Y" || toWait == "y"))
+    {
+        _waitHandler.WaitOne();
+    }
+    Console.WriteLine("The main thread is finished.");
+}
+//WorkingWithClassAutoResetEvent();
+
+void UseIsBackground()
+{
+    Console.Write("Do you want make worker thread backgrounded? (Y/N):");
+    string? isBackgrounded = Console.ReadLine();
+
+    Console.WriteLine($"Start the method from primary thread with ID : {Thread.CurrentThread.ManagedThreadId}");
+
+    Printer printer = new();
+    
+    Thread workThread = new Thread(new ThreadStart(printer.PrintNumbers));
+    workThread.Name = "Worker thread";
+    workThread.IsBackground = (isBackgrounded == "Y" || isBackgrounded == "y");
+    workThread.Start();
+
+    Console.ReadLine();
+
+    Console.WriteLine("The primary thread is finished.");
+}
+
+UseIsBackground();
