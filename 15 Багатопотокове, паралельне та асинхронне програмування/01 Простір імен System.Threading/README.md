@@ -509,10 +509,95 @@ It's done step 9
 Здебільшого налаштування потоку для роботи у фоновому режимі може бути корисним, коли відповідний робочий потік виконує некритичне завдання, яке більше не потрібно після завершення основного завдання програми. Наприклад, ви можете створити програму, яка кожні кілька хвилин перевіряє сервер електронної пошти на наявність нових електронних листів, оновлює поточні погодні умови або виконує інше некритичне завдання.
 
 
+# Проблема паралельної роботи потоків.
 
+При стовені багатопотокових додадків, треба гарантувати, що будь-яка частина спільних даних захищена від хаотичної зміни численними потоками. Враховуючи, що всі потоки в AppDomain мають одночасний доступ до спільних даних, уявіть що могло б статися, якби кілька потоків отримують доступ до однієї ж самої точки даних. Що буде якщо планувальник потоків змусить потоки випадково призупинити свою роботу і наприклад потік А буде змужено призупинитись на шляху до того як він завершить роботу? Поток B тепер очікують нестабільні дані.
 
+Нехай ми маємо наступний клас.
 
+IssueOfConcurrency/Printer.cs
+```cs
+namespace IssueOfConcurrency;
+public class Printer
+{
+    public void PrintNumbers()
+    {
+        // Display Thread info.
+        Console.WriteLine($"{Thread.CurrentThread.Name} is executing PrintNumbers()");
 
+        //Print out numbers.
+        for (int i = 0; i < 10; i++)
+        {
+            Random random = new();
+            Thread.Sleep(200*random.Next(5));
+            Console.Write($"{i} ");
+        }
+        Console.WriteLine();
+    }
+}
+```
+```cs
+void OneThread()
+{
+    Thread.CurrentThread.Name = "Primary";
+    Printer printer = new();
+    printer.PrintNumbers();
+}
+OneThread();
+```
+```
+Primary is executing PrintNumbers()
+0 1 2 3 4 5 6 7 8 9
+```
+Метод PrintNumbers друкує послідовність чисел змушуючи поточний поток призупинятися на випадково згенерований проміжок часу.
 
+Створимо масив потоків і запустимо їх.
 
+```cs
+void WorkManyThreads()
+{
+    int length = 10;
 
+    Printer printer = new();
+
+    //Make many threads that are all pointing to
+    //the same method on the same object
+    Thread[] threads = new Thread[length];
+    for (int i = 0; i < length; i++)
+    {
+        threads[i] = new Thread(new ThreadStart(printer.PrintNumbers)) 
+        { Name = $"Work thread {i}" };
+    }
+
+    foreach (Thread thread in threads)
+    {
+        thread.Start();
+    }
+}
+WorkManyThreads();
+```
+```
+Work thread 1 is executing PrintNumbers()
+Work thread 8 is executing PrintNumbers()
+Work thread 2 is executing PrintNumbers()
+Work thread 0 is executing PrintNumbers()
+Work thread 5 is executing PrintNumbers()
+Work thread 6 is executing PrintNumbers()
+Work thread 7 is executing PrintNumbers()
+Work thread 9 is executing PrintNumbers()
+Work thread 3 is executing PrintNumbers()
+Work thread 4 is executing PrintNumbers()
+0 0 0 1 2 0 0 0 3 0 1 1 1 0 1 2 0 0 1 2 2 2 1 1 4 1 2 2 5 1 3 4 3 3 3 4 3 4 2 6 3 5 4 4 2 5 7 5 6 2 3 4 6 7 8 9 4 3 7 8 5
+5 3 5 6 6 8 5 6 7 7 8 6 9
+8 9
+4 7 7 4 8 5 6 9
+6 8 9
+7 9
+9
+5 7 8 9
+8 6 7 8 9
+9
+```
+Основний потік у цьому AppDomain створює додадкові робочі потоки. Кожному потоку наказано запустити метод PrintNumbers на тому самому екземпляру класу Print. Не вжито жодних запобіжних заходів, щоб заблокувати спільний ресурси цього об'єкту (the consol) є великий шанс, шо поточний потік буде вигнано зі шляху до того, як метод PrintNumbers може надрукувати повний результат. Оскільки нам не відомо коли це станеться може статися, ви обоб'язково отримаєте непередбачувальний результат.
+При кожному запуску прикладу отримуєте різний результат.
+Оскільки кожен потік повідомляє принтеру надрукувати числові дані, планувальник потоків із задоволенням міняє потоки у фоновому режимі.Результат – непослідовний результат.Потрібен спосіб програмного забезпечення синхронізованого доступу до спільних ресурсів.Простір імен System.Threading надає кілька типів, орієнтованих на синхронізацію. Мова програмування C# також надає ключове слово для самого завдання синхронізації спільних даних у багатопоточних програмах.
