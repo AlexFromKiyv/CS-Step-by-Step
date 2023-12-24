@@ -28,5 +28,26 @@ void WorkManyThreads()
         thread.Start();
     }
 }
-WorkManyThreads();
+//WorkManyThreads();
+
+void UseLock()
+{
+    int length = 3;
+
+    Printer printer = new();
+
+    Thread[] threads = new Thread[length];
+    for (int i = 0; i < length; i++)
+    {
+        threads[i] = new Thread(new ThreadStart(printer.PrintNumbersWithLock))
+        { Name = $"Work thread {i}" };
+    }
+
+    foreach (Thread thread in threads)
+    {
+        thread.Start();
+    }
+}
+UseLock();
+
 
