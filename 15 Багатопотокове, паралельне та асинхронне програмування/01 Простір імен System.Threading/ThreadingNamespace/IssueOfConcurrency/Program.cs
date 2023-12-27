@@ -48,6 +48,64 @@ void UseLock()
         thread.Start();
     }
 }
-UseLock();
+//UseLock();
+
+void UseMonitor()
+{
+    int length = 3;
+
+    Printer printer = new();
+
+    Thread[] threads = new Thread[length];
+    for (int i = 0; i < length; i++)
+    {
+        threads[i] = new Thread(new ThreadStart(printer.PrintNumbersWithMonitor))
+        { Name = $"Work thread {i}" };
+    }
+
+    foreach (Thread thread in threads)
+    {
+        thread.Start();
+    }
+}
+//UseMonitor();
 
 
+void AssigningWithLock()
+{
+    int intValue = 5;
+    object lockTocken = new();
+    lock(lockTocken)
+    {
+        intValue++;
+    }
+    Console.WriteLine(intValue);
+}
+//AssigningWithLock();
+
+void UseInterlockedIncrement()
+{
+    int intValue = 5;
+    intValue = Interlocked.Increment(ref intValue);
+    Console.WriteLine(intValue);
+}
+//UseInterlockedIncrement();
+
+void UseInterlockedExchange()
+{
+    int intValue = 5;
+    Interlocked.Exchange(ref intValue,10);
+    Console.WriteLine(intValue);
+}
+//UseInterlockedExchange();
+
+void UseInterlockedCompareExchange()
+{
+    int intValue = 5;
+    Interlocked.CompareExchange(ref intValue,15,5);
+    Console.WriteLine(intValue);
+
+    Interlocked.CompareExchange(ref intValue, 5, 10);
+    Console.WriteLine(intValue);
+}
+UseInterlockedCompareExchange();

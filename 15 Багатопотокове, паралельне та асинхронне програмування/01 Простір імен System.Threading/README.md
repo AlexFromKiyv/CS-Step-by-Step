@@ -684,6 +684,138 @@ Work thread 1 is executing PrintNumbers()
 Work thread 2 is executing PrintNumbers()
 0 1 2 3 4 5 6 7 8 9
 ```
-Метод з використанням lock дозволяє поточному потоку виконати своє завдання. Коли потік потрапляє в область блокування, токен(маркер) блокування стає недоступним ждя інших потоків, доки блокування не буде знято з виходу з області блокування. Таким чином, якщо потік A отримав маркер блокування, інші потоки не зможуть увійти в будь-яку область, яка використовує той самий маркер блокування, доки потік A не відмовиться від маркера блокування.
+Метод з використанням lock дозволяє поточному потоку виконати своє завдання. Коли потік потрапляє в область блокування, токен(маркер) блокування стає недоступним для інших потоків, доки блокування не буде знято при виходу з області блокування. Таким чином, якщо потік A отримав маркер блокування, інші потоки не зможуть увійти в будь-яку область, яка використовує той самий маркер блокування, доки потік A не відмовиться від маркера блокування.
 Якщо ви намагаєтеся заблокувати код у статичному методі, просто оголосите змінну-член приватного статичного об’єкта, яка буде служити маркером блокування.
 
+## Сінхронізація за допомогою типа System.Threading.Monitor.
+
+Оператор lock це скоречена нотація використання класу Monitor. аналог попередньому прикладу можно представити так.
+
+```cs
+    public void PrintNumbersWithMonitor()
+    {
+        Monitor.Enter(threadLock);
+        try
+        {
+            Console.WriteLine($"{Thread.CurrentThread.Name} is executing PrintNumbers()");
+
+            //Print out numbers.
+            for (int i = 0; i < 10; i++)
+            {
+                Random random = new();
+                Thread.Sleep(100 * random.Next(5));
+                Console.Write($"{i} ");
+            }
+            Console.WriteLine();
+        }
+        finally 
+        { 
+            Monitor.Exit(threadLock); 
+        } 
+    }
+```
+```
+void UseMonitor()
+{
+    int length = 3;
+
+    Printer printer = new();
+
+    Thread[] threads = new Thread[length];
+    for (int i = 0; i < length; i++)
+    {
+        threads[i] = new Thread(new ThreadStart(printer.PrintNumbersWithMonitor))
+        { Name = $"Work thread {i}" };
+    }
+
+    foreach (Thread thread in threads)
+    {
+        thread.Start();
+    }
+}
+UseMonitor();
+```
+```
+Work thread 0 is executing PrintNumbers()
+0 1 2 3 4 5 6 7 8 9
+Work thread 1 is executing PrintNumbers()
+0 1 2 3 4 5 6 7 8 9
+Work thread 2 is executing PrintNumbers()
+0 1 2 3 4 5 6 7 8 9
+```
+Метод Enter є кінцевим одержувачем тонена потоку. Область яка блокується обгорається оператором try. Блок finally гарантує звільнення марекра потоку.
+Викрористання типу Monitor на пряму може дати більше можливостей контролю. Можна наказати активному потоку чекати деякий час (через метод Monitor.Wait), повідомити потоки, що очікують, коли поточний потік буде завершено( через статичний метод Monitor.Pulse та Monitor.PulseAll), та інші.
+Як і слід було очікувати, у багатьох випадках ключове слово C# lock підійде. Однак, якщо ви зацікавлені в перевірці додаткових членів класу Monitor, зверніться до документації .NET Core.
+
+## Сінхронізація за допомогою типа System.Threading.Interlocked.
+
+Признасення зміній та прості арифметичні операції не є атомарними. Аби безпечно виконувати такі дії, простір імен System.Threading надає тип, який дозволяє працювати з однією точкою даних атомарно з меньшими накладними витратами, ніж з типом Monitor.
+Тип System.Threading.Interlocked предоставляє такі ключові статичні члени.
+
+    CompareExchange() : Безпечно перевіряє два значення на рівність, і якщо вони рівні, обмінює одне із значень на третє.
+
+    Increment() : Безпечно збільшує значення на 1
+
+    Decrement() : Безпечно зменьшує значення на 1
+
+    Exchange() : Безпечно міняє два значення.
+
+Процес атомарної зміни одного значення досить поширений у багатопоточному середовищі.
+Припустімо, що у вас є код, який збільшує цілочисельну змінну-член з іменем intVal. Можно писати код з сінхронізацією.
+```cs
+void AssigningWithLock()
+{
+    int intValue = 5;
+    object lockTocken = new();
+    lock(lockTocken)
+    {
+        intValue++;
+    }
+    Console.WriteLine(intValue);
+}
+AssigningWithLock();
+```
+Аби зменшити наклодні росходи можна використати статичний метод.
+```cs
+void UseInterlockedIncrement()
+{
+    int intValue = 5;
+    intValue = Interlocked.Increment(ref intValue);
+    Console.WriteLine(intValue);
+}
+UseInterlockedIncrement();
+```
+Зауважте, що метод Increment() не лише коригує значення вхідного параметра, але й повертає нове значення.
+
+Спробуємо виконати призначення. 
+```cs
+void UseInterlockedExchange()
+{
+    int intValue = 5;
+    Interlocked.Exchange(ref intValue,10);
+    Console.WriteLine(intValue);
+}
+UseInterlockedExchange();
+
+```
+Тип Interlocked за допомогою методу Exchange дозволяє атомарно призначати числові або об'єктні дані, уникаючи використання lock та Monitor.
+    
+Спробуємо зробити порівняння.
+```cs
+
+void UseInterlockedCompareExchange()
+{
+    int intValue = 5;
+    Interlocked.CompareExchange(ref intValue,15,5);
+    Console.WriteLine(intValue);
+
+    Interlocked.CompareExchange(ref intValue, 5, 10);
+    Console.WriteLine(intValue);
+}
+UseInterlockedCompareExchange();
+```
+```
+15
+15
+```
+Якшо треба зробити перевірку на еквівалентність і змінити початкову точку порівняння в  потокобезпечний спосіб, можна використати CompareExchange.  

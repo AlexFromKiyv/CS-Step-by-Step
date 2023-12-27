@@ -39,7 +39,30 @@ public class Printer
                 Thread.Sleep(100 * random.Next(5));
                 Console.Write($"{i} ");
             }
-        Console.WriteLine();
+            Console.WriteLine();
         }
     }
+
+    public void PrintNumbersWithMonitor()
+    {
+        Monitor.Enter(threadLock);
+        try
+        {
+            Console.WriteLine($"{Thread.CurrentThread.Name} is executing PrintNumbers()");
+
+            //Print out numbers.
+            for (int i = 0; i < 10; i++)
+            {
+                Random random = new();
+                Thread.Sleep(100 * random.Next(5));
+                Console.Write($"{i} ");
+            }
+            Console.WriteLine();
+        }
+        finally 
+        { 
+            Monitor.Exit(threadLock); 
+        } 
+    }
+
 }
