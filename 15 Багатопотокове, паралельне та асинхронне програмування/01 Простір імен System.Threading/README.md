@@ -819,3 +819,157 @@ UseInterlockedCompareExchange();
 15
 ```
 Якшо треба зробити перевірку на еквівалентність і змінити початкову точку порівняння в  потокобезпечний спосіб, можна використати CompareExchange.  
+
+## Виеористання Timer Callbacks.
+
+Багато програм потребують виклику певного методу протягом регулярного інтервалу часу. Наприклад у вас може бути програма, якій потрібно відображати поточний час в панелі стану за допомогою допоміжної функції. Як інший приклад, ви можете захотіти, щоб ваша програма час від часу викликала допоміжну функцію для виконання некритичних фонових завдань, таких як перевірка нових повідомлень електронної пошти. Для подібних ситуацій ви можете використовувати тип System.Threading.Timer у поєднанні з пов’язаним делегатом під назвою TimerCallback.
+
+Створемо проект який буде друкувати час кожну секунду.
+
+Для почастку створемо метод шо друкує час.
+```cs
+static void PrintTime(object? state)
+{
+
+    Console.Write($" {DateTime.Now.ToLongTimeString()} " +
+        $"ThreadID : {Thread.CurrentThread.ManagedThreadId} " +
+        $"{state?.ToString()}");
+
+    Console.SetCursorPosition(0, 1);
+    Console.CursorVisible = false;
+}
+PrintTime(null);
+```
+```
+ 12:47:52 ThreadID : 1
+```
+Зверніть увагу, що метод PrintTime() має один параметр типу System.Object і повертає void. Така сігнатура методу відповідає делегату TimerCallback. В якості аргументу можна передати будь-який тип виходячи з завдання методу (наприклад адрес почтового сервера, тощо ).Також зауважте, що враховуючи, що цей параметр справді є System.Object, ви можете передати кілька аргументів за допомогою System.Array або спеціального класу/структури.
+
+Далі налаштуємо екземпляр делегата TimerCallback і передамо його в об'єкт Timer.
+```cs
+void UseTimer()
+{
+    Console.WriteLine($"ThreadID : {Thread.CurrentThread.ManagedThreadId}");
+    // The TimerCallback delegate object.
+    TimerCallback timerCallback = new(PrintTime);
+
+    Timer timer = new Timer(
+        timerCallback,// The TimerCallback delegate object.
+        null,         // Any info to pass into the called method (null for no info).
+        0,            // Amount of time to wait before starting (in milliseconds).
+        1000);        // Interval of time between calls (in milliseconds).
+
+    Console.ReadLine();
+}
+```
+```
+ThreadID : 1
+ 12:49:13 ThreadID : 6
+```
+Зверніть увагу шо якшо не визивати Console.ReadLine(), тобто в основному потоці не вказати чеканя вводу сторки, програма закінчить роботу без запуску методу. Як видно метод виконується в окремому потоці. 
+В конструктор Timer можна додати інформацію, у вигляді System.Object, який буде передано цільовому методу делегата.
+
+```cs
+void UseTimerWithInformation()
+{
+    Console.WriteLine($"ThreadID : {Thread.CurrentThread.ManagedThreadId}");
+
+    TimerCallback timerCallback = new(PrintTime);
+
+    _ = new Timer(timerCallback,
+        "Good moment",  // Any info to pass into the called method (null for no info).
+        0,1000);
+
+    Console.ReadLine();
+}
+UseTimerWithInformation();
+```
+```
+ThreadID : 1
+ 12:52:09 ThreadID : 7 Good moment
+```
+Оскільки зміна типу Timer не використовується в жодному шляху виконання її можна видкинути викристовуючи _. 
+
+# Пул потоків.
+
+Створення додадкового потоку потребує затрат, тому з метою підвищення єфективності пул потоків зберігає створені потокі (але не активні), поки вони не знадобляться. Щоб дозволити вам взаємодіяти з цім пулом потоків, що очікують,в просторі імен System.Threading предоставляє клас ThreadPool. 
+Якшо ви хочете поставити виклик методу в чергу на виконання у робочому процесі у пулі, можна використати ThreadPool.QueueUserWorkItem метод. Цей метод було перезавантажено, щоб дозволити кірм екземпляра делегата, передати додадкові користувацьки дані.   
+
+```cs
+public static class ThreadPool
+{
+  ...
+  public static bool QueueUserWorkItem(WaitCallback callBack);
+  public static bool QueueUserWorkItem(WaitCallback callBack,
+                                      object state);
+}
+```
+Делегат WaitCallback може вказувати на будь-який метод, що приймає System.Object як єдиний параметр (що є необов'язкові дані стану) і нічого не повертає. Зауважте, що якщо ви не надаєте System.Object під час виклику QueueUserWorkItem(), середовище виконання .NET Core автоматично передає нульове значення.
+
+```cs
+static void UseQueueUserWorkItem()
+{
+    Thread primary = Thread.CurrentThread;
+    primary.Name = "Primary";
+
+    Console.WriteLine($"Main thread started.\n" +
+        $" Thread.CurrentThread.ManagedThreadId:{primary.ManagedThreadId}\n" +
+        $" Environment.CurrentManagedThreadId:{Environment.CurrentManagedThreadId}");
+
+    Printer printer = new();
+    printer.PrintNumbersWithLock();
+
+    WaitCallback workItem = new WaitCallback(PrintTheNumbers);
+
+    int length = 5;
+    for (int i = 0; i < length; i++)
+    {
+        ThreadPool.QueueUserWorkItem(workItem,printer);
+    }
+    Console.WriteLine("All tasks queued");
+    Console.ReadLine();
+
+    static void PrintTheNumbers(object? state)
+    {
+        if (state is Printer task)
+        {
+            task.PrintNumbersWithLock();
+        }
+    }
+}
+UseQueueUserWorkItem();
+```
+```
+Main thread started.
+ Thread.CurrentThread.ManagedThreadId:1
+ Environment.CurrentManagedThreadId:1
+Primary is executing PrintNumbers()
+0 1 2 3 4 5 6 7 8 9
+All tasks queued
+.NET TP Worker is executing PrintNumbers()
+0 1 2 3 4 5 6 7 8 9
+.NET TP Worker is executing PrintNumbers()
+0 1 2 3 4 5 6 7 8 9
+.NET TP Worker is executing PrintNumbers()
+0 1 2 3 4 5 6 7 8 9
+.NET TP Worker is executing PrintNumbers()
+0 1 2 3 4 5 6 7 8 9
+.NET TP Worker is executing PrintNumbers()
+0 1 2 3 4 5 6 7 8 9
+```
+В цьому випадку не створюється масив об'єктів Thread, а відбуваетья призначеня членам пула потоків callback який буде виконувати запуск цільового методу. 
+
+Використання пулу потоків, замість створеня окремих робочих потоків, має наступні переваги:
+
+    - Пул потоків ефективно крерує потоками, мінімізуючи кількість потоків, які потрібно створити , запустити та зупинити.
+
+    - Використовуючи пул потоків, ви можете зосередитися на своїй бізнес-проблемі, а не на потоковій інфраструктурі програми.
+
+
+Однак у деяких випадках краще використовувати керування потоками вручну:
+
+    - Якшо вам потрибен "foreground" потік або потрібно встановити пріорітет потоку.
+    - Якщо вам потрібен потік із фіксованим ідентифікатором, щоб перервати його, призупинити його або знайти його за назвою.
+    
+     
+
