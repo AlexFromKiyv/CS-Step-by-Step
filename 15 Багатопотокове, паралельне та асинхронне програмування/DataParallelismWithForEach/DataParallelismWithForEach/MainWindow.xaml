@@ -1,0 +1,39 @@
+﻿<Window x:Class="DataParallelismWithForEach.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DataParallelismWithForEach"
+        mc:Ignorable="d"
+        Title="Using Paralell Class" Height="400" Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Label Grid.Row="0" Grid.Column="0">
+            Feel free to type here while the images are processed...
+        </Label>
+        <TextBox Grid.Row="1" Grid.Column="0"  Margin="10,10,10,76"/>
+        <Grid Grid.Row="2" Grid.Column="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Button Name="cmdCancel" Grid.Column="0" Margin="65,0,665,0" Click="cmdCancel_Click" Height="20" VerticalAlignment="Center" Grid.ColumnSpan="2">
+                Cancel
+            </Button>
+            <Button Name="cmdProcessWithoutParalell" Grid.Row="0" Grid.Column="1" Margin="217,10,436,10"
+                    Click="cmdProcessWithoutParalell_Click">
+                Process without Parallel
+            </Button>
+            <Button x:Name="cmdProcessWithForEach" Grid.Row="0" Grid.Column="1" Margin="386,10,250,10"
+                    Click="cmdProcessWithForEach_Click" Content="Process with Paralell.ForEach"/>
+            <Button x:Name="cmdProcessWithTaskFactory" Grid.Column="1" Content="Process with TaskFactory" HorizontalAlignment="Left" Margin="564,0,0,0" VerticalAlignment="Center" Width="144" 
+                    Click="ProcessWithTaskFactory_Click"/>
+
+        </Grid>
+    </Grid>
+</Window>
