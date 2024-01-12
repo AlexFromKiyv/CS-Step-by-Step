@@ -114,7 +114,6 @@ using System.IO;
             {
                 string filename = Path.GetFileName(currentFile);
                 Title = $"Processing {filename} on thread: {Environment.CurrentManagedThreadId}";
-                Debug.WriteLine($"Processing {filename} on thread: {Environment.CurrentManagedThreadId}");
 
                 using Bitmap bitmap = new(currentFile);
                 bitmap.RotateFlip(RotateFlipType.Rotate180FlipNone);
@@ -162,7 +161,7 @@ using System.IO;
             });
         }
 ```
-В якості аргументів методу ForEach виступає масив рядків який є IEnumerable, та лямда вираз який теж саме що і об'єкт делегату Action<string>. Якшо програму запустити а режимі налагодженя то в віконці Debuger можна побачити, що оброба зображень ведеться в різних потоках. Також можна побачити шо час обробкі меньший попередьного варіанта це виводиться в заголовку програми.(можна зрівняти кількість операторів поставиши коментар на одній строчці).
+В якості аргументів методу ForEach виступає масив рядків який є IEnumerable, та лямда вираз який теж саме що і об'єкт делегату Action<string>. Якшо програму запустити а режимі налагодженя то в віконці Debuger можна побачити, що оброба зображень ведеться в різних потоках. Також можна побачити шо час обробкі меньший попередьного варіанта це виводиться в заголовку програми.(можна зрівняти кількість операторів поставиши коментар на одній строчці). Але поки під час обробки зображень не можно одночасно міняти текстове поле.
 
 ### Доступ до елементів інтерфейсу користувача у вторинних потоках.
 
@@ -187,45 +186,131 @@ Eлементи керування GUI мають «спорідненість �
 
         private void ProcessWithTaskFactory_Click(object sender, RoutedEventArgs e)
         {
-            Title = $"Starting...";
-            var watch = Stopwatch.StartNew();
             Task.Factory.StartNew(ProcessFilesWithForEachAndTask);
             //Or
             //Task.Factory.StartNew(() => ProcessFilesWithForEachAndTask());
-            watch.Stop();
-            Title = $"Processing complite. Time: {watch.ElapsedMilliseconds}";
         }
 
 ```
 ```cs
-private void ProcessFilesWithForEachAndTask()
-{
-    string pictureDirectory = @"D:\Pictures";
-    string outputDirectory = @"D:\ModifiedPictures";
+        private void ProcessFilesWithForEachAndTask()
+        {
+            string pictureDirectory = @"D:\Pictures";
+            string outputDirectory = @"D:\ModifiedPictures";
 
-    //Recreate directory 
-    if (Directory.Exists(outputDirectory))
-    {
-        Directory.Delete(outputDirectory, true);
-    }
-    Directory.CreateDirectory(outputDirectory);
+            //Recreate directory 
+            if (Directory.Exists(outputDirectory))
+            {
+                Directory.Delete(outputDirectory, true);
+            }
+            Directory.CreateDirectory(outputDirectory);
 
-    //Process
-    string[] files = Directory.GetFiles(pictureDirectory, "*.jpg", SearchOption.AllDirectories);
+            //Process
+            string[] files = Directory.GetFiles(pictureDirectory, "*.jpg", SearchOption.AllDirectories);
 
-    Parallel.ForEach(files, currentFile =>
-    {
-        string filename = Path.GetFileName(currentFile);
-        Debug.WriteLine($"Processing {filename} on thread: {Environment.CurrentManagedThreadId}");
+            Parallel.ForEach(files, currentFile =>
+            {
+                string filename = Path.GetFileName(currentFile);
+                int threadId = Environment.CurrentManagedThreadId;
 
-        using Bitmap bitmap = new(currentFile);
-        bitmap.RotateFlip(RotateFlipType.Rotate180FlipNone);
-        bitmap.Save(Path.Combine(outputDirectory, filename));
-    });
-    Debug.WriteLine("Process complete.");
-}
+                Dispatcher?.Invoke(() =>
+                {
+                    Title = $"Processing. Thread:{threadId}   File:{filename}";
+                });
+
+                using Bitmap bitmap = new(currentFile);
+                bitmap.RotateFlip(RotateFlipType.Rotate180FlipNone);
+                bitmap.Save(Path.Combine(outputDirectory, filename));
+            });
+            Dispatcher?.Invoke(() => { Title = "Process complete"; });
+        }
 ```
 
 Клас Task репрезентує асінхроні операції. Його властивість Factory повертає об'єкт TaskFactory, я кий дозволяє створювати і кофігурувати об'єкти Task або Task<TResult>.
 Коли визивається метод StartNew пердається об'єкт делегату Action<T> або відповідний лямбда-вираз, який вказує на метод який треба виконати в асінхроній манері.
-Якшо запустити програму в режимі налагодження (debbuging) після натисканя кнопки можна побачити як оброблюються зображеня (в віконці Debug) той самий час вводити дані в текстове поле.  
+Об'єкт Dispatcher є екземпляром батьківського класу WPF. Він дозволяє визвати метод що оновить інтерфейс користувача. Тепер можно бачити процес обробки зображень та змінювати текстове поле одночасно.
+
+## Обробка запиту на сказуваня обробку.
+
+Якщо зображень для обробки буде дуже багато, може виникнути бажаня закінчити процес не дочекавчись його завершення. Тобто треба дозволити користувачу преравти процес обробки зображень при виконаниі циклу за допомогою кнопки Cencel.  Методи Parallel.For() та Parallel.ForEach() підтримують скасування за допомогою маркерів(token) скасування. Коли ви викликаєте методи Parallel, можна передати об'єкт ParalellOptions, який в свою чергу містить об'єкт CancellationTokenSource.
+
+С початку додамо приватну зміну-член класу MainWindow.
+
+```cs
+    public partial class MainWindow : Window
+    {
+        private CancellationTokenSource _cancellationTokenSource;
+    ...
+    }    
+```
+Додамо кнопку і обробники.
+```
+            <Button x:Name="cmdProcessWithCancellation" Grid.Column="1" Content="Process with Cancellation" HorizontalAlignment="Left" Margin="586,0,0,0" VerticalAlignment="Center" Width="142" 
+                Click="ProcessWithCancellation_Click"/>
+```
+```cs
+        private void ProcessWithCancellation_Click(object sender, RoutedEventArgs e)
+        {
+            Task.Factory.StartNew(ProcessFilesWithCancellation);
+        }
+        private void cmdCancel_Click(object sender, RoutedEventArgs e)
+        {
+            // This will be used to tell all the worker threads to stop!
+            _cancellationTokenSource?.Cancel();
+        }
+```
+```cs
+        private void ProcessFilesWithCancellation()
+        {
+            _cancellationTokenSource = new();
+
+            string pictureDirectory = @"D:\Pictures";
+            string outputDirectory = @"D:\ModifiedPictures";
+
+            // Use ParallelOptions instance to store the CancellationToken.
+            ParallelOptions parallelOptions = new ParallelOptions();
+            parallelOptions.CancellationToken = _cancellationTokenSource.Token;
+            parallelOptions.MaxDegreeOfParallelism = Environment.ProcessorCount;
+
+            //Recreate directory 
+            if (Directory.Exists(outputDirectory))
+            {
+                Directory.Delete(outputDirectory, true);
+            }
+            Directory.CreateDirectory(outputDirectory);
+
+            //Process
+            string[] files = Directory.GetFiles(pictureDirectory, "*.jpg", SearchOption.AllDirectories);
+
+            try
+            {
+                Parallel.ForEach(files, parallelOptions, currentFile =>
+                {
+                    parallelOptions.CancellationToken.ThrowIfCancellationRequested();
+                    
+                        string filename = Path.GetFileName(currentFile);
+                        int threadId = Environment.CurrentManagedThreadId;
+
+                        Dispatcher?.Invoke(() =>
+                        {
+                            Title = $"Processing. Thread:{threadId}   File:{filename}";
+                        });
+
+                        using Bitmap bitmap = new(currentFile);
+                        bitmap.RotateFlip(RotateFlipType.Rotate180FlipNone);
+                        bitmap.Save(Path.Combine(outputDirectory, filename));
+                    
+                });
+                Dispatcher?.Invoke(() => { Title = "Process complete"; });
+            }
+            catch(OperationCanceledException ex)
+            {
+                Dispatcher?.Invoke(() => { Title = $"Process canceled! {ex.Message}"; });
+            } 
+        }
+```
+Зауважте, що метод обробки починається із налаштування об’єкта ParallelOptions, встановлюючи властивість CancellationToken на використання маркера CancellationTokenSource. Також зауважте, що коли викликається метод Parallel.ForEach(), передається об’єкт ParallelOptions як другий параметр.
+В середині циклу перевіряється чи не нвзначено в токені скасування. Якшо так викидається виняток і всі потоку зупиняються. Потім виняток перехоплюється і виводиться напис на заголовок.
+
+
+

@@ -22,17 +22,19 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <Button Name="cmdCancel" Grid.Column="0" Margin="65,0,665,0" Click="cmdCancel_Click" Height="20" VerticalAlignment="Center" Grid.ColumnSpan="2">
+            <Button Name="cmdCancel" Grid.Column="0" Margin="19,0,711,0" Click="cmdCancel_Click" Height="20" VerticalAlignment="Center" Grid.ColumnSpan="2">
                 Cancel
             </Button>
-            <Button Name="cmdProcessWithoutParalell" Grid.Row="0" Grid.Column="1" Margin="217,10,436,10"
+            <Button Name="cmdProcessWithoutParalell" Grid.Row="0" Grid.Column="1" Margin="124,10,537,10"
                     Click="cmdProcessWithoutParalell_Click">
                 Process without Parallel
             </Button>
-            <Button x:Name="cmdProcessWithForEach" Grid.Row="0" Grid.Column="1" Margin="386,10,250,10"
-                    Click="cmdProcessWithForEach_Click" Content="Process with Paralell.ForEach"/>
-            <Button x:Name="cmdProcessWithTaskFactory" Grid.Column="1" Content="Process with TaskFactory" HorizontalAlignment="Left" Margin="564,0,0,0" VerticalAlignment="Center" Width="144" 
+            <Button x:Name="cmdProcessWithForEach" Grid.Row="0" Grid.Column="1" Margin="277,10,371,10"
+                    Click="cmdProcessWithForEach_Click" Content="Process with ForEach"/>
+            <Button x:Name="cmdProcessWithTaskFactory" Grid.Column="1" Content="Process with TaskFactory" HorizontalAlignment="Left" Margin="450,0,0,0" VerticalAlignment="Center" Width="149" 
                     Click="ProcessWithTaskFactory_Click"/>
+            <Button x:Name="cmdProcessWithCancellation" Grid.Column="1" Content="Process with Cancellation" HorizontalAlignment="Left" Margin="621,0,0,0" VerticalAlignment="Center" Width="142" 
+                Click="ProcessWithCancellation_Click"/>
 
         </Grid>
     </Grid>
