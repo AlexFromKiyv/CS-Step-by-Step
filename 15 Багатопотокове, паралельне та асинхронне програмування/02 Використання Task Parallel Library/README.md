@@ -313,4 +313,118 @@ Eлементи керування GUI мають «спорідненість �
 В середині циклу перевіряється чи не нвзначено в токені скасування. Якшо так викидається виняток і всі потоку зупиняються. Потім виняток перехоплюється і виводиться напис на заголовок.
 
 
+## Паралелізм Task за допомогою класу Parallel.
+
+Окрім пралелізму даних, TPL можна використовувати для легкого запуску будь-якої кількості асінхроних завдань за допомогою методу Parallel.Invoke(). Цей підхід є трохи більш простим, ніж використання членів із System.Threading; однак, якщо вам потрібен більший контроль над тим, як виконуються завдання, ви можете відмовитися від використання Parallel.Invoke() і використовувати безпосередньо клас Task, як це було в попередньому прикладі.
+Спробуємо отримати загальнодоступну електрону книгу, а потім паралельно виконати набір тривалих завдань.
+
+```cs
+void DownloadBookAndGetStatistic()
+{
+    string _textEbook = string.Empty;
+    GetBook();
+    Console.WriteLine("Downloding book ... ");
+    Console.ReadLine();
+
+
+    void GetBook()
+    {
+        using WebClient webClient = new WebClient();
+        webClient.DownloadStringCompleted += (s, eArgs) =>
+        {
+            _textEbook = eArgs.Result;
+            Console.WriteLine("Download complete.");
+            GetStats();
+        };
+        webClient.DownloadStringAsync(new Uri("http://www.gutenberg.org/files/98/98-0.txt"));
+    }
+
+    void GetStats()
+    {
+        string[] words = _textEbook.Split(new char[] { ' ', '\u000A', ',', '.', ';', ':', '-', '?', '/' },StringSplitOptions.RemoveEmptyEntries);
+
+
+        string[] tenMostCommon = [];
+        string longestWord = string.Empty;
+
+        // Witout Parallel
+        //tenMostCommon = FindTenMostCommon(words);
+        //longestWord = FindLongestWord(words);
+
+        Parallel.Invoke(
+            () => { tenMostCommon = FindTenMostCommon(words); },
+            () => { longestWord = FindLongestWord(words); }
+            );
+
+        StringBuilder stringBuilder = new StringBuilder("Ten most common words are:\n");
+
+        foreach (var word in tenMostCommon)
+        {
+            stringBuilder.AppendLine(word);
+        }
+
+        stringBuilder.AppendLine($"Longest word is: {longestWord}");
+
+        Console.WriteLine(stringBuilder.ToString(),"Book info");
+    }
+
+    string[] FindTenMostCommon(string[] words)
+    {
+        var frequencyOrder = from word in words
+                             where word.Length > 6
+                             group word by word into g
+                             orderby g.Count() descending
+                             select g.Key;
+        string[] result = frequencyOrder.Take(20).ToArray();
+        return result; 
+    }
+
+    string FindLongestWord(string[] words)
+    {
+        var query = from word in words
+                    orderby word.Length descending
+                    select word;
+        return query.FirstOrDefault()!;
+    }
+
+}
+DownloadBookAndGetStatistic();
+```
+```
+Downloding book ...
+Download complete.
+Ten most common words are:
+Defarge
+himself
+Manette
+through
+nothing
+business
+another
+looking
+prisoner
+Cruncher
+Stryver
+CHAPTER
+without
+Monsieur
+Monseigneur
+Tellson's
+Charles
+returned
+husband
+Gutenberg
+Longest word is: undistinguishable
+```
+Клас WebClient є членом System.Net. Він застарілий клас і використовується для прикладу. Цей клас надає методи для надсилання даних і отримання даних з ресурсу, визначеного URI. Як виявилося, багато з цих методів мають асинхронну версію, наприклад DownloadStringAsync(). Цей метод автоматично створить новий потік із пулу потоків .NET Core Runtime. 
+В прикладі додадно обробнип події на закінченя завантаженя у вигляді лямда виразу. 
+Якщо викликаєи синхронну версію цього методу (DownloadString()), повідомлення «Download complete.» не відображатиметься, доки не завершиться завантаження. 
+Виклик обробників масиву слів можна виконати використвани метод Invoкe класу Parallel. Метод очікує масиву з об'єктами типу делегат Action<> або лямбда-виразів. Перевага полягає в тому, що TPL тепер використовуватиме всі можливі процесори на машині для виклику кожного методу паралельно, якщо це можливо. 
+
+
+
+
+
+
+
 
