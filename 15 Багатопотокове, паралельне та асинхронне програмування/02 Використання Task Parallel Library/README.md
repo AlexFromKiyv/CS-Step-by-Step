@@ -422,6 +422,162 @@ Longest word is: undistinguishable
 Виклик обробників масиву слів можна виконати використвани метод Invoкe класу Parallel. Метод очікує масиву з об'єктами типу делегат Action<> або лямбда-виразів. Перевага полягає в тому, що TPL тепер використовуватиме всі можливі процесори на машині для виклику кожного методу паралельно, якщо це можливо. 
 
 
+## Паралельні запити LINQ (PLINQ)
+
+Є інший спосіб, яким ви можете включити паралельні завдання у свої програми. Можна використати набір методів розширення, які дозволяють створювати запити LINQ, який виконуватиме робочі навантаження паралельно.Відповідно, запити LINQ, розроблені для паралельного виконання, називаються запитами PLINQ. Подібно до паралельного коду, створеного за допомогою класу Parallel, у PLINQ є можливість ігнорувати ваш запит на паралельну обробку колекції, якщо це необхідно.
+Під час виконання PLINQ аналізує загальну структуру запиту, і якщо розпаралелювання виграє від запиту, він виконуватиметься одночасно.Однак, якщо розпаралелювання запиту погіршить продуктивність, PLINQ просто виконує запит послідовно.Якщо PLINQ має вибір між потенційно дорогим паралельним алгоритмом або недорогим послідовним алгоритмом, він вибирає послідовний алгоритм за замовчуванням.
+Необхідні методи розширення знаходяться в класі ParallelEnumerable простору імен System.Linq.
+Деякі корисні розширення PLINQ.
+
+    AsParallel() : Вказує, що решту запиту слід розпаралелювати, якщо це можливо
+
+    WithCancellation() : Вказує, що PLINQ має періодично відстежувати стан наданого маркера скасування та скасовувати виконання, якщо це запитується
+
+    WithDegreeOfParallelism() : Визначає максимальну кількість процесорів, які PLINQ має використовувати для розпаралелювання запиту
+
+    ForAll() : Дозволяє паралельно обробляти результати без попереднього злиття з потоком споживача, як у випадку перерахування результату LINQ за допомогою ключового слова foreach
+
+Спробуємо створити запит з використанням звичайної так і паралельної роботи.
+
+PLINQDataProcessing\Program.cs
+```cs
+void UsingPLINQ()
+{
+    Console.WriteLine("Processing");
+    Task.Factory.StartNew(ProcessingIntData);
+    Task.Factory.StartNew(ProcessingIntDataWithPLINQ);
+    Console.ReadKey();
+
+
+    void ProcessingIntData()
+    {
+        // Get a very large array of integers.
+        int[] ints = Enumerable.Range( 0, 100_000_000 ).ToArray();
+
+        // Find the numbers where num % 3 == 0 is true, returned
+        // in descending order.
+        var query = from number in ints
+                    where number%3 == 0
+                    orderby number descending
+                    select number;
+
+        var watch = Stopwatch.StartNew();
+        
+        int[] modThreeIsZero = query.ToArray();
+  
+        watch.Stop();
+        Console.WriteLine($"Time:{watch.ElapsedMilliseconds}");
+        Console.WriteLine($"\tAmount:{modThreeIsZero.Count()}");
+    }
+
+    void ProcessingIntDataWithPLINQ()
+    {
+        // Get a very large array of integers.
+        int[] ints = Enumerable.Range(0, 100_000_000).ToArray();
+        // Find the numbers where num % 3 == 0 is true, returned
+        // in descending order.
+
+        var query = from number in ints.AsParallel()
+                    where number % 3 == 0
+                    orderby number descending
+                    select number;
+
+        var watch = Stopwatch.StartNew();
+
+        int[] modThreeIsZero = query.ToArray();
+
+        watch.Stop();
+        Console.WriteLine($"With Paralell\nTime:{watch.ElapsedMilliseconds}");
+        Console.WriteLine($"\tAmount:{modThreeIsZero.Count()}");
+    }
+
+}
+UsingPLINQ();
+
+```
+```
+Processing
+With Paralell
+Time:14680
+        Amount:33333334
+Time:20064
+        Amount:33333334
+```
+При виконані запускаються два завдання які відрізняються запитом який досліджує великий масив. Включивши виклик AsParallel(), TPL намагатиметься передати навантаження на будь-який доступний ЦП. Зверніть увагу що якщо навантаженя невеликі то затрати на те, шоб зробити обробку паралельною, займають більше часу ніж звичайна обробка. Це можна побачит зменьшивши об'єм масиву.
+
+### Скасування виконання запиту PLINQ.
+
+Також можна використовувати об’єкт CancellationTokenSource, щоб повідомити запиту PLINQ припинити обробку за правильних умов (як правило, через втручання користувача).
+```cs
+void CancellationPLINQ()
+{
+    CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+    
+    Console.WriteLine("Processing ...");
+    Task.Factory.StartNew(ProcessingIntDataWithPLINQAndCancellation);
+    
+    Console.Write("To cancel press Q:");
+    string? answer = Console.ReadLine();
+    if (answer != null && answer.Equals("Q", StringComparison.OrdinalIgnoreCase))
+    {
+        _cancellationTokenSource.Cancel();
+    }
+    Console.ReadLine();
+
+    void ProcessingIntDataWithPLINQAndCancellation()
+    {
+
+        int[] ints = Enumerable.Range(0, 100_000_000).ToArray();
+
+        var query = from number in ints.AsParallel().WithCancellation(_cancellationTokenSource.Token)
+                    where number % 3 == 0
+                    orderby number descending
+                    select number;
+        try
+        {
+            var watch = Stopwatch.StartNew();
+
+            int[] modThreeIsZero = query.ToArray();
+
+            watch.Stop();
+            Console.WriteLine($"\nWith Paralell\nTime:{watch.ElapsedMilliseconds}");
+            Console.WriteLine($"\tAmount:{modThreeIsZero.Count()}");
+        }
+        catch (OperationCanceledException ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+}
+CancellationPLINQ();
+```
+```
+Processing ...
+To cancel press Q:
+With Paralell
+Time:12724
+        Amount:33333334
+
+```
+```
+Processing ...
+To cancel press Q:q
+The query has been canceled via the token supplied to WithCancellation.
+```
+На рівні де створюєьбся завданя повинен бути доступний об'єкт CancellationTokenSource. На цьомуж рівні відбуваеться опитування користувача на необхіжність скасування.
+При створенні запиту ми вказуємо що він повинен стежити за вхідним запитом на скасування. Церобиться в ланцюгу виклику об'єктів розширення. Маркер передається в метод WithCancellation.
+
+```cs
+        var query = from number in ints.AsParallel().WithCancellation(_cancellationTokenSource.Token)
+                    where number % 3 == 0
+                    orderby number descending
+                    select number;
+```
+При відміні виникає виняток який треба обробити. Як показує приклад відмінити обробку можна за період часу який показує обробник без скасування.
+
+## Асинхронні виклики з використанням шаблону async/await.
+
+
 
 
 
