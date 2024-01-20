@@ -7,12 +7,399 @@
 
 У сукупності типи System.Threading.Tasks називають бібліотекою паралельних завдань. TPL автоматично динамічно розподілятиме робоче навантаження вашої програми між доступними ЦП, використовуючи пул потоків виконання. TPL обробляє розподіл роботи, планування потоків, керування станом та інші деталі низького рівня. Результатом є те, що ви можете максимізувати продуктивність своїх програм .NET Core, захищаючись від багатьох складнощів безпосередньої роботи з потоками.
 
-## Роль класу Parallel.
+## Класс Task.
 
-Ключовим класом TPL є System.Threading.Tasks.Parallel. Цей клас містить методи які дозволяють перебирати колекцію даних (зокрема, об'єкт що реалізовує IEnumerable<T>) в паралельний спосіб. Це робиться за допомогою двох основних статичних методів, Parallel.For() та Parallel.ForEach(), кожен з яких визначає численні презавантажені версії. 
+В основі TPL лежить концепція завдань, які представняють собою окреме довге навантаження. Для завдань існує клас Task з простору імен System.Threading.Tasks. Цей клас використовується для асінхроного запуску окремого навантаження в одному з потоків із 
+пулу. Також завдання можна виконати і синхроно.
+
+### Створення і запуск завдання.
+
+Завдання можно створити і запустити декількома способами:
+
+UsingTask\Programm.cs
+```cs
+void RunTask()
+{
+    Task task1 = new Task(() => { Console.WriteLine($"Task 1 on {Thread.CurrentThread.ManagedThreadId}");});
+    task1.Start();
+
+    Task task2 = Task.Factory.StartNew(() => { Console.WriteLine($"Task 2 on {Thread.CurrentThread.ManagedThreadId}"); ; ;});
+
+    Task task3 = Task.Run(() => { Console.WriteLine($"Task 3 on {Thread.CurrentThread.ManagedThreadId} "); });
+
+    task1.Wait();
+    task2.Wait();
+    task3.Wait();
+
+}
+RunTask();
+
+``` 
+```
+Task 1 on 6
+Task 3 on 8
+Task 2 on 7
+```    
+Якшо не використовувати метод Wait завдання основного потоку закінчитися бистріше аніж виконається завдання окремих потоків. 
+
+Цей метод блокує поток в якому викликається завданя поки вона не виконається 
+```cs
+
+void UsingWait()
+{
+    Console.WriteLine("Main thread.");
+    
+    Task task = new(()=>
+    {
+        Console.WriteLine("Start Task.");
+        Thread.Sleep(1000);
+        Console.WriteLine("End Task.");
+
+    });
+    task.Start();
+    task.Wait();
+
+    Console.WriteLine("End main thread."  );
+}
+UsingWait();
+```
+```
+Main thread.
+Start Task.
+End Task.
+End main thread.
+```
+Класс Task має певні властивості.
+```cs
+void PropertyOfTask()
+{
+    Console.WriteLine("Main thread.");
+
+    Task task = new(() =>
+    {
+        Console.WriteLine($"Id: {Task.CurrentId}");
+        Thread.Sleep(1000);
+    });
+    task.Start();
+
+    Console.WriteLine($"Id: {task.Id}");
+    Console.WriteLine($"IsCompleted: {task.IsCompleted}");
+    Console.WriteLine($"IsFaulted: {task.IsFaulted}");
+    Console.WriteLine($"IsCanceled: {task.IsCanceled}");
+    Console.WriteLine($"Status: {task.Status}");
+
+    task.Wait();
+
+    Console.WriteLine("End main thread.");
+}
+PropertyOfTask();
+
+```
+```
+Main thread.
+Id: 1
+IsCompleted: False
+Id: 1
+IsFaulted: False
+IsCanceled: False
+Status: Running
+End main thread.
+
+```
+
+Одне завдання може мати внутрішне завдання.
+```cs
+void InnerTask()
+{
+    Console.WriteLine("Start main");
+    Task outer = Task.Factory.StartNew(() =>
+    {
+        Console.WriteLine("Outer task starting.");
+
+        Task inner = Task.Factory.StartNew(() =>
+        {
+            Console.WriteLine("Inner task starting.");
+            Thread.Sleep(1000);
+            Console.WriteLine("Inner task finished.");
+        });
+        //inner.Wait();
+        Console.WriteLine("Outer task finished.");
+    });
+    outer.Wait();
+    Console.WriteLine("End main");
+}
+InnerTask();
+```
+```
+Start main
+Outer task starting.
+Outer task finished.
+End main
+```
+Задачі виконуються незалежно одна від одної. Як видно з прикладу внутрішне зовнішне завдання може закінчитись не дочекавшись виконання внутрішнього.
+
+Можна вказати внутрішньому завданню що вона є частиною зовнішнього.
+```cs
+void InnerTaskAsPartOuter()
+{
+    Console.WriteLine("Start main");
+    Task outer = Task.Factory.StartNew(() =>
+    {
+        Console.WriteLine("Outer task starting.");
+
+        Task inner = Task.Factory.StartNew(() =>
+        {
+            Console.WriteLine("Inner task starting.");
+            Thread.Sleep(1000);
+            Console.WriteLine("Inner task finished.");
+        },TaskCreationOptions.AttachedToParent);
+
+        Console.WriteLine("Outer task finished.");
+    });
+    outer.Wait();
+    Console.WriteLine("End main");
+}
+InnerTaskAsPartOuter();
+```
+```
+Start main
+Outer task starting.
+Outer task finished.
+Inner task starting.
+Inner task finished.
+End main
+```
+При створені завдання вказується додадковий параметр TaskCreationOptions.AttachedToParent.
+
+Якшо маємо масив завдань можемо їх запустити і вказати основному потоку шо треба дочекатись аби всі завдання закінчились.
+```cs
+void ArrayOfTasks()
+{
+    Task[] tasks =
+    [
+        new Task( () => 
+        {
+            Console.WriteLine("Task 1 started.");
+            Thread.Sleep(5000); 
+            Console.WriteLine("Task 1 finished.");}),
+
+        new Task(() =>
+        {
+            Console.WriteLine("Task 2 started.");
+            Thread.Sleep(5000);
+            Console.WriteLine("Task 2 finished.");
+        }),
+        new Task(() =>
+        {
+            Console.WriteLine("Task 3 started.");
+            Thread.Sleep(5000);
+            Console.WriteLine("Task 3 finished.");
+        }),
+
+    ];
+
+    for (int i = 0; i < 3; i++)
+    {
+        tasks[i].Start();
+    }
+
+    Task.WaitAll(tasks);
+}
+ArrayOfTasks();
+```
+```
+Task 3 started.
+Task 1 started.
+Task 2 started.
+Task 2 finished.
+Task 3 finished.
+Task 1 finished.
+```
+В синхронному виклику навантаженя потребувало б в три рази більше часу.
+
+### Повернення результату виконаного завдання.
+
+Об'єкт Task може повертати результат виконання завдання.
+
+```cs
+void ObtainingTheResultOfTheTask()
+{
+    Console.Write($"Thread:{Thread.CurrentThread.ManagedThreadId} Enter number :");
+    
+    int.TryParse(Console.ReadLine(),out int x);
+
+    Task<int> squareTask = new(() =>
+    {
+        Console.WriteLine($"Thread:{Thread.CurrentThread.ManagedThreadId}");
+        Thread.Sleep(5000);
+        return x*x;
+    });
+
+    squareTask.Start();
+
+    int result = squareTask.Result;
+
+    Console.WriteLine($"Result:{result}");
+}
+ObtainingTheResultOfTheTask();
+```
+```
+Thread:1 Enter number :10
+Thread:6
+Result:100
+```
+Для того щоб завдання повернула результат його треба типізувати типом який хочемо отримати. При звернені до власитвості task.Result поточний потік призупиняється і чекає виконання завданя в якому буде визначено результат. 
+
+### Завдання на продовження.
+
+Завдання може бути виконанне після виконання іншого. Воно може отримати від іншого завдання результату.
+
+```cs
+void ContinuationTask()
+{
+    Task firstTask = new Task(() => Console.WriteLine($"Task Id:{Task.CurrentId}") );
+
+    Task nextTask = firstTask.ContinueWith(AboutTask);
+
+    firstTask.Start();
+
+    nextTask.Wait();
+
+    void AboutTask(Task task)
+    {
+        Console.WriteLine($"Current Task Id:{Task.CurrentId}");
+        Console.WriteLine($"Previous Task Id:{task.Id}");
+    }
+}
+ContinuationTask();
+```
+```
+Task Id:1
+Current Task Id:2
+Previous Task Id:1
+```
+Це нагадує callback. Після виконання першого завдання викликається інше завдання. В метод наступного передається викоанане завдання.
+
+Завданна на продовження може оримати результат від попередьнього завдання.
+
+```cs
+void ContinuationTaskWithValue()
+{
+    int t = 5000;
+
+    Task<int> squareTask = new(() =>
+    {
+        Console.WriteLine($"Task {Task.CurrentId} says: I'm starting"  );
+        Thread.Sleep(t);
+        return t;
+    });
+
+    Task nextTask = squareTask.ContinueWith(task => PrintResult(task.Result));
+
+    squareTask.Start();
+
+    Console.ReadLine();
+
+    void PrintResult(int result)
+    {
+        Console.WriteLine($"Task {Task.CurrentId} says: I waited {result} ");
+    }
+ }
+ContinuationTaskWithValue();
+
+```
+```
+Task 1 says: I'm starting
+Task 2 says: I waited 5000
+```
+Маючи таку можливість можна побудувати ланцюг завдань.
+```cs
+void ChainOfTask()
+{
+    Task firstTask = new(() => AboutTask(null));
+
+    Task secondTask = firstTask.ContinueWith(AboutTask);
+
+    Task thirdTask = secondTask.ContinueWith(AboutTask);
+
+    firstTask.Start();
+
+    Console.ReadLine();
+
+    void AboutTask(Task? task) =>
+        Console.WriteLine($"Current Task:{Task.CurrentId}  Previous Task:{task?.Id}");
+}
+ChainOfTask();
+```
+```
+Current Task:1  Previous Task:
+Current Task:2  Previous Task:1
+Current Task:3  Previous Task:2
+```
+
+
+## Класу Parallel.
+
+Важливим класом TPL є System.Threading.Tasks.Parallel.
+
+Найпростіше запустити завдання паралельно можна за допомогою методу Invoke.
+```cs
+void SimpleUsingInvoke()
+{
+    Parallel.Invoke(
+        () => {
+            Console.WriteLine($"Task:{Task.CurrentId}");
+            Thread.Sleep(3000);
+            Console.WriteLine("Hi");
+
+        },        
+        ()=>SayWithDelay("girl",5000),
+        
+        SayGoodbay       
+        );
+
+    void SayGoodbay()
+    {
+        SayWithDelay("Goodbay", 8000);
+    }
+    
+    void SayWithDelay(string phrase, int delay) 
+    {
+        AboutTask();
+        Thread.Sleep(delay);
+        Console.WriteLine(phrase);
+    }
+
+    void AboutTask()
+    {
+        Console.WriteLine($"Task:{Task.CurrentId}");
+    }
+    
+}
+SimpleUsingInvoke();
+```
+```
+Task:3
+Task:2
+Task:1
+Hi
+girl
+Goodbay
+```
+В якості параметру метод Invoce отримує params Action[]. Таким чином ми можемо пердати методи яки середовище буде виконувати паралельно.
+
+## Скасування паралельних завдань.
+
+Іноді виникає потреба скасувати виконання дуже довгого завдання. В просторі імен System.Threading визначена стуктура CancellationToken яка поширює сповіщення про те, що операції мають бути скасовані. 
+
+
+
+## Parallel.For() та Parallel.ForEach()
+
+Клас Paralell містить методи які дозволяють перебирати колекцію даних (зокрема, об'єкт що реалізовує IEnumerable<T>) в паралельний спосіб. Це робиться за допомогою двох основних статичних методів, Parallel.For() та Parallel.ForEach(), кожен з яких визначає численні презавантажені версії. 
 Ці методи дозволяють створювати тіло набору операторів коду,які оброблятимуться в паралельним способом. За концепцією, ці оператори мають таку саму логіку яку б ви написали в звичайній конструкції переблору(for , foreach). Корсить в тому що клас Parallel витягуватиме потокі з пулу потоків(і куруватимеме паралелізмом) від вашого імені.
 Обидва методи вимагають вказати IEnumerable або  IEnumerable<T> сумісний контейнер, якій містить дані, які потрібно обробити в параллельній манері. Це може бути простий масив, неузагальнена колекція(наприклад ArrayList), узагальнена коллекція(наприклад List<T>) або результат запиту LINQ.
-Крім того, вам потрібно буде використовувати делегати System.Func<T> та System.Action<T> щоб указати цільовий метод, який буде викликано для обробки даних. 
+Крім того, вам потрібно буде використовувати делегати Func<T> або Action<T> щоб указати цільовий метод, який буде викликано для обробки даних. 
 Згадайте, що Func<T> представляє метод, який може мати задане повертане значення та різну кількість аргументів. Делегат Action<T> схожий на Func<T>, оскільки він дозволяє вказувати на метод, який приймає певну кількість параметрів. Однак Action<T> визначає метод, який може повертати лише void. Хоча ви можете викликати методи Parallel.For() і Parallel.ForEach() і передати строго типізований об’єкт делегату Func<T> або Action<T>, ви можете спростити своє програмування, використовуючи відповідний анонімний метод C# або лямбда-вираз.
 
 ## Паралелізм даних із класом Paralell
@@ -577,7 +964,80 @@ The query has been canceled via the token supplied to WithCancellation.
 
 ## Асинхронні виклики з використанням шаблону async/await.
 
+Ключове слово async використовується для визначення того, що метод , лямбда-вираз аьо анонімний метод повинні викликатися в асінхронному режимі автоматично. Просто позначивши метод модифікатором async, .NET Core Runtime створить новий потік виконання для вирішення поточного завдання. Крім того, коли ви викликаєте асинхронний метод, ключове слово await автоматично призупинить поточний потік від будь-якої подальшої діяльності до завершення завдання, залишаючи потік, що викликає, вільним для продовження.
 
+Припустимо у нас є метод який щось довго робить. Для ємуляції пусть виглядає так:
+
+AsyncAwait\SimpleUsingAsyncAwait\Program.cs
+
+```cs
+static string DoLongWork()
+{
+    Thread.Sleep(3000);
+    return "Done with work!";
+}
+```
+Якшо цей метод використовувати послідовно з іншими завданнями весь хід роботи (може і інтерфейс корстувача) буде зупинено і треба буде чекати. 
+
+```cs
+void SlowWork()
+{
+    Console.WriteLine(DoLongWork());
+    Console.Write("You can enter something:");
+    Console.ReadLine();
+
+    static string DoLongWork()
+    {
+        Console.WriteLine("I star to do long work!");
+        Thread.Sleep(5000);
+        return "Done with work!";
+    }
+}
+SlowWork();
+```
+
+```
+I star to do long work!
+Done with work!
+You can enter something:hi
+```
+
+Можна самому кодувати процес відділеня завданя від основного потоку але це може зробити за вас середовише. Для цього можна використати згадані ключові слова.
+
+```cs
+static async Task<string> DoLongWorkAsync()
+{
+    return await Task.Run(() =>
+    {
+        Console.WriteLine($"I star to do long work! Thread:{Environment.CurrentManagedThreadId}");
+        Thread.Sleep(5000);
+        return $"\nDone with work! Thread: {Thread.CurrentThread.ManagedThreadId}";
+    });
+}
+
+static async void UseAsyncAwait()
+{
+    string message = await DoLongWorkAsync();
+    Console.WriteLine(message);
+}
+
+void TestingUsingAsyncAwait()
+{
+    UseAsyncAwait();
+    Console.WriteLine($"\tThread: {Thread.CurrentThread.ManagedThreadId} says: You can enter something");
+    Console.ReadLine();
+}
+TestingUsingAsyncAwait();
+```
+```
+I star to do long work! Thread:6
+        Thread: 1 says: You can enter something
+Hi girl
+Done with work! Thread: 6
+Goodbay
+```
+Зверніть увагу на ключове слово await, яке стоїть перед визовом методу що визначено як async. Це важливо. Коли ви маєте асінхронний метод але не викликаєта його в режимі очікування за допомогою await тоді метод виконується сінхронно.
+Патер  
 
 
 
