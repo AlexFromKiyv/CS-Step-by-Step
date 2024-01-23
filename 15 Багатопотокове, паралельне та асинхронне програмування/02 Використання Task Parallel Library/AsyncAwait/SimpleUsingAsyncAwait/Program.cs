@@ -7,36 +7,52 @@ void SlowWork()
 
     static string DoLongWork()
     {
-        Console.WriteLine("I star to do long work!");
+        int threadId = Thread.CurrentThread.ManagedThreadId;
+        Console.WriteLine($"I star to do long work! Thread:{threadId}");
         Thread.Sleep(5000);
         return "Done with work!";
     }
 }
 //SlowWork();
 
+static async void DoSyncWork()
+{
+    int threadId = Thread.CurrentThread.ManagedThreadId;
+    Console.WriteLine($"I star to do long work synchronous! Thread: {threadId}");
+    Thread.Sleep(5000);
+    Console.WriteLine($"Done with work. Thread: {threadId}");
+
+}
+
 static async Task<string> DoLongWorkAsync()
 {
+
     return await Task.Run(() =>
     {
-        Console.WriteLine($"I star to do long work! Thread:{Environment.CurrentManagedThreadId}");
+        int threadId = Thread.CurrentThread.ManagedThreadId;
+        Console.WriteLine($"I star to do long work asynchronous! Thread: {threadId}");
         Thread.Sleep(5000);
-        return $"\nDone with work! Thread: {Thread.CurrentThread.ManagedThreadId}";
+        return $"\nDone with work. Thread: {threadId}";
     });
 }
 
-static async void UseAsyncAwait()
+//DoSyncWork();
+//string message = await DoLongWorkAsync();
+//Console.WriteLine(message);
+//Console.ReadLine();
+
+
+async void UseAsyncAwait()
 {
     string message = await DoLongWorkAsync();
+    int id = Thread.CurrentThread.ManagedThreadId;
+    await Console.Out.WriteLineAsync($"\nI call DoLongWorkAsync in Thread:{id}");
     Console.WriteLine(message);
 }
 
-void TestingUsingAsyncAwait()
-{
-    UseAsyncAwait();
-    Console.WriteLine($"\tThread: {Thread.CurrentThread.ManagedThreadId} says: You can enter something");
-    Console.ReadLine();
-}
-TestingUsingAsyncAwait();
 
+UseAsyncAwait();
+Console.WriteLine($"\tThread: {Thread.CurrentThread.ManagedThreadId} says: You can enter something");
+Console.ReadLine();
 
 

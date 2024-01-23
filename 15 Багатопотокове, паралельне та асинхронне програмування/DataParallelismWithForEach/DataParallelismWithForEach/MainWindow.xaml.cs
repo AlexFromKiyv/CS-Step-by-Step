@@ -118,8 +118,9 @@ namespace DataParallelismWithForEach
             Parallel.ForEach(files, currentFile =>
             {
                 string filename = Path.GetFileName(currentFile);
+                
+                //For title
                 int threadId = Environment.CurrentManagedThreadId;
-
                 Dispatcher?.Invoke(() =>
                 {
                     Title = $"Processing. Thread:{threadId}   File:{filename}";
@@ -129,6 +130,7 @@ namespace DataParallelismWithForEach
                 bitmap.RotateFlip(RotateFlipType.Rotate180FlipNone);
                 bitmap.Save(Path.Combine(outputDirectory, filename));
             });
+            //For title
             Dispatcher?.Invoke(() => { Title = "Process complete"; });
         }
 
