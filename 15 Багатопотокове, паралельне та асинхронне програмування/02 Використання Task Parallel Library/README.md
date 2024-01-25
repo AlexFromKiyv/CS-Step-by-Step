@@ -1224,4 +1224,71 @@ Done with work. Thread: 7
 Це корисно при роботі з додадками з GUI. Коли розробляється бібліотека без GUI це непотрібні накладні росходи. Викли string message2 = await DoLongWorkAsync().ConfigureAwait(false); не тратить ресурси на контекс сихронізації. Якщо ви пишете непрограмний код (наприклад, код бібліотеки), використовуйте ConfigureAwait(false).
 Єдиним винятком для цього є ASP.NET Core. ASP.NET Core не створює настроюваний SynchronizationContext; тому ConfigureAwait(false) не дає переваги при використанні інших фреймворків.
 
+### Домовленість про іменування асінхроних методів.
+
+Метод який визначен як async можна викликати сінхроно. Тоді він поверне не значення що є результатом завдання. Як правило такі методи викликаяться з await. Ось приклад неправільного коду.
+```cs
+string result = DoLongWorkAsync();
+```
+Маркер await витягує внутрішнє повернуте значення, що міститься в об’єкті Task. Враховуючи те, що методи, які повертають об’єкти Task, тепер можна викликати неблокуючим способом через маркери async і await, рекомендовано називати будь-який метод, який повертає Task, суфіксом Async. Таким чином, розробники, які знають угоду про іменування, отримують візуальне нагадування про те, що ключове слово await є обов’язковим, якщо вони мають намір викликати метод в асинхронному контексті.
+
+## Асінхроні методи шо повертають void.
+
+Асінхроний метод може повертати void.
+
+```cs
+static async void MethodReturningVoidAsync()
+{
+    await Task.Run(() => 
+    {
+        int threadId = Thread.CurrentThread.ManagedThreadId;
+        Console.WriteLine($"I star to do long work asynchronous! Thread: {threadId}");
+        Thread.Sleep(3000); // Emulation the long work 
+    });
+    Console.WriteLine("Fire and forget void method completed");
+}
+
+MethodReturningVoidAsync();
+Console.WriteLine("The work after calling the method.");
+Console.ReadLine();
+```
+```
+The work after calling the method.
+I star to do long work asynchronous! Thread: 6
+Hi Fire and forget void method completed
+```
+Якщо ви викликаєте цей метод, він працюватиме самостійно, не блокуючи основний потік. Це видно з повідомленя шо йде за викликом методу та можливость щось вводити.
+
+Хоча це може здатися життєздатним варіантом для сценаріїв “fire and forget”, існує більша проблема. Якщо метод викидає виняток, йому нікуди йти, крім контексту синхронізації методу, що викликає.
+
+```cs
+static async void MethodReturningVoidWithExceptionAsync()
+{
+    await Task.Run(() =>
+    {
+        int threadId = Thread.CurrentThread.ManagedThreadId;
+        Console.WriteLine($"I star to do long work asynchronous! Thread: {threadId}");
+        Thread.Sleep(3000); // Emulation the long work 
+        throw new Exception("Smomething bad happend!");
+    });
+    Console.WriteLine("Fire and forget void method completed");
+}
+
+try
+{
+    MethodReturningVoidWithExceptionAsync();
+    Console.ReadLine();
+}
+catch (Exception ex)
+{
+    Console.WriteLine(ex.Message);
+}
+```
+```
+I star to do long work asynchronous! Thread: 6
+HiUnhandled exception. System.Exception: Smomething bad happend!
+   at Program.<>c.<<Main>$>b__0_9() in D:\MyWork\CS-Step-by-Step\15 Багатопотокове, паралельне та асинхронне програмування\02 Використання Task Parallel Library\AsyncAwait\SimpleUsingAsyncAwait\Program.cs:line 106
+   at System.Threading.Tasks.Task`1.InnerInvoke()
+```
+Блок catch не тільки не перехоплює виняток, але виняток розміщується в контексті потокового виконання. Тож, хоча це може здатися гарною ідеєю для сценаріїв “fire and forget”, вам краще сподіватися, що в методі async void не буде створено винятку, інакше вся ваша програма може вийти з ладу.
 

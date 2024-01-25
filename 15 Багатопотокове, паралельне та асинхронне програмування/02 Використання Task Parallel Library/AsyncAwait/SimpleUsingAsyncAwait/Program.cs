@@ -1,5 +1,6 @@
 ﻿// Асинхронні виклики з використанням шаблону async/await.
 using System.Diagnostics;
+using System.Threading;
 
 void SlowWork()
 {
@@ -73,10 +74,49 @@ async void UseConfigureAsync()
     Console.WriteLine(stopwatch2.ElapsedMilliseconds);
 }
 
-UseConfigureAsync();
-Console.ReadLine();
+//UseConfigureAsync();
+//Console.ReadLine();
 
 
+//string result = DoLongWorkAsync();
+
+//Асінхроні методи шо повертають void. 
+static async void MethodReturningVoidAsync()
+{
+    await Task.Run(() => 
+    {
+        int threadId = Thread.CurrentThread.ManagedThreadId;
+        Console.WriteLine($"I star to do long work asynchronous! Thread: {threadId}");
+        Thread.Sleep(3000); // Emulation the long work 
+    });
+    Console.WriteLine("Fire and forget void method completed");
+}
+
+//MethodReturningVoidAsync();
+//Console.WriteLine("The work after calling the method.");
+//Console.ReadLine();
+
+static async void MethodReturningVoidWithExceptionAsync()
+{
+    await Task.Run(() =>
+    {
+        int threadId = Thread.CurrentThread.ManagedThreadId;
+        Console.WriteLine($"I star to do long work asynchronous! Thread: {threadId}");
+        Thread.Sleep(3000); // Emulation the long work 
+        throw new Exception("Smomething bad happend!");
+    });
+    Console.WriteLine("Fire and forget void method completed");
+}
+
+try
+{
+    MethodReturningVoidWithExceptionAsync();
+    Console.ReadLine();
+}
+catch (Exception ex)
+{
+    Console.WriteLine(ex.Message);
+}
 
 
 
