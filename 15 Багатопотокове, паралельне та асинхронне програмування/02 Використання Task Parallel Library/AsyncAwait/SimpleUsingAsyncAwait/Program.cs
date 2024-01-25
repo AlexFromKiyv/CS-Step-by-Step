@@ -1,58 +1,84 @@
-﻿
+﻿// Асинхронні виклики з використанням шаблону async/await.
+using System.Diagnostics;
+
 void SlowWork()
 {
-    Console.WriteLine(DoLongWork());
-    Console.Write("You can enter something:");
-    Console.ReadLine();
+    while (true)
+    {
+        Console.Clear();
 
+        Console.WriteLine(DoLongWork());
+        Console.WriteLine(DoLongWork());
+        Console.WriteLine(DoLongWork());
+
+        Console.WriteLine($"Thread {Thread.CurrentThread.ManagedThreadId} says: Enter somthing");
+        Console.ReadLine();
+    }
+ 
     static string DoLongWork()
     {
         int threadId = Thread.CurrentThread.ManagedThreadId;
         Console.WriteLine($"I star to do long work! Thread:{threadId}");
-        Thread.Sleep(5000);
+        Thread.Sleep(3000); // Emulation the long work
         return "Done with work!";
     }
 }
 //SlowWork();
 
-static async void DoSyncWork()
-{
-    int threadId = Thread.CurrentThread.ManagedThreadId;
-    Console.WriteLine($"I star to do long work synchronous! Thread: {threadId}");
-    Thread.Sleep(5000);
-    Console.WriteLine($"Done with work. Thread: {threadId}");
-
-}
-
 static async Task<string> DoLongWorkAsync()
 {
-
     return await Task.Run(() =>
     {
         int threadId = Thread.CurrentThread.ManagedThreadId;
         Console.WriteLine($"I star to do long work asynchronous! Thread: {threadId}");
-        Thread.Sleep(5000);
+        Thread.Sleep(3000);
         return $"\nDone with work. Thread: {threadId}";
     });
 }
 
-//DoSyncWork();
-//string message = await DoLongWorkAsync();
-//Console.WriteLine(message);
-//Console.ReadLine();
-
-
-async void UseAsyncAwait()
+async void CallAsyncMethod()
 {
-    string message = await DoLongWorkAsync();
-    int id = Thread.CurrentThread.ManagedThreadId;
-    await Console.Out.WriteLineAsync($"\nI call DoLongWorkAsync in Thread:{id}");
-    Console.WriteLine(message);
+    string taskResult = await DoLongWorkAsync();
+    Console.WriteLine(taskResult);
 }
 
+//while (true)
+//{
+//    Console.Clear();
 
-UseAsyncAwait();
-Console.WriteLine($"\tThread: {Thread.CurrentThread.ManagedThreadId} says: You can enter something");
+//    CallAsyncMethod();
+//    CallAsyncMethod();
+//    CallAsyncMethod();
+
+//    Console.WriteLine($"Thread {Thread.CurrentThread.ManagedThreadId} says: Enter somthing");
+//    Console.ReadLine();
+//}
+
+
+// 
+
+async void UseConfigureAsync()
+{
+    Stopwatch stopwatch1 = Stopwatch.StartNew();
+    string message1 = await DoLongWorkAsync();
+    Console.WriteLine($"\tmessage1 {message1}");
+    stopwatch1.Stop();
+    Console.WriteLine(stopwatch1.ElapsedMilliseconds);
+
+
+    Stopwatch stopwatch2 = Stopwatch.StartNew();
+    string message2 = await DoLongWorkAsync().ConfigureAwait(false);
+    Console.WriteLine($"\tmessage2 {message2}");
+    stopwatch2.Stop();
+    Console.WriteLine(stopwatch2.ElapsedMilliseconds);
+}
+
+UseConfigureAsync();
 Console.ReadLine();
+
+
+
+
+
 
 
