@@ -108,17 +108,50 @@ static async void MethodReturningVoidWithExceptionAsync()
     Console.WriteLine("Fire and forget void method completed");
 }
 
+//try
+//{
+//    MethodReturningVoidWithExceptionAsync();
+//    Console.ReadLine();
+//}
+//catch (Exception ex)
+//{
+//    Console.WriteLine(ex.Message);
+//}
+
+static async Task MethodReturningVoidTaskAsync()
+{
+    await Task.Run(() =>
+    {
+        int threadId = Thread.CurrentThread.ManagedThreadId;
+        Console.WriteLine($"I star to do long work asynchronous! Thread: {threadId}");
+        Thread.Sleep(3000); // Emulation the long work 
+    });
+    Console.WriteLine("Method with Task completed");
+}
+
+//MethodReturningVoidTaskAsync();
+//Console.WriteLine("The work after calling the method.");
+//Console.ReadLine();
+
+static async Task MethodReturningVoidTaskAndExceptionAsync()
+{
+    await Task.Run(() =>
+    {
+        int threadId = Thread.CurrentThread.ManagedThreadId;
+        Console.WriteLine($"I star to do long work asynchronous! Thread: {threadId}");
+        Thread.Sleep(3000); // Emulation the long work 
+        throw new Exception("Smomething bad happend!");
+    });
+    Console.WriteLine("Method with Task completed");
+}
+
 try
 {
-    MethodReturningVoidWithExceptionAsync();
+    // MethodReturningVoidTaskAndExceptionAsync();
+    await MethodReturningVoidTaskAndExceptionAsync();
     Console.ReadLine();
 }
 catch (Exception ex)
 {
     Console.WriteLine(ex.Message);
 }
-
-
-
-
-

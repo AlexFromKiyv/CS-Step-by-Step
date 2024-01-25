@@ -1286,9 +1286,74 @@ catch (Exception ex)
 ```
 ```
 I star to do long work asynchronous! Thread: 6
-HiUnhandled exception. System.Exception: Smomething bad happend!
-   at Program.<>c.<<Main>$>b__0_9() in D:\MyWork\CS-Step-by-Step\15 Багатопотокове, паралельне та асинхронне програмування\02 Використання Task Parallel Library\AsyncAwait\SimpleUsingAsyncAwait\Program.cs:line 106
-   at System.Threading.Tasks.Task`1.InnerInvoke()
+Hi Unhandled exception. System.Exception: Smomething bad happend!
+...
+
 ```
 Блок catch не тільки не перехоплює виняток, але виняток розміщується в контексті потокового виконання. Тож, хоча це може здатися гарною ідеєю для сценаріїв “fire and forget”, вам краще сподіватися, що в методі async void не буде створено винятку, інакше вся ваша програма може вийти з ладу.
+
+## Асінхроні методи шо повертають Task.
+
+Кращий варіант коли асінхроний метод повертае Task замість void.
+
+```cs
+static async Task MethodReturningVoidTaskAsync()
+{
+    await Task.Run(() =>
+    {
+        int threadId = Thread.CurrentThread.ManagedThreadId;
+        Console.WriteLine($"I star to do long work asynchronous! Thread: {threadId}");
+        Thread.Sleep(3000); // Emulation the long work 
+    });
+    Console.WriteLine("Method with Task completed");
+}
+
+MethodReturningVoidTaskAsync();
+Console.WriteLine("The work after calling the method.");
+Console.ReadLine();
+```
+```
+I star to do long work asynchronous! Thread: 6
+The work after calling the method.
+Hi Method with Task completed
+```
+Якщо викликати метод без ключового слова await, буде той самий результат як і попередній.
+
+Буде такаж сама проблема з винятком.
+
+```cs
+static async Task MethodReturningVoidTaskAndExceptionAsync()
+{
+    await Task.Run(() =>
+    {
+        int threadId = Thread.CurrentThread.ManagedThreadId;
+        Console.WriteLine($"I star to do long work asynchronous! Thread: {threadId}");
+        Thread.Sleep(3000); // Emulation the long work 
+        throw new Exception("Smomething bad happend!");
+    });
+    Console.WriteLine("Method with Task completed");
+}
+
+try
+{
+    MethodReturningVoidTaskAndExceptionAsync();
+    Console.ReadLine();
+}
+catch (Exception ex)
+{
+    Console.WriteLine(ex.Message);
+}
+```
+```
+I star to do long work asynchronous! Thread: 6
+Hi
+```
+Коли виникає виняток програма на це ніяк не реагує. Блок catch не перезоплює виняток. Коли виняток викидається з методу Task/Task<T>, виняток фіксується та розміщується в об’єкті Task. 
+Привикористані await, Exeption стає доступним.
+
+```
+I star to do long work asynchronous! Thread: 6
+Smomething bad happend!
+```
+Таким чином краше уникати визначення метода як async void, а краще використовувати async Task. Як мінімум програма не буде аварійно закінчуватись.
 
