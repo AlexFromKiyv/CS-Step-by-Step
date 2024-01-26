@@ -1357,3 +1357,138 @@ Smomething bad happend!
 ```
 Таким чином краше уникати визначення метода як async void, а краще використовувати async Task. Як мінімум програма не буде аварійно закінчуватись.
 
+## Асінхроний метод з багатьма await.
+
+В асінхронному методі може бути декілька маркерів await.
+
+```cs
+static async Task MultipleAwaits()
+{
+    await Task.Run(() => 
+    {
+        int threadId = Thread.CurrentThread.ManagedThreadId;
+        Console.WriteLine($"I star to do long work asynchronous! Thread: {threadId}");
+        Thread.Sleep(2000); 
+    });
+    Console.WriteLine("Done 1");
+
+    await Task.Run(() =>
+    {
+        int threadId = Thread.CurrentThread.ManagedThreadId;
+        Console.WriteLine($"I star to do long work asynchronous! Thread: {threadId}");
+        Thread.Sleep(2000);
+    });
+    Console.WriteLine("Done 2");
+
+    await Task.Run(() =>
+    {
+        int threadId = Thread.CurrentThread.ManagedThreadId;
+        Console.WriteLine($"I star to do long work asynchronous! Thread: {threadId}");
+        Thread.Sleep(2000);
+    });
+    Console.WriteLine("Done 3");
+}
+
+await MultipleAwaits();
+```
+```
+I star to do long work asynchronous! Thread: 6
+Done 1
+I star to do long work asynchronous! Thread: 6
+Done 2
+I star to do long work asynchronous! Thread: 6
+Done 3
+```
+У цьому випадку кожне завданя чекає свого виколнання. 
+Частіше є потрема не чекати послідовно виконання кожного завдання а чекати коли вони всі виконаються. Це більш вірогідний сценарій, коли є три речі (перевірити електронну пошту, оновити сервер, завантажити файли), які потрібно виконати пакетно, але їх можна виконати паралельно. 
+```cs
+static async Task UseTaskWhenAll()
+{
+    Task[] tasks = [
+
+        Task.Run(() =>
+        {
+            int threadId = Thread.CurrentThread.ManagedThreadId;
+            Console.WriteLine($"I star to do long work asynchronous! Thread: {threadId}");
+            Thread.Sleep(3000);
+            Console.WriteLine("Done 1");
+        }),
+        Task.Run(() =>
+        {
+            int threadId = Thread.CurrentThread.ManagedThreadId;
+            Console.WriteLine($"I star to do long work asynchronous! Thread: {threadId}");
+            Thread.Sleep(6000);
+            Console.WriteLine("Done 2");
+        }),
+        Task.Run(() =>
+        {
+            int threadId = Thread.CurrentThread.ManagedThreadId;
+            Console.WriteLine($"I star to do long work asynchronous! Thread: {threadId}");
+            Thread.Sleep(9000);
+            Console.WriteLine("Done 3");
+        }),
+    ];
+    await Task.WhenAll(tasks);
+}
+
+await UseTaskWhenAll();
+Console.Write("Enter something:"); Console.ReadLine();
+
+```
+```
+I star to do long work asynchronous! Thread: 6
+I star to do long work asynchronous! Thread: 7
+I star to do long work asynchronous! Thread: 8
+Done 1
+Done 2
+Done 3
+Enter something:Hi
+```
+Таким чином всі завданя запускаються одночасно і поток призупиняється поки всі не завершаться.
+
+Інша поведінка методу WhenAny.
+```cs
+static async Task UseTaskWhenAny()
+{
+    Task[] tasks = [
+
+        Task.Run(() =>
+        {
+            int threadId = Thread.CurrentThread.ManagedThreadId;
+            Console.WriteLine($"I star to do long work asynchronous! Thread: {threadId}");
+            Thread.Sleep(3000);
+            Console.WriteLine("Done 1");
+        }),
+        Task.Run(() =>
+        {
+            int threadId = Thread.CurrentThread.ManagedThreadId;
+            Console.WriteLine($"I star to do long work asynchronous! Thread: {threadId}");
+            Thread.Sleep(6000);
+            Console.WriteLine("Done 2");
+        }),
+        Task.Run(() =>
+        {
+            int threadId = Thread.CurrentThread.ManagedThreadId;
+            Console.WriteLine($"I star to do long work asynchronous! Thread: {threadId}");
+            Thread.Sleep(9000);
+            Console.WriteLine("Done 3");
+        }),
+    ];
+    await Task.WhenAny(tasks);
+}
+
+await UseTaskWhenAny();
+Console.Write("Enter something:"); Console.ReadLine();
+```
+```
+I star to do long work asynchronous! Thread: 6
+I star to do long work asynchronous! Thread: 8
+I star to do long work asynchronous! Thread: 7
+Done 1
+Enter something:Hi Done 2
+Done 3
+```
+В цьому випадку всі завданя запускаються одночасно але основний потік звільняється коли будьяке завдання закінчується. 
+Також є перезагружені версії WhenAll ,WhenAny які в якості параметрів приймають наприклад List<Task<string>>.
+
+

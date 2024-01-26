@@ -56,7 +56,6 @@ async void CallAsyncMethod()
 //}
 
 
-// 
 
 async void UseConfigureAsync()
 {
@@ -80,7 +79,7 @@ async void UseConfigureAsync()
 
 //string result = DoLongWorkAsync();
 
-//Асінхроні методи шо повертають void. 
+// Асінхроні методи шо повертають void. 
 static async void MethodReturningVoidAsync()
 {
     await Task.Run(() => 
@@ -145,13 +144,110 @@ static async Task MethodReturningVoidTaskAndExceptionAsync()
     Console.WriteLine("Method with Task completed");
 }
 
-try
+//try
+//{
+//    // MethodReturningVoidTaskAndExceptionAsync();
+//    await MethodReturningVoidTaskAndExceptionAsync();
+//    Console.ReadLine();
+//}
+//catch (Exception ex)
+//{
+//    Console.WriteLine(ex.Message);
+//}
+
+
+// Асінхроний метод з багатьма await.
+
+static async Task MultipleAwaits()
 {
-    // MethodReturningVoidTaskAndExceptionAsync();
-    await MethodReturningVoidTaskAndExceptionAsync();
-    Console.ReadLine();
+    await Task.Run(() => 
+    {
+        int threadId = Thread.CurrentThread.ManagedThreadId;
+        Console.WriteLine($"I star to do long work asynchronous! Thread: {threadId}");
+        Thread.Sleep(2000); 
+    });
+    Console.WriteLine("Done 1");
+
+    await Task.Run(() =>
+    {
+        int threadId = Thread.CurrentThread.ManagedThreadId;
+        Console.WriteLine($"I star to do long work asynchronous! Thread: {threadId}");
+        Thread.Sleep(2000);
+    });
+    Console.WriteLine("Done 2");
+
+    await Task.Run(() =>
+    {
+        int threadId = Thread.CurrentThread.ManagedThreadId;
+        Console.WriteLine($"I star to do long work asynchronous! Thread: {threadId}");
+        Thread.Sleep(2000);
+    });
+    Console.WriteLine("Done 3");
 }
-catch (Exception ex)
+
+//await MultipleAwaits();
+
+static async Task UseTaskWhenAll()
 {
-    Console.WriteLine(ex.Message);
+    Task[] tasks = [
+
+        Task.Run(() =>
+        {
+            int threadId = Thread.CurrentThread.ManagedThreadId;
+            Console.WriteLine($"I star to do long work asynchronous! Thread: {threadId}");
+            Thread.Sleep(3000);
+            Console.WriteLine("Done 1");
+        }),
+        Task.Run(() =>
+        {
+            int threadId = Thread.CurrentThread.ManagedThreadId;
+            Console.WriteLine($"I star to do long work asynchronous! Thread: {threadId}");
+            Thread.Sleep(6000);
+            Console.WriteLine("Done 2");
+        }),
+        Task.Run(() =>
+        {
+            int threadId = Thread.CurrentThread.ManagedThreadId;
+            Console.WriteLine($"I star to do long work asynchronous! Thread: {threadId}");
+            Thread.Sleep(9000);
+            Console.WriteLine("Done 3");
+        }),
+    ];
+    await Task.WhenAll(tasks);
 }
+
+//await UseTaskWhenAll();
+//Console.Write("Enter something:"); Console.ReadLine();
+
+static async Task UseTaskWhenAny()
+{
+    Task[] tasks = [
+
+        Task.Run(() =>
+        {
+            int threadId = Thread.CurrentThread.ManagedThreadId;
+            Console.WriteLine($"I star to do long work asynchronous! Thread: {threadId}");
+            Thread.Sleep(3000);
+            Console.WriteLine("Done 1");
+        }),
+        Task.Run(() =>
+        {
+            int threadId = Thread.CurrentThread.ManagedThreadId;
+            Console.WriteLine($"I star to do long work asynchronous! Thread: {threadId}");
+            Thread.Sleep(6000);
+            Console.WriteLine("Done 2");
+        }),
+        Task.Run(() =>
+        {
+            int threadId = Thread.CurrentThread.ManagedThreadId;
+            Console.WriteLine($"I star to do long work asynchronous! Thread: {threadId}");
+            Thread.Sleep(9000);
+            Console.WriteLine("Done 3");
+        }),
+    ];
+    await Task.WhenAny(tasks);
+}
+
+//await UseTaskWhenAny();
+//Console.Write("Enter something:"); Console.ReadLine();
+
