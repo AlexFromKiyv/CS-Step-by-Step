@@ -1,5 +1,8 @@
 ﻿// Асинхронні виклики з використанням шаблону async/await.
+using Microsoft.VisualStudio.Threading;
 using System.Diagnostics;
+using System.Diagnostics.Metrics;
+using System.Runtime.InteropServices;
 using System.Threading;
 
 void SlowWork()
@@ -117,6 +120,7 @@ static async void MethodReturningVoidWithExceptionAsync()
 //    Console.WriteLine(ex.Message);
 //}
 
+//  Асінхроні методи шо повертають Task.
 static async Task MethodReturningVoidTaskAsync()
 {
     await Task.Run(() =>
@@ -251,3 +255,68 @@ static async Task UseTaskWhenAny()
 //await UseTaskWhenAny();
 //Console.Write("Enter something:"); Console.ReadLine();
 
+// ## Виклик асінхронних методів з сінхронних.
+
+//Task<string> task = DoLongWorkAsync();
+//Console.WriteLine(task.Result);
+//Console.ReadLine();
+
+
+//JoinableTaskFactory joinableTaskFactory = new JoinableTaskFactory(new JoinableTaskContext());
+//string message2 = joinableTaskFactory.Run(DoLongWorkAsync);
+//Console.WriteLine(message2);
+
+static async ValueTask<int> ReturnAnInt()
+{
+    await Task.Delay(3_000);
+    return 5;
+}
+
+//int c = await ReturnAnInt();
+//Console.WriteLine(c);
+
+
+// Перевірка параметрів асінхроних методів.
+static async Task MethodWithProblem(int t)
+{
+   await Task.Run(() =>
+    {
+        int threadId = Thread.CurrentThread.ManagedThreadId;
+        Console.WriteLine($"I star to do long work asynchronous! Thread: {threadId}");
+        Thread.Sleep(2000);
+        t = 5 / t;
+        Console.WriteLine(t);
+    });
+}
+
+// MethodWithProblem(0);
+
+
+static async Task MethodWithVerification(int t)
+{
+    if(!Verification(t))
+    {
+        Console.WriteLine("Bad parameter");
+        return;
+    }
+    await Implementation();
+
+    // privat function
+    static bool Verification(int p) => (p == 0) ? false : true;
+
+    async Task Implementation()
+    {
+        await Task.Run(() =>
+        {
+            int threadId = Thread.CurrentThread.ManagedThreadId;
+            Console.WriteLine($"I star to do long work asynchronous! Thread: {threadId}");
+            Thread.Sleep(3000);
+            t = 15 / t;
+            Console.WriteLine($"Ok {t}");
+        });
+    }
+}
+
+MethodWithVerification(0);
+await MethodWithVerification(0);
+await MethodWithVerification(5);

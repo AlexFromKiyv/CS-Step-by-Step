@@ -1349,8 +1349,19 @@ I star to do long work asynchronous! Thread: 6
 Hi
 ```
 Коли виникає виняток програма на це ніяк не реагує. Блок catch не перезоплює виняток. Коли виняток викидається з методу Task/Task<T>, виняток фіксується та розміщується в об’єкті Task. 
-Привикористані await, Exeption стає доступним.
 
+При використані await, Exeption стає доступним.
+```cs
+try
+{
+    await MethodReturningVoidTaskAndExceptionAsync();
+    Console.ReadLine();
+}
+catch (Exception ex)
+{
+    Console.WriteLine(ex.Message);
+}
+```
 ```
 I star to do long work asynchronous! Thread: 6
 Smomething bad happend!
@@ -1490,5 +1501,114 @@ Done 3
 ```
 В цьому випадку всі завданя запускаються одночасно але основний потік звільняється коли будьяке завдання закінчується. 
 Також є перезагружені версії WhenAll ,WhenAny які в якості параметрів приймають наприклад List<Task<string>>.
+
+## Виклик асінхронних методів з сінхронних.
+
+Підчас виконання асінхронного методу створюеться окремий потік. Ключове слово await можна використовувати лише в async методі. Шо робити коли ви не можете або не хочете робити метод async.
+Є способи викликати асинхронні методи в синхронному контексті. На жаль, більшість з них погані. Перший варіант полягає в тому, щоб просто відмовитися від ключового слова await, дозволяючи початковому потоку продовжувати виконання, тоді як асинхронний метод виконується в окремому потоці, ніколи не повертаючись до викликаючого. Це веде себе як попередній приклад виклику асинхронних методів які повертають Task. Будь-які значення, які повертає метод, втрачаються, а винятки проковтуються.
+
+```cs
+Task<string> task = DoLongWorkAsync();
+Console.WriteLine(task.Result);
+Console.ReadLine();
+```
+```
+I star to do long work asynchronous! Thread: 6
+
+Done with work. Thread: 6
+Hi
+```
+Це може відповідати вашим потребам, але якщо ні, у вас є три варіанти. Перший — це просто використати властивість Result у Task<T> або метод Wait() у методах Task. Якщо метод не вдається, будь-які винятки загортаються в AggregateException, що потенційно ускладнює обробку помилок. Ви також можете викликати GetAwaiter().GetResult(). Це поводиться так само, як виклики Wait() і Result, з тією невеликою різницею, що винятки не загортаються в AggregateException. Хоча методи GetAwaiter().GetResult() працюють як з методами, що повертають значення, так і з методами без значення, що повертається, вони позначені в документації як «не для зовнішнього використання», що означає, що вони можуть змінитися або зникнути в певний момент в майбутньому.
+Хоча ці два варіанти здаються нешкідливими замінами для використання await в асинхронному методі, існує більш серйозна проблема з їх використанням. Виклик Wait(), Result або GetAwaiter().GetResult() блокує викликаючий потік, обробляє асинхронний метод в іншому потоці, а потім повертається назад до викликаючого потоку, зв’язуючи два потоки для виконання роботи. Що ще гірше, кожен із них може спричинити взаємоблокування, особливо якщо потік виклику походить з інтерфейсу користувача програми.
+
+Безпечно виконати асінхроний код дозаоляє пакет Microsoft.VisualStudio.Threading 
+
+```cs
+JoinableTaskFactory joinableTaskFactory = new JoinableTaskFactory(new JoinableTaskContext());
+string message2 = joinableTaskFactory.Run(DoLongWorkAsync);
+Console.WriteLine(message2);
+```
+```
+I star to do long work asynchronous! Thread: 4
+
+Done with work. Thread: 4
+```
+
+## Повернення ValueTask<T>
+
+Асінхроний метод може повертати значення.
+
+```cs
+static async ValueTask<int> ReturnAnInt()
+{
+    await Task.Delay(3_000);
+    return 5;
+}
+
+int c = await ReturnAnInt();
+Console.WriteLine(c);
+```
+```
+5
+```
+
+## Перевірка параметрів асінхроних методів.
+
+Наступний метод при його визові без await не покаже жодної проблеми в виконані завдання.
+
+```cs
+static async Task MethodWithProblem(int t)
+{
+   await Task.Run(() =>
+    {
+        int threadId = Thread.CurrentThread.ManagedThreadId;
+        Console.WriteLine($"I star to do long work asynchronous! Thread: {threadId}");
+        Thread.Sleep(2000);
+        t = 5 / t;
+        Console.WriteLine(t);
+    });
+}
+MethodWithProblem(0);
+```
+Виняток виникне якшо визвати метод з await. 
+Як варіант можете (і повинні) додати перевірки на початок методу, але оскільки весь метод є асинхронним, немає гарантії, коли перевірки будуть виконані. Але є і інший варіант.
+
+```cs
+static async Task MethodWithVerification(int t)
+{
+    if(!Verification(t))
+    {
+        Console.WriteLine("Bad parameter");
+        return;
+    }
+    await Implementation();
+
+    // privat function
+    static bool Verification(int p) => (p == 0) ? false : true;
+
+    async Task Implementation()
+    {
+        await Task.Run(() =>
+        {
+            int threadId = Thread.CurrentThread.ManagedThreadId;
+            Console.WriteLine($"I star to do long work asynchronous! Thread: {threadId}");
+            Thread.Sleep(3000);
+            t = 15 / t;
+            Console.WriteLine($"Ok {t}");
+        });
+    }
+}
+
+MethodWithVerification(0);
+await MethodWithVerification(0);
+await MethodWithVerification(5);
+```
+```
+Bad parameter
+Bad parameter
+I star to do long work asynchronous! Thread: 7
+Ok 3
+```
+Таким чином перевірки виконуються синхронно, а потім приватна функція виконується асинхронно.
 
 
