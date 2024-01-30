@@ -19,7 +19,7 @@ namespace PictureHandlerWithAsyncAwait
     /// </summary>
     public partial class MainWindow : Window
     {
-        private CancellationTokenSource? _cancellationTokenSource = null;
+        private CancellationTokenSource? _cancellationTokenSource;
         public MainWindow()
         {
             InitializeComponent();
@@ -87,6 +87,62 @@ namespace PictureHandlerWithAsyncAwait
             { 
                 Console.WriteLine(ex.Message);
                 throw;
+            }
+        }
+
+        private async void cmdProcessWithForEachAsync_Click(object sender, RoutedEventArgs e)
+        {
+            await ProcessWithForEachAsync(); 
+        }
+
+        private async Task ProcessWithForEachAsync()
+        {
+            _cancellationTokenSource = new();
+
+            string pictureDirectory = @"D:\Pictures";
+            string outputDirectory = @"D:\ModifiedPictures";
+
+            // Use ParallelOptions instance to store the CancellationToken.
+            ParallelOptions parallelOptions = new ParallelOptions();
+            parallelOptions.CancellationToken = _cancellationTokenSource.Token;
+            parallelOptions.MaxDegreeOfParallelism = Environment.ProcessorCount;
+
+            //Recreate directory 
+            if (Directory.Exists(outputDirectory))
+            {
+                Directory.Delete(outputDirectory, true);
+            }
+            Directory.CreateDirectory(outputDirectory);
+
+            //Process
+            string[] files = Directory.GetFiles(pictureDirectory, "*.jpg", SearchOption.AllDirectories);
+
+            try
+            {
+                await Parallel.ForEachAsync(files, parallelOptions, async (currentFile, token) =>
+                {
+                    token.ThrowIfCancellationRequested();
+                    string filename = Path.GetFileName(currentFile);
+                    
+                    //For title
+                    int threadId = Environment.CurrentManagedThreadId;
+                    Dispatcher?.Invoke(() =>
+                    {
+                        Title = $"Processing. Thread:{threadId}   File:{filename}";
+                    });
+
+                    using (Bitmap bitmap = new Bitmap(currentFile))
+                    {
+
+                        bitmap.RotateFlip(RotateFlipType.Rotate180FlipNone);
+                        bitmap.Save(Path.Combine(outputDirectory, filename));
+                    }
+                });
+                Dispatcher?.Invoke(() => Title = "Process complite.");
+            }
+            catch (OperationCanceledException ex)
+            {
+                Dispatcher?.Invoke(() => { Title = $"Process canceled! {ex.Message}"; });
             }
         }
     }

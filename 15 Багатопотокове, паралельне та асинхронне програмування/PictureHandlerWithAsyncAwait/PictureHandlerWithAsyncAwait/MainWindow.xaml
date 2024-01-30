@@ -25,9 +25,13 @@
             <Button Name="cmdCancel" Grid.Column="0" Margin="65,0,665,10" Click="cmdCancel_Click" Height="20" VerticalAlignment="Bottom" Grid.ColumnSpan="2">
                 Cancel
             </Button>
-            <Button Name="cmdProcess" Grid.Row="0" Grid.Column="1" Margin="410,10,225,10"
+            <Button Name="cmdProcess" Grid.Row="0" Grid.Column="1" Margin="332,10,303,10"
                     Click="cmdProcess_Click">
                 Process
+            </Button>
+            <Button Name="cmdProcessWithForEachAsync" Grid.Row="0" Grid.Column="1" Margin="527,10,108,10"
+                    Click="cmdProcessWithForEachAsync_Click">
+                Process with ForEachAsync
             </Button>
 
         </Grid>

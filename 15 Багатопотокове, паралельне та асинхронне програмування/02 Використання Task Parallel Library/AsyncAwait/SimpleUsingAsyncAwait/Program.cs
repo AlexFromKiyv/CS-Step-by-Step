@@ -320,3 +320,64 @@ static async Task MethodWithVerification(int t)
 //MethodWithVerification(0);
 //await MethodWithVerification(0);
 //await MethodWithVerification(5);
+
+// Скасування в патерні async/await за допомогою методу WaitAsync().
+async Task UsingWaitAsync()
+{
+    CancellationTokenSource cancellationTokenSource = new();
+
+    try
+    {
+        string message = await DoLongWorkAsync().WaitAsync(TimeSpan.FromSeconds(12));
+        await Console.Out.WriteLineAsync(message);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+
+    try
+    {
+        string message = await DoLongWorkAsync().WaitAsync(cancellationTokenSource.Token);
+        await Console.Out.WriteLineAsync(message);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+
+    try
+    {
+        string message = await DoLongWorkAsync().WaitAsync(TimeSpan.FromSeconds(2));
+        await Console.Out.WriteLineAsync(message);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+
+
+    cancellationTokenSource.Cancel();
+
+    try
+    {
+        _ = await DoLongWorkAsync().WaitAsync(cancellationTokenSource.Token);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+
+    try
+    {
+        _ = await DoLongWorkAsync().WaitAsync(TimeSpan.FromSeconds(2),cancellationTokenSource.Token);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+
+}
+
+await UsingWaitAsync();
+

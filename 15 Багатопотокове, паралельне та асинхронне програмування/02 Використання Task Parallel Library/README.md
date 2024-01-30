@@ -1753,5 +1753,158 @@ using System.Drawing;
             _cancellationTokenSource = null;
         }
 ```
-При виникнені винятку цикл переривається.  
+При виникнені винятку цикл переривається. 
+
+
+## Асінхроний метод ForEachAsync.
+
+В класі Paralell є метод ForEachAsync який є асінхроним і дозволяє використати асінхроний метод для тіла циклу.
+
+Додамо в проект кнопку та обробник натискання.
+```cs
+        private async void cmdProcessWithForEachAsync_Click(object sender, RoutedEventArgs e)
+        {
+            await ProcessWithForEachAsync(); 
+        }
+
+        private async Task ProcessWithForEachAsync()
+        {
+            _cancellationTokenSource = new();
+
+            string pictureDirectory = @"D:\Pictures";
+            string outputDirectory = @"D:\ModifiedPictures";
+
+            // Use ParallelOptions instance to store the CancellationToken.
+            ParallelOptions parallelOptions = new ParallelOptions();
+            parallelOptions.CancellationToken = _cancellationTokenSource.Token;
+            parallelOptions.MaxDegreeOfParallelism = Environment.ProcessorCount;
+
+            //Recreate directory 
+            if (Directory.Exists(outputDirectory))
+            {
+                Directory.Delete(outputDirectory, true);
+            }
+            Directory.CreateDirectory(outputDirectory);
+
+            //Process
+            string[] files = Directory.GetFiles(pictureDirectory, "*.jpg", SearchOption.AllDirectories);
+
+            try
+            {
+                await Parallel.ForEachAsync(files, parallelOptions, async (currentFile, token) =>
+                {
+                    token.ThrowIfCancellationRequested();
+                    string filename = Path.GetFileName(currentFile);
+                    
+                    //For title
+                    int threadId = Environment.CurrentManagedThreadId;
+                    Dispatcher?.Invoke(() =>
+                    {
+                        Title = $"Processing. Thread:{threadId}   File:{filename}";
+                    });
+
+                    using (Bitmap bitmap = new Bitmap(currentFile))
+                    {
+
+                        bitmap.RotateFlip(RotateFlipType.Rotate180FlipNone);
+                        bitmap.Save(Path.Combine(outputDirectory, filename));
+                    }
+                });
+                Dispatcher?.Invoke(() => Title = "Process complite.");
+            }
+            catch (OperationCanceledException ex)
+            {
+                Dispatcher?.Invoke(() => { Title = $"Process canceled! {ex.Message}"; });
+            }
+        }
+```
+В об'єкті ParallelOptions зберігаеться послання на властивість CancellationTokenSource.Token якій відповідає для скасування виконнання циклу.
+Тіло цилу використовує асінхроний метод який вказано у вигляді лямбда виразу. Можливо в цьому випадку краще булоб зробити окрмий метод замість лямбда-виразу.  
+
+
+
+
+
+
+## Скасування в патерні async/await за допомогою методу WaitAsync().
+
+Повернемся до проекту SimpleUsingAsyncAwait.
+
+Скасувати завдання можна за допомогою методу WaitAsync().
+```cs
+async Task UsingWaitAsync()
+{
+    CancellationTokenSource cancellationTokenSource = new();
+
+    try
+    {
+        string message = await DoLongWorkAsync().WaitAsync(TimeSpan.FromSeconds(12));
+        await Console.Out.WriteLineAsync(message);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+
+    try
+    {
+        string message = await DoLongWorkAsync().WaitAsync(cancellationTokenSource.Token);
+        await Console.Out.WriteLineAsync(message);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+
+    try
+    {
+        string message = await DoLongWorkAsync().WaitAsync(TimeSpan.FromSeconds(2));
+        await Console.Out.WriteLineAsync(message);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+
+
+    cancellationTokenSource.Cancel();
+
+    try
+    {
+        _ = await DoLongWorkAsync().WaitAsync(cancellationTokenSource.Token);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+
+    try
+    {
+        _ = await DoLongWorkAsync().WaitAsync(TimeSpan.FromSeconds(2),cancellationTokenSource.Token);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+
+}
+
+await UsingWaitAsync();
+```
+```
+I star to do long work asynchronous! Thread: 6
+
+Done with work. Thread: 6
+I star to do long work asynchronous! Thread: 7
+
+Done with work. Thread: 7
+I star to do long work asynchronous! Thread: 6
+The operation has timed out.
+I star to do long work asynchronous! Thread: 11
+A task was canceled.
+I star to do long work asynchronous! Thread: 9
+A task was canceled.
+
+```
+В сінхронному контексті існує аналогічний метод Wait.
 
