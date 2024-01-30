@@ -317,6 +317,6 @@ static async Task MethodWithVerification(int t)
     }
 }
 
-MethodWithVerification(0);
-await MethodWithVerification(0);
-await MethodWithVerification(5);
+//MethodWithVerification(0);
+//await MethodWithVerification(0);
+//await MethodWithVerification(5);

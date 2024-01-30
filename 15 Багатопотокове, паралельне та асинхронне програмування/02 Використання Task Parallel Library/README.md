@@ -512,7 +512,7 @@ Task status:Canceled
 Коли ви створюєте програму з багатопоточним графічним інтерфейсом користувача (GUI), вторинні потоки ніколи не зможуть отримати прямий доступ до елементів керування інтерфейсу користувача. Причина в тому, що елементи керування (кнопки, текстові поля, мітки, індикатори виконання тощо) мають спорідненість потоку з потоком, який їх створив.
 У наступному прикладі проілюстровано один із способів надання вторинним потокам доступу до елементів інтерфейсу користувача потокобезпечним способом (хоча простіше зробити за допомогою async і await).
 
-Створемо проект типу WPF Application з назвою DataParallelismWithForEach і назвою рішення StudyTPL.
+Створемо проект типу WPF Application з назвою DataParallelismWithForEach і назвою рішення DataParallelismWithForEach.
 
 Для тестування в католог D:\Pitures скопіюємо декілька будь-яких зображень з розширенням *.jpg.
 
@@ -1611,4 +1611,147 @@ Ok 3
 ```
 Таким чином перевірки виконуються синхронно, а потім приватна функція виконується асинхронно.
 
+## Скасування операцій в патерні async/await .
+
+Скасування не складно реалізувати в шаблоні async/await. 
+
+Створемо проект типу WPF Application з назвою PictureHandlerWithAsyncAwait і назвою рішення PictureHandlerWithAsyncAwait.
+
+Встановити пакет System.Drawing.Common.
+
+    Tools > NuGet Package Manager > Manage NuGet Packages for Solution > В рядку пошуку System.Drawing.Common > Install
+
+Для тестування в католог D:\Pitures скопіюємо декілька будь-яких зображень з розширенням *.jpg.
+
+Змінемо файл MainWindow.xalm
+
+```
+<Window x:Class="PictureHandlerWithAsyncAwait.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PictureHandlerWithAsyncAwait"
+        mc:Ignorable="d"
+        Title="Picture Handler with Async/Await." Height="450" Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Label Grid.Row="0" Grid.Column="0">
+            Feel free to type here while the images are processed...
+        </Label>
+        <TextBox Grid.Row="1" Grid.Column="0"  Margin="10,10,10,10"/>
+        <Grid Grid.Row="2" Grid.Column="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Button Name="cmdCancel" Grid.Column="0" Margin="65,0,665,10" Click="cmdCancel_Click" Height="20" VerticalAlignment="Bottom" Grid.ColumnSpan="2">
+                Cancel
+            </Button>
+            <Button Name="cmdProcess" Grid.Row="0" Grid.Column="1" Margin="410,10,225,10"
+                    Click="cmdProcess_Click">
+                Process
+            </Button>
+
+        </Grid>
+    </Grid>
+</Window>
+
+```
+Змінимо файл MainWindow.xalm.сs (можливо треба розгорнути стрілку файлу MainWindow.xalm).
+В верхній частині оператори using.
+```cs
+//using System.Windows.Shapes;
+using System.IO;
+using System.Drawing;
+```
+Додамо зміну рівня класа та обробник події натискання Cancel.
+
+```cs
+        private CancellationTokenSource? _cancellationTokenSource = null;
+        public MainWindow()
+        {
+            InitializeComponent();
+        }
+
+        private void cmdCancel_Click(object sender, RoutedEventArgs e)
+        {
+            _cancellationTokenSource?.Cancel();
+        }
+
+```
+Додамо метод який обробляє одне зобрадення. 
+
+```cs
+        private async Task ProcessFileAsync(string currentFile,string outputDirectory, CancellationToken token)
+        {
+            string filename = Path.GetFileName(currentFile);
+            using Bitmap bitmap = new(currentFile);
+            try
+            {
+                await Task.Run(() =>
+                {
+                    Dispatcher?.Invoke(() => { Title = $"Processing {filename}"; });
+                    bitmap.RotateFlip(RotateFlipType.Rotate180FlipNone);
+                    bitmap.Save(Path.Combine(outputDirectory, filename));
+                }, token);
+            }
+            catch (OperationCanceledException ex)
+            {
+                Dispatcher?.Invoke(() => { Title = $"Process canceled! {ex.Message}"; });
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw;
+            }
+        }
+```
+В цьому методі в метод Run предаеться CancellationToken якій відповідає за сказування завдання. Коли у об'єкта CancellationTokenSource викликаеться метод Cancel при виконані метода Run виникає TaskCanceledException яке є нашадком  OperationCanceledException.
+
+Додамо обробник натискання кнопки Process який виконує обробку всіх зображень.
+
+```cs
+        private async void cmdProcess_Click(object sender, RoutedEventArgs e)
+        {
+            _cancellationTokenSource = new();
+            string pictureDirectory = @"D:\Pictures";
+            string outputDirectory = @"D:\ModifiedPictures";
+
+            //Recreate directory 
+            if (Directory.Exists(outputDirectory))
+            {
+                Directory.Delete(outputDirectory, true);
+            }
+            Directory.CreateDirectory(outputDirectory);
+
+            //Process
+            string[] files = Directory.GetFiles(pictureDirectory, "*.jpg", SearchOption.AllDirectories);
+
+            try
+            {
+                foreach (var file in files)
+                {
+                    await ProcessFileAsync(file, outputDirectory, _cancellationTokenSource.Token);
+                }
+
+                if (!_cancellationTokenSource.IsCancellationRequested)
+                {
+                    Title = "Process complite";
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+            _cancellationTokenSource = null;
+        }
+```
+При виникнені винятку цикл переривається.  
 
