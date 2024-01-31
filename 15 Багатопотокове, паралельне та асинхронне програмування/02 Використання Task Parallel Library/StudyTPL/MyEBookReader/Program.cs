@@ -132,6 +132,5 @@ async Task DownloadBookWihtAsyncAwaitAndGetStatisticAsync()
         return query.FirstOrDefault()!;
     }
 }
-
 await DownloadBookWihtAsyncAwaitAndGetStatisticAsync();
 
