@@ -4,17 +4,15 @@ static void UseQueueUserWorkItem()
 {
     Thread primary = Thread.CurrentThread;
     primary.Name = "Primary";
-
-    Console.WriteLine($"Main thread started.\n" +
-        $" Thread.CurrentThread.ManagedThreadId:{primary.ManagedThreadId}\n" +
-        $" Environment.CurrentManagedThreadId:{Environment.CurrentManagedThreadId}");
+    Console.WriteLine($"Main thread started. ThreadId:{primary.ManagedThreadId}");
 
     Printer printer = new();
     printer.PrintNumbersWithLock();
+    Console.WriteLine();
 
     WaitCallback workItem = new WaitCallback(PrintTheNumbers);
 
-    int length = 5;
+    int length = 10;
     for (int i = 0; i < length; i++)
     {
         ThreadPool.QueueUserWorkItem(workItem,printer);

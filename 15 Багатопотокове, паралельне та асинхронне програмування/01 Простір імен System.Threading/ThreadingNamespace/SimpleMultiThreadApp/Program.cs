@@ -27,15 +27,8 @@ void WorkingWithThreadStart()
             break;
     }
     //Do some addition work.
-    Console.WriteLine("For finishe prass End");
-    ConsoleKey consoleKey = ConsoleKey.Home;
-    while (consoleKey != ConsoleKey.End)
-    {
-        consoleKey = Console.ReadKey().Key;
-        Console.Beep();
-    }
-    
-    Console.WriteLine("\nThis is on the main thread, and we are finished.");
+    Console.WriteLine($"{Thread.CurrentThread.Name} is almost complete. Press Enter."  );
+    Console.ReadLine();
 }
 //WorkingWithThreadStart();
 
@@ -49,9 +42,6 @@ void Add(object? data)
     }
     Console.WriteLine("The method Add is finished.");
 }
-
-
-
 
 void WorkingWithParameterizedThreadStart()
 {
@@ -117,4 +107,4 @@ void UseIsBackground()
     Console.WriteLine("The primary thread is finished.");
 }
 
-UseIsBackground();
+//UseIsBackground();

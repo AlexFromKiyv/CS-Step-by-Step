@@ -108,4 +108,4 @@ void UseInterlockedCompareExchange()
     Interlocked.CompareExchange(ref intValue, 5, 10);
     Console.WriteLine(intValue);
 }
-UseInterlockedCompareExchange();
+//UseInterlockedCompareExchange();

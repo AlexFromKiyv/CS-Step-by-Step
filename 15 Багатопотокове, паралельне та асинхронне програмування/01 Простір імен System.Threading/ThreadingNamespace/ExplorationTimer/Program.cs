@@ -39,4 +39,4 @@ void UseTimerWithInformation()
 
     Console.ReadLine();
 }
-UseTimerWithInformation();
+//UseTimerWithInformation();
