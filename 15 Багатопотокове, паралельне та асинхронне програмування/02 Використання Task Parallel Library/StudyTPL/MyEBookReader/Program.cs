@@ -5,8 +5,8 @@ using System.Text;
 void DownloadBookAndGetStatistic()
 {
     string _textEbook = string.Empty;
-    GetBook();
     Console.WriteLine("Downloding book ... ");
+    GetBook();
     Console.ReadLine();
 
 
@@ -49,10 +49,12 @@ void DownloadBookAndGetStatistic()
         stringBuilder.AppendLine($"Longest word is: {longestWord}");
 
         Console.WriteLine(stringBuilder.ToString(),"Book info");
+        Console.WriteLine("Work done.");
     }
 
     string[] FindTenMostCommon(string[] words)
     {
+        Console.WriteLine($"Method FindTenMostCommon in Thread:{Thread.CurrentThread.ManagedThreadId}");
         var frequencyOrder = from word in words
                              where word.Length > 6
                              group word by word into g
@@ -64,6 +66,7 @@ void DownloadBookAndGetStatistic()
 
     string FindLongestWord(string[] words)
     {
+        Console.WriteLine($"Method FindLongestWord in Thread:{Thread.CurrentThread.ManagedThreadId}");
         var query = from word in words
                     orderby word.Length descending
                     select word;
@@ -71,7 +74,7 @@ void DownloadBookAndGetStatistic()
     }
 
 }
-//DownloadBookAndGetStatistic();
+DownloadBookAndGetStatistic();
 
 async Task DownloadBookWihtAsyncAwaitAndGetStatisticAsync()
 {

@@ -3,31 +3,27 @@
     Parallel.Invoke(
         () => {
             Console.WriteLine($"Task:{Task.CurrentId}");
-            Thread.Sleep(3000);
+            Thread.Sleep(1000);
             Console.WriteLine("Hi");
 
         },        
-        ()=>SayWithDelay("girl",5000),
+        ()=>SayWithDelay("girl",3000),
         
         SayGoodbay       
         );
 
     void SayGoodbay()
     {
-        SayWithDelay("Goodbay", 8000);
+        SayWithDelay("Goodbay", 5000);
     }
     
     void SayWithDelay(string phrase, int delay) 
     {
-        AboutTask();
+        Console.WriteLine($"Task:{Task.CurrentId}");
         Thread.Sleep(delay);
         Console.WriteLine(phrase);
     }
 
-    void AboutTask()
-    {
-        Console.WriteLine($"Task:{Task.CurrentId}");
-    }
 }
 //SimpleUsingInvoke();
 
@@ -48,22 +44,22 @@ void CancellationWitoutThrow()
             }
 
             Console.WriteLine(i);
-            Thread.Sleep(500);
+            Thread.Sleep(1000);
         }
 
     },cancellationToken);
     
     task.Start();
 
-    Thread.Sleep(3000);
+    Thread.Sleep(7000);
 
     cancellationTokenSource.Cancel();
 
-    Thread.Sleep(500);
-
     Console.WriteLine($"Task status:{task.Status}");
+    
+    Console.ReadLine();
 }
-//CancellationWitoutThrow();
+CancellationWitoutThrow();
 
 
 void CancellationWithThrow()
@@ -109,4 +105,4 @@ void CancellationWithThrow()
     Console.WriteLine($"Task status:{task.Status}");
    
 }
-CancellationWithThrow();
+//CancellationWithThrow();

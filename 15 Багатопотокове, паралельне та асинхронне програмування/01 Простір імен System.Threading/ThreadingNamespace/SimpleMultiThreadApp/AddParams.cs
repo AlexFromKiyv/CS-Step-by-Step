@@ -14,5 +14,6 @@ namespace SimpleMultiThreadApp
             this.a = a;
             this.b = b;
         }
+        public void AddPrint() => Console.WriteLine($"Sum is {a+b}");
     }
 }

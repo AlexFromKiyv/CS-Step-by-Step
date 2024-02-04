@@ -368,6 +368,34 @@ The method Add is finished.
 ```
 При виконані видно що потоки відрізняються і по різному закінчують свою роботу.
 
+Оскільки метод Start не є типобезпечним і потрібно приводити дані до потрібного типу рекомендується щоб в об'єкті були і дані функція шо їх обробляє.
+
+```cs
+    internal class AddParams
+    {
+        public int a, b;
+        public AddParams(int a, int b)
+        {
+            this.a = a;
+            this.b = b;
+        }
+        public void AddPrint() => Console.WriteLine($"Sum is {a+b}");
+    }
+```
+```cs
+void WorkWitoutCasting()
+{
+    AddParams addParams = new(1, 2);
+    Thread thread = new(addParams.AddPrint);
+    thread.Start();
+    Thread.Sleep(1000);
+}
+WorkWitoutCasting();
+```
+```
+Sum is 3
+```
+
 ## Клас AutoResetEvent.
 
 У цих перших кількох прикладах немає чистого способу дізнатися, коли вторинний потік завершив свою роботу. В останньому прикладі код Thread.Sleep(5); спеціально гальмує основний поток, щоб вториний виконався раніше його закінчення. Одним із простих і безпечним для потоків способом змусити потік очікувати, поки не завершиться інший, є використання класу AutoResetEvent.

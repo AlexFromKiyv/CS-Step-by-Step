@@ -59,7 +59,6 @@ namespace DataParallelismWithForEach
             }
         }
 
-
         private void cmdProcessWithForEach_Click(object sender, RoutedEventArgs e)
         {
             Title = $"Starting...";
@@ -93,6 +92,7 @@ namespace DataParallelismWithForEach
                 bitmap.Save(Path.Combine(outputDirectory, filename));
             });
         }
+
 
         private void ProcessWithTaskFactory_Click(object sender, RoutedEventArgs e)
         {

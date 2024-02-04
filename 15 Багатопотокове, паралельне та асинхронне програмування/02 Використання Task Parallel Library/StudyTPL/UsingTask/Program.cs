@@ -1,6 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 
-void RunTask()
+void RunTasks()
 {
     Task task1 = new Task(() => { Console.WriteLine($"Task 1 on {Thread.CurrentThread.ManagedThreadId}");});
     task1.Start();
@@ -14,7 +14,7 @@ void RunTask()
     task3.Wait();
 
 }
-//RunTask();
+//RunTasks();
 
 void UsingWait()
 {
@@ -90,7 +90,7 @@ void InnerTaskAsPartOuter()
             Thread.Sleep(1000);
             Console.WriteLine("Inner task finished.");
         },TaskCreationOptions.AttachedToParent);
-
+        //inner.Wait();
         Console.WriteLine("Outer task finished.");
     });
     outer.Wait();
@@ -105,19 +105,19 @@ void ArrayOfTasks()
         new Task( () => 
         {
             Console.WriteLine("Task 1 started.");
-            Thread.Sleep(5000); 
+            Thread.Sleep(3000); 
             Console.WriteLine("Task 1 finished.");}),
 
         new Task(() =>
         {
             Console.WriteLine("Task 2 started.");
-            Thread.Sleep(5000);
+            Thread.Sleep(3000);
             Console.WriteLine("Task 2 finished.");
         }),
         new Task(() =>
         {
             Console.WriteLine("Task 3 started.");
-            Thread.Sleep(5000);
+            Thread.Sleep(3000);
             Console.WriteLine("Task 3 finished.");
         }),
 
@@ -141,7 +141,7 @@ void ObtainingTheResultOfTheTask()
     Task<int> squareTask = new(() =>
     {
         Console.WriteLine($"Thread:{Thread.CurrentThread.ManagedThreadId}");
-        Thread.Sleep(5000);
+        Thread.Sleep(3000);
         return x*x;
     });
 

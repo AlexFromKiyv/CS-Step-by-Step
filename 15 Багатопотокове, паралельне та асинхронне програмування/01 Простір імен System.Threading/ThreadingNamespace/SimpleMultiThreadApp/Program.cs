@@ -55,6 +55,16 @@ void WorkingWithParameterizedThreadStart()
 }
 //WorkingWithParameterizedThreadStart();
 
+
+void WorkWitoutCasting()
+{
+    AddParams addParams = new(1, 2);
+    Thread thread = new(addParams.AddPrint);
+    thread.Start();
+    Thread.Sleep(1000);
+}
+//WorkWitoutCasting();
+
 AutoResetEvent _waitHandler = new AutoResetEvent(false);
 void AddWithSet(object? data)
 {

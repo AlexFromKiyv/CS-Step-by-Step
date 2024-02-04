@@ -6,13 +6,13 @@ void UsingPLINQ()
     Console.WriteLine("Processing");
     Task.Factory.StartNew(ProcessingIntData);
     Task.Factory.StartNew(ProcessingIntDataWithPLINQ);
-    Console.ReadKey();
+    Console.ReadLine();
 
 
     void ProcessingIntData()
     {
         // Get a very large array of integers.
-        int[] ints = Enumerable.Range( 0, 100_000_000 ).ToArray();
+        int[] ints = Enumerable.Range( 0, 50_000_000 ).ToArray();
         // Find the numbers where num % 3 == 0 is true, returned
         // in descending order.
 
@@ -33,7 +33,7 @@ void UsingPLINQ()
     void ProcessingIntDataWithPLINQ()
     {
         // Get a very large array of integers.
-        int[] ints = Enumerable.Range(0, 10_000_000).ToArray();
+        int[] ints = Enumerable.Range(0, 50_000_000).ToArray();
         // Find the numbers where num % 3 == 0 is true, returned
         // in descending order.
 
@@ -73,7 +73,7 @@ void CancellationPLINQ()
     void ProcessingIntDataWithPLINQAndCancellation()
     {
 
-        int[] ints = Enumerable.Range(0, 100_000_000).ToArray();
+        int[] ints = Enumerable.Range(0, 50_000_000).ToArray();
 
         var query = from number in ints.AsParallel().WithCancellation(_cancellationTokenSource.Token)
                     where number % 3 == 0
@@ -90,10 +90,10 @@ void CancellationPLINQ()
             Console.WriteLine($"\nWith Paralell\nTime:{watch.ElapsedMilliseconds}");
             Console.WriteLine($"\tAmount:{modThreeIsZero.Count()}");
         }
-        catch (OperationCanceledException ex)
+        catch(Exception ex)
         {
             Console.WriteLine(ex.Message);
         }
     }
 }
-CancellationPLINQ();
+//CancellationPLINQ();
