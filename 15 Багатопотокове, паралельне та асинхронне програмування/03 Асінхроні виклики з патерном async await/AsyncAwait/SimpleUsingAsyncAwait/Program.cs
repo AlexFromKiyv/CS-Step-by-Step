@@ -40,11 +40,13 @@ static async Task<string> DoLongWorkAsync()
     });
 }
 
+
 async void CallAsyncMethod()
 {
     string taskResult = await DoLongWorkAsync();
     Console.WriteLine(taskResult);
 }
+
 
 //while (true)
 //{
@@ -258,7 +260,7 @@ static async Task UseTaskWhenAny()
 // ## Виклик асінхронних методів з сінхронних.
 
 //Task<string> task = DoLongWorkAsync();
-//Console.WriteLine(task.Result);
+//Console.WriteLine(task?.Result);
 //Console.ReadLine();
 
 
@@ -338,7 +340,7 @@ async Task UsingWaitAsync()
 
     try
     {
-        string message = await DoLongWorkAsync().WaitAsync(cancellationTokenSource.Token);
+        string message = await DoLongWorkAsync().WaitAsync(TimeSpan.FromSeconds(2));
         await Console.Out.WriteLineAsync(message);
     }
     catch (Exception ex)
@@ -348,7 +350,7 @@ async Task UsingWaitAsync()
 
     try
     {
-        string message = await DoLongWorkAsync().WaitAsync(TimeSpan.FromSeconds(2));
+        string message = await DoLongWorkAsync().WaitAsync(cancellationTokenSource.Token);
         await Console.Out.WriteLineAsync(message);
     }
     catch (Exception ex)

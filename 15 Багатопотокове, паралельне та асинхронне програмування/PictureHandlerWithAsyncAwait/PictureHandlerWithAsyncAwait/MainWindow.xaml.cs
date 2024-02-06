@@ -52,11 +52,8 @@ namespace PictureHandlerWithAsyncAwait
                 {
                     await ProcessFileAsync(file, outputDirectory, _cancellationTokenSource.Token);
                 }
-
-                if (!_cancellationTokenSource.IsCancellationRequested)
-                {
-                    Title = "Process complite";
-                }
+                Title = "Process complite";
+ 
             }
             catch (Exception ex)
             {
@@ -131,12 +128,10 @@ namespace PictureHandlerWithAsyncAwait
                         Title = $"Processing. Thread:{threadId}   File:{filename}";
                     });
 
-                    using (Bitmap bitmap = new Bitmap(currentFile))
-                    {
+                    using Bitmap bitmap = new Bitmap(currentFile);
 
-                        bitmap.RotateFlip(RotateFlipType.Rotate180FlipNone);
-                        bitmap.Save(Path.Combine(outputDirectory, filename));
-                    }
+                    bitmap.RotateFlip(RotateFlipType.Rotate180FlipNone);
+                    bitmap.Save(Path.Combine(outputDirectory, filename));
                 });
                 Dispatcher?.Invoke(() => Title = "Process complite.");
             }

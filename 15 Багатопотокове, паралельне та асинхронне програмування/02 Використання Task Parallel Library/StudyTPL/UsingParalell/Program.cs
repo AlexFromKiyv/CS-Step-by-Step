@@ -59,7 +59,7 @@ void CancellationWitoutThrow()
     
     Console.ReadLine();
 }
-CancellationWitoutThrow();
+//CancellationWitoutThrow();
 
 
 void CancellationWithThrow()
@@ -101,8 +101,7 @@ void CancellationWithThrow()
         }
     }
 
-
     Console.WriteLine($"Task status:{task.Status}");
-   
+  
 }
 //CancellationWithThrow();
