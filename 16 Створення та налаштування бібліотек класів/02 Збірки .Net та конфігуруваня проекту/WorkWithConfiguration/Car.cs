@@ -8,8 +8,10 @@ namespace WorkWithConfiguration
 {
     internal class Car
     {
+        private string? war_code { get; set; }
         public string? Make { get; set; }
         public string? Color { get; set; }
         public string? EngineType { get; set; }
+        public string? GetWarCode() => war_code;
     }
 }

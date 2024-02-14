@@ -337,9 +337,9 @@ VW
 Gray
 Electric
 ```
-Якшо є неспівпадіня або наявність назв, Bind не змінює відповідне значення об'єкту.
+Якщо розділ не конфігуровано, метод Bind() не оновлюватиме екземпляр об'єкту, але залишить усі властивості такими, якими вони існували до виклику Bind().
 
-Можна не тільки змінювати а і створити об'єкт конфігурації.
+Створити об'єкт конфігурації можна інакше.
 
 ```cs
 void CreateConfigurationObject()
@@ -372,8 +372,173 @@ Electric
 ```
 Метод Get створює новий екземпляр зазначеного типу з розділу конфігурації. Неузагальнена версія методу повертає тип object?, тому значення, що повертається, має бути приведене до певного типу перед використанням. Узагальнена версія повертає екземпляр зазначеного типу без необхідності виконувати приведення. Якщо розділ не знайдено, метод повертає значення null.
 
-### Як виявити помилки при створені об'єкта конфігурації.
+### Як виявити помилки при роботі з об'єктом конфігурації.
 
 
+Оновимо файл конфігурації.
+
+```json
+{
+  "BaseCurrency": "Euro",
+  "CarName": "Id.4",
+  "Car": {
+    "Made": "VW",
+    "color": "Gray",
+    "engineType": "Electric",
+    "PowerReserve": "425"
+  }
+}
+```
+Зверніть увагу замість Make - Made.
+```cs
+void BindAndGetAndReflection()
+{
+    
+    IConfiguration configuration = GetConfiguration();
+
+    Car configurationObject_1 = new();
+    
+    configuration.GetSection("car").Bind(configurationObject_1);
+       
+    Console.WriteLine(configurationObject_1?.Make);
+    Console.WriteLine(configurationObject_1?.Color);
+    Console.WriteLine(configurationObject_1?.EngineType);
+    
+    Console.WriteLine();
+
+    var configurationObject_2 = configuration.GetSection(nameof(Car)).Get<Car>();
+    Console.WriteLine(configurationObject_2?.Make);
+    Console.WriteLine(configurationObject_2?.Color);
+    Console.WriteLine(configurationObject_2?.EngineType);
+}
+BindAndGetAndReflection();
+```
+```
+
+Gray
+Electric
 
 
+Gray
+Electric
+```
+Методи Bind() і Get()/Get<T>() використовують reflection, щоб зіставити імена загальнодоступних властивостей класу з іменами в розділі конфігурації без урахування регістру. Якщо властивість у конфігурації не існує в класі (або ім’я написано по-іншому), тоді це конкретне значення конфігурації (за замовчуванням) ігнорується.
+
+Методи Bind(), Get() і Get<T>() додатково можуть виконувати Action<BinderOptions> для подальшого вдосконалення процесу оновлення (Bind()) або створення (Get()/Get<T>()) екземпляра класу.
+```cs
+//
+// Summary:
+//     Options class used by the Microsoft.Extensions.Configuration.ConfigurationBinder.
+public class BinderOptions
+{
+    //
+    // Summary:
+    //     When false (the default), the binder will only attempt to set public properties.
+    //     If true, the binder will attempt to set all non read-only properties.
+    public bool BindNonPublicProperties { get; set; }
+
+    //
+    // Summary:
+    //     When false (the default), no exceptions are thrown when trying to convert a value
+    //     or when a configuration key is found for which the provided model object does
+    //     not have an appropriate property which matches the key's name. When true, an
+    //     System.InvalidOperationException is thrown with a description of the error.
+    public bool ErrorOnUnknownConfiguration { get; set; }
+}
+```
+Якщо для параметра ErrorOnUnknownConfiguration встановлено значення true, тоді виникне виняткова ситуація InvalidOperationException, якщо конфігурація містить назву, яка не існує в моделі.
+
+```cs
+void BindValidation()
+{
+    IConfiguration configuration = GetConfiguration();
+
+    try
+    {
+        IConfigurationSection section = configuration.GetSection(nameof(Car));
+        Car? configurationObject = section.Get<Car>(t => t.ErrorOnUnknownConfiguration = true);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+}
+BindValidation();
+
+```
+```
+'ErrorOnUnknownConfiguration' was set on the provided BinderOptions, but the following properties were not found on the instance of WorkWithConfiguration.Car: 'Made', 'PowerReserve'
+```
+
+BindNonPublicProperties контролює прив’язування непублічні властивостей.
+Змінемо клас Car
+```cs
+    internal class Car
+    {
+        private string? war_code { get; set; }
+        public string? Make { get; set; }
+        public string? Color { get; set; }
+        public string? EngineType { get; set; }
+        public string? GetWarCode() => war_code;
+    }
+```
+Змінемо файл конфігурації.
+```json
+{
+  "BaseCurrency": "Euro",
+  "CarName": "Id.4",
+  "Car": {
+    "Made": "VW",
+    "color": "Gray",
+    "engineType": "Electric",
+    "PowerReserve" : "425",
+    "war_code" : "23345678"
+  }
+}
+```
+```cs
+void PrivatePropertyFromConfiguration()
+{
+    IConfiguration configuration = GetConfiguration();
+    IConfigurationSection section = configuration.GetSection(nameof(Car));
+
+    Car? configurationObject = section.Get<Car>();
+    Console.WriteLine(configurationObject?.GetWarCode());
+
+    Car? configurationObject_1 = section.Get<Car>(t=>t.BindNonPublicProperties=true);
+    Console.WriteLine(configurationObject_1?.GetWarCode());
+}
+PrivatePropertyFromConfiguration();
+```
+```
+
+23345678
+```
+Таким чином якшо з конфігурації треба зчитувати непублічні властивості це треба вказувати.
+
+Також є метод GetRequiredSection якій створить виняток, якщо розділ не налаштовано.
+
+```cs
+void UseGetRequiredSection()
+{
+    try
+    {
+        IConfiguration configuration = GetConfiguration();
+        IConfigurationSection section = configuration.GetRequiredSection("Bus");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+        throw;
+    }
+}
+UseGetRequiredSection();
+```
+```
+Section 'Bus' not found in configuration.
+Unhandled exception. System.InvalidOperationException: Section 'Bus' not found in configuration.
+```
+
+## Додаткові параметри конфігурації.
+
+Окрім використання конфігурації на основі файлів, є варіанти використання змінних середовища, сховища ключів Azure, аргументів командного рядка та багато іншого. Багато з них використовуються в ASP.NET Core.
