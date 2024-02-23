@@ -13,7 +13,7 @@ dotnet new sln
 dotnet new classlib -n CarLibrary
 dotnet sln add .\CarLibrary
 ```
-Це можна зробити і в VS, але приклад нагадує як це зробити в консолі. Тепер рішеня можна відкрити в VS.
+Це можна зробити і в VS, але приклад нагадує як це зробити в консолі. Тепер рішеня можна відкрити в VS. Відкриемо рішеня в VS.
 
 При створені бібліотеки із шаблону автогенеруеться клас Class1.cs якій не дуже потрібний його можна видалити.
 
@@ -47,6 +47,8 @@ public enum MusicMediaEnum
 
 Car.cs
 ```cs
+namespace CarLibrary;
+
 public abstract class Car
 {
     public string Name { get; set; } = string.Empty;
@@ -57,7 +59,7 @@ public abstract class Car
     protected EngineStateEnum State = EngineStateEnum.EngineAlive;
     protected EngineStateEnum EngineState => State;
 
-    protected Car() { } 
+    protected Car() { }
     protected Car(string name, int currentSpeed, int maxSpeed)
     {
         Name = name;
@@ -150,22 +152,22 @@ ildasm /METADATA /out=CarLibrary.il .\CarLibrary\bin\Debug\net8.0\CarLibrary.dll
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Copyright>Copyright 2023</Copyright>
+    <Copyright>Copyright 2024</Copyright>
     <Authors>Alex</Authors>
-    <Company>BiSoft</Company>
+    <Company>BigSoft</Company>
     <Product>CarsShop</Product>
     <PackageId>CarLibrary</PackageId>
-    <Description>This is an awesome library for cars.</Description>
+    <Description>Library for cars.</Description>
     <AssemblyVersion>1.0.0.1</AssemblyVersion>
     <FileVersion>1.0.0.2</FileVersion>
-    <Version>1.0.3</Version>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 ```
 
 
 ### CIL
 
-Збірка не містить інструкцій для конкретної платформи; скоріше, він містить інструкції спільної проміжної мови Common Intermediate Language (CIL), що не залежать від платформи. Коли .NET Runtime завантажує збірку в пам’ять, базовий CIL компілюється (за допомогою компілятора JIT) у інструкції, зрозумілі цільовій платформі. Наприклад, метод TurboBoost() класу SportsCar представлений таким CIL:
+Збірка не містить інструкцій для конкретної платформи; скоріше, віна містить інструкції спільної проміжної мови Common Intermediate Language (CIL), що не залежать від платформи. Коли .NET Runtime завантажує збірку в пам’ять, базовий CIL компілюється (за допомогою компілятора JIT) у інструкції, зрозумілі цільовій платформі. Наприклад, метод TurboBoost() класу SportsCar представлений таким CIL:
 ```
 .method public hidebysig virtual instance void 
           TurboBoost() cil managed
@@ -184,7 +186,7 @@ ildasm /METADATA /out=CarLibrary.il .\CarLibrary\bin\Debug\net8.0\CarLibrary.dll
 
 ### Метадані.
 
-Ось як виглядають металані TypeDef для EngineStateEnum:
+Ось як виглядають метадані TypeDef для EngineStateEnum:
 
 ```
 // TypeDef #2 (02000003)
@@ -223,9 +225,13 @@ ildasm /METADATA /out=CarLibrary.il .\CarLibrary\bin\Debug\net8.0\CarLibrary.dll
 
 Відкрижмо командний рядок. Меню VS Tools> Command Line > Developer Command Prompt.
 
-Створити кліенський проект можна виконавши команду
+Створити кліенський проект можна виконавши команди
 ```console
 dotnet new console -n CarClient
+```
+Додамо проект до рішення
+```console
+dotnet sln add .\CarClient
 ```
 
 Додати посилання проекту на бібліотеку можна командою
@@ -234,10 +240,7 @@ dotnet add CarClient reference Carlibrary
 ```
 Команда add reference створює посилання на проект.Це зручно для розробки, оскільки CarClient завжди використовуватиме останню версію CarLibrary.
 
-Додамо проект до рішення
-```console
-dotnet sln add .\CarClient
-```
+
 Якщо у вас все ще відкрито рішення у Visual Studio, ви помітите, що новий проект відображається в Solution Explorer без будь-якого втручання з вашого боку.Остання зміна — клацнути правою кнопкою миші CarClient у провіднику рішень і вибрати «Set as Startup Project».
 
 Ви також можете встановити посилання на проект у Visual Studio, клацнувши правою кнопкою миші проект CarClient у Solution Explorer, вибравши Add ➤ Project reference та вибравши проект CarLibrary у вузлі проекту.
@@ -274,12 +277,18 @@ Eek! Your engine block exploded!
 Це можна виконати використавши аттрібути.
 InternalCar.cs
 ```cs
-namespace CarLibrary
+
+namespace CarLibrary;
+
+internal class InternalCar : Car
 {
-    internal class InternalCar
+    public override void TurboBoost()
     {
+        Console.WriteLine("The car is driving");
     }
 }
+
+
 ```
 Car.cs
 ```cs
@@ -293,17 +302,25 @@ namespace CarLibrary;
 Тепер можна спробувати використати внутрішній клас для клієнського додадту.
 
 ```cs
-void ViewInternaalClass()
+void TestDrive()
 {
-    var iCar = new InternalCar();
-    iCar.TurboBoost();
+    SportCar sportCar = new SportCar("MyBird", 100, 200);
+    sportCar.TurboBoost();
+
+    MiniVan miniVan = new();
+    miniVan.TurboBoost();
+
+    InternalCar internalCar = new();
+    internalCar.TurboBoost();
 }
-ViewInternaalClass();
+TestDrive();
 ```
 ```
-I'm internal Car
+Ramming speed! Faster is better...
+Eek! Your engine block exploded!
+The car is driving!
 ```
-Інший спосіб досягти того ж — використовувати оновлені можливості у файлі проекту .NET.
+Інший спосіб досягти того ж — використовувати оновлені можливості у файлі проекту.NET.
 ```
 <ItemGroup>
   <AssemblyAttribute Include='System.Runtime.CompilerServices.InternalsVisibleToAttribute'>
