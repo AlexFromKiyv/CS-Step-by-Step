@@ -16,6 +16,6 @@ public class SportCar : Car
     }
     public override void TurboBoost()
     {
-        Console.WriteLine("Ramming speed! Faster is better...");
+        Console.WriteLine("Ramming speed!!! It's not good!");
     }
 }

@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarLibrary", "CarLibrary\Ca
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarClient", "CarClient\CarClient.csproj", "{DC00E2B7-90D4-4AC5-A5B0-4F242994D56A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BigCarClient", "BigCarClient\BigCarClient.csproj", "{71A8F710-35EB-4C4F-BBD2-A56256D513DC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{DC00E2B7-90D4-4AC5-A5B0-4F242994D56A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DC00E2B7-90D4-4AC5-A5B0-4F242994D56A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DC00E2B7-90D4-4AC5-A5B0-4F242994D56A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{71A8F710-35EB-4C4F-BBD2-A56256D513DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{71A8F710-35EB-4C4F-BBD2-A56256D513DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{71A8F710-35EB-4C4F-BBD2-A56256D513DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{71A8F710-35EB-4C4F-BBD2-A56256D513DC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
