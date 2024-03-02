@@ -223,7 +223,7 @@ ildasm /METADATA /out=CarLibrary.il .\CarLibrary\bin\Debug\net8.0\CarLibrary.dll
 
 Оскільки кожен тип проекту CarLibrary було оголошено за допомогою ключового слова public, інші програми .NET також можуть використовувати їх. Також можна визначати типи за допомогою internal ключового слова C# (фактично, це стандартний режим доступу C# для класів). Такі типи можуть використовуватися лише збіркою, у якій вони визначені. Зовнішні клієнти не можуть ні бачити, ні створювати типи, позначені ключовим словом internal.
 
-Відкрижмо командний рядок. Меню VS Tools> Command Line > Developer Command Prompt.
+Відкриемо командний рядок. Меню VS Tools> Command Line > Developer Command Prompt.
 
 Створити кліенський проект можна виконавши команди
 ```console
@@ -233,13 +233,11 @@ dotnet new console -n CarClient
 ```console
 dotnet sln add .\CarClient
 ```
-
 Додати посилання проекту на бібліотеку можна командою
 ```console
 dotnet add CarClient reference Carlibrary
 ```
 Команда add reference створює посилання на проект.Це зручно для розробки, оскільки CarClient завжди використовуватиме останню версію CarLibrary.
-
 
 Якщо у вас все ще відкрито рішення у Visual Studio, ви помітите, що новий проект відображається в Solution Explorer без будь-якого втручання з вашого боку.Остання зміна — клацнути правою кнопкою миші CarClient у провіднику рішень і вибрати «Set as Startup Project».
 
@@ -268,13 +266,15 @@ Eek! Your engine block exploded!
 Клієнтська програма тепер використовує типи, визначені в окремій користувацькій бібліотеці. Коли створюється посилання на проект, порядок збірки рішення коригується так, що залежні проекти (у цьому прикладі CarLibrary) будуються спочатку, а потім вихідні дані з цієї збірки копіюються в вихідний каталог батьківського проекту (CarClient). Скомпільована клієнтська бібліотека посилається на скомпільовану бібліотеку класів. Під час перебудови клієнтського проекту змінюється і залежна бібліотека, а нова версія знову копіюється до цільової папки.
 Якщо ви використовуєте Visual Studio, ви можете натиснути кнопку «Show All Files» в Solution Explorer, і ви зможете побачити всі вихідні файли та переконатися, що скомпільована CarLibrary є там. Якщо ви використовуєте Visual Studio Code, перейдіть до каталогу bin/debug/netX.0 на вкладці Explorer.
 
-Коли робиться пряме посилання замість посилання на проект, скомпільована бібліотека також копіюється до вихідного каталогу клієнтської бібліотеки, але під час створення посилання.Без посилання на проект проекти можна створювати незалежно один від одного, і файли можуть не синхронізуватися. Коротше кажучи, якщо ви розробляєте залежні бібліотеки (як це зазвичай буває у реальних проектах програмного забезпечення), найкраще посилатися на проект, а не на вихід проекту.
+Коли робиться пряме посилання замість посилання на проект, скомпільована бібліотека також копіюється до вихідного каталогу клієнтської бібліотеки, але під час створення посилання.Без посилання на проект проекти можна створювати незалежно один від одного, і файли можуть не синхронізуватися. Якщо ви розробляєте залежні бібліотеки (як це зазвичай буває у реальних проектах програмного забезпечення), найкраще посилатися на проект, а не на вихід проекту.
 
 ## Відкриття внутрішніх типів іншим збіркам
 
 Внутрішні класи видимі лише для інших об’єктів у збірці, де вони визначені. Винятком є випадки, коли видимість явно надається іншому проекту.
+
 Навіщо взагалі викривати внутрішні типи? Зазвичай це робиться для модульного та інтеграційного тестування. Розробники хочуть мати можливість перевірити свій код, але не обов’язково виносити його за межі збірки.
 Це можна виконати використавши аттрібути.
+Додамо клас.
 InternalCar.cs
 ```cs
 
@@ -288,9 +288,8 @@ internal class InternalCar : Car
     }
 }
 
-
 ```
-Car.cs
+Змінемо клас Car.cs
 ```cs
 using System.Runtime.CompilerServices;
 [assembly: InternalsVisibleTo("CarClient")]
@@ -391,7 +390,7 @@ dotnet pack -o .\Publish -c Release
 
 Протестуємо створений пакунок. 
 
-створемо ще один додаток типу console
+Cтворемо ще один додаток типу console.
 
 ```console 
 dotnet new console -n BigCarClient
@@ -533,6 +532,7 @@ dotnet publish -r win-x64 -c release -o singlefile -p:PublishSingleFile=true -p:
 dotnet publish -c release -r win-x64 -o Singlefilecompressed -p:PublishSingleFile=true -p:DebugType=embedded  -p:EnableCompressionInSingleFile=true
 ```
 Команда .NET працювала над обрізанням файлів під час процесу публікації протягом кількох останніх випусків, і з .NET 6 він вийшов з попередньої версії та готовий до використання. Процес обрізання файлів визначає, що можна видалити з середовища виконання на основі того, що використовує ваша програма. Використовуйте таку команду, щоб обрізати вихідні дані одного файлу: 
+
 ```console
 dotnet publish -c release -r win-x64 -o singlefilecompressedandtrimmed -p:PublishSingleFile=true -p:DebugType=embedded  -p:EnableCompressionInSingleFile=true -p:PublishTrimmed=true
 ```
@@ -550,6 +550,7 @@ dotnet publish -c release -r win-x64 -o Singlefilefinal --sc -p:PublishSingleFil
   <TargetFramework>net6.0</TargetFramework>
   <ImplicitUsings>enable</ImplicitUsings>
   <Nullable>disable</Nullable>
+  
   <PublishSingleFile>true</PublishSingleFile>
   <SelfContained>true</SelfContained>
   <RuntimeIdentifier>win-x64</RuntimeIdentifier>
@@ -557,12 +558,22 @@ dotnet publish -c release -r win-x64 -o Singlefilefinal --sc -p:PublishSingleFil
   <DebugType>embedded</DebugType>
   <EnableCompressionInSinglefile>true</EnableCompressionInSinglefile>
   <PublishReadyToRun>true</PublishReadyToRun>
+
 </PropertyGroup>
 ```
 З цими значеннями, встановленими у файлі проекту, командний рядок стає набагато коротшим
 
 ```console
 dotnet publish -c release -o Singlefile
+```
+## Збірки для Legacy Project
+
+Якщо створимо бібліотеку класів за допомогою .NET Standard 2.0, її можна буле використовувати на всіх важливих застарілих платформах .NET і крос-платформних операційних системах Windows, macOS і Linux, а також маючи доступ до широкого набору API .NET.
+
+Для цього можна або вибрать цільовий фрайм ворк при створені .NET Standard 2.0, або виконати команду 
+
+```cs
+dotnet new classlib -f netstandard2.0
 ```
 
 # Як розміщаються збірки.
@@ -615,3 +626,37 @@ GetPaths();
 dotnet add package Microsoft.EntityFrameworkCore
 ```
 Додавши пакет, повторно запустіть програму та зверніть увагу, скільки ще файлів у списку. Незважаючи на те, що ви додали лише одне нове посилання, пакет Microsoft.EntityFrameworkCore має свої залежності, які додаються до списку надійних файлів.
+
+# Декомпіляція збірки за допомогою ILSpy extension.
+
+Іноді корсно подивитись як будують код проціссіонали. Це можно подивитись використовуючи бібліотеки використовуючи декомпіляцію.
+
+Для початку втсановимо розширення для Visual Studio.
+
+Меню VS > Extensions > Manage Extensions > В пошуку ilspy > ILSpy 2022 > Download > Close.
+
+Після цого треда закрити Visual Studio аби встановилось розширення. 
+
+Після встановлення відкриемо рішеня ExplorationOfClassLibraries. Правий клік на проекті CarLibrary > Open output in ILSpy. В дереві Assemblies можна передивитись всі складові збірки.
+
+Також можна подивитись сладові збірок базових класів. В віконці Searsh введіть Directory і вибрати Directory з System.IO. Так можно побачити метод класу.
+
+```cs
+	public static DirectoryInfo? GetParent(string path)
+	{
+		ArgumentException.ThrowIfNullOrEmpty(path, "path");
+		string fullPath = Path.GetFullPath(path);
+		string directoryName = Path.GetDirectoryName(fullPath);
+		if (directoryName == null)
+		{
+			return null;
+		}
+		return new DirectoryInfo(directoryName);
+	}
+```
+Таким чином можно подивитись як можна використовувати клас ArgumentException.
+
+
+
+
+

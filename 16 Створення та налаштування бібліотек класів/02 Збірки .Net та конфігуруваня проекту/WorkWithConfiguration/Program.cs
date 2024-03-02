@@ -17,8 +17,6 @@ void GetDataFromConfigFile()
     Console.WriteLine(configuration.GetValue("Currency", "USD"));
     Console.WriteLine(configuration.GetValue<string>("BusName"));
     Console.WriteLine(configuration.GetValue("BusName","Mercedes Sprinter"));
-    
-    Console.ReadLine();
 }
 //GetDataFromConfigFile();
 
