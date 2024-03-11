@@ -223,7 +223,7 @@ TypeDef #1
 Як показано в попередньому списку метаданих, завжди майте на увазі, що всі рядки чітко задокументовані в метаданих збірки. Це може мати величезні наслідки для безпеки, якщо ви використовуєте рядкові літерали для представлення паролів, номерів кредитних карток або іншої конфіденційної інформації.
 Наступним питанням, яке виникне в голові, може бути «Як я можу використати цю інформацію у своїх програмах?»
 
-# Рефлексія.
+## Рефлексія.
 
 У .NET рефлексія — це процес виявлення типу під час виконання. Використовуючи служби відображення, ви можете програмно отримати ту саму інформацію метаданих, згенеровану ildasm.exe, використовуючи дружню об’єктну модель. Наприклад, за допомогою рефлексії можна отримати список усіх типів, що містяться в даній збірці *.dll або *.exe, включаючи методи, поля, властивості та події, визначені даним типом. Ви також можете динамічно виявляти набір інтерфейсів, які підтримують певний тип, параметри методу та інші пов’язані деталі (базові класи, інформацію про простір імен, дані маніфесту тощо).
 Як і будь-який простір імен, System.Reflection (який визначено в System.Runtime.dll) містить кілька пов’язаних типів.
@@ -251,4 +251,344 @@ TypeDef #1
 Щоб зрозуміти, як використовувати простір імен System.Reflection для програмного читання метаданих .NET, вам потрібно спочатку ознайомитися з класом System.Type.
 
 ## Клас System.Type.
+
+Клас System.Type визначає члени, які можна використовувати для перевірки метаданих типу, велика кількість яких повертає типи з простору імен System.Reflection. Наприклад, Type.GetMethods() повертає масив об’єктів MethodInfo, Type.GetFields() повертає масив об’єктів FieldInfo тощо.
+
+Де які важливі члени, які підтримуються System.Type (додаткову інформацію див. у документації .NET).
+
+    IsAbstract
+    IsArray
+    IsClass
+    IsCOMObject
+    IsEnum
+    IsGenericTypeDefinition
+    IsGenericParameter
+    IsInterface
+    IsPrimitive
+    IsNestedPrivate
+    IsNestedPublic
+    IsSealed
+    IsValueType
+
+Ці властивості (серед іншого) дозволяють вам виявити низку основних характеристик типу, на який ви посилаєтеся (наприклад, чи це абстрактна сутність, масив, вкладений клас тощо).
+
+    GetConstructors()
+    GetEvents()
+    GetFields()
+    GetInterfaces()
+    GetMembers()
+    GetMethods()
+    GetNestedTypes()
+    GetProperties()
+
+Ці методи дозволяють вам отримати масив, що представляє елементи (інтерфейс, метод, властивість тощо), які вас цікавлять. Кожен метод повертає пов’язаний масив (наприклад, GetFields() повертає масив FieldInfo, GetMethods() повертає масив MethodInfo тощо). Майте на увазі, що кожен із цих методів має окрему форму (наприклад, GetMethod(), GetProperty() тощо), яка дозволяє отримати певний елемент за назвою, а не масив усіх пов’язаних елементів.
+
+    FindMembers()
+
+Цей метод повертає масив MemberInfo на основі критеріїв пошуку.
+
+    GetType()
+
+Цей статичний метод повертає екземпляр типу за назвою рядка.
+
+    InvokeMember()
+Цей метод дозволяє «пізнє зв’язування» для певного елемента.Пізніше в цьому розділі ви дізнаєтесь про пізнє зв’язування.
+
+### Отримання посилання на тип за допомогою System.Object.GetType()
+
+Розглядяючи клас Type ви можете отримати екземпляр класу Type різними способами. Однак єдине, що ви не можете зробити, це безпосередньо створити об’єкт Type за допомогою ключового слова new, оскільки Type є абстрактним класом. System.Object визначає метод під назвою GetType(), який повертає екземпляр класу Type, який представляє метадані для поточного об’єкта.
+
+ExamineTypeClass\ExamineTypeClass
+```cs
+void ObtainTypeUseObjectGetType()
+{
+    SportCar sportCar = new();
+    Type type = sportCar.GetType();
+
+    Console.WriteLine(type);
+    Console.WriteLine(type.GetType());
+    
+}
+ObtainTypeUseObjectGetType();
+```
+```console
+CarLibrary.SportCar
+System.RuntimeType
+```
+Очевидно, що цей підхід працюватиме, лише якщо у вас є знання під час компіляції про тип, який ви хочете обстежити (у цьому випадку SportsCar), і на даний момент є примірник типу в пам’яті.
+
+### Отримання посилання на тип за допомогою typeof()
+
+Наступним способом отримання інформації про тип є використання оператора C# typeof, наприклад
+
+```cs
+void ObtainTypeUseTypeOf()
+{
+    SportCar sportCar = new();
+    Type type =typeof(SportCar);
+
+    Console.WriteLine(type);
+    Console.WriteLine(type.GetType());
+}
+ObtainTypeUseTypeOf();
+```
+```
+CarLibrary.SportCar
+System.RuntimeType
+```
+
+На відміну від System.Object.GetType(), оператор typeof є корисним, оскільки вам не потрібно спочатку створювати екземпляр об’єкта, щоб отримати інформацію про тип. Однак ваша база коду все ще повинна мати знання під час компіляції про тип, який ви зацікавлені в дослідженні, оскільки typeof очікує строго типізованого імені типу.
+
+### Отримання посилання на тип за допомогою System.Type.GetType()
+
+Щоб отримати інформацію про тип більш гнучким способом, ви можете викликати статичний член GetType() класу System.Type і вказати повне ім’я рядка типу, який вас цікавить. Використовуючи цей підхід, вам не потрібно знати під час компіляції тип, з якого ви витягуєте метадані, враховуючи, що Type.GetType() приймає екземпляр завжди існуючого System.String.
+
+Нехай в проекті ExamineTypeClass є клас.
+
+```cs
+    internal class Person
+    {
+        public int PersonId { get; set; }
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+
+    }
+```
+Використаємо метод Type.GetType() для отриманя внутрішніх і зовнишніх типів.
+
+```cs
+void ObtainTypeUseTypeGetType()
+{
+
+    Type? type = Type.GetType("ExamineTypeClass.Person", true,true);
+
+    Console.WriteLine(type);
+    Console.WriteLine(type?.GetType());
+
+    type = Type.GetType("CarLibrary.SportCar, Carlibrary", true, true);
+
+    Console.WriteLine(type);
+    Console.WriteLine(type?.GetType());
+
+}
+ObtainTypeUseTypeGetType();
+```
+Метод Type.GetType() було перевантажено, щоб дозволити вам вказати два булеві параметри, один з яких контролює, чи має створюватися виняток, якщо тип неможливо знайти, а інший встановлює чутливість до регістру рядка. Крім того треба вказувати ім'я зовнішбої збірки типу де він находиться.
+
+## Перегляд метаданних програмно.
+
+Існує можливість переглядати і перевіряти метаданні в процесі виконання. Тобто відображати деталі методів, властивостей, полів і підтримуваних інтерфейсів (на додаток до деяких інших цікавих моментів) для будь-якого типу в System.Runtime.dll (всі програми .NET мають автоматичний доступ до цієї бібліотеки класів фреймворку) або власно стоврені типи які є нашадками.
+
+Створимо можливісість ввеcти тип для обстеження.
+
+```cs
+static void StartViewer()
+{
+	string enteredType = string.Empty;
+	do
+	{	//Get name of type.
+        Console.Clear();
+        Console.Write("Enter Type or q:");
+		enteredType = Console.ReadLine()!;
+
+		if (enteredType.Equals("Q",StringComparison.OrdinalIgnoreCase))
+		{
+			break;
+		}
+		Console.Clear();	
+		InvestigateTheType(enteredType);
+        Console.ReadKey();
+    } while (true);
+}
+StartViewer();
+
+static void InvestigateTheType(string typeName)
+{
+    Type? type = Type.GetType(typeName);
+    if (type == null)
+    {
+        Console.WriteLine("Sorry, can't find type!");
+        return;
+    }
+    Console.WriteLine($"We want to investigate the type:{type.FullName}");
+
+}
+```
+```
+Enter Type or q:System.Int32
+
+We want to investigate the type:System.Int32
+
+Enter Type or q:bad
+
+Sorry, can't find type!
+
+```
+### Рефлексія даних про тип.
+
+Дані про тип можна отриматити за допоимогою властивостей класу Type.
+
+```cs
+void AboutType(Type type)
+{
+    Console.WriteLine();
+    Console.WriteLine($"Is type class:{type.IsClass}");
+    Console.WriteLine($"Is type abstract:{type.IsAbstract}");
+    Console.WriteLine($"Is type generic:{type.IsGenericType}");
+    Console.WriteLine($"Is type sealed:{type.IsSealed}");
+    Console.WriteLine($"Base type:{type.BaseType}");
+}
+```
+Зміненмо метод InvestigateTheType який викликатиме новий метод та протестуємо.
+
+```cs
+void InvestigateTheType(string typeName)
+{
+    Type? type = Type.GetType(typeName);
+    if (type == null)
+    {
+        Console.WriteLine("Sorry, can't find type!");
+        return;
+    }
+    Console.WriteLine($"We want to investigate the type:{type.FullName}");
+    
+    AboutType(type);
+}
+```
+```
+We want to investigate the type:System.Array
+
+Is type class:True
+Is type abstract:True
+Is type generic:False
+Is type sealed:False
+Base type:System.Object
+```
+### Рефлексія полів та властивостей.
+
+Поля та властивості можна отримати за допомогою відповідних методів типу Type.
+
+```cs
+void ListFilds(Type type)
+{
+    Console.WriteLine("\nFilds");
+
+    var filds = from f in type.GetFields()
+                orderby f.Name
+                select f;
+    foreach (var f in filds)
+    {
+        Console.WriteLine("\t"+f.Name);
+    }    
+}
+
+void ListProperties(Type type)
+{
+    Console.WriteLine("\nProperties");
+
+    var properties = from p in type.GetProperties()
+                     orderby p.Name
+                     select p;
+    foreach (var p in properties)
+    {
+        Console.WriteLine("\t"+p.Name);
+    }
+}
+
+```
+Методи Type.GetFields Type.GetProperties повертають массиви об'ектів FieldInfo, PropertyInfo. LINQ to Objects дозволяє створювати строго типізовані запити, які можна застосовувати до колекцій об’єктів у пам’яті. Гарна практика, щоразу, коли ви знаходите блоки циклу або логіку програмування рішень, ви можете використовувати відповідний запит LINQ.
+
+Протестуємо.
+```cs
+void InvestigateTheType(string typeName)
+{
+    Type? type = Type.GetType(typeName);
+    if (type == null)
+    {
+        Console.WriteLine("Sorry, can't find type!");
+        return;
+    }
+    Console.WriteLine($"We want to investigate the type:{type.FullName}");
+    
+    //AboutType(type);
+    ListFilds(type);
+    ListProperties(type);
+}
+```
+```
+We want to investigate the type:System.String
+
+Filds
+        Empty
+
+Properties
+        Chars
+        Length
+```
+### Рефлексія методів.
+
+За допомогою методу Type.GetMethods можна отримати массив об'єктів MethodInfo.
+
+```cs
+
+void ListMethods(Type type)
+{
+    Console.WriteLine("Methods");
+
+    var methods =from t in type.GetMethods()
+                 orderby t.Name
+                 select t;
+    
+    foreach (MethodInfo method in methods)
+    {
+        Console.WriteLine($"\t{method.Name}");
+    }
+}
+```
+MethodInfo має багато додаткових членів, які дозволяють визначити, чи є метод статичним, віртуальним, загальним або абстрактним, але тут ми тільки використовуємо Name. 
+
+Протестуємо.
+```cs
+void InvestigateTheType(string typeName)
+{
+    Type? type = Type.GetType(typeName);
+    if (type == null)
+    {
+        Console.WriteLine("Sorry, can't find type!");
+        return;
+    }
+    Console.WriteLine($"We want to investigate the type:{type.FullName}");
+    
+    //AboutType(type);
+    //ListFilds(type);
+    //ListProperties(type);
+    ListMethods(type);
+}
+```
+```
+We want to investigate the type:System.Int32
+Methods
+
+We want to investigate the type:System.Int32
+Methods
+        Abs
+        Clamp
+        CompareTo
+        CompareTo
+        CopySign
+        CreateChecked
+        CreateSaturating
+        CreateTruncating
+        DivRem
+        Equals
+        Equals
+        GetHashCode
+        ...
+```
+
+
+
+
+
+
 
