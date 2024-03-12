@@ -586,9 +586,250 @@ Methods
         ...
 ```
 
+### Рефлексія реалізованих інтерфейсів.
+
+Метод Type.GetInterfaces повертає Type[]
+
+```cs
+void ListInterfaces(Type type)
+{
+    Console.WriteLine("Interfaces");
+
+    var interfaces = from i in type.GetInterfaces()
+                     orderby i.Name
+                     select i;
+
+    foreach (var item in interfaces)
+    {
+        Console.WriteLine("\t"+item.Name);
+    }
+}
+```
+Протестуємо.
+```cs
+void InvestigateTheType(string typeName)
+{
+    Type? type = Type.GetType(typeName);
+    if (type == null)
+    {
+        Console.WriteLine("Sorry, can't find type!");
+        return;
+    }
+    Console.WriteLine($"We want to investigate the type:{type.FullName}");
+
+    //AboutType(type);
+    //ListFilds(type);
+    //ListProperties(type);
+    //ListMethods(type);
+    ListInterfaces(type);
+}
+```
+```
+We want to investigate the type:System.String
+Interfaces
+        ICloneable
+        IComparable
+        IComparable`1
+        IConvertible
+        IEnumerable
+        IEnumerable`1
+        IEquatable`1
+        IParsable`1
+        ISpanParsable`1
+
+```
+
+Більшість методів «get» System.Type (GetMethods(), GetInterfaces() тощо) були перевантажені, щоб ви могли вказувати значення з переліку BindingFlags. Це забезпечує більший рівень контролю над тим, що саме слід шукати (наприклад, лише статичні учасники, лише публічні учасники, включати приватні учасники тощо).
+
+### Рефлексія всього разом. 
+
+Знімемо коментарі з усіх методів шо працюівли окремо і протестуємо роботу.
+
+```cs
+void InvestigateTheType(string typeName)
+{
+    Type? type = Type.GetType(typeName);
+    if (type == null)
+    {
+        Console.WriteLine("Sorry, can't find type!");
+        return;
+    }
+    Console.WriteLine($"We want to investigate the type:{type.FullName}");
+
+    AboutType(type);
+    ListFilds(type);
+    ListProperties(type);
+    ListMethods(type);
+    ListInterfaces(type);
+}
+```
+Для тестування можна ввести різні типи System.Int32, System.Array, System.Math, System.Object тощо.
+
+### Рефлексія статичних методів.
+
+Якщо при тестувані ввести System.Console, тип не розпізнається. Статичні типи не можна завантажити за допомогою методу Type.GetType(typeName). Замість цього ви повинні використовувати інший механізм, функцію typeof із System.Type.  
+
+```cs
+void HowGetSystemConsoleAsType()
+{
+    Type type = typeof(Console);
+    Console.WriteLine($"We want to investigate the type:System.Console");
+    ReflectionOfType(type);
+}
+HowGetSystemConsoleAsType();
+
+void ReflectionOfType(Type type)
+{
+    AboutType(type);
+    ListFilds(type);
+    ListProperties(type);
+    ListMethods(type);
+    ListInterfaces(type);
+}
+
+```
+
+```
+We want to investigate the type:System.Console
+
+Is type class:True
+Is type abstract:True
+Is type generic:False
+Is type sealed:True
+Base type:System.Object
+
+Filds
+
+Properties
+        BackgroundColor
+        BufferHeight
+        BufferWidth
+        CapsLock
+        CursorLeft
+        CursorSize
+```
+
+### Рефлексія узагальнених типів.
+
+Коли ви викликаєте Type.GetType() для отримання опису метаданих загальних типів, ви повинні використовувати спеціальний синтаксис із символом «зворотної галочки» (`), за яким слідує числове значення, яке представляє кількість параметрів типу, які підтримує тип. Наприклад, якщо ви хочете роздрукувати опис метаданих System.Collections.Generic.List<T>, вам потрібно передати такий рядок:
+ 
+    System.Collections.Generic.List`1 
+
+Тут ви використовуєте числове значення 1, враховуючи, що List<T> має лише один параметр типу. Однак, якщо ви хочете відобразити Dictionary<TKey, TValue>, укажіть значення 2, наприклад:
+
+    System.Collections.Generic.Dictionary`2
 
 
+### Рефлексія значень шо повертає та параметрів методів.
 
+Крім назви методів класу ми можемо отримати їх додадкові дані. Зробемо невеликі зміни методу ListMethods.
 
+```cs
+void ListMethods(Type type)
+{
+    Console.WriteLine("Methods");
 
+    var methods =from t in type.GetMethods()
+                 orderby t.Name
+                 select t;
+    
+    foreach (MethodInfo methodInfo in methods)
+    {
+        AboutMethod(methodInfo);
+    }
+
+}
+
+void AboutMethod(MethodInfo methodInfo)
+{
+    string? nameOfTheReturnType = methodInfo.ReturnType.FullName;
+    string nameOfTheParameters = "(";
+    foreach (ParameterInfo paramInfo in methodInfo.GetParameters())
+    {
+        nameOfTheParameters += $"{paramInfo.ParameterType} {paramInfo.Name}";
+    }
+    nameOfTheParameters += ")";
+
+    Console.WriteLine($"{nameOfTheReturnType} {methodInfo.Name} {nameOfTheParameters}");
+}
+```
+Протестуємо.
+```cs
+void InvestigateTheType(string typeName)
+{
+    Type? type = Type.GetType(typeName);
+    if (type == null)
+    {
+        Console.WriteLine("Sorry, can't find type!");
+        return;
+    }
+    Console.WriteLine($"We want to investigate the type:{type.FullName}");
+
+    //AboutType(type);
+    //ListFilds(type);
+    //ListProperties(type);
+    ListMethods(type);
+    //ListInterfaces(type);
+}
+```
+```
+We want to investigate the type:System.Math
+Methods
+System.Int16 Abs (System.Int16 value)
+System.Int32 Abs (System.Int32 value)
+System.Int64 Abs (System.Int64 value)
+System.IntPtr Abs (System.IntPtr value)
+System.SByte Abs (System.SByte value)
+System.Decimal Abs (System.Decimal value)
+System.Double Abs (System.Double value)
+System.Single Abs (System.Single value)
+System.Double Acos (System.Double d)
+System.Double Acosh (System.Double d)
+System.Double Asin (System.Double d)
+```
+
+Тип MethodInfo надає властивість ReturnType і метод GetParameters() для того аби отримати тип повернення та типи вхідних параметрів. 
+Поточна реалізація ListMethods() корисна тим, що ви можете безпосередньо досліджувати кожен параметр і тип повернення методу за допомогою об’єктної моделі System.Reflection.
+Всі типи XXXInfo (MethodInfo, PropertyInfo, EventInfo тощо) перевизначили ToString() для відображення сігнатури запитуваного елемента. Тож нам може бути достатьньо не створювати метод AboutMethod а зробити таку реалізацію.
+
+```cs
+
+void ListMethods(Type type)
+{
+    Console.WriteLine("Methods");
+
+    var methods =from t in type.GetMethods()
+                 orderby t.Name
+                 select t;
+    
+    foreach (MethodInfo methodInfo in methods)
+    {
+        Console.WriteLine("\t"+methodInfo);
+    }
+}
+```
+```
+We want to investigate the type:System.Math
+Methods
+        Int16 Abs(Int16)
+        Int32 Abs(Int32)
+        Int64 Abs(Int64)
+        IntPtr Abs(IntPtr)
+        SByte Abs(SByte)
+        System.Decimal Abs(System.Decimal)
+        Double Abs(Double)
+        Single Abs(Single)
+        Double Acos(Double)
+        Double Acosh(Double)
+        Double Asin(Double)
+        Double Asinh(Double)
+        Double Atan(Double)
+        Double Atan2(Double, Double)
+        Double Atanh(Double)
+        Int64 BigMul(Int32, Int32)
+        UInt64 BigMul(UInt64, UInt64, UInt64 ByRef)
+        Int64 BigMul(Int64, Int64, Int64 ByRef)
+```
+Зрозуміло, що простір імен System.Reflection і клас System.Type дозволяють відображати багато інших аспектів типу, окрім того, що зараз відображає MyTypeViewer. Ви можете отримати події типу, отримати список будь-яких загальних параметрів для певного члена та зібрати десятки інших деталей. Тим не менш, на цьому етапі ви створили браузер об’єктів.
+Основне обмеження цього конкретного прикладу полягає в тому, що у вас немає можливості відобразити поза поточною збіркою або збірками в бібліотеках базових класів, на які завжди є посилання. У зв’язку з цим виникає запитання: «Як я можу створювати програми, які можуть завантажувати (і відображати) збірки, на які немає посилань під час компіляції?»
 

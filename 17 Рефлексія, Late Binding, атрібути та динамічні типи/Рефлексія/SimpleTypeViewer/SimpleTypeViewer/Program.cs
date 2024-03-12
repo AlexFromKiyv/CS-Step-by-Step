@@ -32,10 +32,11 @@ void InvestigateTheType(string typeName)
     }
     Console.WriteLine($"We want to investigate the type:{type.FullName}");
 
-    //AboutType(type);
-    //ListFilds(type);
-    //ListProperties(type);
+    AboutType(type);
+    ListFilds(type);
+    ListProperties(type);
     ListMethods(type);
+    ListInterfaces(type);
 }
 
 void AboutType(Type type)
@@ -82,9 +83,52 @@ void ListMethods(Type type)
                  orderby t.Name
                  select t;
     
-    foreach (MethodInfo method in methods)
+    foreach (MethodInfo methodInfo in methods)
     {
-        Console.WriteLine($"\t{method.Name}");
+        Console.WriteLine("\t"+methodInfo);
     }
 }
+
+void AboutMethod(MethodInfo methodInfo)
+{
+    string? nameOfTheReturnType = methodInfo.ReturnType.FullName;
+    string nameOfTheParameters = "(";
+    foreach (ParameterInfo paramInfo in methodInfo.GetParameters())
+    {
+        nameOfTheParameters += $"{paramInfo.ParameterType} {paramInfo.Name}";
+    }
+    nameOfTheParameters += ")";
+
+    Console.WriteLine($"{nameOfTheReturnType} {methodInfo.Name} {nameOfTheParameters}");
+}
+
+void ListInterfaces(Type type)
+{
+    Console.WriteLine("Interfaces");
+
+    var interfaces = from i in type.GetInterfaces()
+                     orderby i.Name
+                     select i;
+
+    foreach (var item in interfaces)
+    {
+        Console.WriteLine("\t"+item.Name);
+    }
+}
+
+void ReflectionOfType(Type type)
+{
+    AboutType(type);
+    ListFilds(type);
+    ListProperties(type);
+    ListMethods(type);
+    ListInterfaces(type);
+}
+void HowGetSystemConsoleAsType()
+{
+    Type type = typeof(Console);
+    Console.WriteLine($"We want to investigate the type:System.Console");
+    ReflectionOfType(type);
+}
+//HowGetSystemConsoleAsType();
 
