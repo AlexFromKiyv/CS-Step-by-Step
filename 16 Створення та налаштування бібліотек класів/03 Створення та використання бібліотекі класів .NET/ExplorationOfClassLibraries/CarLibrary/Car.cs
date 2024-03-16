@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 
 namespace CarLibrary;
@@ -25,4 +26,7 @@ public abstract class Car
     }
 
     public abstract void TurboBoost();
+
+    public void TurnOnRadio(bool isTurnOn,MusicMediaEnum musicMedia) => 
+        Console.WriteLine(isTurnOn ? $"Jamming {musicMedia}" : "Quiet time..."); 
 }

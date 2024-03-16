@@ -35,6 +35,7 @@ void Run()
             Type? miniVan = assembly.GetType("CarLibrary.MiniVan");
             if (miniVan != null)
             {
+                // Create object
                 obj = Activator.CreateInstance(miniVan);
                 Console.WriteLine($"Created a {obj} using late binding!");
             }
@@ -68,13 +69,13 @@ Cуть пізнього зв’язування полягає у створе�
            Type? miniVan = assembly.GetType("CarLibrary.MiniVan");
            if (miniVan != null)
            {
-               obj = Activator.CreateInstance(miniVan);
-               Console.WriteLine($"Created a {obj} using late binding!");
+                // Create object
+                obj = Activator.CreateInstance(miniVan);
+                Console.WriteLine($"Created a {obj} using late binding!");
 
-               MethodInfo? methodInfo = miniVan.GetMethod("TurboBoost");
-               
-               //Invoke method ('null' for no parameters)
-               methodInfo?.Invoke(obj, null);
+                //Invoke method without parameters
+                MethodInfo? methodInfoTurboBoost = miniVan.GetMethod("TurboBoost");
+                methodInfoTurboBoost?.Invoke(obj, null);
            }
        }
        catch (Exception ex)
@@ -83,6 +84,70 @@ Cуть пізнього зв’язування полягає у створе�
        }
    }
 ```
+```
+Created a CarLibrary.MiniVan using late binding!
+Eek! Your engine block exploded!
+```
 Першим кроком є отримання об’єкта MethodInfo для методу TurboBoost() за допомогою Type.GetMethod(). З отриманої MethodInfo ви зможете викликати MiniVan.TurboBoost за допомогою Invoke(). MethodInfo.Invoke() вимагає від вас надіслати всі параметри, які мають бути надані методу, представленому MethodInfo. Ці параметри представлені масивом типів System.Object (оскільки параметри для даного методу можуть бути будь-якою кількістю різних сутностей).
 
 Якщо ви хочете використати пізнє зв’язування для виклику методу, який потребує параметрів, вам слід запакувати аргументи як масив об’єктів із вільною типізацією.
+
+В класі Car розглянемо метод який потребує параметрів
+
+```cs
+    public void TurnOnRadio(bool isTurnOn,MusicMediaEnum musicMedia) => 
+        Console.WriteLine(isTurnOn ? $"Jamming {musicMedia}" : "Quiet time..."); 
+```
+Другий параметр має тип:
+
+```cs
+public enum MusicMediaEnum
+{
+    MusicCd,
+    MusicTape,
+    MusicRadio,
+    MusicMp3
+}
+```
+Викличемо метод для створенного об'єкта.
+```cs
+    void CreateUsingLateBinding(Assembly assembly)
+    {
+        object? obj;
+        try
+        {
+            Type? miniVan = assembly.GetType("CarLibrary.MiniVan");
+            if (miniVan != null)
+            {
+                // Create object
+                obj = Activator.CreateInstance(miniVan);
+                Console.WriteLine($"Created a {obj} using late binding!");
+
+                //Invoke method without parameters
+                MethodInfo? methodInfoTurboBoost = miniVan.GetMethod("TurboBoost");
+                methodInfoTurboBoost?.Invoke(obj, null);
+
+                //Invoke method with parameters
+                MethodInfo? methodInfoTurnOnRadio = miniVan.GetMethod("TurnOnRadio");
+                methodInfoTurnOnRadio?.Invoke(obj, new object[] {true,2});
+
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+```
+```
+Created a CarLibrary.MiniVan using late binding!
+Eek! Your engine block exploded!
+Jamming MusicRadio
+```
+Зверніть увагу, що ви використовуєте базові числові значення переліку MusicMediaEnum, щоб визначити медіапрогравач MusicRadio.
+
+Ви можете побачити зв’язок між рефлексією, динамічним завантаженням і пізнім зв’язуванням.
+
+API відображення надає багато додаткових функцій, окрім тих, про які тут йдеться, але ви повинні бути в хорошій формі, щоб розібратися в більш детальній інформації, якщо вам це цікаво.
+
+Знову ж таки, ви все ще можете запитати, коли саме вам слід використовувати ці методи у ваших власних програмах. Додаток, що розширюється, далі в цьому розділі має пролити світло на цю проблемую.

@@ -68,6 +68,9 @@ public abstract class Car
     }
 
     public abstract void TurboBoost();
+
+    public void TurnOnRadio(bool isTurnOn,MusicMediaEnum musicMedia) => 
+    Console.WriteLine(isTurnOn ? $"Jamming {musicMedia}" : "Quiet time..."); 
 }
 ```
 Цей клас визначає різні дані стану за допомогою автоматичного синтаксису властивостей. Цей клас також має абстрактний метод під назвою TurboBoost(), який є імітацією дуже високого підняття швидкості і використовує  EngineStateEnum для представлення поточного стану двигуна.
