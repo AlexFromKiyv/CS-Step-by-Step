@@ -333,3 +333,52 @@ A very long, slow, but feature-rich auto
 ```
 Метод Type.GetCustomAttributes() повертає масив об’єктів, який представляє всі атрибути, застосовані до члена, представленого типом (параметр Boolean контролює, чи повинен пошук продовжуватися вгору по ланцюжку успадкування).
 
+## Рефлексія атрибутів за допомогою пізнього зв’язування.
+
+У попередньому прикладі використовувалося раннє зв’язування для друку даних опису автомобіля для типу Winnebago. Це стало можливим, оскільки тип класу VehicleDescriptionAttribute було визначено як відкритий член у збірці AttributedCarLibrary. Також можна використовувати динамічне завантаження та пізнє зв’язування для відображення атрибутів.
+
+Створимо нове рішеня з проектом AttributeReaderLateBinding
+
+```cs
+using System.Reflection;
+
+void ReflectAttributesUsingLateBinding()
+{
+	try
+	{
+		Assembly assembly = Assembly.LoadFrom("AttributedCarLibrary");
+
+		Type? vehicleDesctiption = assembly.GetType("AttributedCarLibrary.VehicleDescriptionAttribute");
+		Console.WriteLine(vehicleDesctiption);
+
+        PropertyInfo? propertyInfoVehileDesc = vehicleDesctiption?.GetProperty("Description");
+        Console.WriteLine(propertyInfoVehileDesc);
+
+        Type[] types = assembly.GetTypes();
+		foreach (Type type in types)
+		{
+			if (vehicleDesctiption == null) { return;}
+
+			object[] objects = type.GetCustomAttributes(vehicleDesctiption, false);
+			foreach (object obj in objects)
+			{
+                Console.WriteLine($"{type} - {propertyInfoVehileDesc?.GetValue(obj,null)}");
+            }
+        }
+	}
+	catch (Exception ex)
+	{
+        Console.WriteLine(ex.Message);
+    }
+}
+ReflectAttributesUsingLateBinding();
+```
+```
+AttributedCarLibrary.VehicleDescriptionAttribute
+System.String Description
+AttributedCarLibrary.HorseAndBuggy - The old gray mare, she ain't what she used to be...
+AttributedCarLibrary.Morotcycle - My rocking Harley
+AttributedCarLibrary.Winnebago - A very long, slow, but feature-rich auto
+```
+
+Єдиним цікавим моментом є використання методу PropertyInfo.GetValue(), який використовується для запуску засобу доступу до властивості.
