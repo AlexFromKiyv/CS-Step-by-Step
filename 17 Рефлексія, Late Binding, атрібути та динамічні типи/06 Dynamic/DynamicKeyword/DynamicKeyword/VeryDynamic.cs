@@ -8,20 +8,20 @@ namespace DynamicKeyword;
 internal class VeryDynamic
 {
     private static dynamic _fild;
-
     public dynamic Property { get; set; }
 
     public dynamic Method(dynamic parameter)
     {
-        dynamic dynamicVariable = "10";
+        dynamic dynamicVariable = parameter;
 
-        if (parameter is int)
+        if (parameter is string)
         {
-            return dynamicVariable;
+            return dynamicVariable.ToUpper();
         }
         else
         {
-            return 10;
+            return dynamicVariable;
         }
     }
 }
+

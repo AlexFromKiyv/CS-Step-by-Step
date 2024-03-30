@@ -1,4 +1,5 @@
 ﻿using DynamicKeyword;
+using System.Reflection;
 
 static void InvestigationImplicitlyTypedValue()
 {
@@ -70,10 +71,12 @@ static void UseVeryDynamic()
 {
     VeryDynamic veryDynamic = new();
 
-    dynamic result =  veryDynamic.Method(10);
+    veryDynamic.Property = 10;
+    dynamic result = veryDynamic.Method(veryDynamic.Property);
     Write(result);
 
-    result = veryDynamic.Method("10");
+    veryDynamic.Property = "Julia";
+    result = veryDynamic.Method(veryDynamic.Property);
     Write(result);
 
     static void Write(dynamic value)
@@ -81,4 +84,82 @@ static void UseVeryDynamic()
         Console.WriteLine(value + " " + value.GetType());
     }
 }
-UseVeryDynamic();
+//UseVeryDynamic();
+
+void Run()
+{
+    Assembly? assembly = null;
+    try
+    {
+        assembly = Assembly.LoadFrom(@"D:\CarLibrary");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+
+    if (assembly != null)
+    {
+        CreateUsingLateBinding(assembly);
+    }
+
+    void CreateUsingLateBinding(Assembly assembly)
+    {
+        object? obj;
+        try
+        {
+            Type? miniVan = assembly.GetType("CarLibrary.MiniVan");
+            if (miniVan != null)
+            {
+                // Create object
+                obj = Activator.CreateInstance(miniVan);
+                Console.WriteLine($"Created a {obj} using late binding!");
+
+                //Invoke method without parameters
+                MethodInfo? methodInfoTurboBoost = miniVan.GetMethod("TurboBoost");
+                methodInfoTurboBoost?.Invoke(obj, null);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+}
+//Run();
+
+
+void RunWithDynamic()
+{
+    Assembly? assembly = null;
+    try
+    {
+        assembly = Assembly.LoadFrom(@"D:\CarLibrary");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+
+    if (assembly != null)
+    {
+        CreateUsingLateBinding(assembly);
+    }
+
+    void CreateUsingLateBinding(Assembly assembly)
+    {
+        Type typeMiniVan = assembly.GetType("CarLibrary.MiniVan");
+
+        try
+        {
+            dynamic miniVan = Activator.CreateInstance(typeMiniVan);
+            Console.WriteLine($"Created a {miniVan} using late binding!");
+            miniVan.TurboBoost();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+}
+RunWithDynamic();
