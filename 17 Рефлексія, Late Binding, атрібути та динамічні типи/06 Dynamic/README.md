@@ -330,3 +330,90 @@ Created a CarLibrary.MiniVan using late binding!
 Eek! Your engine block exploded!
 ```
 Оголошуючи змінну за допомогою ключового слова dynamic, від вашого імені виконується важка робота рефлексії, завдяки DRL. 
+
+## Dynamic для передачи параметрів.
+
+Корисність DLR стає ще більш очевидною, коли вам потрібно зробити виклики методів після пізнього зв'язування, які приймають параметри. Коли ви використовуєте такі виклики після рефлексії, аргументи потрібно запакувати у вигляді масиву object[], які передаються в метод Invoke() методу MethodInfo.
+Створемо рішеня з проектом LateBindingWithDynamic та бібіліотекою класів MyMath. В MyMath переіменуйте клас Class1 на SimpleMath
+
+```cs
+namespace MyMath;
+public class SimpleMath
+{
+    public int Add(int a, int b)
+    {
+        return a + b;
+    }
+}
+
+```
+В файл проекут додамо 
+
+```
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="copy $(TargetPath) $(SolutionDir)LateBindingWithDynamic\$(OutDir)$(TargetFileName) /Y" />
+  </Target>
+```
+Побачите в папці виконувальних файлів (... Debug\netX.O) проекту файл MyMath.dll
+
+Тепер повернемося до проекту LateBindingWithDynamic. Додайте метод , який викликає метод Add() за допомогою типових викликів API рефлексії. 
+
+LateBindingWithDynamic\Program.cs
+
+```cs
+
+using System.Reflection;
+
+static void AddWithReflection()
+{
+    Assembly assembly = Assembly.LoadFrom("MyMath");
+	try
+	{
+        Type simpleMath = assembly.GetType("MyMath.SimpleMath");
+
+        object objSimpleMath = Activator.CreateInstance(simpleMath);
+
+        MethodInfo methodInfoAdd = simpleMath.GetMethod("Add");
+
+        object[] objects = { 1, 2 };
+
+        Console.WriteLine(methodInfoAdd.Invoke(objSimpleMath,objects));
+
+    }
+	catch (Exception ex)
+	{
+        Console.WriteLine(ex.Message);
+    }
+}
+AddWithReflection();
+
+```
+```
+3
+```
+Тепер спростимо код використавши dynamic.
+
+```cs
+static void AddWithDynamic()
+{
+    Assembly assembly = Assembly.LoadFrom("MyMath");
+    try
+    {
+        Type simpleMath = assembly.GetType("MyMath.SimpleMath");
+
+        dynamic objSimpleMath = Activator.CreateInstance(simpleMath);
+
+        Console.WriteLine(objSimpleMath.Add(1,2));
+
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+}
+AddWithDynamic();
+```
+```
+3
+```
+Використовуючи ключове слово dynamic, ви заощадили собі чимало роботи. З динамічно визначеними даними вам більше не потрібно вручну пакувати аргументи як масив об’єктів, запитувати метадані збірки або встановлювати інші подібні деталі. Якщо ви створюєте програму, яка активно використовує динамічне завантаження та пізнє зв’язування,економія коду збільшиться.
