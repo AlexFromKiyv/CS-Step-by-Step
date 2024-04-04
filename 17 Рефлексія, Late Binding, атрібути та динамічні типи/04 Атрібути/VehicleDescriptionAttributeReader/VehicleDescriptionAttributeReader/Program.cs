@@ -9,7 +9,7 @@ void ReflectOnAttributesUsingEarlyBinding()
 
     foreach (VehicleDescriptionAttribute item in customAttributes)
     {
-        Console.WriteLine(item.Description);
+        Console.WriteLine("\t"+item.Description);
     }
 
 }

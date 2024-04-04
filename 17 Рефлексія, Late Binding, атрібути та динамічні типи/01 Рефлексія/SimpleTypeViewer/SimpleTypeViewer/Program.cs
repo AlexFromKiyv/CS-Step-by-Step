@@ -85,7 +85,8 @@ void ListMethods(Type type)
     
     foreach (MethodInfo methodInfo in methods)
     {
-        Console.WriteLine("\t"+methodInfo);
+        //AboutMethod(methodInfo);
+        Console.WriteLine("\t" + methodInfo);
     }
 }
 

@@ -1,5 +1,5 @@
 ﻿
 using ApplyingAttributes;
 
-HorseAndBuggy horseAndBuggy = new(); 
-// 
+HorseAndBuggy horseAndBuggy = new();
+// CS0618: 'HorseAndBuggy' is obsolete: 'Use another vehicle!'

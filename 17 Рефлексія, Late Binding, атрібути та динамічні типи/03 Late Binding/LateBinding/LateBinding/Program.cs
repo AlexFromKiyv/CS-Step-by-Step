@@ -24,19 +24,19 @@ void Run()
         object? obj;
         try
         {
-            Type? miniVan = assembly.GetType("CarLibrary.MiniVan");
-            if (miniVan != null)
+            Type? typeMiniVan = assembly.GetType("CarLibrary.MiniVan");
+            if (typeMiniVan != null)
             {
                 // Create object
-                obj = Activator.CreateInstance(miniVan);
+                obj = Activator.CreateInstance(typeMiniVan);
                 Console.WriteLine($"Created a {obj} using late binding!");
 
                 //Invoke method without parameters
-                MethodInfo? methodInfoTurboBoost = miniVan.GetMethod("TurboBoost");
+                MethodInfo? methodInfoTurboBoost = typeMiniVan.GetMethod("TurboBoost");
                 methodInfoTurboBoost?.Invoke(obj, null);
 
                 //Invoke method with parameters
-                MethodInfo? methodInfoTurnOnRadio = miniVan.GetMethod("TurnOnRadio");
+                MethodInfo? methodInfoTurnOnRadio = typeMiniVan.GetMethod("TurnOnRadio");
                 methodInfoTurnOnRadio?.Invoke(obj, new object[] {true,2});
 
             }

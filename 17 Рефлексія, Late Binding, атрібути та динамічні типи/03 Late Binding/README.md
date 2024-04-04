@@ -3,7 +3,7 @@
 Простіше кажучи, Late Binding (пізнє зв’язування) — це техніка, за допомогою якої ви можете створити екземпляр заданого типу та викликати його члени під час виконання, не маючи жорстко закодованого під час компіляції знання про його існування.
 Коли ви створюєте програму, яка пізно прив’язується до типу у зовнішній збірці, у вас немає причин встановлювати посилання на збірку; отже, маніфест клієнта не містить прямого списку збірки. Пізнє зв’язування відіграє вирішальну роль у будь-якому розширюваному додатку, який ви створюєте.
 
-## Клас Avtivator
+## Клас System.Activator
 
 ```cs
 // This program will load an external library,
@@ -32,11 +32,11 @@ void Run()
         object? obj;
         try
         {
-            Type? miniVan = assembly.GetType("CarLibrary.MiniVan");
-            if (miniVan != null)
+            Type? typeMiniVan = assembly.GetType("CarLibrary.MiniVan");
+            if (typeMiniVan != null)
             {
                 // Create object
-                obj = Activator.CreateInstance(miniVan);
+                obj = Activator.CreateInstance(typeMiniVan);
                 Console.WriteLine($"Created a {obj} using late binding!");
             }
         }
@@ -53,7 +53,8 @@ Created a CarLibrary.MiniVan using late binding!
 ```
 Метод Activator.CreateInstance() дозволяє створення екземпляра типу через пізнє зв’язування. Цей метод багато разів перевантажували, щоб забезпечити значну гнучкість.
 Найпростіший варіант CreateInstance() приймає дійсний об’єкт Type, який описує сутність, яку ви хочете виділити в пам’ять на льоту.
-Однак, оскільки ваша програма не додала посилання на CarLibrary.dll, ви не можете використовувати ключове слово C# using для імпорту простору імен CarLibrary, а отже, ви не можете використовувати тип MiniVan під час операції приведення!
+Однак, оскільки ваша програма не додала посилання на CarLibrary.dll, ви не можете використовувати ключове слово C# using для імпорту простору імен CarLibrary, а отже, ви не можете використовувати тип MiniVan під час операції приведення.
+
 Cуть пізнього зв’язування полягає у створенні екземплярів об’єктів, для яких немає знань під час компіляції. Враховуючи це, як можна викликати базові методи об’єкта MiniVan, що зберігається в посиланні System.Object? Відповідь, звичайно, полягає в використанні рефлексії.
 
 ### Виклик методів у створеного об'єкта.
@@ -61,28 +62,28 @@ Cуть пізнього зв’язування полягає у створе�
 Припустімо, ви хочете викликати метод TurboBoost() MiniVan.
 
 ```cs
-   void CreateUsingLateBinding(Assembly assembly)
-   {
-       object? obj;
-       try
-       {
-           Type? miniVan = assembly.GetType("CarLibrary.MiniVan");
-           if (miniVan != null)
-           {
+    void CreateUsingLateBinding(Assembly assembly)
+    {
+        object? obj;
+        try
+        {
+            Type? typeMiniVan = assembly.GetType("CarLibrary.MiniVan");
+            if (typeMiniVan != null)
+            {
                 // Create object
-                obj = Activator.CreateInstance(miniVan);
+                obj = Activator.CreateInstance(typeMiniVan);
                 Console.WriteLine($"Created a {obj} using late binding!");
 
                 //Invoke method without parameters
-                MethodInfo? methodInfoTurboBoost = miniVan.GetMethod("TurboBoost");
+                MethodInfo? methodInfoTurboBoost = typeMiniVan.GetMethod("TurboBoost");
                 methodInfoTurboBoost?.Invoke(obj, null);
-           }
-       }
-       catch (Exception ex)
-       {
-           Console.WriteLine(ex.Message);
-       }
-   }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
 ```
 ```
 Created a CarLibrary.MiniVan using late binding!
@@ -116,19 +117,19 @@ public enum MusicMediaEnum
         object? obj;
         try
         {
-            Type? miniVan = assembly.GetType("CarLibrary.MiniVan");
-            if (miniVan != null)
+            Type? typeMiniVan = assembly.GetType("CarLibrary.MiniVan");
+            if (typeMiniVan != null)
             {
                 // Create object
-                obj = Activator.CreateInstance(miniVan);
+                obj = Activator.CreateInstance(typeMiniVan);
                 Console.WriteLine($"Created a {obj} using late binding!");
 
                 //Invoke method without parameters
-                MethodInfo? methodInfoTurboBoost = miniVan.GetMethod("TurboBoost");
+                MethodInfo? methodInfoTurboBoost = typeMiniVan.GetMethod("TurboBoost");
                 methodInfoTurboBoost?.Invoke(obj, null);
 
                 //Invoke method with parameters
-                MethodInfo? methodInfoTurnOnRadio = miniVan.GetMethod("TurnOnRadio");
+                MethodInfo? methodInfoTurnOnRadio = typeMiniVan.GetMethod("TurnOnRadio");
                 methodInfoTurnOnRadio?.Invoke(obj, new object[] {true,2});
 
             }
@@ -148,6 +149,6 @@ Jamming MusicRadio
 
 Ви можете побачити зв’язок між рефлексією, динамічним завантаженням і пізнім зв’язуванням.
 
-API відображення надає багато додаткових функцій, окрім тих, про які тут йдеться, але ви повинні бути в хорошій формі, щоб розібратися в більш детальній інформації, якщо вам це цікаво.
+API рефлексії надає багато додаткових функцій, окрім тих, про які тут йдеться, але ви повинні бути в хорошій формі, щоб розібратися в більш детальній інформації, якщо вам це цікаво.
 
 Знову ж таки, ви все ще можете запитати, коли саме вам слід використовувати ці методи у ваших власних програмах. Додаток, що розширюється, далі в цьому розділі має пролити світло на цю проблемую.

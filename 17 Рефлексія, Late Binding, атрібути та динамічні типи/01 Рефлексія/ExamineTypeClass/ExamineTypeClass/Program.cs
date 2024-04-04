@@ -37,4 +37,4 @@ void ObtainTypeUseTypeGetType()
     Console.WriteLine(type?.GetType());
 
 }
-ObtainTypeUseTypeGetType();
+//ObtainTypeUseTypeGetType();
