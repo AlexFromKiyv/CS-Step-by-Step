@@ -356,6 +356,12 @@ System.RuntimeType
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
 
+        private double _selary;
+
+        public void ChangeSelary(double selary)
+        {
+            _selary = selary;
+        }
     }
 ```
 Використаємо метод Type.GetType() для отриманя внутрішніх і зовнишніх типів.
@@ -388,6 +394,114 @@ System.RuntimeType
 ## Перегляд метаданних програмно.
 
 Існує можливість переглядати і перевіряти метаданні в процесі виконання. Тобто відображати деталі методів, властивостей, полів і підтримуваних інтерфейсів для будь-якого типу в System.Runtime.dll (всі програми .NET мають автоматичний доступ до цієї бібліотеки класів фреймворку) або власно стоврені типи, які є нашадками.
+
+### Метод GetMembers.
+
+Коли ми вже маємо отриманий тип ми можеме переглянути його члени.
+```cs
+void UseGetMemebers()
+{
+    Type type = typeof(Person);
+
+    var members = type.GetMembers();
+
+    foreach (var member in members)
+    {
+        Console.WriteLine($"{member.DeclaringType}   {member.MemberType}   {member.Name}");
+    }
+}
+UseGetMemebers();
+
+```
+```
+ExamineTypeClass.Person   Method   get_PersonId
+ExamineTypeClass.Person   Method   set_PersonId
+ExamineTypeClass.Person   Method   get_FirstName
+ExamineTypeClass.Person   Method   set_FirstName
+ExamineTypeClass.Person   Method   get_LastName
+ExamineTypeClass.Person   Method   set_LastName
+ExamineTypeClass.Person   Method   ChangeSelary
+System.Object   Method   GetType
+System.Object   Method   ToString
+System.Object   Method   Equals
+System.Object   Method   GetHashCode
+ExamineTypeClass.Person   Constructor   .ctor
+ExamineTypeClass.Person   Property   PersonId
+ExamineTypeClass.Person   Property   FirstName
+ExamineTypeClass.Person   Property   LastName
+```
+Тут ми отримуєм тільки всі загальнодоступні члени. Для властивостей виводиться методи get і set. Також виодяться успадковані можливості Object.
+
+Також є перезагружений варіант методу.
+
+```cs
+void UseGetMemebersWithBindingFlags()
+{
+    Type type = typeof(Person);
+
+    var members = type.GetMembers(
+        BindingFlags.DeclaredOnly | 
+        BindingFlags.Instance | 
+        BindingFlags.NonPublic | 
+        BindingFlags.Public);
+
+    foreach (var member in members)
+    {
+        Console.WriteLine($"{member.DeclaringType}   {member.MemberType}   {member.Name}");
+    }
+}
+UseGetMemebersWithBindingFlags();
+```
+```
+ExamineTypeClass.Person   Method   get_LastName
+ExamineTypeClass.Person   Method   set_LastName
+ExamineTypeClass.Person   Method   ChangeSelary
+System.Object   Method   GetType
+System.Object   Method   ToString
+System.Object   Method   Equals
+System.Object   Method   GetHashCode
+ExamineTypeClass.Person   Constructor   .ctor
+ExamineTypeClass.Person   Property   PersonId
+ExamineTypeClass.Person   Property   FirstName
+ExamineTypeClass.Person   Property   LastName
+ExamineTypeClass.Person   Method   get_PersonId
+ExamineTypeClass.Person   Method   set_PersonId
+ExamineTypeClass.Person   Method   get_FirstName
+ExamineTypeClass.Person   Method   set_FirstName
+ExamineTypeClass.Person   Method   get_LastName
+ExamineTypeClass.Person   Method   set_LastName
+ExamineTypeClass.Person   Method   ChangeSelary
+ExamineTypeClass.Person   Constructor   .ctor
+ExamineTypeClass.Person   Property   PersonId
+ExamineTypeClass.Person   Property   FirstName
+ExamineTypeClass.Person   Property   LastName
+ExamineTypeClass.Person   Field   <PersonId>k__BackingField
+ExamineTypeClass.Person   Field   <FirstName>k__BackingField
+ExamineTypeClass.Person   Field   <LastName>k__BackingField
+ExamineTypeClass.Person   Field   _selary
+```
+Також можна отримати члени по назві.
+
+```cs
+void GetOneMember()
+{
+    Type type = typeof(Person);
+
+    var changeSaleries = type.GetMember("ChangeSelary");
+    foreach (var member in changeSaleries)
+    {
+        Console.WriteLine($"{member.DeclaringType}   {member.MemberType}   {member.Name}");
+    }
+}
+GetOneMember();
+```
+```
+ExamineTypeClass.Person   Method   ChangeSelary
+```
+
+Оскільки може бути перезавантаження методу повертається масив.
+
+### Дослідження типу.
 
 Створимо можливісість ввеcти тип для обстеження.
 
@@ -845,4 +959,3 @@ Methods
 Зрозуміло, що простір імен System.Reflection і клас System.Type дозволяють відображати багато інших аспектів типу, окрім того, що зараз відображає MyTypeViewer. Ви можете отримати події типу, отримати список будь-яких загальних параметрів для певного члена та зібрати десятки інших деталей. Тим не менш, на цьому етапі ви створили браузер об’єктів.
 
 Основне обмеження цього конкретного прикладу полягає в тому, що у вас немає можливості відобразити поза поточною збіркою або збірками в бібліотеках базових класів, на які завжди є посилання. У зв’язку з цим виникає запитання: «Як я можу створювати програми, які можуть завантажувати (і відображати) збірки, на які немає посилань під час компіляції?»
-

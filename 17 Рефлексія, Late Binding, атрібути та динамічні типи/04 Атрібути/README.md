@@ -204,6 +204,107 @@ public enum AttributeTargets
 
 При цьому, якщо розробник намагався застосувати атрибут [VehicleDescription] до будь-чого, окрім класу чи структури, йому видається помилка під час компіляції. В класі Winnebago виникне помилка ослількі атребут не годиться для полів. 
 
+### Використання атрибутів для валідації.
+
+Атрібути це додадкові метадані яки можна додадти до існуючих і потім використовувати. 
+Створемо нове рішення з проектом під назвою AttributeForValidation.
+Додамо клас атрібута який характеризуватиме вікові рамки.
+
+AttributeForValidation\AgeValidationAttribute.cs
+```cs
+internal class AgeValidationAttribute : Attribute
+{
+    public int From { get; set; } = 0;
+    public int To { get; set; } = 130;
+
+    public AgeValidationAttribute(int from, int to)
+    {
+        From = from;
+        To = to;
+    }
+
+    public AgeValidationAttribute()
+    {
+    }
+}
+```
+Додамо клас до якого застосовується атрібут.
+
+AgeValidationAttribute\Warrior.cs
+```cs
+[AgeValidation(25,60)]
+internal class Warrior
+{
+    public string Name { get; set; }
+    public int Age { get; set; }
+
+    public Warrior(string name, int age)
+    {
+        Name = name;
+        Age = age;
+    }
+}
+
+```
+В цьому класі за допомогою атрібуту ми додаємо метедані які зберігабть дані про межі віку.
+
+Створимо метод який буде перевіряти чи відповідає властивість Age даним встановленим в атрибуті.
+
+AttributeForValidation\Program.cs
+```cs
+static bool AgeValidationForWarrior(Warrior warrior)
+{
+    Type typeWarrior = warrior.GetType();
+
+    var attributes = typeWarrior.GetCustomAttributes(false);
+
+    foreach (Attribute attribute in attributes)
+    {
+        if (attribute is AgeValidationAttribute ageValidationAttribute)
+        {
+            return ageValidationAttribute.From <= warrior.Age && warrior.Age < ageValidationAttribute.To;
+        }
+    }
+    return true;
+}
+```
+Метод GetCustomAttributes повертає object[] тому використовується foreach і оператор мриведеня типу is.
+
+Додамо метода який буде робить запит і відповідати.
+
+AttributeForValidation\Program.cs
+```cs
+static void IsAsWarriorAgeAppropriate(Warrior warrior)
+{
+    string result = AgeValidationForWarrior(warrior) ? "is" : "is not";
+
+    Console.WriteLine($"{warrior.Name} {warrior.Age} as a warrior {result} age appropriate.");
+}
+```
+
+Тепер перевіремо ці методи на об'єктах.
+
+AttributeForValidation\Program.cs
+```cs
+void WarriorValidation()
+{
+    Warrior max = new("Max", 58);
+
+    IsAsWarriorAgeAppropriate(max);
+
+    Warrior julia = new("Julia", 23);
+
+    IsAsWarriorAgeAppropriate(julia);
+
+}
+WarriorValidation();
+```
+```
+Max 58 as a warrior is age appropriate.
+Julia 23 as a warrior is not age appropriate.
+```
+Таким чином стоврюючи власні атрибути і використовуючи GetCustomAttributes можна виконувати валідацію об'єктів.
+
 ## Атрібути рівня збірки.
 
 Також можна застосувати атрибути до всіх типів у певній збірці за допомогою тегу [assembly:]. Наприклад, припустимо, що ви хочете переконатися, що кожен публічний член кожного публічного типу, визначеного у вашій збірці, сумісний із CLS. Для цього просто додайте наступний атрибут рівня складання у верхній частині будь-якого файлу вихідного коду C#, як це (поза будь-якими оголошеннями простору імен):

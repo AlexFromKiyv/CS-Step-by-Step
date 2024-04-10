@@ -122,6 +122,7 @@ void UseAsseblyLoad()
 }
 UseAsseblyLoad();
 ```
+
 Створемо проект FrameworkAssemblyViewer і додамо в проект пакет Microsoft.EntityFrameworkCore
 
 Отримаємо типи цієї збірки.
