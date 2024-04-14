@@ -420,3 +420,219 @@ AddWithDynamic();
 3
 ```
 Використовуючи ключове слово dynamic, ви заощадили собі чимало роботи. З динамічно визначеними даними вам більше не потрібно вручну пакувати аргументи як масив об’єктів, запитувати метадані збірки або встановлювати інші подібні деталі. Якщо ви створюєте програму, яка активно використовує динамічне завантаження та пізнє зв’язування,економія коду збільшиться.
+
+## ExpandoObject та DynamicObject.
+
+В просторі імен System.Dynamic є класи яки дозволяють стоврювати код в манері схожій на Javascript.
+
+### ExpandoObject
+
+Існує можливість створювати динамічні об'єкти.
+
+UsingExpandoObject\Program.cs
+
+```cs
+void CreateDynamicObject()
+{
+    dynamic girl = new System.Dynamic.ExpandoObject();
+
+    // properties
+    girl.Name = "Lucy";
+    girl.Age = 31;
+    girl.Languages = new List<string> { "ukrainian", "russian" };
+    
+    //method
+    girl.IncreaseAge = (Action<int>)(a =>  girl.Age += a);
+
+
+
+    //invoke
+    girl.IncreaseAge(2);
+
+    //write
+    Console.WriteLine($"{girl.Name} {girl.Age}");
+    foreach (string language in girl.Languages)
+    {
+        Console.WriteLine($"\t{language}");
+    }
+}
+CreateDynamicObject();
+```
+```
+Lucy 33
+        ukrainian
+        russian
+```
+Властивості та методи створюються на льоту. 
+
+### DynamicObject
+
+Цей клас також дозаоляє створювати динамічні об'єкти але з посиленим контролем. Для використаня треба створити клас нашадок від DynamicObject та реалізувати низьку методів.
+
+```cs
+using System;
+using System.Collections.Generic;
+using System.Dynamic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace UsingDynamicObject;
+
+internal class Person : DynamicObject
+{
+
+    Dictionary<string, object> members = new Dictionary<string, object>();
+
+    public override bool TrySetMember(SetMemberBinder binder, object? value)
+    {
+        if (value is not null)
+        {
+            members[binder.Name] = value;
+            return true;
+        }
+        return false;
+    }
+
+    public override bool TryGetMember(GetMemberBinder binder, out object? result)
+    {
+        result = null;
+        if (members.ContainsKey(binder.Name))
+        {
+            result = members[binder.Name];
+            return true;
+        }
+        return false;
+    }
+
+    public override bool TryInvokeMember(InvokeMemberBinder binder, object?[]? args, out object? result)
+    {
+        result = null;
+        if (args?[0] is int number)
+        {
+            dynamic method = members[binder.Name];
+            result = method(number);
+        }
+        return result != null;
+    }
+}
+
+```
+Перевизначені методи повертають чи виконалась операція. Перший параметр зв'язувач. Якшо метод є метод об'єкта другий параметр масив для параметрів object[]. 
+
+Тепер цей клас можна використати.
+```cs
+void TestOurClass()
+{
+
+    dynamic person = new Person();
+
+    person.Name = "George"; // invoked TrySetMember
+    person.Age = 25;
+
+    Func<int,int> increaseAge  = (int y) => { person.Age += y; return person.Age; };
+    person.IncreaseAge = increaseAge;
+
+
+    person.IncreaseAge(10); // invoked TryInvokeMember
+
+    Console.WriteLine($"{person.Name} {person.Age}"); // invoked TryGetMember
+
+}
+TestOurClass();
+```
+
+## DLR та IronPython
+
+### Запуск скрипта на Python.
+
+Існують сфери в який використаня динамічних язиків програмуваня корисно. Наприклад написання клієнських сценарієв. Крім того інуючи бібіліотеки на Phayton які мають функціонал якого нема в .Net.
+
+Створемо проект UsingIronPython і додамо пакети DynamicLanguageRuntime та IronPython (правий клік на Dependencies > Manage NuGet Packages >)
+
+UsingIronPython\Program.cs
+```cs
+using IronPython.Hosting;
+using Microsoft.Scripting.Hosting;
+
+
+void RunPythonScript()
+{
+    ScriptEngine engine = Python.CreateEngine();
+    engine.Execute("print('Hi, warrior')");
+    engine.ExecuteFile("D://hi.py");
+}
+RunPythonScript();
+```
+D:\Hi.py
+```py
+print('Hi, girl')
+```
+```console
+Hi, warrior
+Hi, girl
+```
+
+Об'єкт який виконує скрип має тип ScriptEngine і приналежить простору імен Microsoft.Scripting.Hosting
+
+### Взаємодія з скриптом. ScriptScope
+
+За допомогою класу ScriptScope є можливість взаємодіяти з скриптом Python
+
+```cs
+void UseScriptScope()
+{
+    int a = 10;
+
+    ScriptEngine engine = Python.CreateEngine();
+    ScriptScope scope = engine.CreateScope();
+
+    scope.SetVariable("x", a);
+    engine.ExecuteFile("D://square.py", scope);
+    
+    dynamic y = scope.GetVariable("y");
+    Console.WriteLine(y);
+}
+UseScriptScope();
+```
+D:\square.py
+```py
+y = x
+x = x * x
+y = x / y
+print(x)
+```
+```
+100
+10
+```
+Методи GetVariable, SetVariable дозволяє отримати та встановити змінні.
+
+Якшо в скрипті Python визначено функцію її можна виклкикати
+```cs
+void CallPythonFunction()
+{
+
+    ScriptEngine engine = Python.CreateEngine();
+    ScriptScope scope = engine.CreateScope();
+
+    engine.ExecuteFile("D://squares.py", scope);
+
+    dynamic square = scope.GetVariable("square");
+    dynamic result = square(10);
+
+    Console.WriteLine(result);
+}
+CallPythonFunction();
+```
+D:\squares.py
+```py
+def square(x):
+    return x * x
+```
+```console
+100
+```
+Функцію можна отримати як зміну за домоммогою GetVariable. Отримавши фунцію її можна використовувати як звичайну.
+
+
