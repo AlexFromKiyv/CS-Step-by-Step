@@ -784,7 +784,9 @@ milk
 ## Абстрактний клас Stream.
 
 В прикладах ви бачили багато способів отримати об’єкти FileStream, StreamReader і StreamWriter, але вам ще належить зчитувати дані з або записати дані у файл за допомогою цих типів. Щоб зрозуміти, як це зробити, вам потрібно буде ознайомитися з поняттям потоку.
+
 У світі маніпулювання вводом-виводом потік представляє фрагмент даних, що перетікає між джерелом і одержувачем. Потоки забезпечують загальний спосіб взаємодії з послідовністю байтів, незалежно від того, який тип пристрою (наприклад, файл, мережеве підключення або принтер) зберігає або відображає ці байти. Концепція потоку не обмежується файловим вводом-виводом. Бібліотеки .NET забезпечують потоковий доступ до мереж, місць пам’яті та інших потокоцентричних абстракцій. 
+
 Абстрактний клас System.IO.Stream визначає кілька членів, які забезпечують підтримку синхронної та асинхронної взаємодії з носієм даних (наприклад, основним файлом або місцем пам’яті).
 Нащадки потоку представляють дані як необроблений потік байтів; отже, робота безпосередньо з необробленими потоками може бути досить загадковою. Деякі типи, отримані від потоку, підтримують пошук, який відноситься до процесу отримання та коригування поточної позиції в потоці.
 
@@ -808,14 +810,588 @@ milk
 
     Write(), WriteByte(), WriteAsync() : Записує послідовність байтів (або один байт) у поточний потік і просуває поточну позицію в цьому потоці на кількість записаних байтів.
 
+## Робота з FileStreams.
+
+Клас FileStream забезпечує реалізацію для абстрактних членів Stream у спосіб, відповідний для потокової передачі на основі файлів.
+
+Це примітивний потік; він може читати або записувати лише один байт або масив байтів. Однак вам не часто потрібно буде безпосередньо взаємодіяти з членами типу FileStream. Замість цього ви, ймовірно, будете використовувати різні обгортки потоків, які полегшують роботу з спеціальними даними або типами .NET. Тим не менш, вам буде корисно поекспериментувати з можливостями синхронного читання/запису типу FileStream.
+
+Припустимо нам потріблно записати рядок в файл Message.dat
+
+ExploringFileStream\Program.cs
+```cs
+void ExploringWriteReadStringWithFileStream()
+{
+    string directoryFullName = @"D:\Temp";
+    string fileFullName = @"D:\Temp\Message.dat";
+    string message = "Hi girl! How are you?";
+
+    WriteMassege(message,directoryFullName,fileFullName);
+
+    ReadMessage(fileFullName);
+}
+ExploringWriteReadStringWithFileStream();
+
+void WriteMassege(string message, string directoryFullName, string fileFullName)
+{
+    CheckOrCreateDirectory(directoryFullName);
+
+    using FileStream fileStream = File.Open(fileFullName, FileMode.Create);
+
+    byte[] bites = Encoding.Default.GetBytes(message);
+
+    fileStream.Write(bites, 0, bites.Length);
+
+    Console.WriteLine($"fileStream.Position after write:{fileStream.Position}");
+}
 
 
+void ReadMessage(string fileFullName)
+{
+    CheckFile(fileFullName);
+
+    using FileStream fileStream = File.Open(fileFullName, FileMode.Open);
+
+    Console.WriteLine($"fileStream.Position before read:{fileStream.Position}");
+
+    byte[] bytes = new byte[fileStream.Length];
+    for (int i = 0; i < fileStream.Length; i++)
+    {
+        bytes[i] = (byte)fileStream.ReadByte();
+        Console.WriteLine($"{bytes[i]} {(char)bytes[i]}");
+    }
+    Console.WriteLine();
+
+    Console.WriteLine(Encoding.Default.GetString(bytes));
+}
+```
+```
+fileStream.Position after write:21
+fileStream.Position before read:0
+72 H
+105 i
+32
+103 g
+105 i
+114 r
+108 l
+33 !
+32
+72 H
+111 o
+119 w
+32
+97 a
+114 r
+101 e
+32
+121 y
+111 o
+117 u
+63 ?
+
+Hi girl! How are you?
+```
+
+FileStream може працювати лише з необробленими байтами, тому потрібно закодувати тип System.String у відповідний масив байтів. Простір імен System.Text визначає тип під назвою Encoding, який надає елементи, які кодують і декодують рядки до або з масиву байтів. Після кодування масив байтів зберігається у файлі за допомогою методу FileStream.Write(). Після запису fileStream.Position дорівнює кількості записаних байтів і тобто об'єкт вказує на кінець потоку байтів. 
+
+Цей приклад заповнює файл даними, але він також підкреслює головний недолік роботи безпосередньо з типом FileStream: він вимагає працювати з необробленими байтами. Інші типи, отримані від Stream, працюють подібним чином. Наприклад, якщо ви хочете записати послідовність байтів в область пам’яті, ви можете використати MemoryStream.
+
+Простір імен System.IO надає кілька типів, які інкапсулюють деталі роботи з потоковими типами.
+
+## Робота з StreamWriters та StreamReaders
+
+Класи StreamWriter і StreamReader корисні, коли вам потрібно прочитати або записати символьні дані наприклад, рядки. Обидва працюють за замовчуванням із символами Unicode; однак ви можете змінити це, надавши правильно налаштоване посилання на об’єкт System.Text.Encoding.
+
+StreamReader походить від абстрактного типу під назвою TextReader, як і пов’язаний тип StringReader (розглянемо далі в цій главі). Базовий клас TextReader надає обмежений набір функцій кожному з цих нащадків; зокрема, він надає можливість читати та переглядати потік символів.
+
+Тип StreamWriter як і StringWriter ( який розглянете пізніше в цій главі) походить від абстрактного базового класу під назвою TextWriter. Цей клас визначає члени, які дозволяють похідним типам записувати текстові дані в заданий потік символів.
+
+Основні члени TextWriter
+
+    Close() : Цей метод закриває програму запису та звільняє всі пов’язані ресурси. У процесі буфер автоматично очищається ( таки, цей елемент функціонально еквівалентний виклику методу Dispose).
+
+    Flush() : Цей метод очищає всі буфери для поточного пристрою запису та змушує будь-які буферизовані дані записуватися на основний пристрій; проте це не закриває об'єкт потоку.
+
+    NewLine : Ця властивість вказує константу нового рядка для похідного класу запису. За замовчуванням символом закінчення рядка для ОС Windows є символ повернення каретки, за яким іде перевод рядка (\r\n).
+
+    Write(), WriteAsync() : Цей перевантажений метод записує дані в текстовий потік без константи нового рядка.
+
+    WriteLine(), WriteLineAsync() : Цей перевантажений метод записує дані в текстовий потік із константою нового рядка.
+
+Останні два члени класу TextWriter, ймовірно, здаються вам знайомими. Якщо ви пам’ятаєте, тип System.Console має члени Write() і WriteLine(), які надсилають текстові дані на стандартний пристрій виводу. Насправді властивість Console.In обгортає TextReader, а властивість Console.Out обгортає TextWriter. 
+
+Похідний клас StreamWriter забезпечує відповідну реалізацію методів Write(), Close() і Flush(), а також визначає додаткову властивість AutoFlush. Якщо встановлено значення true, ця властивість змушує StreamWriter скидати всі дані кожного разу, коли ви виконуєте операцію запису. Можете підвищити продуктивність, встановивши для AutoFlush значення false, за умови, що ви завжди викликаєте Close(), коли завершуєте запис за допомогою StreamWriter.
+
+### Запис в текстовий файл.
+
+Використаємо StreamWriter для запису рядків в текстовий файл.
+
+ExploringStreamWriterStreamReader\Program.cs
+
+```cs
+
+void WriteToTextReadFromText()
+{
+    string directoryFullName = @"D:\Temp";
+    string fileFullName = @"D:\Temp\MyList.txt";
+
+    WriteToText(directoryFullName,fileFullName);
+
+}
+WriteToTextReadFromText();
+
+void WriteToText(string directoryFullName, string fileFullName)
+{
+    CheckOrCreateDirectory(directoryFullName);
+
+    using StreamWriter streamWriter = File.CreateText(fileFullName);
+
+    streamWriter.WriteLine("1 Build a house");
+    streamWriter.WriteLine("2 Raise a Son");
+    streamWriter.WriteLine("4 Plant a tree");
+    streamWriter.WriteLine("5 Learn English");
+    streamWriter.WriteLine("3 Write library");
+    for (int i = 5; i <= 12; i++)
+    {
+        streamWriter.WriteLine(i + " ...");
+    }
+    for (int i = 0; i <= 12; i++)
+    {
+        streamWriter.Write(i + " ");
+    }
+    streamWriter.Write(streamWriter.NewLine);
+
+    Console.WriteLine($"Creanted file {fileFullName}.");
+}
+
+```
+Cтворюється новий файл за допомогою методу File.CreateText(). Використовуючи отриманий об’єкт StreamWriter, ви можете додати деякі текстові дані до нового файлу.
+
+### Читання з текстового файлу.
+
+Читати текстові дані з файлу програмним шляхом за допомогою відповідного типу StreamReader. Цей клас походить від абстрактного TextReader.
+
+Функціональні можливості TextReader.
+
+    Peek() : Повертає наступний доступний символ (виражений у вигляді цілого числа), не змінюючи положення засобу зчитування. Значення -1 означає, що ви перебуваєте в кінці потоку.
+
+    Read(), ReadAsync() : Читає дані з вхідного потоку.
+
+    ReadBlock(), ReadBlockAsync() : Читає вказану максимальну кількість символів із поточного потоку та записує дані в буфер, починаючи з указаного індексу.
+
+    ReadLine(), ReadLineAsync() : Читає рядок символів із поточного потоку та повертає дані у вигляді рядка (нульовий рядок означає EOF).
+
+    ReadToEnd(), ReadToEndAsync() : Читає всі символи від поточної позиції до кінця потоку та повертає їх як один рядок.
+
+Прочитаємо напередодні створений файл.
+
+```cs
+
+void WriteToTextReadFromText()
+{
+    string directoryFullName = @"D:\Temp";
+    string fileFullName = @"D:\Temp\MyList.txt";
+
+    WriteToText(directoryFullName,fileFullName);
+    ReadFromText(fileFullName);
+}
+
+void ReadFromText(string fileFullName)
+{
+    CheckFile(fileFullName);
+    
+    using StreamReader streamReader = File.OpenText(fileFullName);
+
+    string? input;
+    while ((input = streamReader.ReadLine()) != null)
+    {
+        Console.WriteLine(input);
+    }
+}
+
+```
+```
+Creanted file D:\Temp\MyList.txt.
+1 Build a house
+2 Raise a Son
+4 Plant a tree
+5 Learn English
+3 Write library
+5 ...
+6 ...
+7 ...
+8 ...
+9 ...
+10 ...
+11 ...
+12 ...
+0 1 2 3 4 5 6 7 8 9 10 11 12
+```
+
+### Безпосередне створеня об'єктів StreamWriter та StreamReader.
+
+Можна працювати з StreamWriters і StreamReaders іншим способом: створюючи їх безпосередньо.
+
+```cs
+void DirectlyCreateStreamWriterStreamReader()
+{
+    string path = @"D:\Temp\MyText.txt";
+
+    using StreamWriter streamWriter  = new(path);
+
+    streamWriter.WriteLine("Good day!");
+
+    streamWriter.Close();
+
+    using StreamReader streamReader = new(path);
+
+    string? input = streamReader.ReadToEnd();
+
+    Console.WriteLine(input);
+}
+DirectlyCreateStreamWriterStreamReader();
+```
+```
+Good day!
+```
+
+## Робота з StringWriters та StringReaders
+
+Ви можете використовувати типи StringWriter і StringReader для обробки текстової інформації як потоку символів у пам’яті. Це може виявитися корисним, коли ви хочете додати символьну інформацію до основного буфера.
+
+ExploringStringWriterStringReader
+```cs
+void CreateStringWriter()
+{
+    using StringWriter stringWriter = new();
+
+    stringWriter.WriteLine("What is love?");
+
+    Console.WriteLine($"Contens of stringWriter: {stringWriter} ") ;
+}
+CreateStringWriter();
+```
+```
+Contens of stringWriter: What is love?
+```
+Тут записується блок рядкових даних до об’єкта StringWriter, а не до файлу на локальному жорсткому диску.
+
+StringWriter і StreamWriter походять від одного базового класу TextWriter, тому логіка запису подібна. Враховуючи природу StringWriter, ви також повинні знати, що цей клас дозволяє використовувати наступний метод GetStringBuilder() для вилучення об’єкта System.Text.StringBuilder
+
+```cs
+void UseStringBuilder()
+{
+    using StringWriter stringWriter = new();
+    stringWriter.WriteLine("What is love?");
+    Console.WriteLine($"Contens of stringWriter: {stringWriter}");
+
+    StringBuilder stringBuilder = stringWriter.GetStringBuilder();
+
+    stringBuilder.Insert(0, "Hi!");
+    Console.WriteLine($"Contens of stringWriter: {stringWriter}");
+    Console.WriteLine(stringBuilder.ToString());
+
+    stringBuilder.Remove(0, "Hi!".Length);
+    Console.WriteLine($"Contens of stringWriter: {stringWriter}");
+    Console.WriteLine(stringBuilder.ToString());
+
+}
+UseStringBuilder();
+```
+```
+Contens of stringWriter: What is love?
+
+Contens of stringWriter: Hi!What is love?
+
+Hi!What is love?
+
+Contens of stringWriter: What is love?
+
+What is love?
+```
+
+Якщо ви хочете прочитати з потоку символьних даних, ви можете використовувати відповідний тип StringReader, який функціонує ідентично пов’язаному класу StreamReader.
+
+```cs
+void UsingStringReader()
+{
+    using StringWriter stringWriter = new();
+    stringWriter.WriteLine("What is love?");
+
+    using StringReader stringReader = new(stringWriter.ToString());
+
+    string? input = null;
+
+    while ((input = stringReader.ReadLine()) != null)
+    {
+        Console.WriteLine(input);
+    }
+}
+UsingStringReader();
+```
+```
+What is love?
+```
+
+## Робота з BinaryWriters та BinaryReaders.
+
+Обидва класи походять безпосередньо від System.Object. Ці типи дозволяють читати та записувати дискретні типи даних у базовий потік у компактному двійковому форматі.
+
+Клас BinaryWriter визначає дуже перевантажений метод Write() для розміщення типу даних у базовому потоці. На додаток до члена Write(), BinaryWriter надає додаткові члени, які дозволяють отримати або встановити тип, отриманий від потоку; він також пропонує підтримку довільного доступу до даних.
+
+Основні члени BinaryWriter
+
+    BaseStream : Ця властивість лише для читання надає доступ до основного потоку, який використовується з об’єктом BinaryWriter.
+
+    Close() : Цей метод закриває бінарний потік.
+
+    Flush() : Цей метод очищає двійковий потік.
+
+    Seek() : Цей метод встановлює позицію в поточному потоці.
+
+    Write() : Цей метод записує значення в поточний потік. 
+
+Клас BinaryReader доповнює функціональність, яку пропонує BinaryWriter.
+
+Основні члени BinaryReader
+
+    BaseStream : Ця властивість лише для читання надає доступ до основного потоку, який використовується з об’єктом BinaryReader.
+
+    Close() : Цей метод закриває об'єкт BinaryReader.
+
+    PeekChar() : Цей метод повертає наступний доступний символ без просування позиції в потоці.
+
+    Read() : Цей метод читає заданий набір байтів або символів і зберігає їх у вхідному масиві.
+
+    ReadXXXX() : Клас BinaryReader визначає численні методи читання, які захоплюють наступний тип із потоку (наприклад, ReadBoolean(), ReadByte() і ReadInt32()).
+
+Запишемо дані за допомогою BinaryWriter.
+
+```cs
+void WorkWithBinaryWriter()
+{
+    FileInfo fileInfo = new(@"D:\Temp\BinaryFile.dat");
+
+    using BinaryWriter binaryWriter = new(fileInfo.OpenWrite());
+
+    Console.WriteLine($"binaryWriter.BaseStream : {binaryWriter.BaseStream}");
+
+    int myInt = 888;
+    double myDouble = 888.88;
+    string myString = "hi!";
+
+    binaryWriter.Write(myInt);
+    binaryWriter.Write(myDouble);
+    binaryWriter.Write(myString);
+
+    Console.WriteLine("Done.");
+}
+WorkWithBinaryWriter();
+```
+```
+binaryWriter.BaseStream : System.IO.FileStream
+Done.
+
+```
+Зверніть увагу, як об’єкт FileStream, повернутий із FileInfo.OpenWrite(), передається конструктору типу BinaryWriter. Використання цієї техніки дозволяє легко розшарувати потік перед записом даних. Зауважте, що конструктор BinaryWriter приймає будь-який тип, отриманий від Stream (наприклад, FileStream, MemoryStream або BufferedStream). Таким чином, запис двійкових даних у пам'ять натомість є таким же простим, як надання дійсного об'єкта MemoryStream.
+
+Прочитаємо дані за допомогою BinaryReader.
+
+```cs
+static void WorkWithBinaryReader()
+{
+    FileInfo fileInfo = new(@"D:\Temp\BinaryFile.dat");
+
+    using BinaryReader binaryReader = new(fileInfo.OpenRead());
+
+    Console.WriteLine(binaryReader.ReadInt32());
+    Console.WriteLine(binaryReader.ReadDouble());
+    Console.WriteLine(binaryReader.ReadString());
+}
+WorkWithBinaryReader();
+```
+```
+888
+888,88
+hi!
+```
+
+## Клас FileSystemWatcher.
+
+Цей тип може бути дуже корисним, якщо ви хочете контролювати або «наблюдати» за файлами у вашій системі програмно. Зокрема, ви можете наказати типу FileSystemWatcher контролювати файли для будь-яких дій, визначених переліком System.IO.NotifyFilters.
+
+```cs
+    //
+    // Summary:
+    //     Specifies changes to watch for in a file or folder.
+    //     Визначає зміни, які потрібно спостерігати у файлі чи папці.
+    [Flags]
+    public enum NotifyFilters
+    {
+        //
+        // Summary:
+        //     The name of the file.
+        FileName = 1,
+        //
+        // Summary:
+        //     The name of the directory.
+        DirectoryName = 2,
+        //
+        // Summary:
+        //     The attributes of the file or folder.
+        Attributes = 4,
+        //
+        // Summary:
+        //     The size of the file or folder.
+        Size = 8,
+        //
+        // Summary:
+        //     The date the file or folder last had anything written to it.
+        LastWrite = 16,
+        //
+        // Summary:
+        //     The date the file or folder was last opened.
+        LastAccess = 32,
+        //
+        // Summary:
+        //     The time the file or folder was created.
+        CreationTime = 64,
+        //
+        // Summary:
+        //     The security settings of the file or folder.
+        Security = 256
+    }
+```
+Щоб розпочати роботу з типом FileSystemWatcher, вам потрібно встановити властивість Path, щоб указати ім’я та розташування каталогу, який містить файли, які ви хочете контролювати, а також властивість Filter, яка визначає розширення файлів, які ви хочу стежити.
+
+Можна вибрати обробку подій Changed, Created і Deleted, усі вони працюють у поєднанні з делегатом FileSystemEventHandler.
+
+```cs
+    //
+    // Summary:
+    //     Represents the method that will handle the System.IO.FileSystemWatcher.Changed,
+    //     System.IO.FileSystemWatcher.Created, or System.IO.FileSystemWatcher.Deleted event
+    //     of a System.IO.FileSystemWatcher class.
+    //
+    // Parameters:
+    //   sender:
+    //     The source of the event.
+    //
+    //   e:
+    //     The System.IO.FileSystemEventArgs that contains the event data.
+    public delegate void FileSystemEventHandler(object sender, FileSystemEventArgs e);
+```
+
+Ви також можете обробити подію Renamed за допомогою типу делегату RenamedEventHandler,
+
+```cs
+    //
+    // Summary:
+    //     Represents the method that will handle the System.IO.FileSystemWatcher.Renamed
+    //     event of a System.IO.FileSystemWatcher class.
+    //
+    // Parameters:
+    //   sender:
+    //     The source of the event.
+    //
+    //   e:
+    //     The System.IO.RenamedEventArgs that contains the event data.
+    public delegate void RenamedEventHandler(object sender, RenamedEventArgs e);
+```
+
+Виконаємо відстеження за файлами *.txt.
 
 
+ExploringFileSystemWatcher
+```cs
+
+static void MonitoringFilesInADirectory()
+{
+    // Establish the path to the directory to watch
+    FileSystemWatcher fileSystemWatcher = new();
+	try
+	{
+		fileSystemWatcher.Path = @"D:\Temp";
+        Console.WriteLine($"Set up the fileSystemWatcher.Path = " +
+            $"{fileSystemWatcher.Path}");
+    }
+    catch (Exception ex)
+	{
+        Console.WriteLine(ex.Message);
+	}
+
+    // Set up the things to be on the lookout for.
+    fileSystemWatcher.NotifyFilter = 
+          NotifyFilters.LastAccess
+        | NotifyFilters.LastWrite
+        | NotifyFilters.FileName
+        | NotifyFilters.DirectoryName;
+    Console.WriteLine($"Set up the fileSystemWatcher.NotifyFilter = " +
+        $"{fileSystemWatcher.NotifyFilter}");
+
+    // Only watch text files.
+    fileSystemWatcher.Filter = "*.txt";
+
+    Console.WriteLine($"Set up the fileSystemWatcher.Filter = " +
+        $"{fileSystemWatcher.Filter}");
+
+    // Add event handlers.
+    
+    // Specify what is done when a file is changed, created, or deleted.
+    fileSystemWatcher.Changed += (s, e) =>
+    Console.WriteLine($"File {e.FullPath} {e.ChangeType} ");
+    fileSystemWatcher.Created += (s, e) =>
+    Console.WriteLine($"File {e.FullPath} {e.ChangeType} ");
+    fileSystemWatcher.Deleted += (s, e) =>
+    Console.WriteLine($"File {e.FullPath} {e.ChangeType} ");
+
+    // Specify what is done when a file is renamed.
+    fileSystemWatcher.Renamed += (s, e) =>
+    Console.WriteLine($"File {e.OldFullPath} renamed to {e.FullPath} ");
+
+    // Begin watching the directory.
+    fileSystemWatcher.EnableRaisingEvents = true;
+    Console.WriteLine($"I'm watching what happened with text file in directory " +
+        $"{fileSystemWatcher.Path}");
+    Console.WriteLine("Press End to quit.\n\n");
+
+    // Raise some events.
+    DoSomethingWithTheFiles();
+
+    while (Console.ReadKey().Key != ConsoleKey.End) { }
+}
+MonitoringFilesInADirectory();
 
 
+// Test helper
+static void DoSomethingWithTheFiles()
+{
+    using StreamWriter streamWriter = File.CreateText(@"D:\Temp\MyDoc.txt");
+
+    streamWriter.WriteLine("Chapter 1");
+    streamWriter.Close();
+
+    File.Move(@"D:\Temp\MyDoc.txt", @"D:\Temp\MyDocumetation.txt");
+    File.Delete(@"D:\Temp\MyDoc.txt");
+}
+
+```
+```
+Set up the fileSystemWatcher.Path = D:\Temp
+Set up the fileSystemWatcher.NotifyFilter = FileName, DirectoryName, LastWrite, LastAccess
+Set up the fileSystemWatcher.Filter = *.txt
+I'm watching what happened with text file in directory D:\Temp
+Press End to quit.
 
 
+File D:\Temp\MyDoc.txt Created
+File D:\Temp\MyDoc.txt Changed
+File D:\Temp\MyDoc.txt renamed to D:\Temp\MyDocumetation.txt
+
+```
+Крім того протестувати роботу коду можна безпосередньо змінюючи файли txt в каталозі тим самим викликаючи події.
 
 
+Всі розглятуті класи для оперцій I/O ви, звичайно, будете використовувати в багатьох своїх програмах, але служби серіалізації об’єктів можуть значно спростити збереження великих обсягів даних.
 

@@ -338,7 +338,7 @@ void ExploringFileCreateAndOpen()
 
 void ExploringFileWriteAllLines()
 {
-    string[] myList = { "carrots", "chicken", "grapes", "milk" };
+    string[] myList = ["carrots", "chicken", "grapes", "milk"];
 
     CheckOrCreateDirectory(@"D:\Temp");
 
