@@ -148,7 +148,7 @@ static void SaveAsJSONFormat<T>(T objGraph, string fileName)
 
 void SerializingObjectsUsingJsonSerializer()
 {
-    SaveAsJSONFormat(trevelCar, @"D:\Temp\TrevalCar.json");
+    SaveAsJSONFormat(trevelCar, @"D:\Temp\TravelCar.json");
     Console.WriteLine("Saved trevalCar in JSON document.");
 
     SaveAsJSONFormat(person, @"D:\Temp\Person.json");
@@ -162,8 +162,6 @@ void SerializingRadio()
     Console.WriteLine("Saved Radio in JSON document.");
 }
 //SerializingRadio();
-
-
 
 // Streaming Serialize Async.
 
@@ -230,9 +228,9 @@ void SerializeWithGlobalOptions()
 // JsonSerializerDefaults.Web
 void OptionsForWeb()
 {
-    Console.WriteLine("Default");
+    Console.WriteLine("General");
 
-    JsonSerializerOptions? options = new();
+    JsonSerializerOptions? options = new(JsonSerializerDefaults.General);
     ShowOptions(options);
 
 
@@ -245,7 +243,7 @@ void OptionsForWeb()
     };
     ShowOptions(webOptions);
 }
-OptionsForWeb();
+//OptionsForWeb();
 
 void ShowOptions(JsonSerializerOptions? options)
 {
@@ -254,4 +252,52 @@ void ShowOptions(JsonSerializerOptions? options)
     Console.WriteLine($"NumberHandling: {options?.NumberHandling}");
     Console.WriteLine($"WriteIndented: {options?.WriteIndented}");
     Console.WriteLine($"ReferenceHandler: {options?.ReferenceHandler}");
-} 
+}
+
+
+
+
+// Serializing a collection of objects into JSON
+
+JsonSerializerOptions optionsWithWriteIndented = new(JsonSerializerDefaults.General)
+{ WriteIndented = true };
+
+void SerializingCollectionToJson()
+{
+    SaveAsJson(optionsWithWriteIndented, myCars, @"D:\Temp\CarCollection.json");
+    Console.WriteLine("The collection is serialized.");
+}
+//SerializingCollectionToJson();
+
+
+// Deserialization from JSON
+
+static T? ReadAsJsonFormat<T>(JsonSerializerOptions options, string fileName) =>
+    JsonSerializer.Deserialize<T>(File.ReadAllText(fileName), options);
+
+
+JsonSerializerOptions optionsWithAllowReadingFromString = new(JsonSerializerDefaults.General)
+{ NumberHandling = JsonNumberHandling.AllowReadingFromString };
+
+void DeserializeObjectAndCollectionFromJson()
+{
+    TravelCar? travelCar = ReadAsJsonFormat<TravelCar>(
+        optionsWithAllowReadingFromString,
+        @"D:\Temp\TravelCar.json");
+    Console.WriteLine("Object TravelCar in memory.\n");
+    Console.WriteLine(travelCar);
+
+    List<TravelCar>? travelCars = ReadAsJsonFormat<List<TravelCar>>(
+        optionsWithAllowReadingFromString,
+        @"D:\Temp\CarCollection.json"     
+        );
+
+    if (travelCars == null) return;
+    Console.WriteLine("\nCollections of TravelCar objects in memory.\n");
+
+    foreach (TravelCar car in travelCars)
+    {
+        Console.WriteLine(car);
+    }
+}
+DeserializeObjectAndCollectionFromJson();

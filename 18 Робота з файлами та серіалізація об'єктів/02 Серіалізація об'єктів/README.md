@@ -225,7 +225,7 @@ CanFly:False    CanSubmerge:False       HatchBack:False  RadioId: Sony-236      
 </TravelCar>
 </ArrayOfTravelCar>
 ```
-## Серіалізація та десеріалізація за допомогою XmlSerializer. 
+# Серіалізація та десеріалізація за допомогою XmlSerializer. 
 
 Простір імен System.Xml надає System.Xml.Serialization.XmlSerializer. Ви можете використовувати цей засіб форматування, щоб зберегти публічний стан певного об’єкта як чистий XML. Зауважте, що XmlSerializer вимагає від вас оголосити тип, який буде серіалізовано або десеріалізовано.
 
@@ -251,7 +251,7 @@ CanFly:False    CanSubmerge:False       HatchBack:False  RadioId: Sony-236      
 
 XmlSerializer вимагає, щоб усі серіалізовані типи в графі об’єктів підтримували конструктор за замовчуванням (тому обов’язково додайте його, якщо ви визначаєте власні конструктори).
 
-### Серіалізація об’єктів за допомогою XmlSerializer.
+## Серіалізація об’єктів за допомогою XmlSerializer.
 
 Додамо в проект функцію що серіалізує об'єкт в XML.
 
@@ -356,7 +356,7 @@ SerializingCollectionsOfObjects();
 ```
 Згенерований XML відповідає прикладу, показаному на початку цього розділу, з ArrayOfTravelCar як кореневим елементом.
 
-### Десеріалізація об'єктів і колекцій об'єктів.
+## Десеріалізація об'єктів і колекцій об'єктів.
 
 Десеріалізація XML є прямою протилежністю серіалізації об’єктів і колекцій об’єктів.
 
@@ -735,7 +735,6 @@ Enum має атрибут flags, який дозволяє побітову к�
   "HasSubWoofers": false
 }
 ```
-
 ### Впорядкування властивостей.
 
 Атрибут JsonPropertyOrder контролює порядок властивостей під час серіалізації. Чим менше число, тим ранішою є властивість у кінцевому JSON. Властивостям без порядку призначається нульовий порядок за замовчуванням.
@@ -764,6 +763,7 @@ Enum має атрибут flags, який дозволяє побітову к�
 }
 ```
 З цією зміною властивості серіалізуються в порядку FirstName (-1), а потім IsAlive (1). PersonAge не серіалізується, оскільки є приватним. Якщо його оприлюднити, він отримає нульовий порядок за замовчуванням і розміститься між двома іншими властивостями.
+
 
 ### Потокова серіалізація та підтримка IAsyncEnumerable.
 
@@ -863,9 +863,9 @@ SerializeWithGlobalOptions();
 ```cs
 void OptionsForWeb()
 {
-    Console.WriteLine("Default");
+    Console.WriteLine("General");
 
-    JsonSerializerOptions? options = new();
+    JsonSerializerOptions? options = new(JsonSerializerDefaults.General);
     ShowOptions(options);
 
 
@@ -890,7 +890,7 @@ void ShowOptions(JsonSerializerOptions? options)
 }
 ```
 ```
-Default
+General
 PropertyNameCaseInsensitive: False
 PropertyNamingPolicy:
 NumberHandling: Strict
@@ -905,5 +905,71 @@ WriteIndented: True
 ReferenceHandler: System.Text.Json.Serialization.IgnoreReferenceHandler
 ```
 
-Можна встановити додаткові властивості або змінити значення за замовчуванням через ініціалізацію об’єкта.
+Можна встановити додаткові властивості або змінити значення за замовчуванням через ініціалізацію об’єктів.
+
+### Серіалізація коллекції об’єктів за допомогою JsonSerializer.
+
+Серіалізація колекції об’єктів у JSON обробляється так само, як і окремий об’єкт.
+
+```cs
+
+JsonSerializerOptions optionsWithWriteIndented = new(JsonSerializerDefaults.General)
+{ WriteIndented = true };
+
+void SerializingCollectionToJson()
+{
+    SaveAsJson(optionsWithWriteIndented, myCars, @"D:\Temp\CarCollection.json");
+    Console.WriteLine("The collection is serialized.");
+}
+SerializingCollectionToJson();
+```
+
+## Десеріалізація об'єктів і колекцій об'єктів.
+
+Десеріалізація JSON є протилежністю серіалізації.
+```cs
+static T? ReadAsJsonFormat<T>(JsonSerializerOptions options, string fileName) =>
+    JsonSerializer.Deserialize<T>(File.ReadAllText(fileName), options);
+```
+Функція десеріалізує JSON у тип, указаний за допомогою загальної версії методу.
+
+```cs
+JsonSerializerOptions optionsWithAllowReadingFromString = new(JsonSerializerDefaults.General)
+{ NumberHandling = JsonNumberHandling.AllowReadingFromString };
+
+void DeserializeObjectAndCollectionFromJson()
+{
+    TravelCar? travelCar = ReadAsJsonFormat<TravelCar>(
+        optionsWithAllowReadingFromString,
+        @"D:\Temp\TravelCar.json");
+    Console.WriteLine("Object TravelCar in memory.\n");
+    Console.WriteLine(travelCar);
+
+    List<TravelCar>? travelCars = ReadAsJsonFormat<List<TravelCar>>(
+        optionsWithAllowReadingFromString,
+        @"D:\Temp\CarCollection.json"     
+        );
+
+    if (travelCars == null) return;
+    Console.WriteLine("\nCollections of TravelCar objects in memory.\n");
+
+    foreach (TravelCar car in travelCars)
+    {
+        Console.WriteLine(car);
+    }
+}
+DeserializeObjectAndCollectionFromJson();
+```
+```
+Object TravelCar in memory.
+
+CanFly:True     CanSubmerge:False       HatchBack:False  RadioId: Sony-236      HasTweeters: True       HasSubWoofers:False     Station Presets:89,3, 105,1, 97,1
+
+Collections of TravelCar objects in memory.
+
+CanFly:True     CanSubmerge:True        HatchBack:False  RadioId: Sony-236      HasTweeters: True       HasSubWoofers:False     Station Presets:89,3, 105,1, 97,1
+CanFly:True     CanSubmerge:False       HatchBack:False  RadioId: Sony-236      HasTweeters: True       HasSubWoofers:False     Station Presets:89,3, 105,1, 97,1
+CanFly:False    CanSubmerge:False       HatchBack:False  RadioId: Sony-236      HasTweeters: True       HasSubWoofers:False     Station Presets:89,3, 105,1, 97,1
+```
+Зауважте, що тип, який створюється під час процесу десеріалізації, може бути окремим об’єктом або загальною колекцією.
 
