@@ -10,7 +10,7 @@ namespace SimpleSerialization
     public class Radio
     {
         [JsonInclude]
-        public string RadioId = "Sony-236";
+        public string? RadioId = "Sony-236";
         [JsonInclude]
         public bool HasTweeters;
         [JsonInclude]

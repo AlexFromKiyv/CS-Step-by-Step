@@ -973,3 +973,117 @@ CanFly:False    CanSubmerge:False       HatchBack:False  RadioId: Sony-236      
 ```
 Зауважте, що тип, який створюється під час процесу десеріалізації, може бути окремим об’єктом або загальною колекцією.
 
+### JsonConverters
+
+Ви можете отримати додатковий контроль над процесом серіалізації/десеріалізації, додавши спеціальні конвертери. 
+Спеціальні конвертери успадковують JsonConverter<T> (де T — тип, з яким працює конвертер) і замінюють базові методи Read() і Write(). Ось абстрактні базові методи для перезапису.
+
+```cs
+public abstract T? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options);
+public abstract void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options);
+```
+
+Одним із поширених сценаріїв є перетворення значень null у вашому об’єкті на порожній рядок у JSON і назад на нуль у вашому об’єкті.
+Щоб продемонструвати це, додайте новий файл під назвою JsonStringNullToEmptyConverter.cs, зробіть клас загальнодоступним, успадкуйте від JsonConverter<string> і реалізуйте абстрактні члени.
+
+SimpleSerialization\JsonStringNullToEmptyConverter.cs
+```cs
+namespace SimpleSerialization;
+
+public class JsonStringNullToEmptyConverter : JsonConverter<string>
+{
+    public override string? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        throw new NotImplementedException();
+    }
+
+    public override void Write(Utf8JsonWriter writer, string value, JsonSerializerOptions options)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+```
+У методі Read використовуйте екземпляр Utf8JsonReader, щоб прочитати значення рядка для вузла, і якщо воно null або порожній рядок, поверніть null.
+```cs
+    public override string? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        string? value = reader.GetString();
+
+        if (string.IsNullOrEmpty(value) )
+        {
+            return null;
+        }
+        return value;
+    }
+```
+У методі Write використовуйте Utf8JsonWriter, щоб написати порожній рядок, якщо значення дорівнює null.
+
+```cs
+    public override void Write(Utf8JsonWriter writer, string value, JsonSerializerOptions options)
+    {
+        value ??= string.Empty;
+        writer.WriteStringValue(value);
+    }
+```
+Також для спеціального конвертера треба змусити серіалізатор обробляти нульові значення. За замовчуванням значення null не надсилаються через процес перетворення для покращення продуктивності. Однак у цьому сценарії ми хочемо, щоб нульові значення оброблялися, тому замініть базову властивість HandleNull і встановіть для неї значення true замість значення false за замовчуванням.
+
+```cs
+public override bool HandleNull => true;
+```
+
+Викорстаємо створений клас щоб добавити спеціальний конвертер в опції.
+
+```cs
+void UseCustomConverter()
+{
+    JsonSerializerOptions options = new()
+    {
+        PropertyNameCaseInsensitive = true,
+        PropertyNamingPolicy = null,
+        IncludeFields = true,
+        WriteIndented = true,
+        Converters = { new JsonStringNullToEmptyConverter()}
+
+    };
+
+    // Object with null
+
+    Radio radio1 = new() 
+    {
+        HasTweeters = true,
+        HasSubWoofers = true,
+        RadioId = null
+    };
+
+    var jsonRadio1 = JsonSerializer.Serialize(radio1, options);
+    Console.WriteLine(jsonRadio1);
+
+    Console.WriteLine(JsonSerializer.Serialize(radio1, globalOptions));
+
+}
+UseCustomConverter();
+```
+```
+{
+  "StationPresets": null,
+  "RadioId": "",
+  "HasTweeters": true,
+  "HasSubWoofers": true
+}
+{
+  "StationPresets": null,
+  "RadioId": null,
+  "HasTweeters": true,
+  "HasSubWoofers": true
+}
+```
+Таким чином можна контролювати як серіалізується null. Значення StationPresets досі нульові в JSON, оскільки спеціальний конвертер діє лише на типи рядків, а не на типи List<string>.
+
+
+
+
+
+
+
+

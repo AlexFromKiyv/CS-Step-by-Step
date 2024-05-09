@@ -300,4 +300,34 @@ void DeserializeObjectAndCollectionFromJson()
         Console.WriteLine(car);
     }
 }
-DeserializeObjectAndCollectionFromJson();
+//DeserializeObjectAndCollectionFromJson();
+
+void UseCustomConverter()
+{
+    JsonSerializerOptions options = new()
+    {
+        PropertyNameCaseInsensitive = true,
+        PropertyNamingPolicy = null,
+        IncludeFields = true,
+        WriteIndented = true,
+        Converters = { new JsonStringNullToEmptyConverter()}
+
+    };
+
+    // Object with null
+
+    Radio radio1 = new() 
+    {
+        HasTweeters = true,
+        HasSubWoofers = true,
+        RadioId = null
+    };
+
+    var jsonRadio1 = JsonSerializer.Serialize(radio1, options);
+
+    Console.WriteLine(jsonRadio1);
+
+    Console.WriteLine(JsonSerializer.Serialize(radio1, globalOptions));
+
+}
+UseCustomConverter();
