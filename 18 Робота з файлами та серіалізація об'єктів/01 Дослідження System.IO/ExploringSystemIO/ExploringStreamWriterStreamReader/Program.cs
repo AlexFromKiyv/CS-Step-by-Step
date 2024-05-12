@@ -18,9 +18,8 @@ void WriteToText(string directoryFullName, string fileFullName)
 
     streamWriter.WriteLine("1 Build a house");
     streamWriter.WriteLine("2 Raise a Son");
-    streamWriter.WriteLine("4 Plant a tree");
-    streamWriter.WriteLine("5 Learn English");
-    streamWriter.WriteLine("3 Write library");
+    streamWriter.WriteLine("3 Plant a tree");
+    streamWriter.WriteLine("4 Learn English");
     for (int i = 5; i <= 12; i++)
     {
         streamWriter.WriteLine(i + " ...");
@@ -64,7 +63,7 @@ void DirectlyCreateStreamWriterStreamReader()
 
     Console.WriteLine(input);
 }
-DirectlyCreateStreamWriterStreamReader();
+//DirectlyCreateStreamWriterStreamReader();
 
 
 

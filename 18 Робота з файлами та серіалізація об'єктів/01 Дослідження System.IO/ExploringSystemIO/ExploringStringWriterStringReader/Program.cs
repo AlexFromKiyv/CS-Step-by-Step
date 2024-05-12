@@ -45,5 +45,5 @@ static void UsingStringReader()
         Console.WriteLine(input);
     }
 }
-UsingStringReader();
+//UsingStringReader();
 

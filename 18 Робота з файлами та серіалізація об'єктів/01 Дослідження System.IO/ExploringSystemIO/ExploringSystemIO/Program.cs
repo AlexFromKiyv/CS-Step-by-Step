@@ -48,7 +48,6 @@ void ExploringDirectoryFiles(string directoryString)
     DirectoryInfo directoryInfo = new(directoryString);
     ShowInfoFilesJpg(directoryInfo);
 }
-
 //ExploringDirectoryFiles(@"C:\Windows\Web\Wallpaper");
 
 void ShowInfoFilesJpg(DirectoryInfo directoryInfo)
@@ -88,30 +87,26 @@ void HowCreateSubdirectory()
 
     ShowDirectoryInfo(directoryInfo_1);
 
-    DirectoryInfo directoryInfo_1_1 =  CreateSubdirectory(directoryInfo_1, @"Project");
+    DirectoryInfo directoryInfo_1_1 = directoryInfo_1.CreateSubdirectory(@"Project");
     ShowDirectoryInfo(directoryInfo_1_1);
 
-    DirectoryInfo directoryInfo_1_2 = CreateSubdirectory(directoryInfo_1, @"Project1\Data");
+    DirectoryInfo directoryInfo_1_2 = directoryInfo_1.CreateSubdirectory(@"Project1\Data");
     ShowDirectoryInfo(directoryInfo_1_2);
-
 }
 //HowCreateSubdirectory();
-
-DirectoryInfo CreateSubdirectory(DirectoryInfo directoryInfo,string name )
-{
-   return directoryInfo.CreateSubdirectory(name);
-}
 
 
 // Class Directory
 
 void ExploringDirectory()
 {
+    DirectoryInfo directoryInfo =
+        Directory.CreateDirectory(@"D:\SuperCode\Project2");
+    ShowDirectoryInfo(directoryInfo);
+
+    DeleteDirectory(@"D:\SuperCode\Project2");
+
     ShowAllDriveWithDirectory();
-    Console.WriteLine("\n");
-
-    DeleteDirectory(@"D:\SuperCode\Project1");
-
 }
 //ExploringDirectory();
 
@@ -119,7 +114,7 @@ void ShowAllDriveWithDirectory()
 {
     string[] driveNames = Directory.GetLogicalDrives();
     
-    Console.WriteLine("The masine has drive:");
+    Console.WriteLine("The mashine has drive:");
     foreach (string? drive in driveNames)
     {
         Console.WriteLine("\t"+drive);
@@ -135,7 +130,6 @@ void DeleteDirectory(string directoryString)
     }
 
     Console.Write($"Delete directory {directoryString} (Y/N):");
-
     string? answer = Console.ReadLine();
 
     if (answer !=null && answer.Equals("Y",StringComparison.OrdinalIgnoreCase)) 
@@ -188,7 +182,9 @@ void CheckOrCreateDirectory(string directoryInfoFullName)
 {
     DirectoryInfo directoryInfo = new(directoryInfoFullName);
     if (!directoryInfo.Exists)
-    { directoryInfo.Create(); }
+    { 
+        directoryInfo.Create(); 
+    }
 }
 
 
@@ -230,7 +226,7 @@ void ExploringFileInfoOpen()
     
     // Use the FileStream object...
 }
-ExploringFileInfoOpen();
+//ExploringFileInfoOpen();
 
 
 // FileInfo.OpenRead FileInfo.OpenWrite

@@ -28,7 +28,7 @@ static void WorkWithBinaryReader()
     Console.WriteLine(binaryReader.ReadDouble());
     Console.WriteLine(binaryReader.ReadString());
 }
-WorkWithBinaryReader();
+//WorkWithBinaryReader();
 
 
 
