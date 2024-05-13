@@ -22,10 +22,11 @@ namespace SimpleSerialization
             string? presets = StationPresets == null ? "" : string.Join(", ", 
                 StationPresets.Select(i => i.ToString()).ToList());
 
-            return $"RadioId: {RadioId}\t" +
-                $"HasTweeters: {HasTweeters}\t" +
-                $"HasSubWoofers:{HasSubWoofers}\t" +
-                $"Station Presets:{presets}";
+            return "Object of "+base.ToString()+"\n"+ 
+                $"\tRadioId: {RadioId}\n" +
+                $"\tHasTweeters: {HasTweeters}\n" +
+                $"\tHasSubWoofers:{HasSubWoofers}\n" +
+                $"\tStation Presets:{presets}";
         }
     }
 }

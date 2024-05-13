@@ -23,7 +23,9 @@ namespace SimpleSerialization
 
         public override string? ToString()
         {
-            return $"IsAlive:{IsAlive}\tFirstName:{FirstName}\tAge:{Age}";
+            return "Object of " + base.ToString() + "\n" +
+                $"\tFirstName:{FirstName}\n" +
+                $"\tAge:{Age}IsAlive:{IsAlive}";
         }
     }
 }

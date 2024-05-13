@@ -16,7 +16,9 @@ namespace SimpleSerialization
 
         public override string? ToString()
         {
-            return $"HatchBack:{IsHatchBack}\t {Radio}";
+            return "Object of " + base.ToString() + "\n" +
+                $"\tHatchBack:{IsHatchBack}\n"+
+                $"{Radio}";
         }
     }
 }

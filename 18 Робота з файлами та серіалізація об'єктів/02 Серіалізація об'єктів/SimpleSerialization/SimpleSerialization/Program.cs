@@ -34,22 +34,21 @@ Person person = new()
 {
     FirstName = "James",
     IsAlive = true
-    
 };
 
 void TestCreatedObject()
 {
-    Console.WriteLine(radio);
+    Console.WriteLine(radio); 
     Console.WriteLine();
 
     Console.WriteLine(trevelCar);
     Console.WriteLine();
 
+    Console.WriteLine("Object of "+myCars.ToString());
     foreach (var item in myCars)
     {
         Console.WriteLine(item);
     }
-    Console.WriteLine();
 
     Console.WriteLine(person);
 }
@@ -98,22 +97,28 @@ static T? ReadAsXmlFormat<T>(string fileName)
 
     using Stream fileStream = new FileStream(fileName, FileMode.Open);
 
-    object? obj = xmlSerializer.Deserialize(fileStream);
-
-    if (obj == null) return default(T);
-    else return (T) obj;
+    if (xmlSerializer.Deserialize(fileStream) is T result)
+    {
+        return result;
+    }
+    else
+    {
+        return default;
+    }
 }
 
 static void DeserializingObjectsAndCollectionsOfObjects()
 {
-    Console.WriteLine("DeserializingObject\n");
+ 
     TravelCar? travelCar = ReadAsXmlFormat<TravelCar>(@"D:\Temp\TrevalCar.xml");
 
+    Console.WriteLine("DeserializingObject\n");
     Console.WriteLine(travelCar);
 
-    Console.WriteLine("\nDeserializingCollectionsOfObjects\n");
+
     List<TravelCar>? savedCars = ReadAsXmlFormat<List<TravelCar>>(@"D:\Temp\CarCollection.xml");
 
+    Console.WriteLine("\nDeserializingCollectionsOfObjects\n");
     if (savedCars == null) return;
 
     foreach (var car in savedCars)
@@ -158,8 +163,21 @@ void SerializingObjectsUsingJsonSerializer()
 
 void SerializingRadio()
 {
-    SaveAsJSONFormat(radio, @"D:\Temp\Radio.json");
-    Console.WriteLine("Saved Radio in JSON document.");
+    JsonSerializerOptions options = new()
+    {
+        PropertyNamingPolicy = null,
+        IncludeFields = true,
+        WriteIndented = true,
+        NumberHandling =
+        JsonNumberHandling.AllowNamedFloatingPointLiterals
+        | JsonNumberHandling.WriteAsString,
+
+    };
+
+    string result = JsonSerializer.Serialize(radio,options);
+
+    Console.WriteLine(result);
+
 }
 //SerializingRadio();
 
@@ -221,21 +239,20 @@ static void SaveAsJson<T>(JsonSerializerOptions options,T objGraph, string fileN
 void SerializeWithGlobalOptions()
 {
     SaveAsJson(globalOptions, radio, "Radio.json");
+    Console.WriteLine("Saved radio in JSON document.");
 }
 //SerializeWithGlobalOptions();
 
 
 // JsonSerializerDefaults.Web
-void OptionsForWeb()
+void UseOptionsGeneralAndForWeb()
 {
-    Console.WriteLine("General");
-
+    Console.WriteLine("General options");
     JsonSerializerOptions? options = new(JsonSerializerDefaults.General);
     ShowOptions(options);
 
 
-    Console.WriteLine("\nWeb");
-
+    Console.WriteLine("\nOptions for Web");
     JsonSerializerOptions webOptions = new(JsonSerializerDefaults.Web) 
     { 
         WriteIndented = true,
@@ -243,7 +260,7 @@ void OptionsForWeb()
     };
     ShowOptions(webOptions);
 }
-//OptionsForWeb();
+//UseOptionsGeneralAndForWeb();
 
 void ShowOptions(JsonSerializerOptions? options)
 {
@@ -253,8 +270,6 @@ void ShowOptions(JsonSerializerOptions? options)
     Console.WriteLine($"WriteIndented: {options?.WriteIndented}");
     Console.WriteLine($"ReferenceHandler: {options?.ReferenceHandler}");
 }
-
-
 
 
 // Serializing a collection of objects into JSON
@@ -276,25 +291,26 @@ static T? ReadAsJsonFormat<T>(JsonSerializerOptions options, string fileName) =>
     JsonSerializer.Deserialize<T>(File.ReadAllText(fileName), options);
 
 
-JsonSerializerOptions optionsWithAllowReadingFromString = new(JsonSerializerDefaults.General)
+JsonSerializerOptions optionsWithNumberHandling = new(JsonSerializerDefaults.General)
 { NumberHandling = JsonNumberHandling.AllowReadingFromString };
 
 void DeserializeObjectAndCollectionFromJson()
 {
     TravelCar? travelCar = ReadAsJsonFormat<TravelCar>(
-        optionsWithAllowReadingFromString,
+        optionsWithNumberHandling,
         @"D:\Temp\TravelCar.json");
+  
     Console.WriteLine("Object TravelCar in memory.\n");
     Console.WriteLine(travelCar);
 
     List<TravelCar>? travelCars = ReadAsJsonFormat<List<TravelCar>>(
-        optionsWithAllowReadingFromString,
+        optionsWithNumberHandling,
         @"D:\Temp\CarCollection.json"     
         );
 
     if (travelCars == null) return;
+    
     Console.WriteLine("\nCollections of TravelCar objects in memory.\n");
-
     foreach (TravelCar car in travelCars)
     {
         Console.WriteLine(car);
@@ -330,4 +346,4 @@ void UseCustomConverter()
     Console.WriteLine(JsonSerializer.Serialize(radio1, globalOptions));
 
 }
-UseCustomConverter();
+//UseCustomConverter();

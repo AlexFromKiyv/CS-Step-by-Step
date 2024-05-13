@@ -1,9 +1,14 @@
 # Серіалізація об'єктів
 
 Термін серіалізація описує процес збереження (і, можливо, передачі) стану об’єкта в потік (наприклад, потік файлів або потік пам’яті). Збережена послідовність даних містить усю необхідну інформацію, необхідну для реконструкції або десеріалізації публічного стану об’єкта для подальшого використання. У багатьох випадках збереження даних програми за допомогою служб серіалізації призводить до зменшення коду, ніж використання readers/writers, які ви знайдете в просторі імен System.IO.
+
 Наприклад, припустімо, що ви хочете створити програму на основі графічного інтерфейсу користувача, яка надає можливість кінцевим користувачам зберігати свої налаштування (наприклад, колір вікна та розмір шрифту). Для цього ви можете визначити клас під назвою UserPrefs, який інкапсулює близько 20 фрагментів даних поля. Тепер, якщо ви використовуєте тип System.IO.BinaryWriter, вам потрібно буде зберегти кожне поле об’єкта UserPrefs вручну. Так само, якби ви мали завантажити дані з файлу назад у пам’ять, вам потрібно було б використати System.IO.BinaryReader і вручну прочитати кожне значення, щоб повторно налаштувати новий об’єкт UserPrefs.
+
 Це все можливо, але ви можете заощадити час, використовуючи або eXtensible Markup Language (XML), або JavaScript Object Notation (JSON) серіалізацію. Кожен із цих форматів дає змогу представляти публічний стан об’єкта в одному блоці тексту, який можна використовувати на різних платформах і мовах програмування. Це означає, що ви можете зберегти весь відкритий стан об’єкта лише за допомогою кількох рядків коду.
-Серіалізація об’єктів .NET полегшує збереження об’єктів; однак процеси, які використовуються за лаштунками, досить складні. Наприклад, коли об’єкт зберігається в потоці, усі пов’язані загальнодоступні дані (наприклад, дані базового класу та об’єкти, що містяться) також автоматично серіалізуються. Таким чином, якщо ви намагаєтеся зберегти похідний клас, усі загальнодоступні дані вгору в ланцюжку успадкування також будуть в роботі. Використовується граф об’єктів для представлення набору взаємопов’язаних об’єктів. 
+
+Серіалізація об’єктів .NET полегшує збереження об’єктів; однак процеси, які використовуються за лаштунками, досить складні. Наприклад, коли об’єкт зберігається в потоці, усі пов’язані загальнодоступні дані (наприклад, дані базового класу та об’єкти, що містяться) також автоматично серіалізуються. Таким чином, якщо ви намагаєтеся зберегти похідний клас, усі загальнодоступні дані вгору в ланцюжку успадкування також будуть в роботі. 
+
+Використовується граф об’єктів для представлення набору взаємопов’язаних об’єктів. 
 Можна зберегти граф об’єктів у будь-якому типі, похідному від System.IO.Stream. Важливо лише те, що послідовність даних правильно відображає стан об’єктів на графі.
 
 ## Граф об'єктів.
@@ -17,7 +22,7 @@
 
 ![graph](Graph.png)
 
-Дивлячись на граф об’єктів, ви можете використовувати фразу залежить від або посилається на, з’єднуючи стрілки. Таким чином, на малюнку ви можете побачити, що автомобіль відноситься до класу радіо (враховуючи зв’язок has-a). TravelCar посилається на Car (враховуючи зв’язок is-a), а також на Radio (воно успадковує цю захищену змінну-член).
+Дивлячись на з’єднуючи стрілки графа об’єктів, ви можете використовувати фразу залежить від або посилається на. Таким чином, на малюнку ви можете побачити, що автомобіль відноситься до класу радіо (враховуючи зв’язок has-a). TravelCar посилається на Car (враховуючи зв’язок is-a), а також на Radio (воно успадковує цю захищену змінну-член).
 
 Звичайно, CLR не малює картинки в пам'яті для представлення графа пов'язаних об'єктів. Натомість зв’язок, задокументований на малюнку, представлений математичною формулою, яка виглядає приблизно так:
 
@@ -43,10 +48,11 @@ SimpleSerialization\Radio.cs
             string? presets = StationsPresets == null ? "" : string.Join(", ", 
                 StationsPresets.Select(i => i.ToString()).ToList());
 
-            return $"RadioId: {RadioId}\t" +
-                $"HasTweeters: {HasTweeters}\t" +
-                $"HasSubWoofers:{HasSubWoofers}\t" +
-                $"Station Presets:{presets}";
+            return "Object of "+base.ToString()+"\n"+ 
+                $"\tRadioId: {RadioId}\n" +
+                $"\tHasTweeters: {HasTweeters}\n" +
+                $"\tHasSubWoofers:{HasSubWoofers}\n" +
+                $"\tStation Presets:{presets}";presets}";
         }
     }
 ```
@@ -60,7 +66,9 @@ SimpleSerialization\Car.cs
 
         public override string? ToString()
         {
-            return $"HatchBack:{IsHatchBack}\t {Radio}";
+            return "Object of " + base.ToString() + "\n" +
+                $"\tHatchBack:{IsHatchBack}\n"+
+                $"{Radio}";
         }
     }
 ```
@@ -74,7 +82,9 @@ SimpleSerialization\TravelCar.cs
 
         public override string? ToString()
         {
-            return $"CanFly:{CanFly}\tCanSubmerge:{CanSubmerge}\t{base.ToString()}";
+            return "Object of " + base.ToString() + "\n" +
+                $"\tCanFly:{CanFly}\n" +
+                $"\tCanSubmerge:{CanSubmerge}";
         }
     }
 ```
@@ -93,7 +103,9 @@ SimpleSerialization\Person.cs
 
         public override string? ToString()
         {
-            return $"IsAlive:{IsAlive}\tFirstName:{FirstName}\tAge:{Age}";
+            return "Object of " + base.ToString() + "\n" +
+                $"\tFirstName:{FirstName}\n" +
+                $"\tAge:{Age}IsAlive:{IsAlive}";
         }
     }
 ```
@@ -139,26 +151,70 @@ Person person = new()
 ```cs
 void TestCreatedObject()
 {
-    Console.WriteLine(radio);
+    Console.WriteLine(radio); 
     Console.WriteLine();
+
     Console.WriteLine(trevelCar);
     Console.WriteLine();
 
+    Console.WriteLine("Object of "+myCars.ToString());
     foreach (var item in myCars)
     {
         Console.WriteLine(item);
     }
+
+    Console.WriteLine(person);
 }
 TestCreatedObject();
 ```
 ```
-RadioId: Sony-236       HasTweeters: True       HasSubWoofers:False     Station Presets:89,3, 105,1, 97,1
+Object of SimpleSerialization.Radio
+        RadioId: Sony-236
+        HasTweeters: True
+        HasSubWoofers:False
+        Station Presets:89,3, 105,1, 97,1
 
-CanFly:True     CanSubmerge:False       HatchBack:False  RadioId: Sony-236      HasTweeters: True       HasSubWoofers:False     Station Presets:89,3, 105,1, 97,1
+Object of Object of SimpleSerialization.TravelCar
+        HatchBack:False
+Object of SimpleSerialization.Radio
+        RadioId: Sony-236
+        HasTweeters: True
+        HasSubWoofers:False
+        Station Presets:89,3, 105,1, 97,1
+        CanFly:True
+        CanSubmerge:False
 
-CanFly:True     CanSubmerge:True        HatchBack:False  RadioId: Sony-236      HasTweeters: True       HasSubWoofers:False     Station Presets:89,3, 105,1, 97,1
-CanFly:True     CanSubmerge:False       HatchBack:False  RadioId: Sony-236      HasTweeters: True       HasSubWoofers:False     Station Presets:89,3, 105,1, 97,1
-CanFly:False    CanSubmerge:False       HatchBack:False  RadioId: Sony-236      HasTweeters: True       HasSubWoofers:False     Station Presets:89,3, 105,1, 97,1
+Object of System.Collections.Generic.List`1[SimpleSerialization.TravelCar]
+Object of Object of SimpleSerialization.TravelCar
+        HatchBack:False
+Object of SimpleSerialization.Radio
+        RadioId: Sony-236
+        HasTweeters: True
+        HasSubWoofers:False
+        Station Presets:89,3, 105,1, 97,1
+        CanFly:True
+        CanSubmerge:True
+Object of Object of SimpleSerialization.TravelCar
+        HatchBack:False
+Object of SimpleSerialization.Radio
+        RadioId: Sony-236
+        HasTweeters: True
+        HasSubWoofers:False
+        Station Presets:89,3, 105,1, 97,1
+        CanFly:True
+        CanSubmerge:False
+Object of Object of SimpleSerialization.TravelCar
+        HatchBack:False
+Object of SimpleSerialization.Radio
+        RadioId: Sony-236
+        HasTweeters: True
+        HasSubWoofers:False
+        Station Presets:89,3, 105,1, 97,1
+        CanFly:False
+        CanSubmerge:False
+Object of SimpleSerialization.Person
+        FirstName:James
+        Age:21IsAlive:TruePresets:89,3, 105,1, 97,1
 ```
 
 Таким чином у нас є матеріал для серіалізації.
@@ -231,7 +287,7 @@ CanFly:False    CanSubmerge:False       HatchBack:False  RadioId: Sony-236      
 
 Часто дуже важливо переконатися, що дані в XML-документі відповідають набору правил, які встановлюють достовірність даних. Валідний документ XML не має нічого спільного з синтаксичним благополуччям елементів XML (наприклад, усі елементи, що відкриваються, повинні мати елемент, що закриває). Натомість дійсні документи відповідають узгодженим правилам форматування (наприклад, поле X має бути виражено як атрибут, а не піделемент), які зазвичай визначаються схемою XML або файлом визначення типу документа (DTD).
 
-За замовчуванням XmlSerializer серіалізує всі публічні поля/властивості як елементи XML, а не як атрибути XML. Якщо ви хочете керувати тим, як XmlSerializer генерує кінцевий документ XML, ви можете прикрасити типи будь-якою кількістю додаткових атрибутів .NET із простору імен System.Xml.Serialization. Таблиця описує деякі атрибути .NET, які впливають на те, як дані XML кодуються в потік.
+За замовчуванням XmlSerializer серіалізує всі публічні поля/властивості як елементи XML, а не як атрибути XML. Якщо ви хочете керувати тим, як XmlSerializer генерує кінцевий документ XML, ви можете додати до типу будь-якою кількістю додаткових атрибутів .NET із простору імен System.Xml.Serialization. Таблиця описує деякі атрибути .NET, які впливають на те, як дані XML кодуються в потік.
 
 Виберіть атрибути простору імен System.Xml.Serialization
 
@@ -318,10 +374,7 @@ Saved person in XML document.
         [XmlAnyAttribute]
         public bool CanSubmerge;
 
-        public override string? ToString()
-        {
-            return $"CanFly:{CanFly}\tCanSubmerge:{CanSubmerge}\t{base.ToString()}";
-        }
+        ...
     }
 ```
 Це дає такий XML файл.
@@ -366,30 +419,35 @@ SerializingCollectionsOfObjects();
 static T? ReadAsXmlFormat<T>(string fileName)
 {
     // Create a typed instance of the XmlSerializer
-    XmlSerializer xmlSerializer = new XmlSerializer(typeof(T));
+    XmlSerializer xmlSerializer = new(typeof(T));
 
     using Stream fileStream = new FileStream(fileName, FileMode.Open);
 
-    object? obj = xmlSerializer.Deserialize(fileStream);
-
-    if (obj == null) return default(T);
-    else return (T) obj;
-}
-```
+    if (xmlSerializer.Deserialize(fileStream) is T result)
+    {
+        return result;
+    }
+    else
+    {
+        return default;
+    }
+}```
 Зауважте, що тип, який потрібно десеріалізувати, має бути переданий у конструктор для XmlSerializer:
 
 Використаємо функцію для отриманя об'єктів в пам'яті.
 ```cs
-void DeserializingObjectsAndCollectionsOfObjects()
+static void DeserializingObjectsAndCollectionsOfObjects()
 {
-    Console.WriteLine("DeserializingObject\n");
+ 
     TravelCar? travelCar = ReadAsXmlFormat<TravelCar>(@"D:\Temp\TrevalCar.xml");
 
+    Console.WriteLine("DeserializingObject\n");
     Console.WriteLine(travelCar);
 
-    Console.WriteLine("\nDeserializingCollectionsOfObjects\n");
+
     List<TravelCar>? savedCars = ReadAsXmlFormat<List<TravelCar>>(@"D:\Temp\CarCollection.xml");
 
+    Console.WriteLine("\nDeserializingCollectionsOfObjects\n");
     if (savedCars == null) return;
 
     foreach (var car in savedCars)
@@ -398,19 +456,55 @@ void DeserializingObjectsAndCollectionsOfObjects()
     }
 }
 DeserializingObjectsAndCollectionsOfObjects();
+DeserializingObjectsAndCollectionsOfObjects();
 ```
 ```
 DeserializingObject
 
-CanFly:True     CanSubmerge:False       HatchBack:False  RadioId: Sony-236      HasTweeters: True       HasSubWoofers:False     Station Presets:89,3, 105,1, 97,1
+Object of Object of SimpleSerialization.TravelCar
+        HatchBack:False
+Object of SimpleSerialization.Radio
+        RadioId: Sony-236
+        HasTweeters: True
+        HasSubWoofers:False
+        Station Presets:89,3, 105,1, 97,1
+        CanFly:True
+        CanSubmerge:False
 
 DeserializingCollectionsOfObjects
 
-CanFly:True     CanSubmerge:True        HatchBack:False  RadioId: Sony-236      HasTweeters: True       HasSubWoofers:False     Station Presets:89,3, 105,1, 97,1
-CanFly:True     CanSubmerge:False       HatchBack:False  RadioId: Sony-236      HasTweeters: True       HasSubWoofers:False     Station Presets:89,3, 105,1, 97,1
-CanFly:False    CanSubmerge:False       HatchBack:False  RadioId: Sony-236      HasTweeters: True       HasSubWoofers:False     Station Presets:89,3, 105,1, 97,1
+Object of Object of SimpleSerialization.TravelCar
+        HatchBack:False
+Object of SimpleSerialization.Radio
+        RadioId: Sony-236
+        HasTweeters: True
+        HasSubWoofers:False
+        Station Presets:89,3, 105,1, 97,1
+        CanFly:True
+        CanSubmerge:True
+Object of Object of SimpleSerialization.TravelCar
+        HatchBack:False
+Object of SimpleSerialization.Radio
+        RadioId: Sony-236
+        HasTweeters: True
+        HasSubWoofers:False
+        Station Presets:89,3, 105,1, 97,1
+        CanFly:True
+        CanSubmerge:False
+Object of Object of SimpleSerialization.TravelCar
+        HatchBack:False
+Object of SimpleSerialization.Radio
+        RadioId: Sony-236
+        HasTweeters: True
+        HasSubWoofers:False
+        Station Presets:89,3, 105,1, 97,1
+        CanFly:False
+        CanSubmerge:False
 ```
 Серіалізація XML використовується не лише для зберігання та отримання даних, як показано в цих прикладах, але також для надсилання даних між системами, особливо системами, розробленими з різними стеками технологій. Усі сучасні мови програмування (і багато постачальників баз даних) мають вбудовану підтримку XML.
+
+
+
 
 # Серіалізація з використанням JavaScript Object Notation (JSON).
 
@@ -536,7 +630,7 @@ Person.json
 Зауважте, що включатимкться всі публічні поля в графі об’єктів. Щоб виключити певні загальнодоступні поля за допомогою цієї техніки, ви повинні використовувати для них атрибут JsonExclude.
 
 
-Для другий варіанту, оновіть ваші класи, додавши атрибут [JsonInclude] до кожного загальнодоступного поля, яке має бути включено у вивід JSON. Можна залишити атрибути Xml у класах, і вони не заважатимуть JsonSerializer.
+Для другого варіанту, оновіть ваші класи, додавши атрибут [JsonInclude] до кожного загальнодоступного поля, яке має бути включено у вивід JSON. Можна залишити атрибути Xml у класах, і вони не заважатимуть JsonSerializer.
 
 ```cs
     public class Car
@@ -589,7 +683,7 @@ Person.json
 
 ### Більш читабільний формат JSON файлу.
 
-На додаток до можливості включати загальнодоступні поля, JsonSerializer можна наказати записувати JSON з відступом (та для читання людиною).
+На додаток до можливості включати загальнодоступні поля, JsonSerializer можна наказати записувати JSON з відступами(для кращого читання людиною).
 
 ```cs
 static void SaveAsJSONFormat<T>(T objGrhaph, string fileName)
@@ -628,7 +722,7 @@ static void SaveAsJSONFormat<T>(T objGrhaph, string fileName)
 
 ### PascalCase та camelCase JSON.
 
-PascalCase — це формат, у якому використовується перший символ із великої літери, а також кожна значуща частина назви з великої літери. СamelCase, з іншого боку, встановлює перший символ у нижньому регістрі (як слово camelCase у заголовку цього розділу), а потім кожна значна частина назви починається з великої літери. Візьміть попередній список JSON. PascalCase версія попереднього прикладу – CanSubmerge. canSubmerge є прикладом camelCase.  
+PascalCase — це формат, у якому використовується перший символ із великої літери, а також кожна значуща частина назви з великої літери. сamelCase, з іншого боку, встановлює перший символ у нижньому регістрі (як слово camelCase у заголовку цього розділу), а потім кожна значна частина назви починається з великої літери. Візьміть попередній список JSON. PascalCase версія попереднього прикладу – CanSubmerge. canSubmerge є прикладом camelCase.  
 Чому це має значення? Це важливо, оскільки більшість популярних мов чутливі до регістру (наприклад, C#). Це означає, що CanSubmerge та canSubmerge — це два різні елементи. Загальноприйнятим стандартом іменування публічних речей у C# (класів, загальнодоступних властивостей, функцій тощо) є використання PascalCase. Однак більшість фреймворків JavaScript віддають перевагу використанню camelCase. Це може бути проблематичним під час використання .NET і C# для передачі даних JSON до/з не-C#/.NET RESTful-служб.
 JsonSerializer можна налаштувати для обробки більшості ситуацій, включаючи відмінності в регістрі. Щоб змінити процес серіалізації на використання PascalCase, потрібно встановити для PropertyNamingPolicy значення null.
 
@@ -660,7 +754,7 @@ static void SaveAsJSONFormat<T>(T objGrhaph, string fileName)
 
 ### Ігнорування циклічних посилань за допомогою JsonSerializer.
 
-System.Text.Json.JsonSerializer, представлений у .NET 6/C# 10, підтримує ігнорування циклічних посилань під час серіалізації графа об’єктів. 
+System.Text.Json.JsonSerializer підтримує ігнорування циклічних посилань під час серіалізації графа об’єктів. 
 
 ```cs
     JsonSerializerOptions options = new()
@@ -678,15 +772,23 @@ System.Text.Json.JsonSerializer, представлений у .NET 6/C# 10, п�
 
 ### Обробка чисел за допомогою JsonSerializer.
 
-Подивимось як були серіалізовани числа.
+Подивимось як серіалізуються числа.
 
 ```cs
 void SerializingRadio()
 {
-    SaveAsJSONFormat(radio, @"D:\Temp\Radio.json");
-    Console.WriteLine("Saved Radio in JSON document.");
+    JsonSerializerOptions options = new()
+    {
+        PropertyNamingPolicy = null,
+        IncludeFields = true,
+        WriteIndented = true
+    };
+
+    string result = JsonSerializer.Serialize(radio,options);
+
+    Console.WriteLine(result);
+
 }
-SerializingRadio();
 ```
 ```json
 {
@@ -861,16 +963,14 @@ SerializeWithGlobalOptions();
 ```
 
 ```cs
-void OptionsForWeb()
+void UseOptionsGeneralAndForWeb()
 {
-    Console.WriteLine("General");
-
+    Console.WriteLine("General options");
     JsonSerializerOptions? options = new(JsonSerializerDefaults.General);
     ShowOptions(options);
 
 
-    Console.WriteLine("\nWeb");
-
+    Console.WriteLine("\nOptions for Web");
     JsonSerializerOptions webOptions = new(JsonSerializerDefaults.Web) 
     { 
         WriteIndented = true,
@@ -878,7 +978,8 @@ void OptionsForWeb()
     };
     ShowOptions(webOptions);
 }
-OptionsForWeb();
+UseOptionsGeneralAndForWeb();
+
 
 void ShowOptions(JsonSerializerOptions? options)
 {
@@ -890,14 +991,14 @@ void ShowOptions(JsonSerializerOptions? options)
 }
 ```
 ```
-General
+General options
 PropertyNameCaseInsensitive: False
 PropertyNamingPolicy:
 NumberHandling: Strict
 WriteIndented: False
 ReferenceHandler:
 
-Web
+Options for Web
 PropertyNameCaseInsensitive: True
 PropertyNamingPolicy: System.Text.Json.JsonCamelCaseNamingPolicy
 NumberHandling: AllowReadingFromString
@@ -923,8 +1024,57 @@ void SerializingCollectionToJson()
 }
 SerializingCollectionToJson();
 ```
+```json
+[
+  {
+    "CanFly": true,
+    "CanSubmerge": true,
+    "IsHatchBack": false,
+    "Radio": {
+      "StationPresets": [
+        89.3,
+        105.1,
+        97.1
+      ],
+      "RadioId": "Sony-236",
+      "HasTweeters": true,
+      "HasSubWoofers": false
+    }
+  },
+  {
+    "CanFly": true,
+    "CanSubmerge": false,
+    "IsHatchBack": false,
+    "Radio": {
+      "StationPresets": [
+        89.3,
+        105.1,
+        97.1
+      ],
+      "RadioId": "Sony-236",
+      "HasTweeters": true,
+      "HasSubWoofers": false
+    }
+  },
+  {
+    "CanFly": false,
+    "CanSubmerge": false,
+    "IsHatchBack": false,
+    "Radio": {
+      "StationPresets": [
+        89.3,
+        105.1,
+        97.1
+      ],
+      "RadioId": "Sony-236",
+      "HasTweeters": true,
+      "HasSubWoofers": false
+    }
+  }
+]
+```
 
-## Десеріалізація об'єктів і колекцій об'єктів.
+### Десеріалізація об'єктів і колекцій об'єктів.
 
 Десеріалізація JSON є протилежністю серіалізації.
 ```cs
@@ -934,25 +1084,26 @@ static T? ReadAsJsonFormat<T>(JsonSerializerOptions options, string fileName) =>
 Функція десеріалізує JSON у тип, указаний за допомогою загальної версії методу.
 
 ```cs
-JsonSerializerOptions optionsWithAllowReadingFromString = new(JsonSerializerDefaults.General)
+JsonSerializerOptions optionsWithNumberHandling = new(JsonSerializerDefaults.General)
 { NumberHandling = JsonNumberHandling.AllowReadingFromString };
 
 void DeserializeObjectAndCollectionFromJson()
 {
     TravelCar? travelCar = ReadAsJsonFormat<TravelCar>(
-        optionsWithAllowReadingFromString,
+        optionsWithNumberHandling,
         @"D:\Temp\TravelCar.json");
+  
     Console.WriteLine("Object TravelCar in memory.\n");
     Console.WriteLine(travelCar);
 
     List<TravelCar>? travelCars = ReadAsJsonFormat<List<TravelCar>>(
-        optionsWithAllowReadingFromString,
+        optionsWithNumberHandling,
         @"D:\Temp\CarCollection.json"     
         );
 
     if (travelCars == null) return;
-    Console.WriteLine("\nCollections of TravelCar objects in memory.\n");
 
+    Console.WriteLine("\nCollections of TravelCar objects in memory.\n");
     foreach (TravelCar car in travelCars)
     {
         Console.WriteLine(car);
@@ -963,13 +1114,45 @@ DeserializeObjectAndCollectionFromJson();
 ```
 Object TravelCar in memory.
 
-CanFly:True     CanSubmerge:False       HatchBack:False  RadioId: Sony-236      HasTweeters: True       HasSubWoofers:False     Station Presets:89,3, 105,1, 97,1
+Object of Object of SimpleSerialization.TravelCar
+        HatchBack:False
+Object of SimpleSerialization.Radio
+        RadioId: Sony-236
+        HasTweeters: True
+        HasSubWoofers:False
+        Station Presets:89,3, 105,1, 97,1
+        CanFly:True
+        CanSubmerge:False
 
 Collections of TravelCar objects in memory.
 
-CanFly:True     CanSubmerge:True        HatchBack:False  RadioId: Sony-236      HasTweeters: True       HasSubWoofers:False     Station Presets:89,3, 105,1, 97,1
-CanFly:True     CanSubmerge:False       HatchBack:False  RadioId: Sony-236      HasTweeters: True       HasSubWoofers:False     Station Presets:89,3, 105,1, 97,1
-CanFly:False    CanSubmerge:False       HatchBack:False  RadioId: Sony-236      HasTweeters: True       HasSubWoofers:False     Station Presets:89,3, 105,1, 97,1
+Object of Object of SimpleSerialization.TravelCar
+        HatchBack:False
+Object of SimpleSerialization.Radio
+        RadioId: Sony-236
+        HasTweeters: True
+        HasSubWoofers:False
+        Station Presets:89,3, 105,1, 97,1
+        CanFly:True
+        CanSubmerge:True
+Object of Object of SimpleSerialization.TravelCar
+        HatchBack:False
+Object of SimpleSerialization.Radio
+        RadioId: Sony-236
+        HasTweeters: True
+        HasSubWoofers:False
+        Station Presets:89,3, 105,1, 97,1
+        CanFly:True
+        CanSubmerge:False
+Object of Object of SimpleSerialization.TravelCar
+        HatchBack:False
+Object of SimpleSerialization.Radio
+        RadioId: Sony-236
+        HasTweeters: True
+        HasSubWoofers:False
+        Station Presets:89,3, 105,1, 97,1
+        CanFly:False
+        CanSubmerge:False
 ```
 Зауважте, що тип, який створюється під час процесу десеріалізації, може бути окремим об’єктом або загальною колекцією.
 
@@ -1079,11 +1262,3 @@ UseCustomConverter();
 }
 ```
 Таким чином можна контролювати як серіалізується null. Значення StationPresets досі нульові в JSON, оскільки спеціальний конвертер діє лише на типи рядків, а не на типи List<string>.
-
-
-
-
-
-
-
-

@@ -20,7 +20,9 @@ namespace SimpleSerialization
 
         public override string? ToString()
         {
-            return $"CanFly:{CanFly}\tCanSubmerge:{CanSubmerge}\t{base.ToString()}";
+            return "Object of " + base.ToString() + "\n" +
+                $"\tCanFly:{CanFly}\n" +
+                $"\tCanSubmerge:{CanSubmerge}";
         }
     }
 }
