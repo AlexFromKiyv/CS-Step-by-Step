@@ -748,6 +748,7 @@ static void SaveAsJSONFormat<T>(T objGrhaph, string fileName)
         PropertyNameCaseInsensitive = true,
         IncludeFields = true,
     };
+    ...
 }    
 ```
 Коли параметр PropertyNameCaseInsensitive = true, тоді C# десеріалізує canSubmerge так само, як і CanSubmerge.

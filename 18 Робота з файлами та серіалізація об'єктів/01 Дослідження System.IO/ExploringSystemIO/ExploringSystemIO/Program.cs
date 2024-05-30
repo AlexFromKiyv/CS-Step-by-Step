@@ -176,6 +176,46 @@ void ShowDriveInfo(DriveInfo driveInfo)
 }
 
 
+// Path  Environment
+
+void SpecialSettingsOS()
+{
+    Console.WriteLine("About platform:");
+    Console.WriteLine($"Path.PathSeparator: {Path.PathSeparator}");
+    Console.WriteLine($"Path.DirectorySeparatorChar: {Path.DirectorySeparatorChar}");
+    Console.WriteLine($"Path.GetTempPath(): {Path.GetTempPath()}");
+
+    //Console.WriteLine($"Directory.GetCurrentDirectory(): {Directory.GetCurrentDirectory()}");
+    //Console.WriteLine($"Environment.CurrentDirectory: {Environment.CurrentDirectory}");
+    Console.WriteLine($"Environment.SystemDirectory: {Environment.SystemDirectory}");
+    Console.WriteLine($"{Environment.GetFolderPath(Environment.SpecialFolder.System)}");
+    Console.WriteLine($"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}");
+    Console.WriteLine($"{Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)}");
+    Console.WriteLine($"{Environment.GetFolderPath(Environment.SpecialFolder.Personal)}");
+}
+//SpecialSettingsOS();
+
+void UsePathAndEnvironment()
+{
+    string folderPath = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.Personal),
+        "MyFolder");
+    Console.WriteLine(folderPath);
+
+    Console.WriteLine(Directory.Exists(folderPath));
+
+    Directory.CreateDirectory(folderPath);
+
+    Console.WriteLine(Directory.Exists(folderPath));
+
+    Directory.Delete(folderPath);
+
+    Console.WriteLine(Directory.Exists(folderPath));
+}
+//UsePathAndEnvironment();
+
+
+
 // FileInfo.Create
 
 void CheckOrCreateDirectory(string directoryInfoFullName)
@@ -347,4 +387,4 @@ void ExploringFileWriteAllLines()
         Console.WriteLine(product);
     }
 }
-ExploringFileWriteAllLines();
+//ExploringFileWriteAllLines();

@@ -181,6 +181,9 @@ DirectoryInfo object: MyProject
 
 Таким чином, якщо вкажете каталог, який ще не створено, вам потрібно викликати метод Create(), перш ніж продовжити.
 
+
+### Корисні можливості Path.
+
 Синтаксис шляху, використаний у попередньому прикладі, орієнтований на Windows.
 
 ```cs
@@ -209,6 +212,7 @@ DirectoryInfo object: MyProject
 ```
 
 Якщо ви розробляєте програми .NET для різних платформ, вам слід використовувати конструкції Path.VolumeSeparatorChar і Path.DirectorySeparatorChar, які отримають відповідні символи на основі платформи.
+
 
 ### Прохід по файлах з використанням DirectoryInfo
 
@@ -450,6 +454,70 @@ Drive: D:\
         RootDirectory: D:\
         IsReady: True
 ```
+
+### Корисні можливості Path та Environment. 
+
+Середовище в якому виконується програма може бути різною.
+
+```cs
+
+void SpecialSettingsOS()
+{
+    Console.WriteLine("About platform:");
+    Console.WriteLine($"Path.PathSeparator: {Path.PathSeparator}");
+    Console.WriteLine($"Path.DirectorySeparatorChar: {Path.DirectorySeparatorChar}");
+    Console.WriteLine($"Path.GetTempPath(): {Path.GetTempPath()}");
+
+    //Console.WriteLine($"Directory.GetCurrentDirectory(): {Directory.GetCurrentDirectory()}");
+    //Console.WriteLine($"Environment.CurrentDirectory: {Environment.CurrentDirectory}");
+    Console.WriteLine($"Environment.SystemDirectory: {Environment.SystemDirectory}");
+    Console.WriteLine($"{Environment.GetFolderPath(Environment.SpecialFolder.System)}");
+    Console.WriteLine($"{Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)}");
+    Console.WriteLine($"{Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)}");
+    Console.WriteLine($"{Environment.GetFolderPath(Environment.SpecialFolder.Personal)}");
+}
+SpecialSettingsOS();
+```
+```
+About platform:
+Path.PathSeparator: ;
+Path.DirectorySeparatorChar: \
+Path.GetTempPath(): C:\Users\user\AppData\Local\Temp\
+Environment.SystemDirectory: C:\Windows\system32
+C:\Windows\system32
+C:\Users\user\AppData\Roaming
+C:\Users\user\Documents
+C:\Users\user\Documents
+```
+Для побудови спеціального шляху для діректорії можна використовувати метод Path.Combine в парі з класом Environment.
+
+```cs
+void UsePathAndEnvironment()
+{
+    string folderPath = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.Personal),
+        "MyFolder");
+    Console.WriteLine(folderPath);
+
+    Console.WriteLine(Directory.Exists(folderPath));
+
+    Directory.CreateDirectory(folderPath);
+
+    Console.WriteLine(Directory.Exists(folderPath));
+
+    Directory.Delete(folderPath);
+
+    Console.WriteLine(Directory.Exists(folderPath));
+}
+UsePathAndEnvironment();
+```
+```
+C:\Users\user\Documents\MyFolder
+False
+True
+False
+```
+
 
 ## Класи FileInfo та File.
 
@@ -781,6 +849,7 @@ milk
 
 
 
+
 ## Абстрактний клас Stream.
 
 В прикладах ви бачили багато способів отримати об’єкти FileStream, StreamReader і StreamWriter, але вам ще належить зчитувати дані з або записати дані у файл за допомогою цих типів. Щоб зрозуміти, як це зробити, вам потрібно буде ознайомитися з поняттям Stream (потік, струм) .
@@ -810,11 +879,11 @@ milk
 
     Write(), WriteByte(), WriteAsync() : Записує послідовність байтів (або один байт) у поточний потік і просуває поточну позицію в цьому потоці на кількість записаних байтів.
 
-## Робота з FileStreams.
+## Робота з FileStream.
 
 Клас FileStream забезпечує реалізацію для абстрактних членів Stream у спосіб, відповідний для потокової передачі на основі файлів.
 
-Це примітивний потік; він може читати або записувати лише один байт або масив байтів. Однак вам не часто потрібно буде безпосередньо взаємодіяти з членами типу FileStream. Замість цього ви, ймовірно, будете використовувати різні обгортки потоків, які полегшують роботу з спеціальними даними або типами .NET. Тим не менш, вам буде корисно поекспериментувати з можливостями синхронного читання/запису типу FileStream.
+Це примітивний потік; він може читати або записувати лише один байт або масив байтів. Однак вам не часто потрібно буде безпосередньо взаємодіяти з членами типу FileStream. Замість цього ви, ймовірно, будете використовувати різні обгортки потоків, які полегшують роботу з спеціальними даними або типами .NET. Тим не менш, вам буде корисно поекспериментувати з можливостями синхронного читання/запису типу FileStream. Клас може працювати з текстовими або бінарними файлами. 
 
 Припустимо нам потріблно записати рядок в файл Message.dat
 
@@ -898,6 +967,40 @@ FileStream може працювати лише з необробленими б
 Цей приклад заповнює файл даними, але він також підкреслює головний недолік роботи безпосередньо з типом FileStream: він вимагає працювати з необробленими байтами. Інші типи, отримані від Stream, працюють подібним чином. Наприклад, якщо ви хочете записати послідовність байтів в область пам’яті, ви можете використати MemoryStream.
 
 Простір імен System.IO надає кілька типів, які інкапсулюють деталі роботи з потоковими типами.
+
+### Асінхроний варіант запису та считування.
+
+Клас FileStream має асінхронні варіанти запису та читивування. Як можна здогадатись вони направлені для швидшої обробки значних обсягів.
+
+```cs
+static async Task WriteAndReadFileAsync()
+{
+    Console.Write("Enter a string to write to a file:");
+    string textForFile = Console.ReadLine()!;
+
+    using FileStream fileStreamW = new(@"D:\Temp\note.txt", FileMode.Create);
+    byte[] textArray = System.Text.Encoding.Default.GetBytes(textForFile);
+
+    await fileStreamW.WriteAsync(textArray, 0, textArray.Length);
+
+    fileStreamW.Close();
+
+    using FileStream fileStreamR = File.OpenRead(@"D:\Temp\note.txt");
+    byte[] array = new byte[fileStreamR.Length];
+
+    await fileStreamR.ReadAsync(array, 0, array.Length);
+
+    string textFromFile = System.Text.Encoding.Default.GetString(array);
+
+    Console.WriteLine(textFromFile);
+
+}
+await WriteAndReadFileAsync();
+```
+```
+Enter a string to write to a file:Hi girl! How are you?
+Hi girl! How are you?
+```
 
 ## Робота з StreamWriters та StreamReaders
 
@@ -1027,7 +1130,7 @@ Creanted file D:\Temp\MyList.txt.
 
 ### Безпосередне створеня об'єктів StreamWriter та StreamReader.
 
-Можна працювати з StreamWriters і StreamReaders іншим способом: створюючи їх безпосередньо.
+Можна працювати з StreamWriters і StreamReaders іншим способом: створюючи їх безпосередньо. 
 
 ```cs
 void DirectlyCreateStreamWriterStreamReader()
@@ -1051,6 +1154,42 @@ DirectlyCreateStreamWriterStreamReader();
 ```
 Good day!
 ```
+При створенні за допомогою конструктора можна вказати як ми хочено працювати з файлом з нуля або додадти текст.
+
+```cs
+void CreateFileAndAppendToFileWithStreamWriter()
+{
+    string path = @"D:\Temp\MyText.txt";
+    string text = "Hello\ngirl";
+
+    using StreamWriter writer1 = new StreamWriter(path);
+    writer1.Write(text);
+    writer1.Close();
+
+    using StreamWriter writer2 = new StreamWriter(path,true);
+    writer2.WriteLine("s");
+    writer2.Close();
+
+    using StreamWriter writer3 = new StreamWriter(path, true,System.Text.Encoding.Default);
+    writer3.WriteLine("How are you?");
+    writer3.Close();
+
+    using StreamReader reader1 = new StreamReader(path);
+    string textFromFile = reader1.ReadToEnd();
+    Console.WriteLine(textFromFile);
+
+}
+CreateFileAndAppendToFileWithStreamWriter();
+```
+```
+Hello
+girls
+How are you?
+```
+Серед методів часто використовують ReadToEnd() який читає весь файл.
+
+Крім того існують асінхронні варіанти читання та запису.
+
 
 ## Робота з StringWriters та StringReaders
 
@@ -1129,6 +1268,135 @@ UsingStringReader();
 ```
 What is love?
 ```
+
+
+## Кодування та декодування тексту.
+
+Текстові символи можуть бути представлені різними способами. Наприклад, алфавіт можна закодувати за допомогою азбуки Морзе в ряд крапок і тире для передачі по телеграфній лінії. 
+
+Подібним чином текст всередині комп’ютера зберігається у вигляді бітів (одиниць і нулів), що представляють кодову точку в кодовому просторі. Більшість кодових точок представляють один символ, але вони також можуть мати інші значення, наприклад форматування.
+
+Наприклад, ASCII має кодовий простір із 128 кодовими точками. .NET використовує стандарт Unicode для внутрішнього кодування тексту. Unicode містить більше мільйона кодових точок.
+
+Іноді вам потрібно буде перемістити текст за межі .NET для використання в системах, які не використовують Unicode або використовують різновиди Unicode, тому важливо навчитися конвертувати кодування між собою.
+
+Альтернативні кодування тексту, які зазвичай використовуються комп’ютерами.
+
+    ASCII : Це кодує обмежений діапазон символів за допомогою молодших семи бітів байта.
+
+    UTF-8 : Це представляє кожну кодову точку Unicode як послідовність від одного до чотирьох байтів.
+
+    UTF-16 : Це представляє кожну кодову точку Unicode як послідовність одного або двох 16-бітних цілих чисел.
+
+    ANSI/ISO : Це забезпечує підтримку різноманітних кодових сторінок, які використовуються для підтримки певної мови або групи мов.
+
+У більшості випадків сьогодні UTF-8 є хорошим стандартним кодуванням, тому це буквально кодування за замовчуванням, тобто Encoding.Default.
+
+Звичайно, вам може знадобитися створити текст, використовуючи це кодування для сумісності з іншою системою, тому це має залишитися опцією в .NET.
+
+```cs
+
+using System.Text;
+
+static void EncodingText()
+{
+    Console.WriteLine("Encodings");
+    Console.WriteLine("[1] ASCII");
+    Console.WriteLine("[2] UTF-7");
+    Console.WriteLine("[3] UTF-8");
+    Console.WriteLine("[4] UTF-16 (Unicode)");
+    Console.WriteLine("[5] UTF-32");
+    Console.WriteLine("[6] Latin1");
+    Console.WriteLine("[any other key] Default encoding");
+    Console.WriteLine();
+
+    Console.Write("Press a number to choose an encoding:");
+    ConsoleKey number = Console.ReadKey(intercept: true).Key;
+
+    Encoding encoder = number switch
+    {
+        ConsoleKey.D1 or ConsoleKey.NumPad1 => Encoding.ASCII,
+        ConsoleKey.D2 or ConsoleKey.NumPad2 => Encoding.UTF7,
+        ConsoleKey.D3 or ConsoleKey.NumPad3 => Encoding.UTF8,
+        ConsoleKey.D4 or ConsoleKey.NumPad4 => Encoding.Unicode,
+        ConsoleKey.D5 or ConsoleKey.NumPad5 => Encoding.UTF32,
+        ConsoleKey.D6 or ConsoleKey.NumPad6 => Encoding.Latin1,
+        _ => Encoding.Default
+    };
+
+    Console.WriteLine($"\n\nYou chose:"+encoder.BodyName);
+        
+    var message = "Café £4.39";
+        
+    Console.WriteLine($"\nText to encode: {message}  Characters: {message.Length}");
+    // encode the string into a byte array
+    byte[] encoded = encoder.GetBytes(message);
+    // check how many bytes the encoding needed
+    Console.WriteLine("{0} used {1:N0} bytes.",
+      encoder.GetType().Name, encoded.Length);
+    Console.WriteLine();
+    // enumerate each byte 
+    Console.WriteLine($"BYTE | HEX | CHAR");
+    foreach (byte b in encoded)
+    {
+        Console.WriteLine($"{b,4} | {b.ToString("X"),3} | {(char)b,4}");
+    }
+    // decode the byte array back into a string and display it
+    string decoded = encoder.GetString(encoded);
+    Console.WriteLine(decoded);
+
+}
+//EncodingText();
+
+while (true)
+{
+    Console.Clear();
+    EncodingText();
+    Console.ReadKey();
+}
+```
+```
+Encodings
+[1] ASCII
+[2] UTF-7
+[3] UTF-8
+[4] UTF-16 (Unicode)
+[5] UTF-32
+[6] Latin1
+[any other key] Default encoding
+
+Press a number to choose an encoding:
+
+You chose:us-ascii
+
+Text to encode: Cafe ?4.39  Characters: 10
+ASCIIEncodingSealed used 10 bytes.
+
+BYTE | HEX | CHAR
+  67 |  43 |    C
+  97 |  61 |    a
+ 102 |  66 |    f
+  63 |  3F |    ?
+  32 |  20 |
+  63 |  3F |    ?
+  52 |  34 |    4
+  46 |  2E |    .
+  51 |  33 |    3
+  57 |  39 |    9
+Caf? ?4.39
+```
+При виборі ASCII, що під час виведення байтів знак фунта (£) і наголошений e (é) не можуть бути представлені в ASCII, тому замість нього використовується знак питання.
+Зауважте, що UTF-16 вимагає двох байтів для кожного символу, тобто загалом 20 байтів, і він може кодувати та декодувати символи é та £. Це кодування використовується внутрішньо .NET для зберігання символьних і рядкових значень.
+
+Використовуючи допоміжні класи такі як StreamReader і StreamWriter, ви можете вказати кодування, яке ви хочете використовувати. Коли ви пишете в помічник, текст автоматично кодуватиметься, а коли ви читатимете з помічника, байти автоматично декодуватимуться.
+
+Щоб указати кодування, передайте кодування як другий параметр у конструктор.
+
+```cs
+StreamReader reader = new(stream, Encoding.UTF8); 
+StreamWriter writer = new(stream, Encoding.UTF8);
+```
+Часто у вас не буде вибору, яке кодування використовувати, оскільки ви створюватимете файл для використання в іншій системі. Однак, якщо ви це зробите, виберіть такий, який використовує найменшу кількість байтів, але може зберігати всі потрібні символи.
 
 ## Робота з BinaryWriters та BinaryReaders.
 

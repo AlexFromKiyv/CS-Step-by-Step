@@ -66,6 +66,28 @@ void DirectlyCreateStreamWriterStreamReader()
 //DirectlyCreateStreamWriterStreamReader();
 
 
+// Create Append
+
+void CreateFileAndAppendToFileWithStreamWriter()
+{
+    string path = @"D:\Temp\MyText.txt";
+    string text = "Hello\ngirl";
+
+    using StreamWriter writer1 = new StreamWriter(path);
+    writer1.Write(text);
+    writer1.Close();
+
+    using StreamWriter writer2 = new StreamWriter(path, true);
+    writer2.WriteLine("s");
+    writer2.Close();
+
+    using StreamWriter writer3 = new StreamWriter(path, true, System.Text.Encoding.Default);
+    writer3.WriteLine("How are you?");
+    writer3.Close();
+}
+CreateFileAndAppendToFileWithStreamWriter();
+
+
 
 // Helpers
 void CheckOrCreateDirectory(string directoryInfoFullName)

@@ -11,7 +11,7 @@ void ExploringWriteReadStringWithFileStream()
 
     ReadMessage(fileFullName);
 }
-ExploringWriteReadStringWithFileStream();
+//ExploringWriteReadStringWithFileStream();
 
 void WriteMassege(string message, string directoryFullName, string fileFullName)
 {
@@ -64,7 +64,31 @@ void CheckFile(string path)
 }
 
 
+// WriteAsync ReadAsync
 
+static async Task WriteAndReadFileAsync()
+{
+    Console.Write("Enter a string to write to a file:");
+    string textForFile = Console.ReadLine()!;
+
+    using FileStream fileStreamW = new(@"D:\Temp\note.txt", FileMode.Create);
+    byte[] textArray = System.Text.Encoding.Default.GetBytes(textForFile);
+
+    await fileStreamW.WriteAsync(textArray, 0, textArray.Length);
+
+    fileStreamW.Close();
+
+    using FileStream fileStreamR = File.OpenRead(@"D:\Temp\note.txt");
+    byte[] array = new byte[fileStreamR.Length];
+
+    await fileStreamR.ReadAsync(array, 0, array.Length);
+
+    string textFromFile = System.Text.Encoding.Default.GetString(array);
+
+    Console.WriteLine(textFromFile);
+
+}
+await WriteAndReadFileAsync();
 
 
 
