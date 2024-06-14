@@ -251,4 +251,218 @@ CREATE TABLE [dbo].[CreditRisks](
 GO
 ```
 
+### Створення зв’язків таблиць
+
+Давайте додамо зв’язки зовнішніх ключів між взаємопов’язаними таблицями.
+
+### Створення зв’язку Inventory з Makes 
+
+Кожний автомобіль має виробника.
+
+```sql
+USE [AutoLot]
+GO
+CREATE NONCLUSTERED INDEX [IX_Inventory_MakeId] ON [dbo].[Inventory]
+(
+  [MakeId] ASC
+) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[Inventory]  WITH CHECK ADD  CONSTRAINT [FK_Make_Inventory] FOREIGN KEY([MakeId])
+REFERENCES [dbo].[Makes] ([Id])
+GO
+ALTER TABLE [dbo].[Inventory] CHECK CONSTRAINT [FK_Make_Inventory]
+GO
+```
+
+### Створення зв’язку Orders з Inventory
+
+Замовлення відносится до автомобіля.
+
+```sql 
+USE [AutoLot]
+GO
+CREATE NONCLUSTERED INDEX [IX_Orders_CarId] ON [dbo].[Orders]
+(
+  [CarId] ASC
+) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[Orders]  WITH CHECK ADD  CONSTRAINT [FK_Orders_Inventory] FOREIGN KEY([CarId])
+REFERENCES [dbo].[Inventory] ([Id])
+GO
+ALTER TABLE [dbo].[Orders] CHECK CONSTRAINT [FK_Orders_Inventory]
+GO
+```
+
+### Створення зв’язку Orders з Customers
+
+
+```sql 
+USE [AutoLot]
+GO
+CREATE UNIQUE NONCLUSTERED INDEX [IX_Orders_CustomerId_CarId] ON [dbo].[Orders]
+(
+  [CustomerId] ASC,
+  [CarId] ASC
+) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[Orders]  WITH CHECK ADD  CONSTRAINT [FK_Orders_Customers] FOREIGN KEY([CustomerId])
+REFERENCES [dbo].[Customers] ([Id])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[Orders] CHECK CONSTRAINT [FK_Orders_Customers]
+GO
+```
+
+### Створення зв’язку Customers з CreditRisks 
+
+```sql 
+USE [AutoLot]
+GO
+CREATE NONCLUSTERED INDEX [IX_CreditRisks_CustomerId] ON [dbo].[CreditRisks]
+(
+  [CustomerId] ASC
+) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[CreditRisks]  WITH CHECK ADD  CONSTRAINT [FK_CreditRisks_Customers] FOREIGN KEY([CustomerId])
+REFERENCES [dbo].[Customers] ([Id])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[CreditRisks] CHECK CONSTRAINT [FK_CreditRisks_Customers]
+GO
+```
+
+### Створення Stored Procedure
+
+ ADO.NET дозволяє викликати Stored Procedure. Це підпрограми коду, що зберігаються в базі даних, які виконують певні дії. Stored Procedures можуть повертати дані або просто оперувати даними, нічого не повертаючи. Створимо процедуру.
+
+```sql
+USE [AutoLot]
+GO
+CREATE PROCEDURE [dbo].[GetPetName]
+@carID int,
+@petName nvarchar(50) output
+AS
+SELECT @petName = PetName from dbo.Inventory where Id = @carID
+GO
+```
+Повертає ім’я улюбленця автомобіля на основі наданого carId.
+
+### Додавання даних в таблицю Makes
+
+```sql
+USE [AutoLot]
+GO
+SET IDENTITY_INSERT [dbo].[Makes] ON
+INSERT INTO [dbo].[Makes] ([Id], [Name]) VALUES (1, N'VW')
+INSERT INTO [dbo].[Makes] ([Id], [Name]) VALUES (2, N'Ford')
+INSERT INTO [dbo].[Makes] ([Id], [Name]) VALUES (3, N'Saab')
+INSERT INTO [dbo].[Makes] ([Id], [Name]) VALUES (4, N'Yugo')
+INSERT INTO [dbo].[Makes] ([Id], [Name]) VALUES (5, N'BMW')
+INSERT INTO [dbo].[Makes] ([Id], [Name]) VALUES (6, N'Pinto')
+SET IDENTITY_INSERT [dbo].[Makes] OFF
+```
+
+### Додавання даних в таблицю Inventory 
+
+```sql
+USE [AutoLot]
+GO
+SET IDENTITY_INSERT [dbo].[Inventory] ON
+GO
+INSERT INTO [dbo].[Inventory] ([Id], [MakeId], [Color], [PetName]) VALUES (1, 1, N'Black', N'Zippy')
+INSERT INTO [dbo].[Inventory] ([Id], [MakeId], [Color], [PetName]) VALUES (2, 2, N'Rust', N'Rusty')
+INSERT INTO [dbo].[Inventory] ([Id], [MakeId], [Color], [PetName]) VALUES (3, 3, N'Black', N'Mel')
+INSERT INTO [dbo].[Inventory] ([Id], [MakeId], [Color], [PetName]) VALUES (4, 4, N'Yellow', N'Clunker')
+INSERT INTO [dbo].[Inventory] ([Id], [MakeId], [Color], [PetName]) VALUES (5, 5, N'Black', N'Bimmer')
+INSERT INTO [dbo].[Inventory] ([Id], [MakeId], [Color], [PetName]) VALUES (6, 5, N'Green', N'Hank')
+INSERT INTO [dbo].[Inventory] ([Id], [MakeId], [Color], [PetName]) VALUES (7, 5, N'Pink', N'Pinky')
+INSERT INTO [dbo].[Inventory] ([Id], [MakeId], [Color], [PetName]) VALUES (8, 6, N'Black', N'Pete')
+INSERT INTO [dbo].[Inventory] ([Id], [MakeId], [Color], [PetName]) VALUES (9, 4, N'Brown', N'Brownie')SET IDENTITY_INSERT [dbo].[Inventory] OFF
+GO
+```
+
+### Додавання даних в таблицю Customers
+
+```sql
+USE [AutoLot]
+GO
+SET IDENTITY_INSERT [dbo].[Customers] ON
+INSERT INTO [dbo].[Customers] ([Id], [FirstName], [LastName]) VALUES (1, N'Dave', N'Brenner')
+INSERT INTO [dbo].[Customers] ([Id], [FirstName], [LastName]) VALUES (2, N'Matt', N'Walton')
+INSERT INTO [dbo].[Customers] ([Id], [FirstName], [LastName]) VALUES (3, N'Steve', N'Hagen')
+INSERT INTO [dbo].[Customers] ([Id], [FirstName], [LastName]) VALUES (4, N'Pat', N'Walton')
+INSERT INTO [dbo].[Customers] ([Id], [FirstName], [LastName]) VALUES (5, N'Bad', N'Customer')
+SET IDENTITY_INSERT [dbo].[Customers] OFF
+```
+
+### Додавання даних в таблицю Orders
+
+```sql
+USE [AutoLot]
+GO
+SET IDENTITY_INSERT [dbo].[Orders] ON
+INSERT INTO [dbo].[Orders] ([Id], [CustomerId], [CarId]) VALUES (1, 1, 5)
+INSERT INTO [dbo].[Orders] ([Id], [CustomerId], [CarId]) VALUES (2, 2, 1)
+INSERT INTO [dbo].[Orders] ([Id], [CustomerId], [CarId]) VALUES (3, 3, 4)
+INSERT INTO [dbo].[Orders] ([Id], [CustomerId], [CarId]) VALUES (4, 4, 7)
+SET IDENTITY_INSERT [dbo].[Orders] OFF
+```
+
+### Додавання даних в таблицю CreditRisks
+
+```sql
+USE [AutoLot]
+GO
+SET IDENTITY_INSERT [dbo].[CreditRisks] ON
+INSERT INTO [dbo].[CreditRisks] ([Id], [FirstName], [LastName], [CustomerId]) VALUES (1, N'Bad', N'Customer', 5)
+SET IDENTITY_INSERT [dbo].[CreditRisks] OFF
+```
+На цьому база даних AutoLot завершена. Звичайно, це далека від реальної бази даних додатків, але вона задовольнить ваші потреби в цій главі. Тепер, коли у вас є база даних для тестування, можна заглибитися в деталі моделі постачальника даних ADO.NET.
+
+
+# Шаблон Factory постачальника даних ADO.NET
+
+Шаблон Factory для постачальника даних .NET дозволяє створювати єдину кодову базу, використовуючи узагальнені типи доступу до даних. Всі класи в постачальнику даних походять від тих самих базових класів, визначених у просторі імен System.Data.Common.
+
+    DbCommand: абстрактний базовий клас для всіх класів команд
+
+    DbConnection: абстрактний базовий клас для всіх класів підключення
+
+    DbDataAdapter: абстрактний базовий клас для всіх класів адаптерів даних
+
+    DbDataReader: абстрактний базовий клас для всіх класів читачів даних
+
+    DbParameter: абстрактний базовий клас для всіх класів параметрів
+
+    DbTransaction: абстрактний базовий клас для всіх класів транзакцій
+
+Кожен із сумісних із .NET постачальників даних містить тип класу, який походить від System.Data.Common.DbProviderFactory. Цей базовий клас визначає кілька методів отримують провайдер-спеціфічні об'єкти даних. Ось члени DbProviderFactory:
+
+```cs
+public abstract class DbProviderFactory
+{
+..public virtual bool CanCreateDataAdapter { get;};
+..public virtual bool CanCreateCommandBuilder { get;};
+  public virtual DbCommand CreateCommand();
+  public virtual DbCommandBuilder CreateCommandBuilder();
+  public virtual DbConnection CreateConnection();
+  public virtual DbConnectionStringBuilder
+    CreateConnectionStringBuilder();
+  public virtual DbDataAdapter CreateDataAdapter();
+  public virtual DbParameter CreateParameter();
+  public virtual DbDataSourceEnumerator
+    CreateDataSourceEnumerator();
+}
+```
+
+Щоб отримати тип, похідний від DbProviderFactory, для вашого постачальника даних, кожен постачальник надає статичну властивість, яка використовується для повернення правильного типу. Щоб повернути версію SQL Server DbProviderFactory, використовуйте такий код:
+
+```cs
+// Get the factory for the SQL data provider.
+DbProviderFactory sqlFactory =
+  Microsoft.Data.SqlClient.SqlClientFactory.Instance;
+```
+Щоб зробити програму більш універсальною, ви можете створити фабрику DbProviderFactory, яка повертає певний варіант DbProviderFactory на основі налаштування у файлі appsettings.json для програми. Коли ви отримаєте фабрику для вашого провайдера даних можна отримати асоційовані об’єкти даних провайдера (наприклад, з’єднання, команди та зчитувачі даних).
+
+## Використаня DbProviderFactory
 
