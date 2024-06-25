@@ -436,7 +436,7 @@ SET IDENTITY_INSERT [dbo].[CreditRisks] OFF
 
     DbTransaction: абстрактний базовий клас для всіх класів транзакцій
 
-Кожен із сумісних із .NET постачальників даних містить тип класу, який походить від System.Data.Common.DbProviderFactory. Цей базовий клас визначає кілька методів отримують провайдер-спеціфічні об'єкти даних. Ось члени DbProviderFactory:
+Кожен із сумісних із .NET постачальників даних містить тип класу, який походить від System.Data.Common.DbProviderFactory. Цей базовий клас визначає кілька методів для отримання спеціфічних для провайдера об'єктів роботи з даними. Ось члени DbProviderFactory:
 
 ```cs
 public abstract class DbProviderFactory
@@ -465,4 +465,270 @@ DbProviderFactory sqlFactory =
 Щоб зробити програму більш універсальною, ви можете створити фабрику DbProviderFactory, яка повертає певний варіант DbProviderFactory на основі налаштування у файлі appsettings.json для програми. Коли ви отримаєте фабрику для вашого провайдера даних можна отримати асоційовані об’єкти даних провайдера (наприклад, з’єднання, команди та зчитувачі даних).
 
 ## Використаня DbProviderFactory
+
+Створіть новий проект C# Console Application (під назвою DataProviderFactory), який роздрукує залишки автомобілів з бази даних AutoLot. Для цього початкового прикладу ви жорстко закодуєте логіку доступу до даних безпосередньо в консольній програмі (для спрощення), але далі буде розглянуто більш універсальний варіант.
+
+Додайте в проект пакети:
+Microsoft.Extensions.Configuration.Json
+System.Data.Common
+System.Data.Odbc
+System.Data.OleDb
+Microsoft.Data.SqlClient
+
+Далі визначте константу компілятора PC (якщо ви використовуєте ОС Windows)
+
+```xml
+<PropertyGroup>
+  <DefineConstants>PC</DefineConstants>
+</PropertyGroup>
+```
+
+Додайте DataProviderEnum.cs
+
+DataProviderFactory\DataProviderEnum.cs
+```cs
+namespace DataProviderFactory;
+
+//OleDb is Windows only
+enum DataProviderEnum
+{
+    SqlServer,
+#if PC
+    OleDb,
+#endif
+    Odbc
+}
+```
+
+Додайте новий файл JSON під назвою appsettings.json. Оскільки БД може бути в контейнері Docker або в окремому екземплярі SQL Sever варіанти підключень можуть бути різними. Ост файл з різними варіантам.
+
+```json
+{
+  "ProviderName": "SqlServer",
+  //"ProviderName": "OleDb",
+  //"ProviderName": "Odbc",
+  "SqlServer": {
+    // for localdb use @"Data Source=(localdb)\mssqllocaldb;Integrated Security=true;Initial Catalog=AutoLot"
+    "ConnectionString": "Data Source=.,5433;User Id=sa;Password=P@ssw0rd;Initial Catalog=AutoLot;Encrypt=False"
+  },
+  "Odbc": {
+    // for localdb use @"Driver={ODBC Driver 17 for SQL Server};Server=(localdb)\mssqllocaldb;Database=AutoLot;Trusted_Connection=Yes";
+    "ConnectionString": "Driver={ODBC Driver 17 for SQL Server};Server=localhost,5433;Database=AutoLot;UId=sa;Pwd=P@ssw0rd;Encrypt=False;"
+  },
+  "OleDb": {
+    // if localdb use @"Provider=SQLNCLI11;Data Source=(localdb)\mssqllocaldb;Initial Catalog=AutoLot;Integrated Security=SSPI"),
+    "ConnectionString": "Provider=SQLNCLI11;Data Source=.,5433;User Id=sa;Password=P@ssw0rd;Initial Catalog=AutoLot;Encrypt=False;"
+  }
+}
+```
+Якшо використавується LocalDb.
+
+```json
+{
+  "ProviderName": "SqlServer",
+  //"ProviderName": "OleDb",
+  //"ProviderName": "Odbc",
+  "SqlServer": {
+    "ConnectionString": "Data Source=(localdb)\\mssqllocaldb;Integrated Security=true;Initial Catalog=AutoLot"
+  },
+  "Odbc": {
+    "ConnectionString": "Driver={ODBC Driver 17 for SQL Server};Server=(localdb)\\mssqllocaldb;Database=AutoLot;Trusted_Connection=Yes"
+  },
+  "OleDb": {
+    "ConnectionString": "Provider=SQLNCLI11;Data Source=(localdb)\\mssqllocaldb;Initial Catalog=AutoLot;Integrated Security=SSPI"
+  }
+}
+```
+
+Під час використання SQL Server у контейнері Docker, у якому не встановлено сертифікат, рядок підключення має бути незашифрованим, тому ми маємо Encrypt=False; у рядках підключення Docker. Для реальних програм не використовуйте цей параметр; замість цього переконайтеся, що контейнер (або ваш екземпляр SQL Server) має сертифікат, і використовуйте Encrypt=True; замість цього.
+
+При кожному виконанні файл конфігурації повинен бути в каталозі виконання. У файлі проекту налаштуемо MSBuild для копіювання файлу налаштувань JSON у вихідний каталог під час кожної збірки.
+
+```xml
+<ItemGroup>
+  <None Update='appsettings.json'>
+    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+  </None>
+</ItemGroup>
+```
+CopyToOutputDirectory чутливий до пробілів. Переконайтеся, що все в одному рядку без пробілів навколо слова Always. 
+
+Тепер, коли у вас є належний файл appsettings.json, ви можете читати значення постачальника та ConnectionString за допомогою конфігурації .NET.
+
+Створимо функцію що повертає дані з файла конфігурації
+
+```cs
+void Run()
+{
+    Console.WriteLine(GetProviderFromConfiguration());
+}
+Run();
+
+static (DataProviderEnum Provider, string? ConnectionString) GetProviderFromConfiguration()
+{
+    IConfiguration config = new ConfigurationBuilder()
+        .SetBasePath(Directory.GetCurrentDirectory())
+        .AddJsonFile("appsettings.json", true, true)
+        .Build();
+
+    string? providerName = config["ProviderName"];
+
+    if (Enum.TryParse<DataProviderEnum>(providerName, out DataProviderEnum provider))
+    {
+        return (provider, config[$"{providerName}:ConnectionString"]);
+    }
+    throw new Exception("Invalid data provider value supplied.");
+}
+```
+```console
+(SqlServer, Data Source=(localdb)\mssqllocaldb;Integrated Security=true;Initial Catalog=AutoLot)
+```
+Ця функція зчитує конфігурацію, встановлє правильне значення DataProviderEnum, отримують рядок підключення.
+
+Створемо функцію шо повертає екземпляр DbProviderFactory відповідно до значення DataProviderEnum.
+
+```cs
+void Run()
+{
+    Console.WriteLine(GetDbProviderFactory(DataProviderEnum.OleDb));
+}
+Run();
+
+//
+
+static DbProviderFactory GetDbProviderFactory(DataProviderEnum provider)
+	=> provider switch
+	{
+		DataProviderEnum.SqlServer => SqlClientFactory.Instance,
+		DataProviderEnum.Odbc => OdbcFactory.Instance,
+#if PC
+        DataProviderEnum.OleDb => OleDbFactory.Instance,
+#endif
+		_ => SqlClientFactory.Instance
+
+    };
+
+```
+```
+System.Data.OleDb.OleDbFactory
+```
+Використаємо ці функції для отримання даних з БД.
+
+```cs
+static void Run()
+{
+    PrintOutSimpleList();
+}
+Run();
+
+static void PrintOutSimpleList()
+{
+    var (provider, connectionString) = GetProviderFromConfiguration();
+
+    DbProviderFactory factory = GetDbProviderFactory(provider);
+
+    // Get the connection object
+    using DbConnection? connection = factory.CreateConnection();
+    Console.WriteLine($"Your connection object is : {connection?.GetType().Name}");
+
+    if (connection == null) return;
+
+    // Opening a connection to the database
+    connection.ConnectionString = connectionString;
+    connection.Open();
+
+    // Make command object
+    DbCommand? command = factory.CreateCommand();
+    Console.WriteLine($"Your command object is a : {command?.GetType().Name}");
+
+    if (command == null) return;
+
+    command.Connection = connection;
+    command.CommandText =
+        "Select i.Id, m.Name From Inventory " +
+        "i inner join Makes m on m.Id = i.MakeId";
+
+    // Make data reader
+    using DbDataReader reader = command.ExecuteReader();
+    Console.WriteLine($"Your data reader object is a : {reader.GetType().Name}");
+
+    Console.WriteLine("\n\t\tInventory\n");
+    //Print out data
+    while (reader.Read())
+    {
+        Console.WriteLine($"\t{reader["Id"]}\t{reader["Name"]} ");
+    }
+}
+```
+```console
+Your connection object is : SqlConnection
+Your command object is a : SqlCommand
+Your data reader object is a : SqlDataReader
+
+                Inventory
+
+        1       VW
+        2       Ford
+        3       Saab
+        4       Yugo
+        9       Yugo
+        5       BMW
+        6       BMW
+        7       BMW
+        8       Pinto
+```
+Зауважте, що для діагностичних цілей ви використовуєте служби відображення, щоб надрукувати ім’я базового з’єднання, команди та пристрою читання даних.
+
+Тепер змінемо файл налаштовування вказавши іншого провайдера. 
+
+```json
+{
+  //"ProviderName": "SqlServer",
+  //"ProviderName": "OleDb",
+  "ProviderName": "Odbc",
+  "SqlServer": {
+    "ConnectionString": "Data Source=(localdb)\\mssqllocaldb;Integrated Security=true;Initial Catalog=AutoLot"
+  },
+  "Odbc": {
+    "ConnectionString": "Driver={ODBC Driver 17 for SQL Server};Server=(localdb)\\mssqllocaldb;Database=AutoLot;Trusted_Connection=Yes"
+  },
+  "OleDb": {
+    "ConnectionString": "Provider=SQLNCLI11;Data Source=(localdb)\\mssqllocaldb;Initial Catalog=AutoLot;Integrated Security=SSPI"
+  }
+}
+```
+```console
+Your connection object is : OdbcConnection
+Your command object is a : OdbcCommand
+Your data reader object is a : OdbcDataReader
+
+                Inventory
+
+        1       VW
+        2       Ford
+        3       Saab
+        4       Yugo
+        9       Yugo
+        5       BMW
+        6       BMW
+        7       BMW
+        8       Pinto
+```
+
+На цьому етапі достатньо знати, що ви можете використовувати модель фабрики постачальників даних ADO.NET для створення єдиної кодової бази, яка може використовувати різні постачальники даних декларативним способом. Змінюється об'ект провайдера та рядок підключення весь інший код залишається однаковим для вирішування завдання.
+
+Хоча підхід з використанням фабрики досить потужний він не без доліків. Ви повинні переконатися, що база коду використовує лише типи та методи, спільні для всіх постачальників через членів абстрактних базових класів. Таким чином, під час створення бази коду ви обмежені членами, доступними DbConnection, DbCommand та іншими типами простору імен System.Data.Common. Враховуючи це, ви можете виявити, що цей узагальнений підхід не дозволяє вам отримати прямий доступ до деяких наворотів конкретної СУБД. Якщо ви повинні мати можливість викликати певних членів основного постачальника (наприклад, SqlConnection), ви можете зробити це за допомогою явного приведення, як у цьому прикладі:
+
+```cs
+if (connection is SqlConnection sqlConnection)
+{
+  // Print out which version of SQL Server is used.
+  WriteLine(sqlConnection.ServerVersion);
+}
+```
+Однак, роблячи це, вашу кодову базу стає дещо важче підтримувати (і менш гнучкою), оскільки ви повинні додати кілька перевірок під час виконання. Тим не менш, якщо вам потрібно побудувати бібліотеки доступу до даних ADO.NET найбільш гнучким можливим способом, використання шаблона factory постачальника даних забезпечує чудовий механізм для цього.
+
+Entity Framework Core і його підтримка впровадження залежностей(dependency injection) значно спрощує створення бібліотек доступу до даних, яким потрібен доступ до різних джерел даних.
+
+# Типи Connection, Command, and DataReader детально.
 
