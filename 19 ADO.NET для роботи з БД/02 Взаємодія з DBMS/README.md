@@ -732,3 +732,140 @@ Entity Framework Core і його підтримка впровадження з
 
 # Типи Connection, Command, and DataReader детально.
 
+Як показано в попередньому прикладі, ADO.NET дозволяє вам взаємодіяти з базою даних за допомогою об’єктів підключення, команди та зчитувача даних вашого постачальника даних.Створимо розширений приклад, щоб глибше зрозуміти ці об’єкти. 
+У наведеному попередньому прикладі вам потрібно виконати наступні кроки, якщо ви хочете підключитися до бази даних і прочитати записи за допомогою об’єкта читача даних:
+
+1. Створіть, налаштуйте та відкрийте свій об’єкт підключення.
+2. Створіть і налаштуйте об’єкт команди, вказавши об’єкт підключення як аргумент конструктора або за допомогою властивості Connection.
+3. Викличте ExecuteReader() у налаштованому об’єкті команд.
+4. Обробляйте кожен запис за допомогою методу Read() засобу читання даних.
+
+Щоб почати, створіть новий проект консольної програми під назвою AutoLot.DataReader і додайте пакет Microsoft.Data.SqlClient.
+
+```cs
+using Microsoft.Data.SqlClient;
+
+static void UseDataReader()
+{
+    using SqlConnection connection = new();
+
+    connection.ConnectionString = "Data Source=(localdb)\\mssqllocaldb;Integrated Security=true;Initial Catalog=AutoLot";
+    connection.Open();
+
+    Console.WriteLine($"Connection state: {connection.State}\n");
+
+    string sql = @"Select i.id, m.Name as Make, i.Color, i.Petname
+                   FROM Inventory i
+                   INNER JOIN Makes m on m.Id = i.MakeId";
+
+    SqlCommand myCommand = new(sql, connection);
+
+    using SqlDataReader myDataReader = myCommand.ExecuteReader();
+
+    while (myDataReader.Read())
+    {
+        Console.WriteLine($"{myDataReader["Make"]} {myDataReader["Color"]} {myDataReader["PetName"]}");
+    }
+
+}
+UseDataReader();
+```
+```console
+Connection state: Open
+
+VW Black Zippy
+Ford Rust Rusty
+Saab Black Mel
+Yugo Yellow Clunker
+BMW Black Bimmer
+BMW Green Hank
+BMW Pink Pinky
+Pinto Black Pete
+Yugo Brown Brownie
+```
+
+## Робота з об’єктами Connection
+
+Перший крок, який потрібно зробити під час роботи з постачальником даних, — це встановити сеанс із джерелом даних за допомогою об’єкта підключення (який, як ви пам’ятаєте, походить від DbConnection). Об’єкти підключення .NET надаються з відформатованим рядком підключення; цей рядок містить кілька пар ім'я-значення, розділених крапкою з комою. Ви використовуєте цю інформацію, щоб визначити ім’я комп’ютера, до якого ви хочете підключитися, необхідні налаштування безпеки, ім’я бази даних на цьому комп’ютері та іншу інформацію про постачальника даних.
+
+При використані контейнера Docker рядок підключення може виглядати таким чином:
+
+  Data Source=.,5433;User Id=sa;Password=P@ssw0rd;Initial Catalog=AutoLot;Encrypt=False
+
+
+Як ви можете зробити висновок ,Initial Catalog стосується бази даних, з якою ви хочете встановити сеанс. Data Source визначає ім'я машини, яка підтримує базу даних.Використовуеться .,5433, який стосується хост-комп’ютера (крапка такий самий, як і використання «localhost»), і порт 5433, який є портом, який контейнер Docker зіставив із портом SQL Server. Якби ви використовували інший екземпляр, ви б визначили властивість як machinename,port\instance. Наприклад, MYSERVER\SQLSERVER2019 означає, що MYSERVER — це ім’я сервера, на якому працює SQL Server, використовується порт за замовчуванням, а SQLSERVER2019 — це ім’я екземпляра. Якщо машина локальна для розробки, ви можете використовувати крапку (.) або маркер (localhost) для імені сервера. Якщо екземпляр SQL Server є екземпляром за замовчуванням, ім’я екземпляра не вказано. Наприклад, якщо ви створили AutoLot на інсталяції Microsoft SQL Server, налаштованій як екземпляр за замовчуванням на вашому локальному комп’ютері, ви повинні використовувати «Data Source=localhost».
+Окрім цього, ви можете надати будь-яку кількість токенів, які представляють облікові дані безпеки. Якщо для Integrated Security встановлено значення true, для автентифікації та авторизації використовуються поточні облікові дані Windows.
+Після того, як ви встановите рядок з’єднання, ви можете використовувати виклик Open(), щоб встановити з’єднання з СУБД. На додаток до членів ConnectionString, Open() і Close(), об’єкт підключення надає ряд членів, які дозволяють налаштувати додаткові параметри щодо вашого з’єднання, наприклад параметри часу очікування та інформацію про транзакції.
+
+Члени типу DbConnection
+
+  BeginTransaction() : Цей метод використовується для початку транзакції бази даних.
+
+  ChangeDatabase() : Цей метод використовується для зміни бази даних під час відкритого підключення.
+
+  ConnectionTimeout : Ця властивість лише для читання повертає кількість часу очікування під час встановлення з’єднання перед припиненням і створенням помилки (значення за замовчуванням залежить від постачальника). Якщо ви бажаєте змінити значення за замовчуванням, укажіть сегмент часу очікування з’єднання в рядку підключення (наприклад, час очікування з’єднання=30).
+
+  Database : Ця read-only властивість отримує назву бази даних, яку підтримує об’єкт підключення.
+
+  DataSource : Ця read-only властивість отримує розташування бази даних, яку підтримує об’єкт підключення.
+
+  GetSchema() : Цей метод повертає об’єкт DataTable, який містить інформацію про схему з джерела даних.
+
+  State : Ця read-only властивість отримує поточний стан підключення, який представлено переліком ConnectionState.
+
+Властивості типу DbConnection зазвичай доступні лише для читання і корисні лише тоді, коли потрібно отримати характеристики з’єднання під час виконання. Якщо вам потрібно змінити параметри за замовчуванням, ви повинні змінити сам рядок підключення. Наприклад, наступний рядок з’єднання встановлює параметр часу очікування з’єднання зі стандартного (15 секунд для SQL Server) на 30 секунд:
+
+  Data Source=.,5433;User Id=sa;Password=P@ssw0rd;Initial Catalog=AutoLot;Encrypt=False;Connect Timeout=30
+
+Подивимось дані нашого з'єднання.
+
+```cs
+static void UseDataReader()
+{
+    using SqlConnection connection = new();
+
+    connection.ConnectionString = "Data Source=(localdb)\\mssqllocaldb;Integrated Security=true;Initial Catalog=AutoLot";
+    connection.Open();
+
+    ShowConnectionStatus(connection);
+  //...
+}
+```
+```cs
+static void ShowConnectionStatus(SqlConnection connection)
+{
+    Console.WriteLine("\n\tInfo about your connection\n");
+    Console.WriteLine($"Database location : {connection.DataSource}");
+    Console.WriteLine($"Database : {connection.Database}");
+    Console.WriteLine($"Timeout : {connection.ConnectionTimeout}");
+    Console.WriteLine($"State : {connection.State}");
+    Console.WriteLine();
+}
+```
+
+```
+
+        Info about your connection
+
+Database location : (localdb)\mssqllocaldb
+Database : AutoLot
+Timeout : 15
+State : Open
+
+```
+Хоча більшість із цих властивостей не потребують пояснень, властивість State заслуговує окремої згадки. Ви можете призначити цій властивості будь-яке значення переліку ConnectionState, як показано тут:
+
+```cs
+public enum ConnectionState
+{
+  Broken,
+  Closed,
+  Connecting,
+  Executing,
+  Fetching,
+  Open
+}
+```
+Однак єдиними дійсними значеннями ConnectionState є ConnectionState.Open, ConnectionState.Connecting і ConnectionState.Closed (решту членів цього переліку зарезервовано для використання в майбутньому). Крім того, завжди безпечніше закрити з’єднання, навіть якщо стан з’єднання наразі ConnectionState.Closed.
+
+## 
