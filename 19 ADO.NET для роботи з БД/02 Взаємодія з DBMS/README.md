@@ -868,4 +868,108 @@ public enum ConnectionState
 ```
 Однак єдиними дійсними значеннями ConnectionState є ConnectionState.Open, ConnectionState.Connecting і ConnectionState.Closed (решту членів цього переліку зарезервовано для використання в майбутньому). Крім того, завжди безпечніше закрити з’єднання, навіть якщо стан з’єднання наразі ConnectionState.Closed.
 
-## 
+## Робота з об’єктами ConnectionStringBuilder
+
+Програмна робота з рядками підключення може бути громіздкою, оскільки вони часто представлені у вигляді рядкових літералів, які важко підтримувати та, у кращому випадку, схильні до помилок. Постачальники даних, сумісні з .NET, підтримують об’єкти конструктора рядка з’єднання, які дозволяють установлювати пари ім’я-значення за допомогою строго типізованих властивостей.
+
+```cs
+static void UsingSqlConnectionStringBuilder()
+{
+    using SqlConnection connection = new();
+
+    var connectionStringBuilder = new SqlConnectionStringBuilder()
+    {
+        InitialCatalog = "AutoLot",
+        DataSource = "(localdb)\\mssqllocaldb",
+        IntegratedSecurity = true,
+        ConnectTimeout = 30,
+        Encrypt = false,
+    };
+
+    Console.WriteLine(connectionStringBuilder.ConnectionString);
+
+    connection.ConnectionString = connectionStringBuilder.ConnectionString;
+    connection.Open();
+
+    ShowConnectionStatus(connection);
+}
+UsingSqlConnectionStringBuilder();
+```
+
+```
+Data Source=(localdb)\mssqllocaldb;Initial Catalog=AutoLot;Integrated Security=True;Connect Timeout=30;Encrypt=False
+
+        Info about your connection
+
+Database location : (localdb)\mssqllocaldb
+Database : AutoLot
+Timeout : 30
+State : Open
+```
+
+Створюєте екземпляр SqlConnectionStringBuilder, встановлюєте відповідні властивості та отримуєте внутрішній рядок за допомогою властивості ConnectionString. Також зауважте, що ви використовуєте типовий конструктор типу. Якщо ви так захочете, ви також можете створити екземпляр об’єкта конструктора рядка з’єднання вашого постачальника даних, передавши наявний рядок з’єднання як початкову точку (це може бути корисним, коли ви динамічно читаєте ці значення із зовнішнього джерела). Після того, як ви гідратували об’єкт початковими рядковими даними, ви можете змінити конкретні пари ім’я-значення за допомогою відповідних властивостей.
+
+## Робота з об’єктами Command
+
+Тепер, коли ви краще розумієте роль об’єкта підключення, наступний порядок роботи — перевірити, як надсилати SQL-запити до відповідної бази даних. Тип SqlCommand (який походить від DbCommand) є OO представленням SQL-запиту, імені таблиці або збереженої процедури. Ви вказуєте тип команди за допомогою властивості CommandType, яка може приймати будь-яке значення з enum CommandType , як показано тут:
+
+```cs
+public enum CommandType
+{
+  StoredProcedure,
+  TableDirect,
+  Text // Default value.
+}
+```
+Створимо комануди з власними запитами.
+
+```cs
+
+static void CreatingCommandObjects()
+{
+ 
+    using SqlConnection connection = new();
+
+    connection.ConnectionString = "Data Source=(localdb)\\mssqllocaldb;Integrated Security=true;Initial Catalog=AutoLot";
+    connection.Open();
+
+    ShowConnectionStatus(connection);
+
+    // Create command object via ctor args.
+    string sql1 = @"Select i.id, m.Name as Make, i.Color, i.Petname
+                   FROM Inventory i
+                   INNER JOIN Makes m on m.Id = i.MakeId";
+    SqlCommand myCommand1 = new(sql1, connection);
+
+    // Create another command object via properties.
+    SqlCommand myCommand2 = new();
+    myCommand2.Connection = connection;
+    myCommand2.CommandText = "Select m.id, m.Name from Makes m";
+
+
+}
+CreatingCommandObjects();
+
+```
+Коли ви створюєте командний об’єкт, ви можете встановити SQL-запит як параметр конструктора або безпосередньо за допомогою властивості CommandText. Крім того, коли ви створюєте командний об’єкт, вам потрібно вказати підключення, яке ви хочете використовувати. Знову ж таки, ви можете зробити це як параметр конструктора або за допомогою властивості Connection.
+На даний момент ви фактично не надіслали SQL-запит до бази даних AutoLot, а підготували стан об’єкта команди для майбутнього використання.
+
+Члени типу DbCommand
+
+  CommandTimeout : Отримує або встановлює час очікування під час виконання команди перед припиненням спроби та генеруванням помилки. За замовчуванням 30 секунд.
+
+  Connection : Отримує або встановлює DbConnection, який використовується цим екземпляром DbCommand.
+
+  Parameters : Gets the collection of DbParameter objects used for a parameterized query.
+
+  Cancel() : Cancels the execution of a command.
+
+  ExecuteReader() : Виконує SQL-запит і повертає об’єкт DbDataReader постачальника даних, який надає доступ лише для пересилання та лише для читання для результату запиту.
+
+  ExecuteNonQuery() : Виконує SQL-завдання (наприклад, insert, update, delete або create table).
+
+  ExecuteScalar() : Полегшена версія методу ExecuteReader(), яка була розроблена спеціально для однотонних запитів (наприклад, отримання кількості записів).
+
+  Prepare() : Створює підготовлену (або скомпільовану) версію команди на джерелі даних. Як ви, напевно, знаєте, підготовлений запит виконується трохи швидше та корисний, коли вам потрібно виконати той самий запит кілька разів (зазвичай із різними параметрами кожного разу).
+
+
