@@ -933,8 +933,6 @@ static void CreatingCommandObjects()
     connection.ConnectionString = "Data Source=(localdb)\\mssqllocaldb;Integrated Security=true;Initial Catalog=AutoLot";
     connection.Open();
 
-    ShowConnectionStatus(connection);
-
     // Create command object via ctor args.
     string sql1 = @"Select i.id, m.Name as Make, i.Color, i.Petname
                    FROM Inventory i
@@ -971,5 +969,140 @@ CreatingCommandObjects();
   ExecuteScalar() : Полегшена версія методу ExecuteReader(), яка була розроблена спеціально для однотонних запитів (наприклад, отримання кількості записів).
 
   Prepare() : Створює підготовлену (або скомпільовану) версію команди на джерелі даних. Як ви, напевно, знаєте, підготовлений запит виконується трохи швидше та корисний, коли вам потрібно виконати той самий запит кілька разів (зазвичай із різними параметрами кожного разу).
+
+
+## Робота з Data Readers
+
+Після встановлення активного з’єднання та команди SQL наступним кроком є ​​надсилання запиту до джерела даних. Як ви могли здогадатися, у вас є кілька способів зробити це.
+Тип DbDataReader (який реалізує IDataReader) є найпростішим і найшвидшим способом отримання інформації зі сховища даних.
+
+Зчитувачі даних представляють потік даних, призначений лише для читання, що повертається по одному запису за раз ідучи в перед послідоності. Враховуючи це, засоби читання даних корисні лише тоді, коли надсилаються оператори вибору SQL до основного сховища даних. Зчитувачі даних корисні, коли вам потрібно швидко переглянути великі обсяги даних і вам не потрібно підтримувати представлення в пам’яті. Наприклад, якщо ви запитуєте 20 000 записів із таблиці для зберігання в текстовому файлі, зберігати цю інформацію в DataSet буде досить інтенсивно з використанням пам’яті (оскільки DataSet зберігає весь результат запиту в пам’яті одночасно).Кращий підхід полягає у створенні зчитувача даних, який обертається над кожним записом якомога швидше. Однак майте на увазі, що об’єкти читання даних (на відміну від об’єктів адаптера даних, які ви розглянете пізніше) зберігають відкрите з’єднання зі своїм джерелом даних, доки ви явно не закриєте з’єднання.
+
+Ви отримуєте об’єкти читання даних з об’єкта команди за допомогою виклику ExecuteReader(). Зчитувач даних представляє поточний запис, який він прочитав із бази даних. Зчитувач даних має метод індексатора (наприклад, синтаксис [] у C#), який дозволяє отримати доступ до стовпця в поточному записі. Ви можете отримати доступ до стовпця або за назвою, або за допомогою цілого числа від нуля.
+
+```cs
+static void ObtainDataReader()
+{
+    using SqlConnection connection = new();
+
+    connection.ConnectionString = "Data Source=(localdb)\\mssqllocaldb;Integrated Security=true;Initial Catalog=AutoLot";
+    connection.Open();
+
+    SqlCommand myCommand = new();
+    myCommand.Connection = connection;
+    myCommand.CommandText = "Select m.id, m.Name from Makes m";
+
+    using SqlDataReader dataReader = myCommand.ExecuteReader();
+
+    dataReader.Read();
+    Console.WriteLine($"{dataReader["id"]} {dataReader["Name"]}");
+
+    Console.WriteLine();
+    while (dataReader.Read())
+    {
+        Console.WriteLine($"{dataReader["id"]} {dataReader["Name"]}");
+    }
+    dataReader.Close();
+
+    Console.WriteLine();
+
+    string sql1 = @"Select i.id, m.Name as Make, i.Color, i.Petname
+                   FROM Inventory i
+                   INNER JOIN Makes m on m.Id = i.MakeId";
+    SqlCommand myCommand1 = new(sql1, connection);
+
+    using SqlDataReader dataReader1 = myCommand1.ExecuteReader();
+
+    while (dataReader1.Read())
+    {
+        for (int i = 0; i < dataReader1.FieldCount; i++)
+        {
+            Console.Write($"{dataReader1.GetName(i)} = {dataReader1.GetValue(i)}\t");
+        }
+        Console.WriteLine();
+    }
+}
+ObtainDataReader();
+```
+```console
+1 VW
+
+2 Ford
+3 Saab
+4 Yugo
+5 BMW
+6 Pinto
+
+id = 1  Make = VW       Color = Black   Petname = Zippy
+id = 2  Make = Ford     Color = Rust    Petname = Rusty
+id = 3  Make = Saab     Color = Black   Petname = Mel
+id = 4  Make = Yugo     Color = Yellow  Petname = Clunker
+id = 5  Make = BMW      Color = Black   Petname = Bimmer
+id = 6  Make = BMW      Color = Green   Petname = Hank
+id = 7  Make = BMW      Color = Pink    Petname = Pinky
+id = 8  Make = Pinto    Color = Black   Petname = Pete
+id = 9  Make = Yugo     Color = Brown   Petname = Brownie
+```
+
+В прикладі використовується метод Read(), який зчитує перший або наступний запис. Коли наступного запису нема повертається false. Для кожного вхідного запису, який ви читаєте з бази даних, ви використовуєте індексатор типів, щоб роздрукувати дані запису. Також аби не кодувати жорстко назви стовбців можна використати методи GetName(i) та GetValue(i) та властивість кількості стовбців FieldCount.
+
+### Отримання кількох наборів результатів за допомогою зчитувача даних
+
+Об’єкти зчитування даних можуть отримувати кілька наборів результатів за допомогою одного об’єкта команди. Наприклад, якщо ви хочете отримати всі рядки з таблиці Inventory, а також усі рядки з таблиці Customers, ви можете вказати обидва оператори SQL SELECT за допомогою розділювача крапки з комою.
+
+```cs
+static void MultipleResultSetsWithDataReader()
+{
+    using SqlConnection connection = new();
+
+    connection.ConnectionString = "Data Source=(localdb)\\mssqllocaldb;Integrated Security=true;Initial Catalog=AutoLot";
+    connection.Open();
+
+    SqlCommand myCommand = new();
+    myCommand.Connection = connection;
+    myCommand.CommandText = "Select m.id, m.Name from Makes m; Select * from Customers";
+
+    using SqlDataReader dataReader = myCommand.ExecuteReader();
+    do
+    {
+        while (dataReader.Read())
+        {
+            for (int i = 0; i < dataReader.FieldCount; i++)
+            {
+                Console.Write($"{dataReader.GetName(i)} = {dataReader.GetValue(i)}\t");
+            }
+            Console.WriteLine();
+        }
+    } while (dataReader.NextResult());
+}
+MultipleResultSetsWithDataReader();
+```
+```console
+id = 1  Name = VW
+id = 2  Name = Ford
+id = 3  Name = Saab
+id = 4  Name = Yugo
+id = 5  Name = BMW
+id = 6  Name = Pinto
+Id = 1  FirstName = Dave        LastName = Brenner      TimeStamp = System.Byte[]
+Id = 2  FirstName = Matt        LastName = Walton       TimeStamp = System.Byte[]
+Id = 3  FirstName = Steve       LastName = Hagen        TimeStamp = System.Byte[]
+Id = 4  FirstName = Pat LastName = Walton       TimeStamp = System.Byte[]
+Id = 5  FirstName = Bad LastName = Customer     TimeStamp = System.Byte[]
+
+```
+Завжди автоматично повертається перший набір результатів. Аби отримати наступні результат визмваються метод NextResult. Зчитувач даних може обробляти лише оператори SQL Select; ви не можете використовувати їх для зміни існуючої таблиці бази даних за допомогою запитів Insert, Update або Delete.
+
+# Робота із запитами Create, Update, та Delete
+
+Метод ExecuteReader() витягує об’єкт читача даних, який дозволяє перевіряти результати оператора SQL Select, використовуючи потік інформації лише для перегляду в перед та лише для читання. Однак, якщо ви хочете надіслати оператори SQL, які призводять до модифікації даної таблиці (або будь-якого іншого оператора SQL без запиту, наприклад створення таблиць або надання дозволів), ви викликаєте метод ExecuteNonQuery() свого об’єкта команди. Цей єдиний метод виконує вставки, оновлення та видалення на основі формату тексту команди.
+
+Термін NonQuery — це оператор SQL, який не повертає набір результатів. Таким чином, оператори Select є запитами, тоді як оператори Insert, Update та Delete – ні. Враховуючи це, ExecuteNonQuery() повертає int, який представляє кількість рядків, які зазнали впливу, а не новий набір записів.
+
+Попередні приклади лише відкривали з’єднання та використовували їх для отримання даних. Це лише одна частина роботи з базою даних; фреймворк доступу до даних не принесе великої користі, якщо він також повністю не підтримує функції Create, Read, Update та Delete (CRUD). Дізнаємось як це зробити за допомогою викликів ExecuteNonQuery().
+
+Почніть із створення нового проекту бібліотеки класів C# під назвою AutoLot.DataAccessLayes та додайте пакет Microsoft.Data.SqlClient.
+
+
 
 

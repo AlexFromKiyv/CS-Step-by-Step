@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.SqlClient;
+using System.Data;
 using System.Xml.Serialization;
 
 static void UseDataReader()
@@ -69,8 +70,6 @@ static void CreatingCommandObjects()
     connection.ConnectionString = "Data Source=(localdb)\\mssqllocaldb;Integrated Security=true;Initial Catalog=AutoLot";
     connection.Open();
 
-    ShowConnectionStatus(connection);
-
     // Create command object via ctor args.
     string sql1 = @"Select i.id, m.Name as Make, i.Color, i.Petname
                    FROM Inventory i
@@ -84,4 +83,73 @@ static void CreatingCommandObjects()
 
 
 }
-CreatingCommandObjects();
+//CreatingCommandObjects();
+
+static void ObtainDataReader()
+{
+    using SqlConnection connection = new();
+
+    connection.ConnectionString = "Data Source=(localdb)\\mssqllocaldb;Integrated Security=true;Initial Catalog=AutoLot";
+    connection.Open();
+
+    SqlCommand myCommand = new();
+    myCommand.Connection = connection;
+    myCommand.CommandText = "Select m.id, m.Name from Makes m";
+
+    using SqlDataReader dataReader = myCommand.ExecuteReader();
+
+    dataReader.Read();
+    Console.WriteLine($"{dataReader["id"]} {dataReader["Name"]}");
+
+    Console.WriteLine();
+    while (dataReader.Read())
+    {
+        Console.WriteLine($"{dataReader["id"]} {dataReader["Name"]}");
+    }
+    dataReader.Close();
+
+    Console.WriteLine();
+
+    string sql1 = @"Select i.id, m.Name as Make, i.Color, i.Petname
+                   FROM Inventory i
+                   INNER JOIN Makes m on m.Id = i.MakeId";
+    SqlCommand myCommand1 = new(sql1, connection);
+
+    using SqlDataReader dataReader1 = myCommand1.ExecuteReader();
+
+    while (dataReader1.Read())
+    {
+        for (int i = 0; i < dataReader1.FieldCount; i++)
+        {
+            Console.Write($"{dataReader1.GetName(i)} = {dataReader1.GetValue(i)}\t");
+        }
+        Console.WriteLine();
+    }
+}
+//ObtainDataReader();
+
+static void MultipleResultSetsWithDataReader()
+{
+    using SqlConnection connection = new();
+
+    connection.ConnectionString = "Data Source=(localdb)\\mssqllocaldb;Integrated Security=true;Initial Catalog=AutoLot";
+    connection.Open();
+
+    SqlCommand myCommand = new();
+    myCommand.Connection = connection;
+    myCommand.CommandText = "Select m.id, m.Name from Makes m; Select * from Customers";
+
+    using SqlDataReader dataReader = myCommand.ExecuteReader();
+    do
+    {
+        while (dataReader.Read())
+        {
+            for (int i = 0; i < dataReader.FieldCount; i++)
+            {
+                Console.Write($"{dataReader.GetName(i)} = {dataReader.GetValue(i)}\t");
+            }
+            Console.WriteLine();
+        }
+    } while (dataReader.NextResult());
+}
+MultipleResultSetsWithDataReader();
