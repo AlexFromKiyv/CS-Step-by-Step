@@ -1101,8 +1101,143 @@ Id = 5  FirstName = Bad LastName = Customer     TimeStamp = System.Byte[]
 
 Попередні приклади лише відкривали з’єднання та використовували їх для отримання даних. Це лише одна частина роботи з базою даних; фреймворк доступу до даних не принесе великої користі, якщо він також повністю не підтримує функції Create, Read, Update та Delete (CRUD). Дізнаємось як це зробити за допомогою викликів ExecuteNonQuery().
 
-Почніть із створення нового проекту бібліотеки класів C# під назвою AutoLot.DataAccessLayes та додайте пакет Microsoft.Data.SqlClient.
+Почніть із створення нового проекту бібліотеки класів C# під назвою AutoLot.DataAccessLayer та додайте пакет Microsoft.Data.SqlClient. Додайте новий файл класу під назвою GlobalUsings.cs до проекту та оновіть файл до таких глобальних операторів using :
 
+AutoLot.DataAccessLaye\GlobalUsings.cs
+```cs
+global using System.Data;
+global using System.Reflection;
+global using Microsoft.Data.SqlClient;
+```
+Перш ніж створювати клас, який виконуватиме операції з даними, ми спочатку створимо клас C#, який представлятиме запис із таблиці Inventory із пов’язаною інформацією Make.
 
+## Класи Car і CarViewModel
 
+Сучасні бібліотеки доступу до даних використовують класи (які зазвичай називають models або entities), які використовуються для представлення та транспортування даних із бази даних. Крім того, класи можна використовувати для представлення даних, які поєднують дві або більше таблиць, щоб зробити дані більш значущими. Entity класи використовуються для роботи з каталогом бази даних (для операторів оновлення), а view model класи використовуються для відображення даних у змістовний спосіб. Ці концепції є основою object relational mappers (ORMs), таких як Entity Framework Core. Наразі просто створимо одну модель (для необробленого рядка Inventory) та одну модель перегляду (об’єднавши рядок Inventory з пов’язаними даними у таблиці Makes).
 
+Додайте нову папку до свого проекту під назвою Models і додайте до неї два нових файли під назвою Car.cs і CarViewModel.cs.
+
+Car.cs
+```cs
+namespace AutoLot.DataAccessLayer.Models;
+
+public class Car
+{
+    public int Id { get; set; }
+    public int MakeId { get; set; }
+    public string Color { get; set; }
+    public string PetName { get; set; }
+    public byte[] TimeStamp { get; set; }
+}
+```
+CarViewModel.cs
+```cs
+namespace AutoLot.DataAccessLayer.Models;
+
+public class CarViewModel :Car
+{
+    public string Make { get; set; }
+}
+
+```
+Додамо папку до GlobalUsings.cs
+
+GlobalUsings.cs
+```cs
+global using System.Data;
+global using System.Reflection;
+global using Microsoft.Data.SqlClient;
+
+global using AutoLot.DataAccessLayer.Models;
+```
+
+## Клас InventoryDal
+
+Далі додайте нову папку під назвою DataOperations. У цій новій папці додайте новий клас під назвою InventoryDal.cs і змініть клас на public. Цей клас визначатиме різні члени для взаємодії з таблицею Inventory бази даних AutoLot.
+
+### Додавання конструкторів
+
+```cs
+public class InventoryDal
+{
+    // Variables
+    private readonly string _connectionString;
+
+    // Constructors
+    public InventoryDal(string connectionString)
+    {
+        _connectionString = connectionString;
+    }
+    public InventoryDal() : this("Data Source=(localdb)\\mssqllocaldb;Integrated Security=true;Initial Catalog=AutoLot")
+    {
+    }
+}
+```
+Створюеться конструктор, який приймає рядковий параметр (connectionString) і присвоює значення змінній рівня класу. Далі створюеться конструктор без параметрів, який передає стандартний рядок з’єднання іншому конструктору. Це дає змогу змінювати конфігурацію підключення (зрозуміор шо в реальних проетах не має такого жорстко закодованих рядків).
+
+### Відкриття та закриття підключення
+
+```cs
+public class InventoryDal
+{
+    // Variables
+    private readonly string _connectionString;
+    private SqlConnection? _sqlConnection = null;
+
+    // Constructors
+
+    //...
+
+    // Connection
+    private void OpenConnection()
+    {
+        _sqlConnection = new SqlConnection { ConnectionString = _connectionString };
+        _sqlConnection.Open();
+    }
+
+    private void CloseConnection() 
+    { 
+        if (_sqlConnection?.State != ConnectionState.Closed)
+        {
+            _sqlConnection?.Close();
+        } 
+    }    
+}
+
+```
+Додана змінна рівня класу для утримання з’єднання, яке використовуватиметься кодом доступу до даних. Також додано два методи: один для відкриття з’єднання (OpenConnection()), а інший – для закриття з’єднання (CloseConnection()). У методі CloseConnection() перевіряеться стан з’єднання. 
+
+Для стислості більшість методів у класі InventoryDal не використовуватимуть блоки try/catch для обробки можливих винятків, а також не створюватимуть спеціальні винятки, щоб повідомити про різні проблеми з виконанням (наприклад, неправильний рядок підключення). Якщо ви збираєтеся створити індустріальну бібліотеку доступу до даних, вам обов’язково захочеться використовувати методи обробки структурованих винятків, щоб врахувати будь-які аномалії виконання.
+
+### Додавання IDisposable
+
+```cs
+
+public class InventoryDal : IDisposable
+{
+    // ...
+
+    // Implementation the disposable pattern
+    bool _disposed = false;
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_disposed) 
+        {
+            return;
+        }
+        if (disposing) 
+        { 
+            _sqlConnection?.Dispose();
+        }
+        _disposed = true;  
+    }
+
+    public void Dispose() 
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+}
+
+```
+Додано інтерфейс IDisposable до визначення класу. Далі реалізовано disposable патерн, викликавши Dispose в об’єкті SqlConnection.
