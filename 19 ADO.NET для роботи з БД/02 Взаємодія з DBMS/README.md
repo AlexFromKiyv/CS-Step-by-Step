@@ -1241,3 +1241,286 @@ public class InventoryDal : IDisposable
 
 ```
 Додано інтерфейс IDisposable до визначення класу. Далі реалізовано disposable патерн, викликавши Dispose в об’єкті SqlConnection.
+
+### Методи виботки
+В класі операції з данними почнемо з того що ми вже знаемо про об’єкти Command, DataReaders і загальні колекції, щоб отримати записи з таблиці Inventory. Як ви бачили раніше, об’єкт DataReader постачальника даних дозволяє вибирати записи за допомогою механізму лише для читання та проходу в перед за допомогою методу Read().У цьому прикладі властивість CommandBehavior на DataReader налаштовано на автоматичне закриття з’єднання, коли закривається зчитувач.
+
+```cs
+   // Methods of data selection
+   public List<CarViewModel> GetAllInvertory()
+   {
+       List<CarViewModel> invertory = new();
+
+       OpenConnection();
+
+       string sql = 
+           @"SELECT i.Id, i.Color, i.PetName,m.Name as Make 
+             FROM Inventory i 
+             INNER JOIN Makes m on m.Id = i.MakeId";
+       using SqlCommand command = new(sql, _sqlConnection);
+
+       SqlDataReader dataReader = command.ExecuteReader(CommandBehavior.CloseConnection);
+       while (dataReader.Read())
+       {
+           invertory.Add(new CarViewModel
+           {
+               Id = dataReader.GetInt32("Id"),
+               Color = dataReader.GetString("Color"),
+               Make = dataReader.GetString("Make"),
+               PetName = dataReader.GetString("PetName")
+           });
+       }
+       dataReader.Close();
+
+       return invertory;
+   }
+```
+Метод GetAllInventory() повертає List<CarViewModel> для представлення всіх даних у таблиці Inventory.
+
+Протестуємо в Program.cs
+
+```cs
+static void TestGetAllInvertory()
+{
+    InventoryDal inventoryDal = new InventoryDal();
+
+    var inventory = inventoryDal.GetAllInvertory();
+
+    foreach (var item in inventory)
+    {
+        Console.WriteLine($"{item.Id}\t{item.Make}\t{item.Color}\t{item.PetName}");
+    }
+}
+TestGetAllInvertory();
+```
+```console
+1       VW      Black   Zippy
+2       Ford    Rust    Rusty
+3       Saab    Black   Mel
+4       Yugo    Yellow  Clunker
+5       BMW     Black   Bimmer
+6       BMW     Green   Hank
+7       BMW     Pink    Pinky
+8       Pinto   Black   Pete
+9       Yugo    Brown   Brownie
+```
+
+Наступний метод вибору отримує одну CarViewModel на основі CarId.
+
+```cs
+    public CarViewModel VerySimple_GetCar(int id)
+    {
+        OpenConnection();
+       
+        CarViewModel car = new();
+
+        //This should use parameters for security reasons
+        string sql =
+            $@"SELECT i.Id, i.Color, i.PetName,m.Name as Make 
+               FROM Inventory i 
+               INNER JOIN Makes m on m.Id = i.MakeId
+               WHERE i.Id = {id}";
+
+        using SqlCommand command = new(sql, _sqlConnection);
+
+        SqlDataReader dataReader = command.ExecuteReader(CommandBehavior.CloseConnection);
+
+        dataReader.Read();
+        car = new CarViewModel
+        {
+            Id = dataReader.GetInt32("Id"),
+            Color = dataReader.GetString("Color"),
+            Make = dataReader.GetString("Make"),
+            PetName = dataReader.GetString("PetName")
+        };
+        dataReader.Close();
+        return car;
+    }
+```
+
+Протестуємо.
+
+```cs
+
+static void Test_VerySimple_GetCar()
+{
+    InventoryDal inventoryDal = new InventoryDal();
+    CarViewModel car = inventoryDal.VerySimple_GetCar(7);
+    Console.WriteLine($"{car.Id}\t{car.Make}\t{car.Color}\t{car.PetName}");
+}
+Test_VerySimple_GetCar();
+```
+```console
+7       BMW     Pink    Pinky
+```
+Загалом це погана практика приймати введення користувача в необроблені оператори SQL, як це робиться тут. Далі код буде оновлено для використання параметрів.
+
+### Методи додавання 
+
+Вставка нового рядка в таблицю проводиться аналогічно зчитуванню. Відбувається відкриття з’єднання, виклик ExecuteNonQuery() за допомогою вашого об’єкта команди та закриття з’єднання. 
+
+```cs
+    public void VerySimple_InsertCar(string color, int makeId, string petName)
+    {
+        OpenConnection();
+
+        string sql = $"Insert Into Inventory (MakeId, Color, PetName) Values ('{makeId}', '{color}', '{petName}')";
+        
+        using SqlCommand command = new(sql, _sqlConnection);
+
+        command.ExecuteNonQuery();
+        
+        CloseConnection();
+    }
+```
+Метод приймає три параметри, які зіставляються з неідентичними стовпцями таблиці Inventory (Color, MakeId та PetName). Ці аргументи використовуються для форматування типу рядка для вставки нового запису. Використовується свій об’єкт SqlConnection для виконання оператора SQL. 
+
+
+Протестуємо.
+```cs
+static void Test_VerySimple_InsertCar()
+{
+    InventoryDal inventoryDal = new InventoryDal();
+    inventoryDal.VerySimple_InsertCar("Green", 1, "Ella");
+    
+    TestGetAllInvertory();
+}
+Test_VerySimple_InsertCar();
+```
+```console
+1       VW      Black   Zippy
+2       Ford    Rust    Rusty
+3       Saab    Black   Mel
+4       Yugo    Yellow  Clunker
+5       BMW     Black   Bimmer
+6       BMW     Green   Hank
+7       BMW     Pink    Pinky
+8       Pinto   Black   Pete
+9       Yugo    Brown   Brownie
+10      VW      Green   Ella
+```
+
+Кращий метод використовує Car для створення строго типізованого методу, гарантуючи, що всі властивості передаються в метод у правильному порядку.
+
+```cs
+    public void Simple_InsertCar(Car car)
+    {
+        OpenConnection();
+
+        string sql = $"Insert Into Inventory (MakeId, Color, PetName) Values ('{car.MakeId}', '{car.Color}', '{car.PetName}')";
+
+        using SqlCommand command = new(sql, _sqlConnection);
+
+        command.ExecuteNonQuery();
+
+        CloseConnection();
+    }
+```
+```cs
+static void Test_Simple_InsertCar()
+{
+    InventoryDal inventoryDal = new InventoryDal();
+    Car car = new() { Color = "Gray", MakeId = 1, PetName = "Elektric" };
+    inventoryDal.Simple_InsertCar(car);
+
+    TestGetAllInvertory();
+}
+Test_Simple_InsertCar();
+```
+```console
+1       VW      Black   Zippy
+2       Ford    Rust    Rusty
+3       Saab    Black   Mel
+4       Yugo    Yellow  Clunker
+5       BMW     Black   Bimmer
+6       BMW     Green   Hank
+7       BMW     Pink    Pinky
+8       Pinto   Black   Pete
+9       Yugo    Brown   Brownie
+10      VW      Green   Ella
+11      VW      Grey    Elektric
+12      VW      Gray    Elektric
+```
+
+### Методи видалення
+
+Видалити існуючий запис так само просто, як вставити новий запис. Але перед видаленням краще зробити перевірку.
+
+```cs
+    // Methods for deletion
+
+    public void Simple_DeleteCar(int id)
+    {
+        OpenConnection();
+
+        string sql = $"Delete from Inventory where Id = '{id}' ";
+        using SqlCommand command = new(sql, _sqlConnection);
+
+        try
+        {
+            command.ExecuteNonQuery();
+        }
+        catch (SqlException sqlEx)
+        {
+            Console.WriteLine("Exception in DB:" + sqlEx.Message);
+        }
+        catch (Exception ex)  {
+            Console.WriteLine(ex.Message);
+        }
+        
+        CloseConnection();
+    }
+
+```
+У цьому коді виклик виконання запиту до БД виконується в області оператора try/catch. Це обробляє ситуації які можуть виникнутив в роботі СУБД. Таблиці повязані між собою за допомогою зовнішніх кючів і видаленя з однієї таблиці може не виконатись якшо є посилання на рядок іншої. Стандартні параметри INSERT і UPDATE для зовнішніх ключів за замовчуванням запобігають видаленню пов’язаних записів у зв’язаних таблицях. Коли це трапляється, виникає виняткова ситуація SqlException. 
+
+```cs
+static void Test_Simple_DeleteCar()
+{
+    InventoryDal inventoryDal = new InventoryDal();
+    inventoryDal.Simple_DeleteCar(11);
+    TestGetAllInvertory();
+
+    Console.WriteLine();
+
+    inventoryDal.Simple_DeleteCar(5);
+
+    Console.WriteLine();
+
+    TestGetAllInvertory();
+}
+Test_Simple_DeleteCar();
+
+```
+```
+1       VW      Black   Zippy
+2       Ford    Rust    Rusty
+3       Saab    Black   Mel
+4       Yugo    Yellow  Clunker
+5       BMW     Black   Bimmer
+6       BMW     Green   Hank
+7       BMW     Pink    Pinky
+8       Pinto   Black   Pete
+9       Yugo    Brown   Brownie
+10      VW      Green   Ella
+12      VW      Gray    Elektric
+
+Exception in DB:The DELETE statement conflicted with the REFERENCE constraint "FK_Orders_Inventory". The conflict occurred in database "AutoLot", table "dbo.Orders", column 'CarId'.
+The statement has been terminated.
+
+1       VW      Black   Zippy
+2       Ford    Rust    Rusty
+3       Saab    Black   Mel
+4       Yugo    Yellow  Clunker
+5       BMW     Black   Bimmer
+6       BMW     Green   Hank
+7       BMW     Pink    Pinky
+8       Pinto   Black   Pete
+9       Yugo    Brown   Brownie
+10      VW      Green   Ella
+12      VW      Gray    Elektric
+```
+
+Як бачимо рядок не видалено.
+
+### 
