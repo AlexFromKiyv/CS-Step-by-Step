@@ -1442,7 +1442,7 @@ Test_Simple_InsertCar();
 12      VW      Gray    Elektric
 ```
 
-### Методи видалення
+### Метод видалення
 
 Видалити існуючий запис так само просто, як вставити новий запис. Але перед видаленням краще зробити перевірку.
 
@@ -1523,4 +1523,378 @@ The statement has been terminated.
 
 Як бачимо рядок не видалено.
 
-### 
+### Метод оновлення
+
+Коли справа доходить до оновлення наявного запису в таблиці інвентаризації, перше, що ви повинні вирішити, це те, що ви хочете дозволити абоненту змінити, будь то колір автомобіля, ім’я домашньої тварини, марка чи все одразу. Один із способів надати абоненту повну гнучкість — це визначити метод, який приймає тип рядка для представлення будь-якого виду оператора SQL, але це в кращому випадку ризиковано. 
+В ідеалі ви хочете мати набір методів, які дозволяють абоненту оновлювати запис різними способами. Реалізуєм метод для одного поля.
+
+```cs
+    // Methods for update
+    public void Simple_Update(int id, string newPetName)
+    {
+        OpenConnection();
+
+        string sql = $"Update Inventory Set PetName = '{newPetName}' Where Id = '{id}'";
+
+        using SqlCommand command = new(sql, _sqlConnection);
+
+        command.ExecuteNonQuery();
+
+        CloseConnection();
+    }
+
+```
+```cs
+static void Test_Simple_Update()
+{
+    TestGetAllInvertory();
+    Console.WriteLine();
+
+    InventoryDal inventoryDal = new InventoryDal();
+    inventoryDal.Simple_Update(12, "Electra");
+
+    TestGetAllInvertory();
+}
+Test_Simple_Update();
+```
+
+```console
+1       VW      Black   Zippy
+2       Ford    Rust    Rusty
+3       Saab    Black   Mel
+4       Yugo    Yellow  Clunker
+5       BMW     Black   Bimmer
+6       BMW     Green   Hank
+7       BMW     Pink    Pinky
+8       Pinto   Black   Pete
+9       Yugo    Brown   Brownie
+10      VW      Green   Ella
+12      VW      Gray    Elektric
+
+1       VW      Black   Zippy
+2       Ford    Rust    Rusty
+3       Saab    Black   Mel
+4       Yugo    Yellow  Clunker
+5       BMW     Black   Bimmer
+6       BMW     Green   Hank
+7       BMW     Pink    Pinky
+8       Pinto   Black   Pete
+9       Yugo    Brown   Brownie
+10      VW      Green   Ella
+12      VW      Gray    Electra
+```
+
+### Робота з параметризованими об’єктами Command
+
+Наразі логіка вставки, оновлення та видалення для типу InventoryDal використовує жорстко закодовані рядкові літерали для кожного запиту SQL. У параметризованих запитах параметри SQL є об’єктами, а не простими блоками тексту. Обробка SQL-запитів у більш об’єктно-орієнтований спосіб допомагає зменшити кількість друкарських помилок (враховуючи строго типізовані властивості). Крім того, параметризовані запити зазвичай виконуються набагато швидше, ніж літеральний рядок SQL, оскільки вони аналізуються точно один раз (а не кожного разу, коли рядок SQL призначається властивості CommandText). Параметризовані запити також допомагають захистити від атак SQL-ін’єкцій (добре відома проблема безпеки доступу до даних).
+Для підтримки параметризованих запитів об’єкти Command ADO.NET підтримують колекцію окремих об’єктів параметрів. За замовчуванням ця колекція порожня, але ви можете вставити будь-яку кількість об’єктів параметрів, які зіставляються з параметром-заповнювачем у запиті SQL. Якщо ви хочете пов’язати параметр у запиті SQL з членом колекції параметрів об’єкта команди, ви можете додати до текстового параметра SQL символ @ (принаймні, коли використовується Microsoft SQL Server; не всі СУБД підтримують цю нотацію).
+
+### Вказівка ​​параметрів за допомогою типу DbParameter
+
+Перш ніж створити параметризований запит, вам потрібно ознайомитися з типом DbParameter (який є базовим класом для конкретного об’єкта параметра постачальника).Цей клас підтримує низку властивостей, які дозволяють налаштувати назву, розмір і тип даних параметра, а також інші характеристики, включаючи напрямок руху параметра.
+
+Ключові члени типу DbParameter
+
+  DbType : Отримує або встановлює власний тип даних параметра, представлений як тип даних CLR
+
+  Direction : Отримує або встановлює, чи є параметр лише введенням, лише виведенням, двонаправленим чи параметром значення, що повертається
+
+  IsNullable : Отримує або встановлює, чи параметр приймає нульові значення
+
+  ParameterName : Отримує або встановлює назву DbParameter
+
+  Size : Отримує або встановлює максимальний розмір параметра даних у байтах; це корисно лише для текстових даних
+
+  Value : Отримує або встановлює значення параметра
+
+Тепер давайте розглянемо, як заповнити колекцію об’єкта команди сумісними з DBParameter об’єктами, переробивши методи InventoryDal для використання параметрів.
+
+### Додавання параметру до методу вибору
+
+Створемо метод отримання з таблиці з об'єктом параметра
+
+```cs
+    public CarViewModel GetCar(int id)
+    {
+        OpenConnection();
+
+        CarViewModel car = new();
+
+        SqlParameter sqlParameter = new SqlParameter 
+        { 
+            ParameterName = "@id",
+            Value = id,
+            SqlDbType = SqlDbType.Int,
+            Direction = ParameterDirection.Input,
+        };
+
+        string sql =
+            $@"SELECT i.Id, i.Color, i.PetName,m.Name as Make 
+               FROM Inventory i 
+               INNER JOIN Makes m on m.Id = i.MakeId
+               WHERE i.Id = @id";
+
+        using SqlCommand command = new(sql, _sqlConnection);
+        command.Parameters.Add(sqlParameter);
+
+        SqlDataReader dataReader = command.ExecuteReader(CommandBehavior.CloseConnection);
+
+        dataReader.Read();
+        car = new CarViewModel
+        {
+            Id = dataReader.GetInt32("Id"),
+            Color = dataReader.GetString("Color"),
+            Make = dataReader.GetString("Make"),
+            PetName = dataReader.GetString("PetName")
+        };
+        dataReader.Close();
+        return car;
+    }
+```
+```cs
+static void Test_GetCar()
+{
+    InventoryDal inventoryDal = new InventoryDal();
+    CarViewModel car = inventoryDal.GetCar(7);
+    Console.WriteLine($"{car.Id}\t{car.Make}\t{car.Color}\t{car.PetName}");
+}
+Test_GetCar();
+```
+```console
+7       BMW     Pink    Pinky
+```
+Значення ParameterName має відповідати імені, яке використовується в запиті SQL , тип має відповідати типу стовпця бази даних, а напрямок залежить від того, чи використовується параметр для надсилання даних у запит (ParameterDirection.Input) або якщо він призначений для повернення даних із запиту (ParameterDirection.Output). Параметри також можуть бути визначені як input/output або як значення, що повертаються (наприклад, із збереженої процедури). В рядку sql використвується назнв параметра @id.
+
+### Додавання параметру до методу видалення
+
+Аналогічно можна оновити метод видалення.
+
+```cs
+    public void DeleteCar(int id)
+    {
+        OpenConnection();
+
+        SqlParameter sqlParameter = new SqlParameter
+        {
+            ParameterName = "@id",
+            Value = id,
+            SqlDbType = SqlDbType.Int,
+            Direction = ParameterDirection.Input
+        };
+
+        string sql = $"Delete from Inventory where Id = @id ";
+        using SqlCommand command = new(sql, _sqlConnection);
+        command.Parameters.Add(sqlParameter);
+
+        try
+        {
+            command.ExecuteNonQuery();
+        }
+        catch (SqlException sqlEx)
+        {
+            Console.WriteLine("Exception in DB:" + sqlEx.Message);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+
+        CloseConnection();
+    }
+```
+```cs
+static void Test_DeleteCar()
+{
+    TestGetAllInvertory();
+    Console.WriteLine();
+
+    InventoryDal inventoryDal = new InventoryDal();
+    inventoryDal.Simple_DeleteCar(12);
+
+    TestGetAllInvertory();
+
+}
+Test_DeleteCar();
+```
+```console
+1       VW      Black   Zippy
+2       Ford    Rust    Rusty
+3       Saab    Black   Mel
+4       Yugo    Yellow  Clunker
+5       BMW     Black   Bimmer
+6       BMW     Green   Hank
+7       BMW     Pink    Pinky
+8       Pinto   Black   Pete
+9       Yugo    Brown   Brownie
+10      VW      Green   Ella
+12      VW      Gray    Electra
+
+1       VW      Black   Zippy
+2       Ford    Rust    Rusty
+3       Saab    Black   Mel
+4       Yugo    Yellow  Clunker
+5       BMW     Black   Bimmer
+6       BMW     Green   Hank
+7       BMW     Pink    Pinky
+8       Pinto   Black   Pete
+9       Yugo    Brown   Brownie
+10      VW      Green   Ella
+```
+
+### Додавання параметрів до методу оновлення
+
+Для цього методу потрібні два параметри: один для id, а інший для нового PetName.
+
+```cs
+    // Methods for update with parameters
+    public void Update(int id, string newPetName)
+    {
+        OpenConnection();
+
+        SqlParameter id_parameter = new SqlParameter
+        {
+            ParameterName = "@id",
+            Value = id,
+            SqlDbType = SqlDbType.Int,
+            Direction = ParameterDirection.Input
+        };
+
+        SqlParameter petName_parameter = new SqlParameter
+        {
+            ParameterName = "@petName",
+            Value = newPetName,
+            SqlDbType = SqlDbType.NVarChar,
+            Size = 50,
+            Direction = ParameterDirection.Input
+        };
+
+        string sql = $"Update Inventory Set PetName = @petName Where Id = @id";
+
+        using SqlCommand command = new(sql, _sqlConnection);
+
+        command.Parameters.Add(id_parameter);
+        command.Parameters.Add(petName_parameter);
+
+        command.ExecuteNonQuery();
+
+        CloseConnection();
+    }
+```
+
+Перший параметр створюється так само, як у двох попередніх прикладах, а другий створює параметр, який відповідає типу бази даних NVarChar (тип поля PetName з таблиці Inventory).
+
+```cs
+static void Test_Update()
+{
+    TestGetAllInvertory();
+    Console.WriteLine();
+
+    InventoryDal inventoryDal = new InventoryDal();
+    inventoryDal.Update(10, "Electra");
+
+    TestGetAllInvertory();
+}
+Test_Update();
+```
+```
+1       VW      Black   Zippy
+2       Ford    Rust    Rusty
+3       Saab    Black   Mel
+4       Yugo    Yellow  Clunker
+5       BMW     Black   Bimmer
+6       BMW     Green   Hank
+7       BMW     Pink    Pinky
+8       Pinto   Black   Pete
+9       Yugo    Brown   Brownie
+10      VW      Green   Ella
+
+1       VW      Black   Zippy
+2       Ford    Rust    Rusty
+3       Saab    Black   Mel
+4       Yugo    Yellow  Clunker
+5       BMW     Black   Bimmer
+6       BMW     Green   Hank
+7       BMW     Pink    Pinky
+8       Pinto   Black   Pete
+9       Yugo    Brown   Brownie
+10      VW      Green   Electra
+```
+
+### Додавання параметру до методу вставки
+
+```cs
+    // Method for insert with parameters
+    public void InsertCar(Car car)
+    {
+        OpenConnection();
+
+        string sql = "Insert Into Inventory" +
+                     "(MakeId, Color, PetName) Values" +
+                     "(@MakeId, @Color, @PetName)";
+
+
+        using SqlCommand command = new(sql, _sqlConnection);
+
+        SqlParameter parameter = new SqlParameter
+        {
+            ParameterName = "@MakeId",
+            Value = car.MakeId,
+            SqlDbType = SqlDbType.Int,
+            Direction = ParameterDirection.Input
+        };
+        command.Parameters.Add(parameter);
+
+        parameter = new SqlParameter
+        {
+            ParameterName = "@Color",
+            Value = car.Color,
+            SqlDbType = SqlDbType.NVarChar,
+            Size = 50,
+            Direction = ParameterDirection.Input
+        };
+        command.Parameters.Add(parameter);
+
+        parameter = new SqlParameter
+        {
+            ParameterName = "@PetName",
+            Value = car.PetName,
+            SqlDbType = SqlDbType.NVarChar,
+            Size = 50,
+            Direction = ParameterDirection.Input
+        };
+        command.Parameters.Add(parameter);
+
+        command.ExecuteNonQuery();
+
+        CloseConnection();
+    }
+```
+
+
+```cs
+static void Test_InsertCar()
+{
+    InventoryDal inventoryDal = new InventoryDal();
+    Car car = new() { Color = "White", MakeId = 2, PetName = "Lapik" };
+    inventoryDal.InsertCar(car);
+
+    TestGetAllInvertory();
+}
+Test_InsertCar();
+```
+```
+1       VW      Black   Zippy
+2       Ford    Rust    Rusty
+3       Saab    Black   Mel
+4       Yugo    Yellow  Clunker
+5       BMW     Black   Bimmer
+6       BMW     Green   Hank
+7       BMW     Pink    Pinky
+8       Pinto   Black   Pete
+9       Yugo    Brown   Brownie
+10      VW      Green   Electra
+13      Ford    White   Lapik
+```
+Хоча для створення параметризованого запиту часто потрібно більше коду, кінцевим результатом є зручніший спосіб програмного налаштування операторів SQL, а також досягнення кращої загальної продуктивності. Вони також надзвичайно корисні, коли ви хочете запустити збережену процедуру.
+
+### Виконання збереженої процедури

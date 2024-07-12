@@ -172,4 +172,173 @@ public class InventoryDal : IDisposable
         CloseConnection();
     }
 
+    // Methods for update
+    public void Simple_Update(int id, string newPetName)
+    {
+        OpenConnection();
+
+        string sql = $"Update Inventory Set PetName = '{newPetName}' Where Id = '{id}'";
+
+        using SqlCommand command = new(sql, _sqlConnection);
+
+        command.ExecuteNonQuery();
+
+        CloseConnection();
+    }
+
+    // Methods of data selection with parameter
+
+    public CarViewModel GetCar(int id)
+    {
+        OpenConnection();
+
+        CarViewModel car = new();
+
+
+        SqlParameter sqlParameter = new SqlParameter 
+        { 
+            ParameterName = "@id",
+            Value = id,
+            SqlDbType = SqlDbType.Int,
+            Direction = ParameterDirection.Input,
+        };
+
+        string sql =
+            $@"SELECT i.Id, i.Color, i.PetName,m.Name as Make 
+               FROM Inventory i 
+               INNER JOIN Makes m on m.Id = i.MakeId
+               WHERE i.Id = @id";
+
+        using SqlCommand command = new(sql, _sqlConnection);
+        command.Parameters.Add(sqlParameter);
+
+        SqlDataReader dataReader = command.ExecuteReader(CommandBehavior.CloseConnection);
+
+        dataReader.Read();
+        car = new CarViewModel
+        {
+            Id = dataReader.GetInt32("Id"),
+            Color = dataReader.GetString("Color"),
+            Make = dataReader.GetString("Make"),
+            PetName = dataReader.GetString("PetName")
+        };
+        dataReader.Close();
+        return car;
+    }
+
+
+    // Methods for deletion with parameter
+
+    public void DeleteCar(int id)
+    {
+        OpenConnection();
+
+        SqlParameter sqlParameter = new SqlParameter
+        {
+            ParameterName = "@id",
+            Value = id,
+            SqlDbType = SqlDbType.Int,
+            Direction = ParameterDirection.Input
+        };
+
+        string sql = $"Delete from Inventory where Id = @id ";
+        using SqlCommand command = new(sql, _sqlConnection);
+        command.Parameters.Add(sqlParameter);
+
+        try
+        {
+            command.ExecuteNonQuery();
+        }
+        catch (SqlException sqlEx)
+        {
+            Console.WriteLine("Exception in DB:" + sqlEx.Message);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+
+        CloseConnection();
+    }
+
+    // Methods for update with parameters
+    public void Update(int id, string newPetName)
+    {
+        OpenConnection();
+
+        SqlParameter id_parameter = new SqlParameter
+        {
+            ParameterName = "@id",
+            Value = id,
+            SqlDbType = SqlDbType.Int,
+            Direction = ParameterDirection.Input
+        };
+
+        SqlParameter petName_parameter = new SqlParameter
+        {
+            ParameterName = "@petName",
+            Value = newPetName,
+            SqlDbType = SqlDbType.NVarChar,
+            Size = 50,
+            Direction = ParameterDirection.Input
+        };
+
+        string sql = $"Update Inventory Set PetName = @petName Where Id = @id";
+
+        using SqlCommand command = new(sql, _sqlConnection);
+
+        command.Parameters.Add(id_parameter);
+        command.Parameters.Add(petName_parameter);
+
+        command.ExecuteNonQuery();
+
+        CloseConnection();
+    }
+
+    // Method for insert with parameters
+    public void InsertCar(Car car)
+    {
+        OpenConnection();
+
+        string sql = "Insert Into Inventory" +
+                     "(MakeId, Color, PetName) Values" +
+                     "(@MakeId, @Color, @PetName)";
+
+
+        using SqlCommand command = new(sql, _sqlConnection);
+
+        SqlParameter parameter = new SqlParameter
+        {
+            ParameterName = "@MakeId",
+            Value = car.MakeId,
+            SqlDbType = SqlDbType.Int,
+            Direction = ParameterDirection.Input
+        };
+        command.Parameters.Add(parameter);
+
+        parameter = new SqlParameter
+        {
+            ParameterName = "@Color",
+            Value = car.Color,
+            SqlDbType = SqlDbType.NVarChar,
+            Size = 50,
+            Direction = ParameterDirection.Input
+        };
+        command.Parameters.Add(parameter);
+
+        parameter = new SqlParameter
+        {
+            ParameterName = "@PetName",
+            Value = car.PetName,
+            SqlDbType = SqlDbType.NVarChar,
+            Size = 50,
+            Direction = ParameterDirection.Input
+        };
+        command.Parameters.Add(parameter);
+
+        command.ExecuteNonQuery();
+
+        CloseConnection();
+    }
+
 }

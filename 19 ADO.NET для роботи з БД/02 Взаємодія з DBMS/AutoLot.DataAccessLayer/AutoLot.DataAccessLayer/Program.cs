@@ -54,4 +54,59 @@ static void Test_Simple_DeleteCar()
 
     TestGetAllInvertory();
 }
-Test_Simple_DeleteCar();
+//Test_Simple_DeleteCar();
+
+static void Test_Simple_Update()
+{
+    TestGetAllInvertory();
+    Console.WriteLine();
+
+    InventoryDal inventoryDal = new InventoryDal();
+    inventoryDal.Simple_Update(12, "Electra");
+
+    TestGetAllInvertory();
+}
+//Test_Simple_Update();
+
+static void Test_GetCar()
+{
+    InventoryDal inventoryDal = new InventoryDal();
+    CarViewModel car = inventoryDal.GetCar(7);
+    Console.WriteLine($"{car.Id}\t{car.Make}\t{car.Color}\t{car.PetName}");
+}
+//Test_GetCar();
+
+static void Test_DeleteCar()
+{
+    TestGetAllInvertory();
+    Console.WriteLine();
+
+    InventoryDal inventoryDal = new InventoryDal();
+    inventoryDal.Simple_DeleteCar(12);
+
+    TestGetAllInvertory();
+
+}
+//Test_DeleteCar();
+
+static void Test_Update()
+{
+    TestGetAllInvertory();
+    Console.WriteLine();
+
+    InventoryDal inventoryDal = new InventoryDal();
+    inventoryDal.Update(10, "Electra");
+
+    TestGetAllInvertory();
+}
+//Test_Update();
+
+static void Test_InsertCar()
+{
+    InventoryDal inventoryDal = new InventoryDal();
+    Car car = new() { Color = "White", MakeId = 2, PetName = "Lapik" };
+    inventoryDal.InsertCar(car);
+
+    TestGetAllInvertory();
+}
+Test_InsertCar();
