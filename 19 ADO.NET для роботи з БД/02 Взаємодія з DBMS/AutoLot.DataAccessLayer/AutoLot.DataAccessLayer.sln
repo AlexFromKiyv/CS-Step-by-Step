@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.35004.147
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoLot.DataAccessLayer", "AutoLot.DataAccessLayer\AutoLot.DataAccessLayer.csproj", "{A4D93403-B1EB-4D97-92DB-A7F7B65BE075}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoLot.DataAccessLayer", "AutoLot.DataAccessLayer\AutoLot.DataAccessLayer.csproj", "{A4D93403-B1EB-4D97-92DB-A7F7B65BE075}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoLot.Client", "AutoLot.Client\AutoLot.Client.csproj", "{9AD1C9F4-7FB4-4A32-AC0D-67AE1F237850}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{A4D93403-B1EB-4D97-92DB-A7F7B65BE075}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A4D93403-B1EB-4D97-92DB-A7F7B65BE075}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A4D93403-B1EB-4D97-92DB-A7F7B65BE075}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9AD1C9F4-7FB4-4A32-AC0D-67AE1F237850}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9AD1C9F4-7FB4-4A32-AC0D-67AE1F237850}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9AD1C9F4-7FB4-4A32-AC0D-67AE1F237850}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9AD1C9F4-7FB4-4A32-AC0D-67AE1F237850}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1898,3 +1898,251 @@ Test_InsertCar();
 Хоча для створення параметризованого запиту часто потрібно більше коду, кінцевим результатом є зручніший спосіб програмного налаштування операторів SQL, а також досягнення кращої загальної продуктивності. Вони також надзвичайно корисні, коли ви хочете запустити збережену процедуру.
 
 ### Виконання збереженої процедури
+
+Збережена процедура — це іменований блок коду SQL, який зберігається в базі даних. Ви можете створити збережені процедури так, щоб вони повертали набір рядків або скалярних типів даних або виконували будь-що інше, що має сенс (наприклад, вставляли, оновлювали або видаляли записи). Ви також можете змусити їх приймати будь-яку кількість необов’язкових параметрів. Кінцевим результатом є одиниця роботи, яка веде себе як типовий метод, за винятком того, що вона розташована в сховищі даних, а не у двійковому бізнес-об’єкті.  
+
+Створюючи базу даних ми створили одну процедуру.
+
+```sql
+USE [AutoLot]
+GO
+CREATE PROCEDURE [dbo].[GetPetName]
+@carID int,
+@petName nvarchar(50) output
+AS
+SELECT @petName = PetName from dbo.Inventory where Id = @carID
+GO
+```
+Назва процедур GetPetName яка має два параметри. Перший для визначення рядка @carID другий для результату @petName.
+Створимо метод для її використання.
+
+```cs
+    // Executing a Stored Procedure
+    public string? LookUpPetName(int id)
+    {
+        OpenConnection();
+
+        using SqlCommand command = new("GetPetName", _sqlConnection);
+
+        command.CommandType = CommandType.StoredProcedure;
+
+        // Input parameter
+        SqlParameter parameter = new SqlParameter
+        {
+            ParameterName = "@carID",
+            Value = id,
+            SqlDbType = SqlDbType.Int,
+            Direction = ParameterDirection.Input
+        };
+        command.Parameters.Add(parameter);
+
+        // Output parameter
+        parameter = new SqlParameter
+        {
+            ParameterName = "@petName",
+            SqlDbType = SqlDbType.NVarChar,
+            Size = 50,
+            Direction = ParameterDirection.Output
+        };
+        command.Parameters.Add(parameter);
+
+        command.ExecuteNonQuery();
+
+        CloseConnection();
+
+        return command.Parameters["@petName"].Value.ToString() ;
+    }
+```
+```cs
+static void Test_LookUpPetName()
+{
+    TestGetAllInvertory();
+    Console.WriteLine();
+
+    InventoryDal inventoryDal = new InventoryDal();
+
+    Console.WriteLine(inventoryDal.LookUpPetName(5));
+    Console.WriteLine(inventoryDal.LookUpPetName(155));
+
+}
+Test_LookUpPetName();
+```
+```console
+1       VW      Black   Zippy
+2       Ford    Rust    Rusty
+3       Saab    Black   Mel
+4       Yugo    Yellow  Clunker
+5       BMW     Black   Bimmer
+6       BMW     Green   Hank
+7       BMW     Pink    Pinky
+8       Pinto   Black   Pete
+9       Yugo    Brown   Brownie
+10      VW      Green   Electra
+13      Ford    White   Lapik
+
+Bimmer
+
+
+```
+Одним з важливих аспектів виклику збереженої процедури є пам’ятати, що командний об’єкт може представляти оператор SQL (за замовчуванням) або ім’я збереженої процедури. Якщо ви хочете повідомити об’єкт команди, що він буде викликати збережену процедуру, ви передаєте ім’я процедури (як аргумент конструктора або за допомогою властивості CommandText) і повинні встановити для властивості CommandType значення CommandType.StoredProcedure. (Якщо ви цього не зробите, ви отримаєте виняток під час виконання, оскільки об’єкт команди за замовчуванням очікує оператора SQL.).
+Далі зверніть увагу, що для властивості Direction параметра @petName встановлено значення ParameterDirection.Output. Як і раніше, ви додаєте кожен об’єкт параметра до колекції параметрів об’єкта команди.
+Після того, як збережена процедура завершиться викликом ExecuteNonQuery(), ви можете отримати значення вихідного параметра, звернувшись до колекції параметрів об’єкта команди та відповідне приведення.
+
+На даний момент у вас є надзвичайно проста бібліотека доступу до даних, яку можна використовувати для створення клієнта для відображення та редагування ваших даних.
+
+### Використанна класу клієнським додатком
+
+Додайте нову консольну програму AutoLot.Client до рішення і додайте посилання на проект AutoLot.DataAccessLayer. Очистіть створений код у файлі program.cs та додайте наступні using у верхній частині файлу:
+
+
+```cs
+using AutoLot.DataAccessLayer.DataOperations;
+using AutoLot.DataAccessLayer.Models;
+```
+Далі перевіримо всі операції CRUD.
+
+```cs
+static void Run()
+{
+    InventoryDal inventoryDal = new();
+    Console.WriteLine("\t\tAll list");
+    List<CarViewModel> cars = inventoryDal.GetAllInvertory();
+    ViewListOfCar(cars);
+    Console.WriteLine("\n\n");
+
+    
+    int firstId = cars.OrderBy(c => c.Make).Select(r => r.Id).First();
+    CarViewModel car = inventoryDal.GetCar(firstId);
+    Console.WriteLine("\t\tFinding first car by Make");
+    Console.WriteLine("Id\tMake\tColor\tPet Name");
+    Console.WriteLine($"{car.Id}\t{car.Make}\t{car.Color}\t{car.PetName}");
+    Console.WriteLine("\n\n");
+
+    Console.WriteLine("\t\tInsert");
+    Car newCar = new() { Color = "Red", MakeId = 5, PetName = "Cher" };
+    inventoryDal.InsertCar(newCar);
+    ViewListOfCar(inventoryDal.GetAllInvertory());
+    Console.WriteLine("\n\n");
+
+    Console.WriteLine("\t\tDelete");
+    int lastId = inventoryDal.GetAllInvertory().Max(c => c.Id);
+    Console.WriteLine($"Last ID {lastId}");
+    inventoryDal.DeleteCar(lastId);
+    ViewListOfCar(inventoryDal.GetAllInvertory());
+    Console.WriteLine("\n\n");
+
+
+    Console.WriteLine("\t\tUpdate");
+    inventoryDal.Update(13, "Shmapik");
+    ViewListOfCar(inventoryDal.GetAllInvertory());
+    Console.WriteLine("\n\n");
+
+
+    Console.WriteLine("\t\tDelete with SqlException");
+    inventoryDal.DeleteCar(5);
+    ViewListOfCar(inventoryDal.GetAllInvertory());
+}
+Run();
+
+static void ViewListOfCar(List<CarViewModel> cars)
+{
+    Console.WriteLine("Id\tMake\tColor\tPet Name");
+    foreach (var item in cars)
+    {
+        Console.WriteLine($"{item.Id}\t{item.Make}\t{item.Color}\t{item.PetName}");
+    }
+}
+```
+Додадкова функція вивлвдить весь список таблиці. 
+
+
+```console
+                All list
+Id      Make    Color   Pet Name
+1       VW      Black   Zippy
+2       Ford    Rust    Rusty
+3       Saab    Black   Mel
+4       Yugo    Yellow  Clunker
+5       BMW     Black   Bimmer
+6       BMW     Green   Hank
+7       BMW     Pink    Pinky
+8       Pinto   Black   Pete
+9       Yugo    Brown   Brownie
+10      VW      Green   Electra
+13      Ford    White   Lapik
+
+
+
+                Finding first car by Make
+Id      Make    Color   Pet Name
+5       BMW     Black   Bimmer
+
+
+
+                Insert
+Id      Make    Color   Pet Name
+1       VW      Black   Zippy
+2       Ford    Rust    Rusty
+3       Saab    Black   Mel
+4       Yugo    Yellow  Clunker
+5       BMW     Black   Bimmer
+6       BMW     Green   Hank
+7       BMW     Pink    Pinky
+8       Pinto   Black   Pete
+9       Yugo    Brown   Brownie
+10      VW      Green   Electra
+13      Ford    White   Lapik
+17      BMW     Red     Cher
+
+
+
+                Delete
+Last ID 17
+Id      Make    Color   Pet Name
+1       VW      Black   Zippy
+2       Ford    Rust    Rusty
+3       Saab    Black   Mel
+4       Yugo    Yellow  Clunker
+5       BMW     Black   Bimmer
+6       BMW     Green   Hank
+7       BMW     Pink    Pinky
+8       Pinto   Black   Pete
+9       Yugo    Brown   Brownie
+10      VW      Green   Electra
+13      Ford    White   Lapik
+
+
+
+                Update
+Id      Make    Color   Pet Name
+1       VW      Black   Zippy
+2       Ford    Rust    Rusty
+3       Saab    Black   Mel
+4       Yugo    Yellow  Clunker
+5       BMW     Black   Bimmer
+6       BMW     Green   Hank
+7       BMW     Pink    Pinky
+8       Pinto   Black   Pete
+9       Yugo    Brown   Brownie
+10      VW      Green   Electra
+13      Ford    White   Shmapik
+
+
+
+                Delete with SqlException
+Exception in DB:The DELETE statement conflicted with the REFERENCE constraint "FK_Orders_Inventory". The conflict occurred in database "AutoLot", table "dbo.Orders", column 'CarId'.
+The statement has been terminated.
+Id      Make    Color   Pet Name
+1       VW      Black   Zippy
+2       Ford    Rust    Rusty
+3       Saab    Black   Mel
+4       Yugo    Yellow  Clunker
+5       BMW     Black   Bimmer
+6       BMW     Green   Hank
+7       BMW     Pink    Pinky
+8       Pinto   Black   Pete
+9       Yugo    Brown   Brownie
+10      VW      Green   Electra
+13      Ford    White   Shmapik
+```
+

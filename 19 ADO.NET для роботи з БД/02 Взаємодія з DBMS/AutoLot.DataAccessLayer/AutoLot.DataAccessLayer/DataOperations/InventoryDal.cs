@@ -341,4 +341,41 @@ public class InventoryDal : IDisposable
         CloseConnection();
     }
 
+    // Executing a Stored Procedure
+    public string? LookUpPetName(int id)
+    {
+        OpenConnection();
+
+        using SqlCommand command = new("GetPetName", _sqlConnection);
+
+        command.CommandType = CommandType.StoredProcedure;
+
+        // Input parameter
+        SqlParameter parameter = new SqlParameter
+        {
+            ParameterName = "@carID",
+            Value = id,
+            SqlDbType = SqlDbType.Int,
+            Direction = ParameterDirection.Input
+        };
+        command.Parameters.Add(parameter);
+
+        // Output parameter
+        parameter = new SqlParameter
+        {
+            ParameterName = "@petName",
+            SqlDbType = SqlDbType.NVarChar,
+            Size = 50,
+            Direction = ParameterDirection.Output
+        };
+        command.Parameters.Add(parameter);
+
+        command.ExecuteNonQuery();
+
+        CloseConnection();
+
+        return command.Parameters["@petName"].Value.ToString() ;
+    }
+
+
 }

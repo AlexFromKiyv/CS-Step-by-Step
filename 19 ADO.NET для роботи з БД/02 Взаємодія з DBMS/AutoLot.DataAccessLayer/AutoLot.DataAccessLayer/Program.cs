@@ -109,4 +109,18 @@ static void Test_InsertCar()
 
     TestGetAllInvertory();
 }
-Test_InsertCar();
+//Test_InsertCar();
+
+
+static void Test_LookUpPetName()
+{
+    TestGetAllInvertory();
+    Console.WriteLine();
+
+    InventoryDal inventoryDal = new InventoryDal();
+
+    Console.WriteLine(inventoryDal.LookUpPetName(5));
+    Console.WriteLine(inventoryDal.LookUpPetName(155));
+
+}
+//Test_LookUpPetName();
