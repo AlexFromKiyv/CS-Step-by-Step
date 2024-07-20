@@ -1,4 +1,5 @@
 ﻿using AutoLot.DataAccessLayer.DataOperations;
+using AutoLot.DataAccessLayer.BulkImport;
 
 static void TestGetAllInvertory()
 {
@@ -124,3 +125,58 @@ static void Test_LookUpPetName()
 
 }
 //Test_LookUpPetName();
+
+static void Test_ProcessCreditRisk()
+{
+    InventoryDal inventoryDal = new InventoryDal();
+
+    inventoryDal.GetAllCustomer(); Console.WriteLine();
+    inventoryDal.GetAllCreditRisks(); Console.WriteLine();
+
+    Console.WriteLine("Run process with transaction.");
+
+    inventoryDal.ProcessCreditRisk(false, 1);
+    inventoryDal.ProcessCreditRisk(true, 3);
+
+    inventoryDal.GetAllCustomer(); Console.WriteLine();
+    inventoryDal.GetAllCreditRisks(); Console.WriteLine();
+
+}
+//Test_ProcessCreditRisk();
+
+
+// Data for Test_MyDataReader
+List<Car> cars = new()
+{
+    new Car() {Color = "Blue", MakeId = 2, PetName = "Snuppy1"},
+    new Car() {Color = "White", MakeId = 1, PetName = "Snuppy2"},
+    new Car() {Color = "Red", MakeId = 4, PetName = "Snuppy3"},
+    new Car() {Color = "Yellow", MakeId = 1, PetName = "Snuppy4"},
+}; 
+
+void Test_MyDataReader()
+{
+    string connectionString = "Data Source=(localdb)\\mssqllocaldb;Integrated Security=true;Initial Catalog=AutoLot";
+
+    var connection = new SqlConnection { ConnectionString = connectionString };
+
+    connection.Open();
+
+    MyDataReader<Car> myDataReader = new(cars, connection, "dbo", "Inventory");
+
+    Console.WriteLine("FildCount:"+myDataReader.FieldCount);
+
+    Console.WriteLine("Id\tMakeId\tColor\tPetName\tTimeStep");
+
+    while (myDataReader.Read())
+    {
+        Console.WriteLine(
+            myDataReader.GetValue(0) + "\t" +
+            myDataReader.GetValue(1) + "\t" +
+            myDataReader.GetValue(2) + "\t" +
+            myDataReader.GetValue(3) + "\t" +
+            myDataReader.GetValue(4));
+    }
+    connection.Close();
+}
+Test_MyDataReader();

@@ -1151,11 +1151,11 @@ global using Microsoft.Data.SqlClient;
 global using AutoLot.DataAccessLayer.Models;
 ```
 
-## Клас InventoryDal
+# Клас InventoryDal
 
 Далі додайте нову папку під назвою DataOperations. У цій новій папці додайте новий клас під назвою InventoryDal.cs і змініть клас на public. Цей клас визначатиме різні члени для взаємодії з таблицею Inventory бази даних AutoLot.
 
-### Додавання конструкторів
+## Додавання конструкторів
 
 ```cs
 public class InventoryDal
@@ -1175,7 +1175,7 @@ public class InventoryDal
 ```
 Створюеться конструктор, який приймає рядковий параметр (connectionString) і присвоює значення змінній рівня класу. Далі створюеться конструктор без параметрів, який передає стандартний рядок з’єднання іншому конструктору. Це дає змогу змінювати конфігурацію підключення (зрозуміор шо в реальних проетах не має такого жорстко закодованих рядків).
 
-### Відкриття та закриття підключення
+## Відкриття та закриття підключення
 
 ```cs
 public class InventoryDal
@@ -1209,7 +1209,7 @@ public class InventoryDal
 
 Для стислості більшість методів у класі InventoryDal не використовуватимуть блоки try/catch для обробки можливих винятків, а також не створюватимуть спеціальні винятки, щоб повідомити про різні проблеми з виконанням (наприклад, неправильний рядок підключення). Якщо ви збираєтеся створити індустріальну бібліотеку доступу до даних, вам обов’язково захочеться використовувати методи обробки структурованих винятків, щоб врахувати будь-які аномалії виконання.
 
-### Додавання IDisposable
+## Додавання IDisposable
 
 ```cs
 
@@ -1242,7 +1242,7 @@ public class InventoryDal : IDisposable
 ```
 Додано інтерфейс IDisposable до визначення класу. Далі реалізовано disposable патерн, викликавши Dispose в об’єкті SqlConnection.
 
-### Методи виботки
+## Методи виботки
 В класі операції з данними почнемо з того що ми вже знаемо про об’єкти Command, DataReaders і загальні колекції, щоб отримати записи з таблиці Inventory. Як ви бачили раніше, об’єкт DataReader постачальника даних дозволяє вибирати записи за допомогою механізму лише для читання та проходу в перед за допомогою методу Read().У цьому прикладі властивість CommandBehavior на DataReader налаштовано на автоматичне закриття з’єднання, коли закривається зчитувач.
 
 ```cs
@@ -1355,7 +1355,7 @@ Test_VerySimple_GetCar();
 ```
 Загалом це погана практика приймати введення користувача в необроблені оператори SQL, як це робиться тут. Далі код буде оновлено для використання параметрів.
 
-### Методи додавання 
+## Методи додавання 
 
 Вставка нового рядка в таблицю проводиться аналогічно зчитуванню. Відбувається відкриття з’єднання, виклик ExecuteNonQuery() за допомогою вашого об’єкта команди та закриття з’єднання. 
 
@@ -1442,7 +1442,7 @@ Test_Simple_InsertCar();
 12      VW      Gray    Elektric
 ```
 
-### Метод видалення
+## Метод видалення
 
 Видалити існуючий запис так само просто, як вставити новий запис. Але перед видаленням краще зробити перевірку.
 
@@ -1584,7 +1584,7 @@ Test_Simple_Update();
 12      VW      Gray    Electra
 ```
 
-### Робота з параметризованими об’єктами Command
+## Робота з параметризованими об’єктами Command
 
 Наразі логіка вставки, оновлення та видалення для типу InventoryDal використовує жорстко закодовані рядкові літерали для кожного запиту SQL. У параметризованих запитах параметри SQL є об’єктами, а не простими блоками тексту. Обробка SQL-запитів у більш об’єктно-орієнтований спосіб допомагає зменшити кількість друкарських помилок (враховуючи строго типізовані властивості). Крім того, параметризовані запити зазвичай виконуються набагато швидше, ніж літеральний рядок SQL, оскільки вони аналізуються точно один раз (а не кожного разу, коли рядок SQL призначається властивості CommandText). Параметризовані запити також допомагають захистити від атак SQL-ін’єкцій (добре відома проблема безпеки доступу до даних).
 Для підтримки параметризованих запитів об’єкти Command ADO.NET підтримують колекцію окремих об’єктів параметрів. За замовчуванням ця колекція порожня, але ви можете вставити будь-яку кількість об’єктів параметрів, які зіставляються з параметром-заповнювачем у запиті SQL. Якщо ви хочете пов’язати параметр у запиті SQL з членом колекції параметрів об’єкта команди, ви можете додати до текстового параметра SQL символ @ (принаймні, коли використовується Microsoft SQL Server; не всі СУБД підтримують цю нотацію).
@@ -1897,7 +1897,7 @@ Test_InsertCar();
 ```
 Хоча для створення параметризованого запиту часто потрібно більше коду, кінцевим результатом є зручніший спосіб програмного налаштування операторів SQL, а також досягнення кращої загальної продуктивності. Вони також надзвичайно корисні, коли ви хочете запустити збережену процедуру.
 
-### Виконання збереженої процедури
+## Виконання збереженої процедури
 
 Збережена процедура — це іменований блок коду SQL, який зберігається в базі даних. Ви можете створити збережені процедури так, щоб вони повертали набір рядків або скалярних типів даних або виконували будь-що інше, що має сенс (наприклад, вставляли, оновлювали або видаляли записи). Ви також можете змусити їх приймати будь-яку кількість необов’язкових параметрів. Кінцевим результатом є одиниця роботи, яка веде себе як типовий метод, за винятком того, що вона розташована в сховищі даних, а не у двійковому бізнес-об’єкті.  
 
@@ -1990,7 +1990,7 @@ Bimmer
 
 На даний момент у вас є надзвичайно проста бібліотека доступу до даних, яку можна використовувати для створення клієнта для відображення та редагування ваших даних.
 
-### Використанна класу клієнським додатком
+## Використанна класу клієнським додатком
 
 Додайте нову консольну програму AutoLot.Client до рішення і додайте посилання на проект AutoLot.DataAccessLayer. Очистіть створений код у файлі program.cs та додайте наступні using у верхній частині файлу:
 
@@ -2146,3 +2146,460 @@ Id      Make    Color   Pet Name
 13      Ford    White   Shmapik
 ```
 
+## Транзакції бази даних
+
+Транзакція - це набір операцій з базою даних, які успішно або невдало виконуються як сукупна одиниця. Якщо одна з операцій виявляється невдалою, усі інші операції відкочуються, ніби нічого й не було. Транзакції дуже важливі для забезпечення безпеки, дійсності та узгодженості даних таблиці.
+Транзакції важливі, коли операція з базою даних передбачає взаємодію з декількома таблицями або кількома збереженими процедурами (або комбінацією атомів бази даних). Класичний приклад транзакції включає процес переказу грошових коштів між двома банківськими рахунками. Наприклад, якщо ви мали переказати $500 зі свого ощадного рахунку на свій поточний рахунок, наступні кроки мають відбутися під час транзакції:
+
+1. Банк повинен зняти $500 з вашого ощадного рахунку.
+2. Банк повинен додати $500 на ваш поточний рахунок.
+
+Було б дуже погано, якби гроші були зняті з ощадного рахунку, але не переведені на поточний (через якусь помилку з боку банку), тому що тоді ви втратите $500. Однак, якщо ці кроки загорнуті в транзакцію бази даних, СУБД гарантує, що всі пов’язані кроки відбуваються як єдине ціле. Якщо будь-яка частина транзакції не вдається, вся операція повертається до початкового стану (rolled back). З іншого боку, якщо всі кроки виконані успішно, транзакція зафіксована (committed).
+
+Ви можете бути знайомі з акронімом ACID, переглядаючи літературу про транзакції. Це відображає чотири ключові властивості первинної транзакції: атомарність (усе або нічого), послідовність(consistent, дані залишаються стабільними протягом усієї транзакції), ізольована (транзакції не заважають іншим операціям) і довговічність (durable транзакції зберігаються та зареєстровано).
+
+Платформа .NET підтримує транзакції різними способами. Тут буде розглянуто об’єкт транзакції вашого постачальника даних ADO.NET (SqlTransaction, у випадку Microsoft.Data.SqlClient). 
+На додаток до вбудованої підтримки транзакцій у бібліотеках базових класів .NET, можна використовувати мову SQL вашої системи керування базами даних. Наприклад, ви можете створити збережену процедуру, яка використовує оператори BEGIN TRANSACTION, ROLLBACK і COMMIT.
+
+### Ключові члени об’єкта транзакції ADO.NET
+
+Усі транзакції, які ми будемо використовувати, реалізують інтерфейс IDbTransaction. Він визначає декілька членів наступним чином
+
+```cs
+public interface IDbTransaction : IDisposable
+{
+  IDbConnection Connection { get; }
+  IsolationLevel IsolationLevel { get; }
+  void Commit();
+  void Rollback();
+}
+```
+Зверніть увагу на властивість Connection, яка повертає посилання на об’єкт підключення, який ініціював поточну транзакцію (як ви побачите, ви отримуєте об’єкт транзакції з певного об’єкта підключення). Ви викликаєте метод Commit(), коли кожна з ваших операцій з базою даних завершується успішно. Це призведе до того, що кожна зміна, що очікує на розгляд, збережеться в сховищі даних. І навпаки, ви можете викликати метод Rollback() у разі виняткової ситуації під час виконання, яка інформує СУБД ігнорувати будь-які очікувані зміни, залишаючи вихідні дані недоторканими.
+Властивість IsolationLevel об’єкта транзакції дозволяє вказати, наскільки агресивно транзакція повинна бути захищена від дій інших паралельних транзакцій. За замовчуванням транзакції повністю ізольовані, доки не будуть зафіксовані.
+Крім членів, визначених інтерфейсом IDbTransaction, тип SqlTransaction визначає додатковий член під назвою Save(), який дозволяє визначати точки збереження. Ця концепція дозволяє відкочувати невдалу транзакцію до названої точки, а не відкочувати всю транзакцію. По суті, коли ви викликаєте Save() за допомогою об’єкта SqlTransaction, ви можете вказати зрозумілий монікер рядка. Коли ви викликаєте Rollback(), ви можете вказати той самий псевдонім як аргумент для ефективного часткового відкоту. Виклик Rollback() без аргументів призводить до відкоту всіх незавершених змін.
+
+### Додавання методу транзакції 
+
+Повернемось до класу InvertoryDal та добавимо можливість для вирішення передбачуваних кредитних ризиків. Додамо метод який шукає клієнта додає його до таблиці CreditRisks.
+
+
+```cs
+public void ProcessCreditRisk(bool throwEx, int customerId)
+{
+    OpenConnection();
+
+    // Look up customer by id
+
+    string firstName, lastName;
+
+    SqlParameter parameterId = new()
+    {
+        ParameterName = "@CustomerId",
+        SqlDbType = SqlDbType.Int,
+        Value = customerId,
+        Direction = ParameterDirection.Input
+    };
+
+    string sql = "Select * from Customers where Id = @CustomerId";
+    var cmdSelect = new SqlCommand(sql, _sqlConnection);
+
+    cmdSelect.Parameters.Add(parameterId);
+
+    using var dataReader = cmdSelect.ExecuteReader();
+
+    if (dataReader.HasRows)
+    {
+        dataReader.Read();
+        firstName = dataReader.GetString("FirstName");
+        lastName = dataReader.GetString("LastName");
+        dataReader.Close();
+    }
+    else
+    {
+        CloseConnection();
+        return;
+    }
+
+    // Insert command
+    SqlParameter parameterId1 = new()
+    {
+        ParameterName = "@CustomerId",
+        SqlDbType = SqlDbType.Int,
+        Value = customerId,
+        Direction = ParameterDirection.Input
+    };
+    SqlParameter parameterFirstName = new()
+    {
+        ParameterName ="@FirstName",
+        SqlDbType = SqlDbType.NVarChar,
+        Size = 50,
+        Value = firstName
+    };
+    SqlParameter parameterLastName = new()
+    {
+        ParameterName = "@LastName",
+        SqlDbType = SqlDbType.NVarChar,
+        Size = 50,
+        Value = lastName
+    };
+
+    sql = "Insert Into CreditRisks (CustomerId, FirstName, LastName) Values(@CustomerId,@FirstName, @LastName)";
+    var cmdInsert = new SqlCommand(sql, _sqlConnection);
+    cmdInsert.Parameters.Add(parameterId1);    
+    cmdInsert.Parameters.Add(parameterFirstName);
+    cmdInsert.Parameters.Add(parameterLastName);
+
+    // Update command
+    SqlParameter parameterId2 = new()
+    {
+        ParameterName = "@CustomerId",
+        SqlDbType = SqlDbType.Int,
+        Value = customerId,
+        Direction = ParameterDirection.Input
+    };
+    sql = "Update Customers set LastName = LastName + ' (CreditRisk) ' where Id = @CustomerId";
+    var cmdUpdate = new SqlCommand(sql, _sqlConnection);
+    cmdUpdate.Parameters.Add(parameterId2);
+
+    // Use transaction object. We will get this from the connection object
+    SqlTransaction? transaction = null;
+    try
+    {
+        transaction = _sqlConnection?.BeginTransaction();
+        cmdInsert.Transaction = transaction;
+        cmdUpdate.Transaction = transaction;
+
+        cmdInsert.ExecuteNonQuery();
+        cmdUpdate.ExecuteNonQuery();
+
+        // Simulate error
+        if (throwEx)
+        {
+            throw new Exception('Sorry!  Database error! Tx failed...');
+        }
+        transaction?.Commit();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+        transaction?.Rollback();                     
+    }
+    finally
+    {
+        CloseConnection();
+    };
+}
+```
+Тут ви використовуєте вхідний параметр bool, щоб ініціювати ситуацію коли виник виняток.
+Це дозволяє імітувати непередбачену обставину, яка призведе до збою транзакції бази даних. Очевидно, ви робите це тут лише для ілюстрації;справжній метод транзакцій бази даних не хотів би дозволити абоненту змусити логіку відмовити через примху! 
+Зверніть увагу, що ви використовуєте два об’єкти SqlCommand для представлення кожного кроку в транзакції, яку ви розпочинаєте.
+Спочатку отримуєте дані клієнта. Далі підготовлюєте дві команди. Ви можете отримати дійсний об’єкт SqlTransaction з об’єкта підключення за допомогою BeginTransaction(). Далі, і це найважливіше, ви повинні залучити кожен об’єкт команди, призначивши властивість Transaction об’єкту транзакції, який ви щойно отримали. Якщо ви цього не зробите, логіка Insert/Update не буде в контексті транзакції.
+Після виклику ExecuteNonQuery() для кожної команди ви створюєте виняток, якщо (і тільки якщо) значення параметра bool є істинним. У цьому випадку всі незавершені операції бази даних відкочуються. Якщо ви не створите виняток, обидва кроки будуть зафіксовані в таблицях бази даних після виклику Commit().
+
+Додамо методи шо повертає дані таблиць в яких виконуються команди.
+
+```cs
+    public void GetAllCustomer()
+    {
+
+        OpenConnection();
+        string sql = "Select * from Customers";
+        var cmdSelect = new SqlCommand(sql, _sqlConnection);
+
+        using var dataReader = cmdSelect.ExecuteReader();
+
+        while(dataReader.Read())
+        {
+            Console.WriteLine(dataReader.GetInt32("Id") + "\t" +
+                dataReader.GetString("FirstName") + "\t" +
+                dataReader.GetString("LastName")
+                );
+        }
+       
+        CloseConnection();
+    }
+    public void GetAllCreditRisks()
+    {
+
+        OpenConnection();
+        string sql = "Select * from CreditRisks";
+        var cmdSelect = new SqlCommand(sql, _sqlConnection);
+
+        using var dataReader = cmdSelect.ExecuteReader();
+
+        while (dataReader.Read())
+        {
+            Console.WriteLine(dataReader.GetInt32("Id") + "\t" +
+                dataReader.GetString("FirstName") + "\t" +
+                dataReader.GetString("LastName") + "\t" +
+                dataReader.GetInt32("CustomerId")
+                );
+        }
+        CloseConnection();
+    }
+```
+
+Протестуєм процес з транзауцією.
+
+```cs
+static void Test_ProcessCreditRisk()
+{
+    InventoryDal inventoryDal = new InventoryDal();
+
+    inventoryDal.GetAllCustomer(); Console.WriteLine();
+    inventoryDal.GetAllCreditRisks(); Console.WriteLine();
+
+    Console.WriteLine("Run process with transaction.");
+
+    inventoryDal.ProcessCreditRisk(false, 1);
+    inventoryDal.ProcessCreditRisk(true, 3);
+
+    inventoryDal.GetAllCustomer(); Console.WriteLine();
+    inventoryDal.GetAllCreditRisks(); Console.WriteLine();
+
+}
+Test_ProcessCreditRisk();
+```
+```
+1       Dave    Brenner
+2       Matt    Walton
+3       Steve   Hagen
+4       Pat     Walton
+5       Bad     Customer
+
+1       Bad     Customer        5
+
+Run process with transaction.
+Sorry!  Database error! Transaction failed...
+1       Dave    Brenner (CreditRisk)
+2       Matt    Walton
+3       Steve   Hagen
+4       Pat     Walton
+5       Bad     Customer
+
+1       Bad     Customer        5
+3       Dave    Brenner 1
+```
+
+Як бачимо в першому виклику всі зміни в БД зафіксувались а другий виклик нічого не змінив.
+
+## Виконання масових(bulk) копій за допомогою ADO.NET
+
+У випадках, коли вам потрібно завантажити багато записів у базу даних, методи, показані досі, будуть досить неефективними. SQL Server має функцію під назвою масове копіювання, розроблену спеціально для цього сценарію, і її загорнуто в ADO.NET за допомогою класу SqlBulkCopy.
+
+### Ознайомлення з класом SqlBulkCopy
+
+Клас SqlBulkCopy має метод WriteToServer() і асинхронну версію WriteToServerAsync(), який обробляє список записів і записує дані в базу даних більш ефективно, ніж написання серії операторів вставки та їх виконання з об’єктом Command. Перевантаження WriteToServer приймають DataTable, DataReader або масив DataRows. Щоб дотримуватися теми цього розділу, ви збираєтеся використовувати версію DataReader. Для цього вам потрібно створити спеціальний зчитувач даних.
+
+### Створення спеціального зчитувача даних
+
+Спецфальний зчитувач даних краще зробити узагальненим і містив список моделей, які ви хочете імпортувати. Почніть із створення нової папки в проекті AutoLot.DataAccessLayer під назвою BulkImport. У папці створіть новий клас інтерфейсу під назвою IMyDataReader.cs, який реалізує IDataReader.
+
+```cs
+
+namespace AutoLot.DataAccessLayer.BulkImport;
+
+internal interface IMyDataReader<T> : IDataReader
+{
+    public List<T> Records { get; set; }
+}
+```
+Як ви вже бачили, зчитувачі даних мають багато методів. Хороша новина полягає в тому, що для SqlBulkCopy ви повинні реалізувати лише кілька з них. Створіть новий клас під назвою MyDataReader.cs, оновіть клас до public і sealed і запровадьте IMyDataReader.Додайте конструктор для записів і встановлення властивості.
+
+```cs
+public sealed class MyDataReader<T> : IMyDataReader<T>
+{
+    public List<T> Records { get; set; }
+    public MyDataReader(List<T> records)
+    {
+        Records = records;
+    }
+}
+
+```
+Попросіть Visual Studio або Visual Studio Code реалізувати всі методи для вас, і ви матимете початкову точку для користувацького зчитувача даних. 
+
+Далі описано методи, які необхідно реалізувати для нашого сценарію.
+
+Ключові методи IDataReader для SqlBulkCopy
+
+    Read : Отримує наступний запис; повертає true, якщо наступний запис є, або повертає false, якщо в кінці списку
+
+    FieldCount : Отримує загальну кількість полів у джерелі даних
+
+    GetValue : Отримує значення поля на основі порядкової позиції
+
+    GetSchemaTable : Отримує інформацію про схему для цільової таблиці
+
+Додайте змінну рівня класу для зберігання поточного індексу List<T>.
+
+```cs
+    private int _index = -1;
+```
+Почнемо з методу Read.
+
+```cs
+    public bool Read()
+    {
+        if (_index + 1 >= Records.Count)
+        {
+            return false;
+        }
+        _index++;
+        return true;
+    }
+
+```
+По суті метод змінює индекс поточного єлемента на наступний якшо такий є. Якшо індекс вказує на кінець повертає false інакше true.
+
+Для кожного з методів get і метод FieldCount потрібне глибоке знання конкретної моделі, яку потрібно завантажити. Приклад методу GetValue() з використанням класу Car.
+
+```cs
+public object GetValue(int i)
+{
+  Car currentRecord = Records[_currentIndex] as Car;
+  return i switch
+  {
+    0 => currentRecord.Id,
+    1 => currentRecord.MakeId,
+    2 => currentRecord.Color,
+    3 => currentRecord.PetName,
+    4 => currentRecord.TimeStamp,
+    _ => string.Empty,
+  };
+}
+```
+
+База даних містить лише чотири таблиці, але це означає, що у вас все ще є чотири варіанти читача даних. Уявіть, якби у вас була справжня виробнича база даних з набагато більшою кількістю таблиць. Можна зробити краще використовуючи рефлексію (reflection) та LINQ to Objects.
+
+Для ціх цілей додамо змінні, щоб зберігати значення PropertyInfo для моделі, а також словник, який використовуватиметься для зберігання позиції поля та імені для таблиці в SQL Server.
+
+```cs
+    private readonly PropertyInfo[] _propertyInfos;
+    private readonly Dictionary<int,string> _nameDictionary;
+```
+Оновіть конструктор, щоб отримати властивості узагального типу та ініціалізувати словник.
+
+```cs
+    public MyDataReader(List<T> records)
+    {
+        Records = records;
+        _propertyInfos = typeof(T).GetProperties();
+        _nameDictionary = new();
+    }
+```
+
+Додайте змінні які будуть зберігати SQLConnection, схему та назву таблиці в яку додаються записи. 
+
+```cs
+    private readonly SqlConnection _connection;
+    private readonly string _schema;
+    private readonly string _tableName;
+```
+Оновіть конструктор щоб приймати ці змінні.
+
+```cs
+    public MyDataReader(List<T> records, SqlConnection connection, string schema, string tableName)
+    {
+        Records = records;
+        _propertyInfos = typeof(T).GetProperties();
+        _nameDictionary = new();
+        _connection = connection;
+        _schema = schema;
+        _tableName = tableName;
+    }
+```
+Створимо допоміжний метод який отримує інформацію SQL Server щодо цільової таблиці.
+
+```cs
+    public DataTable GetSchaemaTable()
+    {
+        string sql = $"SELECT * FROM {_schema}.{_tableName}";
+        using var schemaCommand = new SqlCommand(sql, _connection);
+        using var reader = schemaCommand.ExecuteReader(CommandBehavior.SchemaOnly);
+        return reader.GetSchemaTable();
+    }
+```
+Змінемо конструктор заповнивши словник назвами стовпців.
+
+```cs
+    public MyDataReader(List<T> records, SqlConnection connection, string schema, string tableName)
+    {
+        Records = records;
+        _propertyInfos = typeof(T).GetProperties();
+        _nameDictionary = new();
+        _connection = connection;
+        _schema = schema;
+        _tableName = tableName;
+
+        DataTable schemaTable = GetSchaemaTable();
+        for (int i = 0; i < schemaTable?.Rows.Count; i++)
+        {
+            DataRow dataRow = schemaTable.Rows[i];
+            var columnName = dataRow.Field<string>("ColumnName");
+            _nameDictonary.Add(i, columnName);
+        }
+    }
+```
+Додамо реалізацію необхідних для копіювання методів.
+
+```cs
+
+    public int FieldCount => _propertyInfos.Length;
+
+    public object GetValue(int i) =>
+        _propertyInfos
+        .First(x => x.Name.Equals(_nameDictionary[i], StringComparison.OrdinalIgnoreCase))
+        .GetValue(Records[_index])!;
+
+```
+Решта методів які не використовуються для рішеня нашого завдання залишимо нереалізованими.
+
+Перевіримо спеціальний клас зчитувача. 
+
+AutoLot.DataAccessLayer\Program.cs
+```cs
+// Data for Test_MyDataReader
+List<Car> cars = new()
+{
+    new Car() {Color = "Blue", MakeId = 2, PetName = "Snuppy1"},
+    new Car() {Color = "White", MakeId = 1, PetName = "Snuppy2"},
+    new Car() {Color = "Red", MakeId = 4, PetName = "Snuppy3"},
+    new Car() {Color = "Yellow", MakeId = 1, PetName = "Snuppy4"},
+}; 
+
+void Test_MyDataReader()
+{
+    string connectionString = "Data Source=(localdb)\\mssqllocaldb;Integrated Security=true;Initial Catalog=AutoLot";
+
+    var connection = new SqlConnection { ConnectionString = connectionString };
+
+    connection.Open();
+
+    MyDataReader<Car> myDataReader = new(cars, connection, "dbo", "Inventory");
+
+    Console.WriteLine("FildCount:"+myDataReader.FieldCount);
+
+    Console.WriteLine("Id\tMakeId\tColor\tPetName\tTimeStep");
+
+    while (myDataReader.Read())
+    {
+        Console.WriteLine(
+            myDataReader.GetValue(0) + "\t" +
+            myDataReader.GetValue(1) + "\t" +
+            myDataReader.GetValue(2) + "\t" +
+            myDataReader.GetValue(3) + "\t" +
+            myDataReader.GetValue(4));
+    }
+    connection.Close();
+}
+Test_MyDataReader();
+```
+```
+FildCount:5
+Id      MakeId  Color   PetName TimeStep
+0       2       Blue    Snuppy1
+0       1       White   Snuppy2
+0       4       Red     Snuppy3
+0       1       Yellow  Snuppy4
+```

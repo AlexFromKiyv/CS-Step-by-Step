@@ -377,5 +377,149 @@ public class InventoryDal : IDisposable
         return command.Parameters["@petName"].Value.ToString() ;
     }
 
+    public void ProcessCreditRisk(bool throwEx, int customerId)
+    {
+        OpenConnection();
+
+        // Look up customer by id
+
+        string firstName, lastName;
+
+        SqlParameter parameterId = new()
+        {
+            ParameterName = "@CustomerId",
+            SqlDbType = SqlDbType.Int,
+            Value = customerId,
+            Direction = ParameterDirection.Input
+        };
+
+        string sql = "Select * from Customers where Id = @CustomerId";
+        var cmdSelect = new SqlCommand(sql, _sqlConnection);
+
+        cmdSelect.Parameters.Add(parameterId);
+
+        using var dataReader = cmdSelect.ExecuteReader();
+
+        if (dataReader.HasRows)
+        {
+            dataReader.Read();
+            firstName = dataReader.GetString("FirstName");
+            lastName = dataReader.GetString("LastName");
+            dataReader.Close();
+        }
+        else
+        {
+            CloseConnection();
+            return;
+        }
+
+        // Insert command
+        SqlParameter parameterId1 = new()
+        {
+            ParameterName = "@CustomerId",
+            SqlDbType = SqlDbType.Int,
+            Value = customerId,
+            Direction = ParameterDirection.Input
+        };
+        SqlParameter parameterFirstName = new()
+        {
+            ParameterName ="@FirstName",
+            SqlDbType = SqlDbType.NVarChar,
+            Size = 50,
+            Value = firstName
+        };
+        SqlParameter parameterLastName = new()
+        {
+            ParameterName = "@LastName",
+            SqlDbType = SqlDbType.NVarChar,
+            Size = 50,
+            Value = lastName
+        };
+
+        sql = "Insert Into CreditRisks (CustomerId, FirstName, LastName) Values(@CustomerId,@FirstName, @LastName)";
+        var cmdInsert = new SqlCommand(sql, _sqlConnection);
+        cmdInsert.Parameters.Add(parameterId1);    
+        cmdInsert.Parameters.Add(parameterFirstName);
+        cmdInsert.Parameters.Add(parameterLastName);
+
+        // Update command
+        SqlParameter parameterId2 = new()
+        {
+            ParameterName = "@CustomerId",
+            SqlDbType = SqlDbType.Int,
+            Value = customerId,
+            Direction = ParameterDirection.Input
+        };
+        sql = "Update Customers set LastName = LastName + ' (CreditRisk) ' where Id = @CustomerId";
+        var cmdUpdate = new SqlCommand(sql, _sqlConnection);
+        cmdUpdate.Parameters.Add(parameterId2);
+
+        // Use transaction object. We will get this from the connection object
+        SqlTransaction? transaction = null;
+        try
+        {
+            transaction = _sqlConnection?.BeginTransaction();
+            cmdInsert.Transaction = transaction;
+            cmdUpdate.Transaction = transaction;
+
+            cmdInsert.ExecuteNonQuery();
+            cmdUpdate.ExecuteNonQuery();
+
+            // Simulate error
+            if (throwEx)
+            {
+                throw new Exception("Sorry!  Database error! Transaction failed...");
+            }
+            transaction?.Commit();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            transaction?.Rollback();                     
+        }
+        finally
+        {
+            CloseConnection();
+        };
+    }
+
+    public void GetAllCustomer()
+    {
+
+        OpenConnection();
+        string sql = "Select * from Customers";
+        var cmdSelect = new SqlCommand(sql, _sqlConnection);
+
+        using var dataReader = cmdSelect.ExecuteReader();
+
+        while(dataReader.Read())
+        {
+            Console.WriteLine(dataReader.GetInt32("Id") + "\t" +
+                dataReader.GetString("FirstName") + "\t" +
+                dataReader.GetString("LastName")
+                );
+        }
+       
+        CloseConnection();
+    }
+    public void GetAllCreditRisks()
+    {
+
+        OpenConnection();
+        string sql = "Select * from CreditRisks";
+        var cmdSelect = new SqlCommand(sql, _sqlConnection);
+
+        using var dataReader = cmdSelect.ExecuteReader();
+
+        while (dataReader.Read())
+        {
+            Console.WriteLine(dataReader.GetInt32("Id") + "\t" +
+                dataReader.GetString("FirstName") + "\t" +
+                dataReader.GetString("LastName") + "\t" +
+                dataReader.GetInt32("CustomerId")
+                );
+        }
+        CloseConnection();
+    }
 
 }
