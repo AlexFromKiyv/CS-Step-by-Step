@@ -62,7 +62,7 @@ public class InventoryDal : IDisposable
 
 
     // Methods of data selection
-    public List<CarViewModel> GetAllInvertory()
+    public List<CarViewModel> GetAllInventory()
     {
         List<CarViewModel> invertory = new();
 

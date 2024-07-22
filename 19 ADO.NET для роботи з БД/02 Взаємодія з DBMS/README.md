@@ -1247,9 +1247,9 @@ public class InventoryDal : IDisposable
 
 ```cs
    // Methods of data selection
-   public List<CarViewModel> GetAllInvertory()
+   public List<CarViewModel> GetAllInventory()
    {
-       List<CarViewModel> invertory = new();
+       List<CarViewModel> inventory = new();
 
        OpenConnection();
 
@@ -1262,7 +1262,7 @@ public class InventoryDal : IDisposable
        SqlDataReader dataReader = command.ExecuteReader(CommandBehavior.CloseConnection);
        while (dataReader.Read())
        {
-           invertory.Add(new CarViewModel
+           inventory.Add(new CarViewModel
            {
                Id = dataReader.GetInt32("Id"),
                Color = dataReader.GetString("Color"),
@@ -1272,7 +1272,7 @@ public class InventoryDal : IDisposable
        }
        dataReader.Close();
 
-       return invertory;
+       return inventory;
    }
 ```
 Метод GetAllInventory() повертає List<CarViewModel> для представлення всіх даних у таблиці Inventory.
@@ -1280,18 +1280,18 @@ public class InventoryDal : IDisposable
 Протестуємо в Program.cs
 
 ```cs
-static void TestGetAllInvertory()
+static void TestGetAllInventory()
 {
     InventoryDal inventoryDal = new InventoryDal();
 
-    var inventory = inventoryDal.GetAllInvertory();
+    var inventory = inventoryDal.GetAllInventory();
 
     foreach (var item in inventory)
     {
         Console.WriteLine($"{item.Id}\t{item.Make}\t{item.Color}\t{item.PetName}");
     }
 }
-TestGetAllInvertory();
+TestGetAllInventory();
 ```
 ```console
 1       VW      Black   Zippy
@@ -1383,7 +1383,7 @@ static void Test_VerySimple_InsertCar()
     InventoryDal inventoryDal = new InventoryDal();
     inventoryDal.VerySimple_InsertCar("Green", 1, "Ella");
     
-    TestGetAllInvertory();
+    TestGetAllInventory();
 }
 Test_VerySimple_InsertCar();
 ```
@@ -1423,7 +1423,7 @@ static void Test_Simple_InsertCar()
     Car car = new() { Color = "Gray", MakeId = 1, PetName = "Elektric" };
     inventoryDal.Simple_InsertCar(car);
 
-    TestGetAllInvertory();
+    TestGetAllInventory();
 }
 Test_Simple_InsertCar();
 ```
@@ -1479,7 +1479,7 @@ static void Test_Simple_DeleteCar()
 {
     InventoryDal inventoryDal = new InventoryDal();
     inventoryDal.Simple_DeleteCar(11);
-    TestGetAllInvertory();
+    TestGetAllInventory();
 
     Console.WriteLine();
 
@@ -1487,7 +1487,7 @@ static void Test_Simple_DeleteCar()
 
     Console.WriteLine();
 
-    TestGetAllInvertory();
+    TestGetAllInventory();
 }
 Test_Simple_DeleteCar();
 
@@ -1547,13 +1547,13 @@ The statement has been terminated.
 ```cs
 static void Test_Simple_Update()
 {
-    TestGetAllInvertory();
+    TestGetAllInventory();
     Console.WriteLine();
 
     InventoryDal inventoryDal = new InventoryDal();
     inventoryDal.Simple_Update(12, "Electra");
 
-    TestGetAllInvertory();
+    TestGetAllInventory();
 }
 Test_Simple_Update();
 ```
@@ -1705,13 +1705,13 @@ Test_GetCar();
 ```cs
 static void Test_DeleteCar()
 {
-    TestGetAllInvertory();
+    TestGetAllInventory();
     Console.WriteLine();
 
     InventoryDal inventoryDal = new InventoryDal();
     inventoryDal.Simple_DeleteCar(12);
 
-    TestGetAllInvertory();
+    TestGetAllInventory();
 
 }
 Test_DeleteCar();
@@ -1786,13 +1786,13 @@ Test_DeleteCar();
 ```cs
 static void Test_Update()
 {
-    TestGetAllInvertory();
+    TestGetAllInventory();
     Console.WriteLine();
 
     InventoryDal inventoryDal = new InventoryDal();
     inventoryDal.Update(10, "Electra");
 
-    TestGetAllInvertory();
+    TestGetAllInventory();
 }
 Test_Update();
 ```
@@ -1878,7 +1878,7 @@ static void Test_InsertCar()
     Car car = new() { Color = "White", MakeId = 2, PetName = "Lapik" };
     inventoryDal.InsertCar(car);
 
-    TestGetAllInvertory();
+    TestGetAllInventory();
 }
 Test_InsertCar();
 ```
@@ -1956,7 +1956,7 @@ GO
 ```cs
 static void Test_LookUpPetName()
 {
-    TestGetAllInvertory();
+    TestGetAllInventory();
     Console.WriteLine();
 
     InventoryDal inventoryDal = new InventoryDal();
@@ -2006,7 +2006,7 @@ static void Run()
 {
     InventoryDal inventoryDal = new();
     Console.WriteLine("\t\tAll list");
-    List<CarViewModel> cars = inventoryDal.GetAllInvertory();
+    List<CarViewModel> cars = inventoryDal.GetAllInventory();
     ViewListOfCar(cars);
     Console.WriteLine("\n\n");
 
@@ -2021,26 +2021,26 @@ static void Run()
     Console.WriteLine("\t\tInsert");
     Car newCar = new() { Color = "Red", MakeId = 5, PetName = "Cher" };
     inventoryDal.InsertCar(newCar);
-    ViewListOfCar(inventoryDal.GetAllInvertory());
+    ViewListOfCar(inventoryDal.GetAllInventory());
     Console.WriteLine("\n\n");
 
     Console.WriteLine("\t\tDelete");
-    int lastId = inventoryDal.GetAllInvertory().Max(c => c.Id);
+    int lastId = inventoryDal.GetAllInventory().Max(c => c.Id);
     Console.WriteLine($"Last ID {lastId}");
     inventoryDal.DeleteCar(lastId);
-    ViewListOfCar(inventoryDal.GetAllInvertory());
+    ViewListOfCar(inventoryDal.GetAllInventory());
     Console.WriteLine("\n\n");
 
 
     Console.WriteLine("\t\tUpdate");
     inventoryDal.Update(13, "Shmapik");
-    ViewListOfCar(inventoryDal.GetAllInvertory());
+    ViewListOfCar(inventoryDal.GetAllInventory());
     Console.WriteLine("\n\n");
 
 
     Console.WriteLine("\t\tDelete with SqlException");
     inventoryDal.DeleteCar(5);
-    ViewListOfCar(inventoryDal.GetAllInvertory());
+    ViewListOfCar(inventoryDal.GetAllInventory());
 }
 Run();
 
@@ -2180,7 +2180,7 @@ public interface IDbTransaction : IDisposable
 
 ### Додавання методу транзакції 
 
-Повернемось до класу InvertoryDal та добавимо можливість для вирішення передбачуваних кредитних ризиків. Додамо метод який шукає клієнта додає його до таблиці CreditRisks.
+Повернемось до класу InventoryDal та добавимо можливість для вирішення передбачуваних кредитних ризиків. Додамо метод який шукає клієнта додає його до таблиці CreditRisks.
 
 
 ```cs
@@ -2603,3 +2603,133 @@ Id      MakeId  Color   PetName TimeStep
 0       4       Red     Snuppy3
 0       1       Yellow  Snuppy4
 ```
+
+### Статичний клас для виконання масового копіювання за допомогою SqlBulkCopy
+
+Додайте новий публічний статичний клас під назвою ProcessBulkImport.cs до папки BulkImport. Додайте код для обробки відкриття та закриття з’єднань.
+
+```cs
+
+namespace AutoLot.DataAccessLayer.BulkImport;
+
+public static class ProcessBulkImport
+{
+    private const string ConnectionString = "Data Source=(localdb)\\mssqllocaldb;Integrated Security=true;Initial Catalog=AutoLot";
+    private static SqlConnection? _sqlConnection = null;
+
+    private static void OpenConnection()
+    {
+        _sqlConnection = new()
+        {
+            ConnectionString = ConnectionString,
+        };
+        _sqlConnection.Open();
+    }
+
+    private static void CloseConnection() 
+    {
+        if(_sqlConnection?.State != ConnectionState.Closed)
+        {
+            _sqlConnection?.Close();
+        }
+    }
+}
+```
+Додамо метод шо виконує копіювання.
+
+```cs
+    public static void ExecuteBulkImport<T>(IEnumerable<T> records, string tableName)
+    {
+        OpenConnection();
+        
+        using SqlConnection connection = _sqlConnection!;
+        SqlBulkCopy bulkCopy = new(connection)
+        {
+            DestinationTableName = tableName,
+        };
+
+        var dataReader = new MyDataReader<T>(records.ToList(), _sqlConnection, "dbo", "Inventory");
+
+        try
+        {
+            bulkCopy.WriteToServer(dataReader);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+        finally
+        {
+            CloseConnection();
+        } 
+    }
+
+```
+При створені екземпляра класу SqlBulkCopy передеється відкрите підключення та далі встановлюється назва таблиці в яку буде виконуватися копіювання. Потім створіть новий екземпляр користувацького зчитувача даних, що містить список для масового копіювання і викличте WriteToServer().
+
+### Тестування класу масового копіювання
+
+Повернувшись до проекту AutoLot.Client, додайте новий метод у файл Program.cs під назвою DoBulkCopy().
+
+
+```cs
+void DoBulkCopy()
+{
+    InventoryDal inventoryDal = new();
+    Console.WriteLine("\t\tBefore bulk copy");
+    ViewListOfCar(inventoryDal.GetAllInventory());
+    Console.WriteLine("\n\n");
+
+    var cars = new List<Car>
+    {
+        new Car() {Color = "Blue", MakeId = 4, PetName = "MyCar1"},
+        new Car() {Color = "Red", MakeId = 3, PetName = "MyCar2"},
+        new Car() {Color = "White", MakeId = 1, PetName = "MyCar3"},
+        new Car() {Color = "Yellow", MakeId = 2, PetName = "MyCar4"}
+    };
+
+    ProcessBulkImport.ExecuteBulkImport(cars, "Inventory");
+
+    Console.WriteLine("\t\tAfter bulk copy");
+    ViewListOfCar(inventoryDal.GetAllInventory());
+}
+DoBulkCopy();
+```
+```
+                Before bulk copy
+Id      Make    Color   Pet Name
+1       VW      Black   Zippy
+2       Ford    Rust    Rusty
+3       Saab    Black   Mel
+4       Yugo    Yellow  Clunker
+5       BMW     Black   Bimmer
+6       BMW     Green   Hank
+7       BMW     Pink    Pinky
+8       Pinto   Black   Pete
+9       Yugo    Brown   Brownie
+10      VW      Green   Electra
+13      Ford    White   Shmapik
+
+
+
+                After bulk copy
+Id      Make    Color   Pet Name
+1       VW      Black   Zippy
+2       Ford    Rust    Rusty
+3       Saab    Black   Mel
+4       Yugo    Yellow  Clunker
+5       BMW     Black   Bimmer
+6       BMW     Green   Hank
+7       BMW     Pink    Pinky
+8       Pinto   Black   Pete
+9       Yugo    Brown   Brownie
+10      VW      Green   Electra
+13      Ford    White   Shmapik
+18      Yugo    Blue    MyCar1
+19      Saab    Red     MyCar2
+20      VW      White   MyCar3
+21      Ford    Yellow  MyCar4
+```
+
+Хоча додавання чотирьох нових записів не демонструє переваг роботи, пов’язаної з використанням класу SqlBulkCopy, уявіть спробу завантажити тисячі записів.
+Як і все в .NET, це ще один інструмент, який потрібно мати у своєму наборі інструментів, щоб використовувати його, коли це буде найбільш доцільним.

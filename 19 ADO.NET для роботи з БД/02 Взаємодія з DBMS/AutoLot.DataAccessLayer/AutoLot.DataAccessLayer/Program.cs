@@ -5,7 +5,7 @@ static void TestGetAllInvertory()
 {
     InventoryDal inventoryDal = new InventoryDal();
 
-    var inventory = inventoryDal.GetAllInvertory();
+    var inventory = inventoryDal.GetAllInventory();
 
     foreach (var item in inventory)
     {
@@ -179,4 +179,4 @@ void Test_MyDataReader()
     }
     connection.Close();
 }
-Test_MyDataReader();
+//Test_MyDataReader();

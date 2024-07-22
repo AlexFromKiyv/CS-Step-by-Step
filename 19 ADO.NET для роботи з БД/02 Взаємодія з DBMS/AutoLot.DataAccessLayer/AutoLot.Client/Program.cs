@@ -1,4 +1,5 @@
-﻿using AutoLot.DataAccessLayer.DataOperations;
+﻿using AutoLot.DataAccessLayer.BulkImport;
+using AutoLot.DataAccessLayer.DataOperations;
 using AutoLot.DataAccessLayer.Models;
 
 
@@ -7,7 +8,7 @@ static void Run()
 {
     InventoryDal inventoryDal = new();
     Console.WriteLine("\t\tAll list");
-    List<CarViewModel> cars = inventoryDal.GetAllInvertory();
+    List<CarViewModel> cars = inventoryDal.GetAllInventory();
     ViewListOfCar(cars);
     Console.WriteLine("\n\n");
 
@@ -22,28 +23,28 @@ static void Run()
     Console.WriteLine("\t\tInsert");
     Car newCar = new() { Color = "Red", MakeId = 5, PetName = "Cher" };
     inventoryDal.InsertCar(newCar);
-    ViewListOfCar(inventoryDal.GetAllInvertory());
+    ViewListOfCar(inventoryDal.GetAllInventory());
     Console.WriteLine("\n\n");
 
     Console.WriteLine("\t\tDelete");
-    int lastId = inventoryDal.GetAllInvertory().Max(c => c.Id);
+    int lastId = inventoryDal.GetAllInventory().Max(c => c.Id);
     Console.WriteLine($"Last ID {lastId}");
     inventoryDal.DeleteCar(lastId);
-    ViewListOfCar(inventoryDal.GetAllInvertory());
+    ViewListOfCar(inventoryDal.GetAllInventory());
     Console.WriteLine("\n\n");
 
 
     Console.WriteLine("\t\tUpdate");
     inventoryDal.Update(13, "Shmapik");
-    ViewListOfCar(inventoryDal.GetAllInvertory());
+    ViewListOfCar(inventoryDal.GetAllInventory());
     Console.WriteLine("\n\n");
 
 
     Console.WriteLine("\t\tDelete with SqlException");
     inventoryDal.DeleteCar(5);
-    ViewListOfCar(inventoryDal.GetAllInvertory());
+    ViewListOfCar(inventoryDal.GetAllInventory());
 }
-Run();
+//Run();
 
 static void ViewListOfCar(List<CarViewModel> cars)
 {
@@ -54,3 +55,24 @@ static void ViewListOfCar(List<CarViewModel> cars)
     }
 }
 
+void DoBulkCopy()
+{
+    InventoryDal inventoryDal = new();
+    Console.WriteLine("\t\tBefore bulk copy");
+    ViewListOfCar(inventoryDal.GetAllInventory());
+    Console.WriteLine("\n\n");
+
+    var cars = new List<Car>
+    {
+        new Car() {Color = "Blue", MakeId = 4, PetName = "MyCar1"},
+        new Car() {Color = "Red", MakeId = 3, PetName = "MyCar2"},
+        new Car() {Color = "White", MakeId = 1, PetName = "MyCar3"},
+        new Car() {Color = "Yellow", MakeId = 2, PetName = "MyCar4"}
+    };
+
+    ProcessBulkImport.ExecuteBulkImport(cars, "Inventory");
+
+    Console.WriteLine("\t\tAfter bulk copy");
+    ViewListOfCar(inventoryDal.GetAllInventory());
+}
+DoBulkCopy();
