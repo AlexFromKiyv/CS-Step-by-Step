@@ -75,4 +75,4 @@ void DoBulkCopy()
     Console.WriteLine("\t\tAfter bulk copy");
     ViewListOfCar(inventoryDal.GetAllInventory());
 }
-DoBulkCopy();
+//DoBulkCopy();

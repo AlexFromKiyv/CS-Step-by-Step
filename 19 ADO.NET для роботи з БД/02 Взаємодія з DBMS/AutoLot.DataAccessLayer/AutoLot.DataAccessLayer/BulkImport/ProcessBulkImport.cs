@@ -38,7 +38,7 @@ public static class ProcessBulkImport
             DestinationTableName = tableName,
         };
 
-        var dataReader = new MyDataReader<T>(records.ToList(), _sqlConnection, "dbo", "Inventory");
+        var dataReader = new MyDataReader<T>(records.ToList(), _sqlConnection, "dbo", tableName);
 
         try
         {

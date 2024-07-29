@@ -2,7 +2,7 @@
 
 Платформа .NET визначає кілька просторів імен, які дозволяють взаємодіяти з системами реляційних баз даних. У сукупності ці простори імен відомі як ADO.NET. 
 
-Платформа .NET підтримує численні постачальники даних (як надані як частина .NET Framework, так і доступні зі сторонніх джерел), кожен з яких оптимізований для зв’язку з певною системою керування базами даних (наприклад, Microsoft SQL Server, Oracle та MySQL). Існує шаблони постачальника даних. Використовуючи типи в просторах імен System.Data (включно з просторами імен System.Data.Common і специфічними для постачальників баз даних просторами імен, такими як Microsoft.Data.SqlClient, System.Data.Odbc і простором імен постачальників баз даних лише для Windows System.Data.Oledb), ви можете створити єдину кодову базу, яка може динамічно вибирати базового постачальника даних без необхідності перекомпілювати чи повторно розгортати кодову базу програми.
+Платформа .NET підтримує численні постачальники даних (як надані як частина .NET, так і доступні зі сторонніх джерел), кожен з яких оптимізований для зв’язку з певною системою керування базами даних (наприклад, Microsoft SQL Server, Oracle та MySQL). Існують різні постачальники даних з реалізацієї необхідних інтерфейсів. Використовуючи типи в просторах імен System.Data (включно з просторами імен System.Data.Common і специфічними для постачальників баз даних просторами імен, такими як Microsoft.Data.SqlClient, System.Data.Odbc і простором імен постачальників баз даних лише для Windows System.Data.Oledb), ви можете створити єдину кодову базу, яка може динамічно вибирати базового постачальника даних без необхідності перекомпілювати чи повторно розгортати кодову базу програми.
 
 Ви можете працювати безпосередньо з постачальником бази даних SQL Server, створюючи та відкриваючи підключення для отримання даних, а потім переходити до вставки, оновлення та видалення даних. Також ви можете виконувати транзакції бази даних і виконувати функцію масового копіювання SQL Server за допомогою ADO.NET для завантаження списку записів у базу даних.
 
@@ -20,7 +20,7 @@ ADO.NET не надає єдиного набору об’єктів, які в
 
     DbCommand (IDbCommand) : Представляє SQL-запит або збережену процедуру. Об’єкти команди також надають доступ до об’єкта читача даних постачальника.
 
-    DbDataReader (IDataReader,IDataRecord) : Представляє SQL-запит або збережену процедуру. Об’єкти команди також надають доступ до об’єкта читача даних постачальника.
+    DbDataReader (IDataReader,IDataRecord) : Надає доступ лише для руху в перед до даних лише для читання за допомогою курсору на стороні сервера.
 
     DbDataAdapter (IDataAdapter,IDbDataAdapter) : Передає набори даних між абонентом і сховищем даних. Адаптери даних містять з’єднання та набір із чотирьох внутрішніх командних об’єктів, які використовуються для вибору, вставки, оновлення та видалення інформації зі сховища даних.
 
@@ -62,7 +62,7 @@ ADO.NET не надає єдиного набору об’єктів, які в
 
 ## Типи простору імен System.Data
 
-З усіх просторів імен ADO.NET System.Data є найменшим спільним знаменником. Цей простір імен містить типи, спільні для всіх постачальників даних ADO.NET, незалежно від основного сховища даних. На додаток до ряду винятків, орієнтованих на базу даних (наприклад, NoNullAllowedException, RowNotInTableException і MissingPrimaryKeyException), System.Data містить типи, які представляють різні примітиви бази даних (наприклад, таблиці, рядки, стовпці та обмеження), а також загальні інтерфейси реалізований об’єктами постачальника даних. 
+З усіх просторів імен ADO.NET System.Data є найменшим спільним класом. Цей простір імен містить типи, спільні для всіх постачальників даних ADO.NET, незалежно від основного сховища даних. На додаток до ряду винятків, орієнтованих на базу даних (наприклад, NoNullAllowedException, RowNotInTableException і MissingPrimaryKeyException), System.Data містить типи, які представляють різні примітиви бази даних (наприклад, таблиці, рядки, стовпці та обмеження), а також загальні інтерфейси реалізований об’єктами постачальника даних. 
 
 Основні члени простору імен System.Data
 
@@ -98,7 +98,7 @@ ADO.NET не надає єдиного набору об’єктів, які в
 
 ### Роль інтерфейсу IDbConnection
 
-Тип IDbConnection реалізується connection object постачальника даних. Цей інтерфейс визначає набір членів, які використовуються для налаштування підключення до певного сховища даних. Реалізація також дозволяє отримати об’єкт транзакції постачальника даних.
+Тип IDbConnection реалізується об'єктом Сonnection постачальника даних. Цей інтерфейс визначає набір членів, які використовуються для налаштування підключення до певного сховища даних. Реалізація також дозволяє отримати об’єкт транзакції постачальника даних.
 
 ```cs
 public interface IDbConnection : IDisposable
@@ -119,7 +119,7 @@ public interface IDbConnection : IDisposable
 
 ### Роль інтерфейсу IDbTransaction
 
-Перевантажений метод BeginTransaction(), визначений IDbConnection, надає доступ до transaction object постачальника. Ви можете використовувати членів, визначених IDbTransaction, для програмної взаємодії з транзакційним сеансом і основним сховищем даних.
+Перевантажений метод BeginTransaction(), визначений IDbConnection, надає доступ до об'єкту Transaction постачальника. Ви можете використовувати члени, визначених IDbTransaction, для програмної взаємодії з транзакційним сеансом і основним сховищем даних.
 
 ```cs
 public interface IDbTransaction : IDisposable
@@ -134,7 +134,7 @@ public interface IDbTransaction : IDisposable
  
 ### Роль інтерфейсу IDbCommand
 
-Далі йде інтерфейс IDbCommand, який буде реалізований command object постачальника даних. Як і інші об’єктні моделі доступу до даних, командні об’єкти дозволяють програмно маніпулювати операторами SQL, збереженими процедурами та параметризованими запитами. Об’єкти команд також надають доступ до типу читача даних постачальника даних через перевантажений метод ExecuteReader().
+Далі йде інтерфейс IDbCommand, який буде реалізований об'єкт Сommand постачальника даних. Як і інші об’єктні моделі доступу до даних, командні об’єкти дозволяють програмно маніпулювати операторами SQL, збереженими процедурами та параметризованими запитами. Об’єкти команд також надають доступ до типу читача даних постачальника даних через перевантажений метод ExecuteReader().
 
 ```cs
 public interface IDbCommand : IDisposable
@@ -318,8 +318,10 @@ enum DataProviderEnum
 ```
 Якщо ви використовуєте Visual Studio, теж саме можна зробити, у властивостях проекту, на вкладці «Build», ввести значення «Conditional compiler symbols».
 
-Для різних DBMS потрібні різні connection object.
+Для різних DBMS потрібні різні об'єкти підключення. 
+Створему функцію яка повертає об'єкт підключення.
 
+MyConnectionFactory\Program.cs
 ```cs
 using Microsoft.Data.SqlClient;
 using System.Data.Odbc;
@@ -329,19 +331,17 @@ using System.Data;
 using System.Data.OleDb;
 #endif
 
-// Testing various connections
-void ObtainingSpecificConntctionObject()
+// Get a specific Connection object
+IDbConnection? GetConnection(DataProviderEnum dataProvider) => dataProvider switch
 {
-	Setup(DataProviderEnum.SqlServer);
-    Setup(DataProviderEnum.Odbc);
+    DataProviderEnum.SqlServer => new SqlConnection(),
+    DataProviderEnum.Odbc => new OdbcConnection(),
+    DataProviderEnum.None => null,
 #if PC
-    Setup(DataProviderEnum.OleDb);
+    DataProviderEnum.OleDb => new OleDbConnection(),
 #endif
-    Setup(DataProviderEnum.None);
-
-}
-ObtainingSpecificConntctionObject();
-
+    _ => null
+};
 
 // Set up a custom connection
 void Setup(DataProviderEnum providerEnum)
@@ -359,19 +359,25 @@ void Setup(DataProviderEnum providerEnum)
 	}
 }
 
-// Get a specific Connection object
-IDbConnection? GetConnection(DataProviderEnum dataProvider) => dataProvider switch
-{
-	DataProviderEnum.SqlServer => new SqlConnection(),
-	DataProviderEnum.Odbc => new OdbcConnection(),
-	DataProviderEnum.None => null,
-#if PC
-	DataProviderEnum.OleDb => new OleDbConnection(),
-#endif
-	_ => null
-};
-
 ```
+Протестуємо методи 
+
+```cs
+
+// Testing various connections
+void ObtainingSpecificConnеctionObject()
+{
+    Setup(DataProviderEnum.SqlServer);
+    Setup(DataProviderEnum.Odbc);
+#if PC
+    Setup(DataProviderEnum.OleDb);
+#endif
+    Setup(DataProviderEnum.None);
+
+}
+ObtainingSpecificConnеctionObject();
+```
+
 ```
 Connection object is SqlConnection
 Connection object is OdbcConnection

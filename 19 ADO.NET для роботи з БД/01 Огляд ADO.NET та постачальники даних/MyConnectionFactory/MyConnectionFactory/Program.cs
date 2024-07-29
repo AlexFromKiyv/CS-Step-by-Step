@@ -7,18 +7,18 @@ using System.Data;
 using System.Data.OleDb;
 #endif
 
-// Testing various connections
-void ObtainingSpecificConntctionObject()
-{
-	Setup(DataProviderEnum.SqlServer);
-    Setup(DataProviderEnum.Odbc);
-#if PC
-    Setup(DataProviderEnum.OleDb);
-#endif
-    Setup(DataProviderEnum.None);
 
-}
-ObtainingSpecificConntctionObject();
+// Get a specific Connection object
+IDbConnection? GetConnection(DataProviderEnum dataProvider) => dataProvider switch
+{
+    DataProviderEnum.SqlServer => new SqlConnection(),
+    DataProviderEnum.Odbc => new OdbcConnection(),
+    DataProviderEnum.None => null,
+#if PC
+    DataProviderEnum.OleDb => new OleDbConnection(),
+#endif
+    _ => null
+};
 
 
 // Set up a custom connection
@@ -33,19 +33,21 @@ void Setup(DataProviderEnum providerEnum)
 	}
 	else
 	{
-		Console.WriteLine("There is no connetcion object.");
+		Console.WriteLine("There is no connection object.");
 	}
 }
 
-// Get a specific Connection object
-IDbConnection? GetConnection(DataProviderEnum dataProvider) => dataProvider switch
-{
-	DataProviderEnum.SqlServer => new SqlConnection(),
-	DataProviderEnum.Odbc => new OdbcConnection(),
-	DataProviderEnum.None => null,
-#if PC
-	DataProviderEnum.OleDb => new OleDbConnection(),
-#endif
-	_ => null
-};
 
+
+// Testing various connections
+void ObtainingSpecificConnеctionObject()
+{
+    Setup(DataProviderEnum.SqlServer);
+    Setup(DataProviderEnum.Odbc);
+#if PC
+    Setup(DataProviderEnum.OleDb);
+#endif
+    Setup(DataProviderEnum.None);
+
+}
+ObtainingSpecificConnеctionObject();
