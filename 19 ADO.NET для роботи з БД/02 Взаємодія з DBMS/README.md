@@ -1094,6 +1094,43 @@ Id = 5  FirstName = Bad LastName = Customer     TimeStamp = System.Byte[]
 ```
 Завжди автоматично повертається перший набір результатів. Аби отримати наступні результат визмваються метод NextResult. Зчитувач даних може обробляти лише оператори SQL Select; ви не можете використовувати їх для зміни існуючої таблиці бази даних за допомогою запитів Insert, Update або Delete.
 
+### Асінхроний варіант роботи з БД.
+
+Класи для створення з'єднання та виконання команд мають асінхроні версії методів.
+
+```cs
+static async Task ReadDataFromDBAsync()
+{
+    string connectionString = "Data Source=(localdb)\\mssqllocaldb;Integrated Security=true;Initial Catalog=AutoLot";
+
+    using SqlConnection connection = new(connectionString);
+
+    string sql = "Select * From Customers";
+
+    await connection.OpenAsync();
+
+    SqlCommand command = new(sql, connection);
+
+    SqlDataReader reader = await command.ExecuteReaderAsync();
+
+    Console.WriteLine($"{reader.GetName(0)}\t{reader.GetName(1)}\t{reader.GetName(2)}");
+
+    while (await reader.ReadAsync())
+    {
+        Console.WriteLine($"{reader.GetInt32("Id")}\t{reader.GetString("FirstName")}\t{reader.GetString("LastName")}");
+    }
+}
+await ReadDataFromDBAsync();
+```
+```
+Id      FirstName       LastName
+1       Dave    Brenner
+2       Matt    Walton
+3       Steve   Hagen
+4       Pat     Walton
+5       Bad     Customer
+```
+
 # Робота із запитами Create, Update, та Delete
 
 Метод ExecuteReader() витягує об’єкт читача даних, який дозволяє перевіряти результати оператора SQL Select, використовуючи потік інформації лише для перегляду в перед та лише для читання. Однак, якщо ви хочете надіслати оператори SQL, які призводять до модифікації даної таблиці (або будь-якого іншого оператора SQL без запиту, наприклад створення таблиць або надання дозволів), ви викликаєте метод ExecuteNonQuery() свого об’єкта команди. Цей єдиний метод виконує вставки, оновлення та видалення на основі формату тексту команди.

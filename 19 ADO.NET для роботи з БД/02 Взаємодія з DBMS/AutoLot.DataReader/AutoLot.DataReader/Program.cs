@@ -152,4 +152,27 @@ static void MultipleResultSetsWithDataReader()
         }
     } while (dataReader.NextResult());
 }
-MultipleResultSetsWithDataReader();
+//MultipleResultSetsWithDataReader();
+
+static async Task ReadDataFromDBAsync()
+{
+    string connectionString = "Data Source=(localdb)\\mssqllocaldb;Integrated Security=true;Initial Catalog=AutoLot";
+
+    using SqlConnection connection = new(connectionString);
+
+    string sql = "Select * From Customers";
+
+    await connection.OpenAsync();
+
+    SqlCommand command = new(sql, connection);
+
+    SqlDataReader reader = await command.ExecuteReaderAsync();
+
+    Console.WriteLine($"{reader.GetName(0)}\t{reader.GetName(1)}\t{reader.GetName(2)}");
+
+    while (await reader.ReadAsync())
+    {
+        Console.WriteLine($"{reader.GetInt32("Id")}\t{reader.GetString("FirstName")}\t{reader.GetString("LastName")}");
+    }
+}
+await ReadDataFromDBAsync();
