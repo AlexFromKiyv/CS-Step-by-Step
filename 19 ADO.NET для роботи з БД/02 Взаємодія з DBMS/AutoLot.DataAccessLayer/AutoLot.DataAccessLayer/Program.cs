@@ -1,5 +1,6 @@
 ﻿using AutoLot.DataAccessLayer.DataOperations;
 using AutoLot.DataAccessLayer.BulkImport;
+using System.Data.Common;
 
 static void TestGetAllInvertory()
 {
@@ -180,3 +181,87 @@ void Test_MyDataReader()
     connection.Close();
 }
 //Test_MyDataReader();
+
+void UsingDataSetForReadData()
+{
+    string connectionString = "Data Source=(localdb)\\mssqllocaldb;Integrated Security=true;Initial Catalog=AutoLot";
+
+    string sql = "Select * From Customers";
+
+    var connection = new SqlConnection { ConnectionString = connectionString };
+
+    SqlDataAdapter adapter = new(sql, connection);
+    DataSet dataSet = new();
+
+    adapter.Fill(dataSet);
+
+    PrintDataSetForCustomers(dataSet);
+
+}
+//UsingDataSetForReadData();
+
+void PrintDataSetForCustomers(DataSet dataSet)
+{
+    foreach (DataTable dataTable in dataSet.Tables)
+    {
+        foreach (DataColumn dataColumn in dataTable.Columns)
+        {
+            Console.Write($"{dataColumn.ColumnName}\t");
+        }
+        Console.WriteLine();
+
+        foreach (DataRow dataRow in dataTable.Rows)
+        {
+            Console.WriteLine($"{dataRow[0]}\t{dataRow[1]}\t{dataRow[2]}\t{BitConverter.ToUInt64((byte[])dataRow[3], 0)}");
+        }
+    }
+}
+
+
+
+void ChangeDataSetAndUpdateDB()
+{
+    string connectionString = "Data Source=(localdb)\\mssqllocaldb;Integrated Security=true;Initial Catalog=AutoLot";
+
+    string sql = "Select * From Customers";
+
+    var connection = new SqlConnection { ConnectionString = connectionString };
+
+    SqlDataAdapter adapter = new(sql, connection);
+    DataSet dataSet = new();
+
+    adapter.Fill(dataSet);
+
+    DataTable dataTableCustomers = dataSet.Tables[0];
+
+    Console.WriteLine($"Number of customers:{dataTableCustomers.Rows.Count}");
+
+    //Add row
+    DataRow newRowCustomer = dataTableCustomers.NewRow();
+    newRowCustomer["FirstName"] = "Tomy";
+    newRowCustomer["LastName"] = "Stark";
+    newRowCustomer["Timestamp"] = BitConverter.GetBytes(DateTime.Now.ToBinary());
+    dataTableCustomers.Rows.Add(newRowCustomer);
+
+    //Change item in row 
+    Console.WriteLine("Rows[4][1]"+dataTableCustomers.Rows[4][1]);
+    dataTableCustomers.Rows[4][1] = "Jack";
+
+    Console.WriteLine("\nDataSet in Memory");
+    PrintDataSetForCustomers(dataSet);
+
+    Console.WriteLine();
+    //Update DB
+    SqlCommandBuilder sqlCommandBuilder = new(adapter);
+    Console.WriteLine(sqlCommandBuilder.GetUpdateCommand().CommandText);
+    Console.WriteLine(sqlCommandBuilder.GetInsertCommand().CommandText);
+    Console.WriteLine(sqlCommandBuilder.GetDeleteCommand().CommandText);
+
+    adapter.Update(dataSet);
+    //For one table
+    //adapter.Update(dataTableCustomers);
+
+}
+//ChangeDataSetAndUpdateDB();
+//Console.WriteLine();
+//UsingDataSetForReadData();

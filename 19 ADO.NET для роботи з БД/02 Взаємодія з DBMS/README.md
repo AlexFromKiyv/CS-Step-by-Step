@@ -2421,6 +2421,142 @@ Sorry!  Database error! Transaction failed...
 
 Як бачимо в першому виклику всі зміни в БД зафіксувались а другий виклик нічого не змінив.
 
+## Клас DataSet
+
+### Зчитування даних за допомогою SqlDataAdapter
+
+Клас DataSet з простору імен System.Data предсталяє сховише частини даних отриманих з джерела. Об'єкти класу DataSet зберігають об'єкти DataTeble які, в свою чергу, складаються з об'єктів DataRow і DataColumn. Заповнити даними цей об'єкт дозволяє об'єкт реалізація System.Data.IDataAdapter для конкретної СУБД. 
+
+```cs
+void UsingDataSetForReadData()
+{
+    string connectionString = "Data Source=(localdb)\\mssqllocaldb;Integrated Security=true;Initial Catalog=AutoLot";
+
+    string sql = "Select * From Customers";
+
+    var connection = new SqlConnection { ConnectionString = connectionString };
+
+    SqlDataAdapter adapter = new(sql, connection);
+    DataSet dataSet = new();
+
+    adapter.Fill(dataSet);
+
+    PrintDataSetForCustomers(dataSet);
+
+}
+UsingDataSetForReadData();
+
+void PrintDataSetForCustomers(DataSet dataSet)
+{
+    foreach (DataTable dataTable in dataSet.Tables)
+    {
+        foreach (DataColumn dataColumn in dataTable.Columns)
+        {
+            Console.Write($"{dataColumn.ColumnName}\t");
+        }
+        Console.WriteLine();
+
+        foreach (DataRow dataRow in dataTable.Rows)
+        {
+            Console.WriteLine($"{dataRow[0]}\t{dataRow[1]}\t{dataRow[2]}\t{BitConverter.ToUInt64((byte[])dataRow[3], 0)}");
+        }
+    }
+}
+```
+```
+Id      FirstName       LastName        TimeStamp
+1       Dave    Brenner (CreditRisk)    17857335472477437952
+2       Matt    Walton  16214928983370760192
+3       Steve   Hagen   17713220284401582080
+4       Pat     Walton  16359044171446616064
+5       Bad     Customer        16431101765484544000
+```
+
+Метод Fill заповнює об'єкт DataSet. Метод неявно відкриває підключення який встановлений для адаптера якшо воно не відкрите і закриває його після виконання заповнення. DataColumn описує схему таблиці яка створюеться. DataRow зберігає строки таблиці.
+
+DataSet часіше за все використовували для відображеня даних.
+
+### Зміна даних в DataSet та оновленя даних в БД
+
+При використані DataSet зберігає таблиці в пам'яті зміст яких можна змінювати. Зміни в пам'яті не впливають на БД. Оновити дані в базі можна методом адаптера.
+
+```cs
+void ChangeDataSetAndUpdateDB()
+{
+    string connectionString = "Data Source=(localdb)\\mssqllocaldb;Integrated Security=true;Initial Catalog=AutoLot";
+
+    string sql = "Select * From Customers";
+
+    var connection = new SqlConnection { ConnectionString = connectionString };
+
+    SqlDataAdapter adapter = new(sql, connection);
+    DataSet dataSet = new();
+
+    adapter.Fill(dataSet);
+
+    DataTable dataTableCustomers = dataSet.Tables[0];
+
+    Console.WriteLine($"Number of customers:{dataTableCustomers.Rows.Count}");
+
+    //Add row
+    DataRow newRowCustomer = dataTableCustomers.NewRow();
+    newRowCustomer["FirstName"] = "Tomy";
+    newRowCustomer["LastName"] = "Stark";
+    newRowCustomer["Timestamp"] = BitConverter.GetBytes(DateTime.Now.ToBinary());
+    dataTableCustomers.Rows.Add(newRowCustomer);
+
+    //Change item in row 
+    Console.WriteLine("Rows[4][1]"+dataTableCustomers.Rows[4][1]);
+    dataTableCustomers.Rows[4][1] = "Jack";
+
+    Console.WriteLine("\nDataSet in Memory");
+    PrintDataSetForCustomers(dataSet);
+
+    Console.WriteLine();
+    //Update DB
+    SqlCommandBuilder sqlCommandBuilder = new(adapter);
+    Console.WriteLine(sqlCommandBuilder.GetUpdateCommand().CommandText);
+    Console.WriteLine(sqlCommandBuilder.GetInsertCommand().CommandText);
+    Console.WriteLine(sqlCommandBuilder.GetDeleteCommand().CommandText);
+
+    adapter.Update(dataSet);
+    //For one table
+    //adapter.Update(dataTableCustomers);
+
+}
+ChangeDataSetAndUpdateDB();
+Console.WriteLine();
+UsingDataSetForReadData();
+```
+```
+Number of customers:5
+Rows[4][1]Bad
+
+DataSet in Memory
+Id      FirstName       LastName        TimeStamp
+1       Dave    Brenner (CreditRisk)    17857335472477437952
+2       Matt    Walton  16214928983370760192
+3       Steve   Hagen   17713220284401582080
+4       Pat     Walton  16359044171446616064
+5       Jack    Customer        16431101765484544000
+        Tomy    Stark   9861952209130864806
+
+UPDATE [Customers] SET [FirstName] = @p1, [LastName] = @p2 WHERE (([Id] = @p3) AND ([FirstName] = @p4) AND ([LastName] = @p5))
+INSERT INTO [Customers] ([FirstName], [LastName]) VALUES (@p1, @p2)
+DELETE FROM [Customers] WHERE (([Id] = @p1) AND ([FirstName] = @p2) AND ([LastName] = @p3))
+
+Id      FirstName       LastName        TimeStamp
+1       Dave    Brenner (CreditRisk)    17857335472477437952
+2       Matt    Walton  16214928983370760192
+3       Steve   Hagen   17713220284401582080
+4       Pat     Walton  16359044171446616064
+5       Jack    Customer        3562066929784979456
+9       Tomy    Stark   3634124523822907392
+```
+При створенні об'єкта SqlCommandBuilder в ньому створюються всі необхідні команди для внесеня змін в БД. Для цього просто в конструктор передаеться об'єкт адаптера.Всі зміни в БД перносяться з пам'яті при виклику методу адаптера Update.
+
+
+
 ## Виконання масових(bulk) копій за допомогою ADO.NET
 
 У випадках, коли вам потрібно завантажити багато записів у базу даних, методи, показані досі, будуть досить неефективними. SQL Server має функцію під назвою масове копіювання, розроблену спеціально для цього сценарію, і її загорнуто в ADO.NET за допомогою класу SqlBulkCopy.
@@ -2771,3 +2907,329 @@ Id      Make    Color   Pet Name
 
 Хоча додавання чотирьох нових записів не демонструє переваг роботи, пов’язаної з використанням класу SqlBulkCopy, уявіть спробу завантажити тисячі записів.
 Як і все в .NET, це ще один інструмент, який потрібно мати у своєму наборі інструментів, щоб використовувати його, коли це буде найбільш доцільним.
+
+# SQLite
+
+SQLite це СУБД дозволяє зберігати структуровані дані в єдиному файлі. Не потребує сервера портативна, крос-платформена і мобільна. БД після компіляції додадку счтає частиною додадку. 
+
+## Робота з БД
+
+Створимо консолний додаток UseSQLite та додамо до нього пакет Microsoft.Data.Sqlite. 
+
+### SqliteConnection та строка підключення
+
+Строка підключеня до БД це набір пар ключ-значення розбілені крапкою з комою. Вона має наступні параметри
+
+Параметри підключення
+
+    Data Source : вказує шлях до джерела даних. Якшо не вказано створює тимчасовий файл.
+
+    Mode : Встановлює режим підключення (ReadWriteCreate(default), ReadWrite, ReadOnly, Memory )
+
+    Cashe : Встановлює режим кешування (Default, Private, Shared)
+
+    Password : Встановлює ключ шифрування
+
+    Foreign Keys : Чи буде база підтримувати зовнішні ключи (True, False)
+
+    Recursive triggers : Вказує чи будуть використовуватись рекурсивні трігери.
+
+Проста строка підключеня може виглядадти так 
+
+```cs
+string connectionString = "Data Source=usersdata.db";
+```
+
+Створимо підключання.
+
+```cs
+void ConnectionToDb()
+{
+    using SqliteConnection connection = new("DataSource=D:\\Temp\\users.db");
+    connection.Open();
+    Console.WriteLine(connection.State);
+    Console.WriteLine(connection.Database);
+    Console.WriteLine(connection.DataSource);
+    Console.WriteLine(connection.ServerVersion);
+    Console.WriteLine(connection.DefaultTimeout);
+    connection.Close();
+}
+ConnectionToDb();
+```
+```
+Open
+main
+D:\Temp\users.db
+3.41.2
+30
+```
+
+Після цого на диску з'явится пуста БД.
+
+## SqliteCommand та виконання команд
+
+Провайдер Microsoft.Data.Sqlite пеалізовує всі інтерфейси яки повинен реалізовувати провайдер тому як ви бачили з'єднання виконується аналогічно тому як ми розглядали. Теж саме з командами.
+
+### Додавання нової таблиці
+
+```cs
+void AddTable()
+{
+    using SqliteConnection connection = new("DataSource=D:\\Temp\\users.db");
+    connection.Open();
+
+    SqliteCommand command = new SqliteCommand();
+    command.Connection = connection;
+    command.CommandText = "CREATE TABLE Users(_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, Name TEXT NOT NULL, Age INTEGER NOT NULL)";
+    command.ExecuteNonQuery();
+
+    connection.Close();
+}
+AddTable();
+
+```
+Співставлення даних в СУБД та C# можна знайти в документації по запиту SQLite Data types С#
+
+
+### Додавання даних
+
+```cs
+void AddUser()
+{
+    using SqliteConnection connection = new("DataSource=D:\\Temp\\users.db");
+    connection.Open();
+
+    SqliteCommand command = new SqliteCommand();
+    command.Connection = connection;
+    command.CommandText = "INSERT INTO Users (Name, Age) VALUES ('Julia', 36)";
+    int number = command.ExecuteNonQuery();
+
+    connection.Close();
+
+    Console.WriteLine($"Rows have been added to the Users table: {number}");
+}
+AddUser();
+```
+```
+Rows have been added to the Users table: 1
+```
+
+Можна додадти декілька рядків.
+
+```cs
+void AddUsers()
+{
+    using SqliteConnection connection = new("DataSource=D:\\Temp\\users.db");
+    
+    connection.Open();
+
+    string sql = "INSERT INTO Users (Name, Age) VALUES ('Alex', 34), ('Olga', 28)";
+    SqliteCommand command = new SqliteCommand(sql, connection);
+    int number = command.ExecuteNonQuery();
+
+    connection.Close();
+
+    Console.WriteLine($"Rows have been added to the Users table: {number}");
+}
+AddUsers();
+
+```
+```
+Rows have been added to the Users table: 2
+```
+Зачення id останнього доданого рядка можна отримати запросом SELECT last_insert_rowid();
+
+
+### Оновлення даних 
+
+```cs
+void UpdateUser()
+{
+    using SqliteConnection connection = new("DataSource=D:\\Temp\\users.db");
+
+    string sql = "UPDATE Users SET Age=14 WHERE Name='Olga'";
+
+    connection.Open();
+
+    SqliteCommand command = new SqliteCommand(sql, connection);
+
+    int number = command.ExecuteNonQuery();
+
+    connection.Close();
+
+    Console.WriteLine($"Rows have been updated to the Users table: {number}");
+}
+UpdateUser();
+```
+```
+Rows have been updated to the Users table: 1
+```
+
+### Видаленя даних
+```cs
+void DeleteUser()
+{
+    using SqliteConnection connection = new("DataSource=D:\\Temp\\users.db");
+
+    string sql = "DELETE  FROM Users WHERE Age < 16";
+
+    connection.Open();
+
+    SqliteCommand command = new SqliteCommand(sql, connection);
+
+    int number = command.ExecuteNonQuery();
+
+    connection.Close();
+
+    Console.WriteLine($"Rows have been deleted to the Users table: {number}");
+}
+DeleteUser();
+```
+```
+Rows have been deleted to the Users table: 1
+```
+
+### Декілька операцій з даними
+
+Як видно всі операції з даними виконуються індентично. Різниця в sql- виразі. За одне підключена зробимо деквілька операцій.
+```cs
+void SomeDataChanges()
+{
+    using SqliteConnection connection = new("DataSource=D:\\Temp\\users.db");
+
+    connection.Open();
+
+    SqliteCommand command = new SqliteCommand();
+    command.Connection = connection;
+
+    command.CommandText = "INSERT INTO Users (Name, Age) VALUES ('Sara', 34), ('John', 28)";
+    int number = command.ExecuteNonQuery();
+    Console.WriteLine($"Rows have been added to the Users table: {number}");
+
+    command.CommandText = "UPDATE Users SET Age=44 WHERE Name='Sara'";
+    number = command.ExecuteNonQuery();
+    Console.WriteLine($"Rows have been updated to the Users table: {number}");
+
+    command.CommandText = "DELETE FROM Users WHERE Name='John'";
+    number = command.ExecuteNonQuery();
+    Console.WriteLine($"Rows have been deleted to the Users table: {number}");
+
+    connection.Close();
+
+}
+SomeDataChanges();
+```
+```
+Rows have been added to the Users table: 2
+Rows have been updated to the Users table: 1
+Rows have been deleted to the Users table: 1
+```
+
+### Читання даних
+
+Читаня даних теж виконується аналогічно як у інших провайдерів даних.
+
+```cs
+void ReadFromDb()
+{
+    using SqliteConnection connection = new("DataSource=D:\\Temp\\users.db");
+
+    connection.Open();
+
+    string sql = "SELECT * FROM Users";
+
+    SqliteCommand command = new(sql, connection);
+
+    using SqliteDataReader reader = command.ExecuteReader();
+
+    Console.WriteLine($"{reader.GetName(0)}\t{reader.GetName(1)}\t{reader.GetName(2)}");
+
+    reader.Read();
+
+    Console.WriteLine($"{reader.GetValue(0)}\t{reader.GetValue(1)}\t{reader.GetValue(2)}");
+
+
+    while (reader.Read())
+    {
+        Console.WriteLine($"{reader["_id"]}\t{reader["Name"]}\t{reader["Age"]}");
+    }
+
+    connection.Close();
+}
+ReadFromDb();
+```
+```
+_id     Name    Age
+1       Julia   36
+2       Alex    34
+4       Sara    44
+```
+
+### Запити з параметрами.
+
+Усі параметри в SQLite вхідні. 
+
+```cs
+void CommandWithParameters()
+{
+    using SqliteConnection connection = new("DataSource=D:\\Temp\\users.db");
+
+    connection.Open();
+
+    string sql = "INSERT INTO Users (Name, Age) VALUES (@name, @age)";
+
+    SqliteCommand command = new(sql, connection);
+
+    SqliteParameter parameterName = new("@name", SqliteType.Text, 50);
+    parameterName.Value = "Tomy";
+    command.Parameters.Add( parameterName );
+
+    SqliteParameter parameterAge = new("@age", 37);
+    command.Parameters.Add(parameterAge);
+
+    int number = command.ExecuteNonQuery();
+    Console.WriteLine($"Rows have been added to the Users table: {number}");
+
+    connection.Close();
+
+    ReadFromDb();
+}
+CommandWithParameters();
+```
+```
+Rows have been added to the Users table: 1
+_id     Name    Age
+1       Julia   36
+2       Alex    34
+4       Sara    44
+6       Tomy    37
+```
+Як бачимо в конструктор класу SqliteParameter можно передати тип параметру або число.
+
+### Отримання скалярних значень
+
+```cs
+void RetrieveScalarValue()
+{
+    using SqliteConnection connection = new("DataSource=D:\\Temp\\users.db");
+
+    connection.Open();
+
+    string sql = "SELECT AVG(Age) FROM Users";
+    SqliteCommand command = new(sql, connection);
+    object? avgAge = command.ExecuteScalar();
+    Console.WriteLine(avgAge);
+
+    command.CommandText = "SELECT COUNT(*) FROM Users";
+    object? countUsers = command.ExecuteScalar();
+    Console.WriteLine(countUsers);
+
+    connection.Close();
+}
+RetrieveScalarValue();
+```
+```
+37,75
+4
+```
+Треба враховувати що ExecuteScalar повертає object?.  
