@@ -112,7 +112,6 @@ global using System.ComponentModel.DataAnnotations.Schema;
 DbContext Factory під час розробки — це клас, який реалізує інтерфейс IDesignTimeDbContextFactory<T>, де T — похідний клас DbContext. Інтерфейс має один метод CreateDbContext(), який ви повинні реалізувати, щоб створити екземпляр вашого похідного DbContext. Цей клас не призначений для використання у виробництві, а лише під час розробки, і існує в основному для інструментів командного рядка EF Core, які ви незабаром дослідите. У прикладах у цьому та наступному розділах він використовуватиметься для створення нових екземплярів ApplicationDbContext. Вважається поганою практикою використовувати фабрику DbContext для створення екземплярів вашого похідного класу DbContext. Пам’ятайте, що це демонстраційний код, призначений для навчання, і використання його таким чином робить демонстраційний код чистішим. Ви побачите, як правильно створити екземпляр похідного класу DbContext у розділі ASP.NET Core.
 
 ```cs
-
 namespace AutoLot.Samples;
 
 public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<ApplicationDbContext>
@@ -510,4 +509,363 @@ GO
 ```
 Відображення таблиці за типом може мати значні наслідки для продуктивності, які слід враховувати перед використанням цієї схеми відображення. Для отримання додаткової інформації зверніться до документації.
 
+#### Властивості навігації та зовнішні ключі
+
+Властивості навігації представляють, як класи сутностей пов’язані один з одним і дозволяють коду переходити від одного екземпляра сутності до іншого. За визначенням властивість навігації — це будь-яка властивість, яка відображається на нескалярний тип, як визначено постачальником бази даних. На практиці властивості навігації відображаються на іншу сутність (так звані властивості навігації посилання) або колекцію іншої сутності (називаються властивості навігації колекції). На стороні бази даних властивості навігації транслюються у зв’язки зовнішнього ключа між таблицями. Зв’язки «один до одного», «один до багатьох» і «багато до багатьох» підтримуються безпосередньо в EF Core. Класи сутностей також можуть мати властивості навігації, які вказують на себе, представляючи таблиці з самопосиланнями. Перш ніж охоплювати деталі навігаційних властивостей і шаблонів зв’язків сутностей, зверніться до термінів в моделях відносин.
+
+Терміни, що використовуються для опису навігаційних властивостей і зв’язків
+
+    Principal entity(Основна сутність) : Сутність з якої виходять відносини.
+
+    Dependent entity(Залежна сутність) : Сутність яка залежить від іншої.
+
+    Principal key(Основний ключ) : Властивість/властивості, які використовуються для визначення головної сутності. Може бути первинним або альтернативним ключем. Ключі можна налаштувати за допомогою однієї властивості або кількох властивостей.
+
+    Foreign key(Зовнішній ключ) : Властивість/властивості, які зберігаються дочірньою сутністю для зберігання основного ключа.
+
+    Required relationship(Необхідні відносини) : Зв’язок, де потрібне значення зовнішнього ключа (не допускає значення null).
+
+    Optional relationship(Необов'язковий зв'язок) : Відношення, де значення зовнішнього ключа може буте відсутьне(nullable).
+
+#### Відсутні властивості зовнішнього ключа
+
+Якщо сутність із властивістю посилальної навігації не має властивості для значення зовнішнього ключа, EF Core створить необхідну властивість/властивості сутності. Вони відомі як тіньові властивості зовнішнього ключа та мають імена у форматі <navigation property name><principal key property name> або <principal entity name><principal key property name>. Це справедливо для всіх типів зв’язків (один до багатьох, один до одного, багато до багатьох). Набагато чистіший підхід створити свої сутності з явною властивістю/властивостями зовнішнього ключа, ніж змусити EF Core створити їх для вас.
+
+#### Відносини One-to-Many
+
+Щоб створити зв’язок «One-to-Many», клас сутності з боку One (the principal) додає властивість колекції класу сутності, який знаходиться з боку Many (the dependent). Залежна сутність також повинна мати властивості для зовнішнього ключа назад до основної. Якщо ні, EF Core створить тіньові властивості зовнішнього ключа, як пояснювалося раніше.
+Наприклад, у базі даних, створеній раніше, таблиці Makes (представлена ​​класом сутності Make) і таблиця Inventory (представлена ​​класом сутності Car) мають зв’язок «One-to-Many».
+
+Додамо сутності і відносини в проект AutoLot.Samples
+
+AutoLot.Samples\Models\BaseEntity.cs
+```cs
+namespace AutoLot.Samples.Models;
+
+public abstract class BaseEntity
+{
+    public int Id { get; set; }
+    public byte[] TimeStamp { get; set; }
+}
+```
+
+AutoLot.Samples\Models\Make.cs
+```cs
+namespace AutoLot.Samples.Models;
+
+public class Make : BaseEntity
+{
+    public string Name { get; set; }
+    public IEnumerable<Car> Cars { get; set; } = new List<Car>();
+}
+```
+
+AutoLot.Samples\Models\Car.cs
+```cs
+namespace AutoLot.Samples.Models;
+
+public class Car : BaseEntity
+{
+    public string Color { get; set; }
+    public string PetName { get; set; }
+    public int MakeId { get; set; }
+    public Make MakeNavigation { get; set; }
+
+}
+```
+У прикладі Car/Make сутність Car є залежною сутністю (the many of the one-to-many), а сутність Make є основною сутністю (the one of the one-to-many). 
+
+Під час формування існуючої бази даних (як ви зробите в наступному розділі), EF Core іменує властивості навігації посилань так само, як ім’я типу властивості (наприклад, public Make Make {get; set;}). Це може спричинити проблеми з навігацією та IntelliSense, а також ускладнити роботу з кодом. Можна додавати суфікс Navigation до властивостей посилання на навігацію для ясності, як показано в попередньому прикладі.
+
+Оновіть файл GlobalUsings.cs, щоб включити новий простір імен для моделей.
+
+AutoLot.Samples\GlobalUsings.cs
+```cs
+\\...
+
+global using AutoLot.Samples.Models;
+```
+
+Далі додайте властивості DbSet<Car> і DbSet<Make> до ApplicationDbContext.
+
+```cs
+        public DbSet<Car> Cars { get; set; }
+        public DbSet<Make> Makes { get; set; }
+```
+Коли база даних оновлюється за допомогою міграцій EF Core, створюються такі таблиці. 
+Оновлення бази даних за допомогою міграцій EF Core розглядається далі в цьому розділі.
+
+```console
+dotnet ef migrations add Initial -o Migrations -c AutoLot.Samples.ApplicationDbContext
+dotnet ef database update Initial -c AutoLot.Samples.ApplicationDbContext
+```
+
+Виконається наступний запит:
+```sql
+CREATE TABLE [dbo].[Makes](
+  [Id] [int] IDENTITY(1,1) NOT NULL,
+  [Name] [nvarchar](max) NULL,
+  [TimeStamp] [varbinary](max) NULL,
+ CONSTRAINT [PK_Makes] PRIMARY KEY CLUSTERED
+(
+  [Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+CREATE TABLE [dbo].[Cars](
+  [Id] [int] IDENTITY(1,1) NOT NULL,
+  [Color] [nvarchar](max) NULL,
+  [PetName] [nvarchar](max) NULL,
+  [TimeStamp] [varbinary](max) NULL,
+  [MakeId] [int] NOT NULL,
+ CONSTRAINT [PK_Cars] PRIMARY KEY CLUSTERED
+(
+  [Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[Cars] WITH CHECK ADD  CONSTRAINT [FK_Cars_Makes_MakeId]
+  FOREIGN KEY([MakeId]) REFERENCES [dbo].[Makes] ([Id])
+  ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[Cars] CHECK CONSTRAINT [FK_Cars_Makes_MakeId]
+GO
+```
+Зверніть увагу на зовнішній ключ MakeId і перевірку обмеження FK_Cars_Makes_MakeId, створені в залежній таблиці (Cars).
+
+#### Відносини One-to-One
+
+У зв’язках «One-to-One» обидві сутності мають посилання на навігаційну властивість для іншої сутності. Під час побудови зв’язків «One-to-One» EF Core має знати, яка сторона є головною сутністю. Це можна зробити, маючи чітко визначений зовнішній ключ до головної сутності або вказавши принципала за допомогою Fluent API. Якщо EF Core не отримує інформацію за допомогою одного з цих двох методів, він вибере один на основі своєї здатності виявляти зовнішній ключ. На практиці ви повинні чітко визначити залежну, додавши властивості зовнішнього ключа. Це усуває будь-яку неоднозначність і гарантує, що ваші таблиці правильно налаштовані.
+
+Додайте новий клас під назвою Radio.cs.
+
+```cs
+public class Radio : BaseEntity
+{
+    public bool HasTweeters { get; set; }
+    public bool HasSubWoofers { get; set; }
+    public string RadioId { get; set; }
+    public int CarId { get; set; }
+    public Car CarNavigation { get; set; }
+}
+```
+Додайте властивість навігації до класу Car:
+
+```cs
+public class Car : BaseEntity
+{
+    // ...
+
+    public Radio RadioNavigation { get; set; }
+}
+```
+Оскільки Radio має зовнішній ключ до класу Car (заснований на конвенції, про яку ми розглянемо пізніше), Radio є залежною сутністю, а Car є основною сутністю. EF Core неявно створює необхідний унікальний індекс властивості зовнішнього ключа в залежній сутності. Якщо ви хочете змінити назву індексу, це можна зробити за допомогою анотацій даних або Fluent API.
+
+Додайте властивість DbSet<Radio> до класу ApplicationDbContext:
+
+```cs
+    public class ApplicationDbContext : DbContext
+    {
+        // Properies
+
+        //...
+
+        public DbSet<Radio> Radios { get; set; }
+    
+        //...
+    }    
+```
+
+Коли базу даних оновлено за допомогою таких міграцій EF Core, таблиця Cars не змінюється, і створюється така таблиця Radios:
+
+```console
+dotnet ef migrations add Radio -o Migrations -c AutoLot.Samples.ApplicationDbContext
+dotnet ef database update Radio  -c AutoLot.Samples.ApplicationDbContext
+```
+Виконається наступний запит:
+```sql
+CREATE TABLE [dbo].[Radios](
+  [Id] [int] IDENTITY(1,1) NOT NULL,
+  [HasTweeters] [bit] NOT NULL,
+  [HasSubWoofers] [bit] NOT NULL,
+  [RadioId] [nvarchar](max) NULL,
+  [TimeStamp] [varbinary](max) NULL,
+  [CarId] [int] NOT NULL,
+ CONSTRAINT [PK_Radios] PRIMARY KEY CLUSTERED
+(
+        [Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[Radios]  WITH CHECK ADD  CONSTRAINT [FK_Radios_Cars_CarId] FOREIGN KEY([CarId])
+REFERENCES [dbo].[Cars] ([Id])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[Radios] CHECK CONSTRAINT [FK_Radios_Cars_CarId]
+GO
+```
+Зверніть увагу на зовнішній ключ і обмеження перевірки, створені в залежній таблиці Radios.
+
+#### Відносини Many-to-Many
+
+У зв’язках «Many-to-Many» обидві сутності мають властивість навігації колекції для іншої сутності. Це реалізовано в сховищі даних із окремою об’єднаною таблицею між двома таблицями сутностей. Ця об’єднана таблиця за замовчуванням названа на честь двох таблиць за допомогою <Entity1Entity2>, але її можна змінити програмно за допомогою Fluent API. Сутність об’єднання має зв’язки «One-to-Many» із кожною з таблиць сутностей.
+
+Створіть клас Driver, який матиме зв’язок багато-до-багатьох із класом Car.
+
+```cs
+
+namespace AutoLot.Samples.Models;
+
+public class Driver : BaseEntity
+{
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
+    public IEnumerable<Car> Cars { get; set; } = new List<Car>(); 
+}
+```
+
+Додайте властивість DbSet<Driver> до класу ApplicationDbContext
+
+```cs
+    public class ApplicationDbContext : DbContext
+    {
+        // Properies
+
+        //...
+
+        public DbSet<Driver> Drivers { get; set; }
+    
+        //...
+    }    
+```
+Далі оновіть клас Car, щоб мати властивість навігації колекції для нового класу Driver:
+
+```cs
+public class Car : BaseEntity
+{
+    // ...
+
+    public IEnumerable<Driver> Drivers { get; set; }
+}
+```
+
+Щоб оновити базу даних, використовуйте такі команди міграції (знову ж таки, міграції будуть повністю пояснені далі в цьому розділі):
+
+```console
+dotnet ef migrations add Drivers -o Migrations -c AutoLot.Samples.ApplicationDbContext
+dotnet ef database update Drivers  -c AutoLot.Samples.ApplicationDbContext
+```
+Коли база даних оновлюється, таблиця Cars не змінюється, а таблиці Drivers і CarDriver створюються. Настуаний запит виконається:
+
+```sql
+CREATE TABLE [dbo].[Drivers](
+  [Id] [INT] IDENTITY(1,1) NOT NULL,
+  [FirstName] [NVARCHAR](MAX) NULL,
+  [LastName] [NVARCHAR](MAX) NULL,
+  [TimeStamp] [VARBINARY](MAX) NULL,
+ CONSTRAINT [PK_Drivers] PRIMARY KEY CLUSTERED
+(
+  [Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+CREATE TABLE [dbo].[CarDriver](
+  [CarsId] [int] NOT NULL,
+  [DriversId] [int] NOT NULL,
+ CONSTRAINT [PK_CarDriver] PRIMARY KEY CLUSTERED
+(
+  [CarsId] ASC,
+  [DriversId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[CarDriver]  WITH CHECK ADD  CONSTRAINT [FK_CarDriver_Cars_CarsId]
+  FOREIGN KEY([CarsId]) REFERENCES [dbo].[Cars] ([Id]) ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[CarDriver] CHECK CONSTRAINT [FK_CarDriver_Cars_CarsId]
+GO
+ALTER TABLE [dbo].[CarDriver]  WITH CHECK ADD  CONSTRAINT [FK_CarDriver_Drivers_DriversId]
+  FOREIGN KEY([DriversId]) REFERENCES [dbo].[Drivers] ([Id]) ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[CarDriver] CHECK CONSTRAINT [FK_CarDriver_Drivers_DriversId]
+GO
+```
+Зверніть увагу, що складений первинний ключ, обмеження перевірки (зовнішні ключі) і каскадна поведінка створені EF Core, щоб переконатися, що таблицю CarDriver налаштовано як правильну таблицю об’єднання.
+
+Еквівалентний зв’язок Car-Driver «Many-to-Many» можна досягти шляхом явного створення трьох таблиць(і саме так це має бути зроблено у версіях EF Core, раніших за EF Core 5). 
+
+Ось скорочений приклад
+
+```cs
+public class Driver
+{
+...
+  public IEnumerable<CarDriver> CarDrivers { get; set; }
+}
+public class Car
+{
+...
+  public IEnumerable<CarDriver> CarDrivers { get; set; }
+}
+public class CarDriver
+{
+  public int CarId {get;set;}
+  public Car CarNavigation {get;set;}
+  public int DriverId {get;set;}
+  public Driver DriverNavigation {get;set;}
+}
+```
+
+#### Каскадна поведінка
+
+Більшість сховищ даних (наприклад, SQL Server) мають правила, які контролюють поведінку під час видалення рядка. Якщо пов’язані (залежні) записи також потрібно видалити, це називається каскадним видаленням. У EF Core є три дії, які можуть відбуватися, коли видаляється основна сутність (із залежними сутностями, завантаженими в пам’ять).
+
+    Залежні записи видаляються.
+
+    Залежні зовнішні ключі мають значення null.
+
+    Залежна сутність залишається незмінною.
+
+Поведінка за умовчанням для необов’язкових і обов’язкових зв’язків відрізняється. Поведінка також може бути налаштована на одне із семи значень, хоча для використання рекомендовано лише п’ять. Поведінка налаштовується за допомогою переліку DeleteBehavior за допомогою Fluent API. Опції, доступні в переліку, перераховані тут:
+
+    Cascade
+
+    ClientCascade
+
+    ClientNoAction (not recommended for use)
+
+    ClientSetNull
+
+    NoAction (not recommended for use)
+
+    SetNull
+
+    Restrict
+
+У EF Core зазначена поведінка запускається лише після видалення сутності та виклику SaveChanges() для похідного DbContext. Перегляньте розділ «Виконання запиту», щоб дізнатися більше про те, коли EF Core взаємодіє зі сховищем даних.
+
+#### Каскадна поведінка при необов'язкових відносинах (Optional Relationships)
+
+Необов’язкові зв’язки – це те, де залежна сутність може встановити значення зовнішнього ключа на null. Для необов’язкових зв’язків типовою поведінкою є ClientSetNull. У таблиці показано каскадну поведінку залежних сутностей і вплив на записи бази даних під час використання SQL Server.
+
+
+| Delete Behavior|Вплив на залежних (у пам'яті)| Вплив на залежних (у базі даних)|
+| -------- | ---------|-----------|
+| Cascade|Сутності видаляються.| Сутності видаляються базою даних.|
+| ClientCascade| Сутності видаляються.| Для баз даних, які не підтримують каскадне видалення, EF Core видаляє сутності.|
+| ClientSetNull (default)| Для властивості/властивостей зовнішнього ключа встановлено значення null.| Нічого|
+|SetNull| Для властивості/властивостей зовнішнього ключа встановлено значення null.|Для властивості/властивостей зовнішнього ключа встановлено значення null.|
+|Restrict| Нічого|Нічого|
+
+#### Каскадна поведінка при обов'язкових відносинах (Required Relationships)
+
+Обов’язкові зв’язки – це випадки, коли залежна сутність не може встановити значення(а) зовнішнього ключа на null. Для обов’язкових зв’язків типовою поведінкою є Cascade. У таблиці показано каскадну поведінку залежних сутностей і вплив на записи бази даних під час використання SQL Server.
+
+| Delete Behavior|Вплив на залежних (у пам'яті)| Вплив на залежних (у базі даних)|
+| -------- | ---------|-----------|
+| Cascade (default)|Сутності видаляються.| Сутності видаляються.|
+| ClientCascade| Сутності видаляються.| Для баз даних, які не підтримують каскадне видалення, EF Core видаляє сутності.|
+| ClientSetNull| SaveChanges створює виняток.| Нічого|
+|SetNull| SaveChanges створює виняток.|SaveChanges створює виняток.|
+|Restrict| Нічого|Нічого|
 

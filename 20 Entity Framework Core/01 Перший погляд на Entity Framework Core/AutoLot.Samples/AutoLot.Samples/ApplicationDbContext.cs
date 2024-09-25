@@ -8,6 +8,14 @@ namespace AutoLot.Samples
 {
     public class ApplicationDbContext : DbContext
     {
+        // Properies
+
+        public DbSet<Car> Cars { get; set; }
+        public DbSet<Make> Makes { get; set; }
+        public DbSet<Radio> Radios { get; set; }
+        public DbSet<Driver> Drivers { get; set; }
+
+
         // Constructors
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) :base(options) 
         {
@@ -30,6 +38,7 @@ namespace AutoLot.Samples
             ChangeTracker.Tracked += ChangeTracker_Tracked;
         }
 
+        // Events
         private void ChangeTracker_Tracked(object? sender, EntityTrackedEventArgs e)
         {
             if (e.FromQuery)
@@ -46,6 +55,7 @@ namespace AutoLot.Samples
             }
         }
 
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Fluent API calls go here
