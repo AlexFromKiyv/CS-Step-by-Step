@@ -5,7 +5,7 @@ static void SimpleSaveCahnges()
     //make some changes
     context.SaveChanges();
 }
-SimpleSaveCahnges();
+//SimpleSaveCahnges();
 
 static void TransactedSaveChanges()
 {
