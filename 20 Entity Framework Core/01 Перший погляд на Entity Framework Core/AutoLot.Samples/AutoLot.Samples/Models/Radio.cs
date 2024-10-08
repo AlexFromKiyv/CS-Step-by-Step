@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace AutoLot.Samples.Models;
-
+[EntityTypeConfiguration(typeof(RadioConfiguration))]
 public class Radio : BaseEntity
 {
     public bool HasTweeters { get; set; }

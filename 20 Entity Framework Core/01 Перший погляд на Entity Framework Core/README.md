@@ -1575,13 +1575,13 @@ modelBuilder.Entity<Car>()
          .HasOne(cd => cd.DriverNavigation)
          .WithMany(d => d.CarDrivers)
          .HasForeignKey(nameof(CarDriver.DriverId))
-         .HasConstraintName('FK_InventoryDriver_Drivers_DriverId')
+         .HasConstraintName("FK_InventoryDriver_Drivers_DriverId")
          .OnDelete(DeleteBehavior.Cascade),
      j => j
          .HasOne(cd => cd.CarNavigation)
          .WithMany(c => c.CarDrivers)
          .HasForeignKey(nameof(CarDriver.CarId))
-         .HasConstraintName('FK_InventoryDriver_Inventory_InventoryId')
+         .HasConstraintName("FK_InventoryDriver_Inventory_InventoryId")
          .OnDelete(DeleteBehavior.ClientCascade),
      j =>
          {
@@ -1600,3 +1600,268 @@ protected override void OnModelCreating(ModelBuilder modelBuilder)
   modelBuilder.Entity<LogEntry>().ToTable('Logs', t => t.ExcludeFromMigrations());
 }
 ```
+
+#### Використання класів IEntityTypeConfiguration
+
+Як ви могли здогадатися на цьому етапі роботи з Fluent API, метод OnModelCreating() може стати досить довгим (і громіздким), чим складнішою стає ваша модель. Інтерфейс IEntityTypeConfiguration і атрибут EntityTypeConfiguration дозволяють перемістити конфігурацію Fluent API для сутності у власний клас. Це робить більш чистим ApplicationDbContext і підтримує принцип проектування поділу проблем.
+Почніть із створення нового каталогу під назвою Configuration у каталозі Models. У цьому новому каталозі додайте новий файл під назвою CarConfiguration.cs, зробіть його загальнодоступним і реалізуйте інтерфейс IEntityTypeConfiguration<Car>:
+
+```cs
+namespace AutoLot.Samples.Models.Configuration;
+
+public class CarConfiguration : IEntityTypeConfiguration<Car>
+{
+    public void Configure(EntityTypeBuilder<Car> builder)
+    {
+        
+    }
+}
+```
+Потім перемістіть вміст конфігурації для сутності Car з методу OnModelCreating() у ApplicationDbContext у метод Configure() класу CarConfiguration. Замініть змінну entity на змінну builder, щоб метод Configure() виглядав так:
+```cs
+
+namespace AutoLot.Samples.Models.Configuration;
+
+public class CarConfiguration : IEntityTypeConfiguration<Car>
+{
+    public void Configure(EntityTypeBuilder<Car> builder)
+    {
+        builder.ToTable("Inventory", "dbo");
+        builder.HasKey(e => e.Id);
+        builder.HasIndex(e => e.MakeId, "IX_Inventory_MakeId");
+        builder.Property(e => e.Color)
+          .IsRequired()
+          .HasMaxLength(50)
+          .HasDefaultValue("Black");
+        builder.Property(e => e.PetName)
+          .IsRequired()
+          .HasMaxLength(50);
+        builder.Property(e => e.DateBuild).HasDefaultValueSql("getdate()");
+        builder.Property(e => e.IsDrivable)
+          .HasField("_isDrivable")
+          .HasDefaultValue(true);
+        builder.Property(e => e.TimeStamp)
+          .IsRowVersion()
+          .IsConcurrencyToken();
+        builder.Property(e => e.Display).HasComputedColumnSql("[PetName] + '(' + [Color] + ')'", stored: true);
+        builder.HasOne(d => d.MakeNavigation)
+          .WithMany(p => p.Cars)
+          .HasForeignKey(d => d.MakeId)
+          .OnDelete(DeleteBehavior.ClientSetNull)
+          .HasConstraintName("FK_Inventory_Makes_MakeId");
+    }
+}
+```
+
+Ця конфігурація також працює з плавною конфігурацією «Many-to-Many» між Car і Driver. Додавати конфігурацію до класу CarConfiguration або створювати клас DriverConfiguration ви самі вибираєте. Для цього прикладу перемістіть його в клас CarConfiguration у кінці методу Configure():
+
+```cs
+    public void Configure(EntityTypeBuilder<Car> builder)
+    {
+        //...
+        builder
+        .HasMany(p => p.Drivers)
+        .WithMany(p => p.Cars)
+        .UsingEntity<CarDriver>(
+          j => j
+            .HasOne(cd => cd.DriverNavigation)
+            .WithMany(d => d.CarDrivers)
+            .HasForeignKey(nameof(CarDriver.DriverId))
+            .HasConstraintName("FK_InventoryDriver_Drivers_DriverId")
+            .OnDelete(DeleteBehavior.Cascade),
+          j => j
+            .HasOne(cd => cd.CarNavigation)
+            .WithMany(c => c.CarDrivers)
+            .HasForeignKey(nameof(CarDriver.CarId))
+            .HasConstraintName("FK_InventoryDriver_Inventory_InventoryId")
+            .OnDelete(DeleteBehavior.ClientCascade),
+          j =>
+          {
+              j.HasKey(cd => new { cd.CarId, cd.DriverId });
+          });
+    }
+
+```
+
+Оновіть файл GlobalUsings.cs, щоб включити новий простір імен для класів конфігурації:
+
+```cs
+global using AutoLot.Samples.Models.Configuration;
+```
+Замініть увесь код у методі OnModelBuilding() (у класі ApplicationDbContext.cs), який налаштовує клас Car і зв’язок Car to Driver багато-до-багатьох, на такий єдиний рядок коду:
+
+```cs
+new CarConfiguration().Configure(modelBuilder.Entity<Car>());
+```
+
+Останнім кроком для класу Car є додавання атрибута EntityTypeConfiguration:
+
+```cs
+[EntityTypeConfiguration(typeof(CarConfiguration))]
+public class Car : BaseEntity
+{
+    //...
+}    
+```
+
+Потім повторіть ті самі дії для коду API Radio Fluent. Створіть новий клас під назвою RadioConfiguration, реалізуйте інтерфейс IEntityTypeConfiguration<Radio> і додайте код із методу ApplicationDbContext OnModelBuilding():
+
+```cs
+namespace AutoLot.Samples.Models.Configuration;
+
+internal class RadioConfiguration : IEntityTypeConfiguration<Radio>
+{
+    public void Configure(EntityTypeBuilder<Radio> builder)
+    {
+        builder.Property(e => e.CarId).HasColumnName("InventoryId");
+        builder.HasIndex(e => e.CarId, "IX_Radios_CarId").IsUnique();
+        builder.HasOne(d => d.CarNavigation)
+          .WithOne(p => p.RadioNavigation)
+          .HasForeignKey<Radio>(d => d.CarId);
+    }
+}
+```
+
+Оновіть метод OnModelCreating() у ApplicationDbContext:
+
+```cs
+            new RadioConfiguration().Configure(modelBuilder.Entity<Radio>());
+```
+Додайте атрибут EntityTypeConfiguration до класу Radio
+
+```cs
+[EntityTypeConfiguration(typeof(RadioConfiguration))]
+public class Radio : BaseEntity
+{
+    //...
+}    
+```
+Хоча це не зменшило загальну кількість рядків коду, ця нова функція зробила ApplicationDbContext набагато чистішим.
+
+#### Умовні позначення, анотації та Fluent API, боже!
+
+На цьому етапі вам може бути цікаво, який із трьох варіантів використовувати для формування ваших сутностей і їхнього зв’язку між собою та сховищем даних. Відповідь - усі три. Умовні угоди завжди активні (якщо ви не заміните їх анотаціями даних або Fluent API). Анотації даних можуть робити майже все, що можуть робити методи API Fluent, і самі зберігати інформацію в класі сутності, що може підвищити читабельність коду та підтримку. Fluent API є найпотужнішим з усіх трьох. Незалежно від того, використовуєте ви анотації даних чи Fluent API, знайте, що анотації даних переважають над вбудованими угодами, а методи Fluent API переважають над усім.
+
+### Типи сутностей Owned(У власності)
+
+Іноді дві або більше сутності будуть містити однаковий набір властивостей. Можна використовувати клас C# як властивість сутності для визначення набору властивостей для іншої сутності. Коли типи, позначені атрибутом [Owned] (або налаштовані за допомогою Fluent API), додаються як властивість сутності, EF Core додасть усі властивості з класу сутності [Owned] до сутності-власника. Це збільшує можливість повторного використання коду C#.
+За лаштунками EF Core вважає це відношення один до одного. Клас у власності є залежною сутністю, а клас що аолодіє є головною сутністю. Клас, яки' є у власносі, навіть якщо він вважається сутністю, не може існувати без сутності-власника. Назви стовпців за замовчуванням із типу власності будуть відформатовані як NavigationPropertyName_OwnedEntityPropertyName (наприклад, PersonalNavigation_FirstName). Назви за замовчуванням можна змінити за допомогою Fluent API.
+
+Додамо клас Person:
+
+```cs
+
+namespace AutoLot.Samples.Models;
+[Owned]
+public class Person
+{
+    [Required,StringLength(50)]
+    public string FirstName { get; set; }
+    [Required, StringLength(50)]
+    public string LastName { get; set; }
+}
+```
+Зверніть увагу на атрибут Owned.
+За допомогою цього ми можемо замінити властивості FirstName і LastName у класі Driver на новий клас Person:
+
+```cs
+public class Driver : BaseEntity
+{
+    public Person PersonInfo { get; set; } = new Person();
+    public IEnumerable<Car> Cars { get; set; } = new List<Car>();
+    [InverseProperty(nameof(CarDriver.DriverNavigation))]
+    public IEnumerable<CarDriver> CarDrivers { get; set; } = new List<CarDriver>();
+}
+```
+За замовчуванням дві властивості Person зіставляються зі стовпцями з іменами PersonInfo_FirstName та PersonInfo_LastName. Щоб змінити це, спочатку додайте новий файл DriverConfiguration.cs у папку Configuration і оновіть код до наступного:
+
+```cs
+namespace AutoLot.Samples.Models.Configuration;
+
+public class DriverConfiguration : IEntityTypeConfiguration<Driver>
+{
+    public void Configure(EntityTypeBuilder<Driver> builder)
+    {
+        builder.OwnsOne(o => o.PersonInfo,
+            pd =>
+            {
+                pd.Property<string>(nameof(Person.FirstName))
+                       .HasColumnName(nameof(Person.FirstName))
+                       .HasColumnType("nvarchar(50)");
+                pd.Property<string>(nameof(Person.LastName))
+                       .HasColumnName(nameof(Person.LastName))
+                       .HasColumnType("nvarchar(50)");
+            });
+    }
+}
+
+```
+Оновіть метод ApplicationDbContext OnConfiguring():
+```cs
+            new DriverConfiguration().Configure(modelBuilder.Entity<Driver>());
+```
+Оновіть клас Driver:
+
+```cs
+[EntityTypeConfiguration(typeof(DriverConfiguration))]
+public class Driver : BaseEntity
+{
+    //...
+}
+```
+Таблиця Driver оновлюється таким чином (зауважте, що nullability стовпці FirstName та LastName не відповідають анотаціям Required в сутності що у власності).
+
+```sql
+CREATE TABLE [dbo].[Drivers](
+        [Id] [INT] IDENTITY(1,1) NOT NULL,
+        [FirstName] [NVARCHAR](50) NULL,
+        [LastName] [NVARCHAR](50) NULL,
+        [TimeStamp] [TIMESTAMP] NULL,
+ CONSTRAINT [PK_Drivers] PRIMARY KEY CLUSTERED
+(
+        [Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+```
+Хоча клас Person має анотацію Required для обох своїх властивостей, обидва стовпці SQL Server мають значення NULL. Це пов’язано з проблемою того, як система міграції перекладає сутності власності, коли вони використовуються з необов’язковим зв’язком. Щоб виправити це, є кілька варіантів. Перший — увімкнути типи нульових посилань C# (на рівні проекту або в класах). Це робить навігаційну властивість PersonInfo не допускаючою значення, що враховується EF Core, і, у свою чергу, EF Core потім належним чином налаштовує стовпці у сутності, що належить. Інший варіант полягає в додаванні оператора Fluent API, щоб зробити властивість навігації обов’язковою.
+```cs
+public class DriverConfiguration : IEntityTypeConfiguration<Driver>
+{
+  public void Configure(EntityTypeBuilder<Driver> builder)
+  {
+    //...
+    builder.Navigation(d=>d.PersonInfo).IsRequired(true);
+  }
+}
+```
+Це оновлює властивості типу, що належить Person, для встановлення ненульового стовпця в SQL Server:
+
+```sql
+CREATE TABLE [dbo].[Drivers](
+      [Id] [INT] IDENTITY(1,1) NOT NULL,
+      [FirstName] [NVARCHAR](50) NOT NULL,
+      [LastName] [NVARCHAR](50) NOT NULL,
+      [TimeStamp] [TIMESTAMP] NULL,
+ CONSTRAINT [PK_Drivers] PRIMARY KEY CLUSTERED
+(
+      [Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF,
+      IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON,
+      OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+```
+Існує чотири обмеження на використання типів, що належать:
+
+    Ви не можете створити DbSet<T> для owned типу.
+
+    Ви не можете викликати Entity<T>() із власним типом у ModelBuilder.
+
+    Екземпляри одного типу сутності не можуть бути спільними для кількох власників.
+
+    Типи owned не можуть мати ієрархії успадкування.
+
+Існують додаткові параметри, які можна досліджувати за допомогою об’єктів власності, зокрема колекції, поділ таблиці та вкладення. Щоб отримати більше інформації, зверніться до документації EF Core.
+
+#### 

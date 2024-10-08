@@ -61,55 +61,83 @@ namespace AutoLot.Samples
         {
             // Fluent API calls go here
 
-            modelBuilder.Entity<Car>(entity => 
-            {
-                entity.ToTable("Invertory", "dbo");
-                entity.HasKey(e => e.Id);
-                //entity.HasKey(e => new { e.Id, e.OrganizationId });
-                entity.HasIndex(e => e.MakeId, "IX_Inventory_MakeId").IsUnique();
-                entity.Property(e => e.Color)
-                .IsRequired()
-                .HasMaxLength(50)
-                .HasDefaultValue("Black");
-                entity.Property(e => e.PetName)
-                .IsRequired()
-                .HasMaxLength(50);
-                entity.Property(e => e.DateBuild)
-                .HasDefaultValueSql("getdate()");
-                entity.Property(e => e.IsDrivable)
-                .HasField("_IsDrivable")
-                .HasDefaultValue(true);
-                entity.Property(e => e.TimeStamp)
-                .IsRowVersion()
-                .IsConcurrencyToken();
-                entity.Property(e => e.Display)
-                .HasComputedColumnSql("[PetName] + ' (' + [Color] + ')'");
+            //modelBuilder.Entity<Car>(entity => 
+            //{
+            //    entity.ToTable("Invertory", "dbo");
+            //    entity.HasKey(e => e.Id);
+            //    //entity.HasKey(e => new { e.Id, e.OrganizationId });
+            //    entity.HasIndex(e => e.MakeId, "IX_Inventory_MakeId").IsUnique();
+            //    entity.Property(e => e.Color)
+            //    .IsRequired()
+            //    .HasMaxLength(50)
+            //    .HasDefaultValue("Black");
+            //    entity.Property(e => e.PetName)
+            //    .IsRequired()
+            //    .HasMaxLength(50);
+            //    entity.Property(e => e.DateBuild)
+            //    .HasDefaultValueSql("getdate()");
+            //    entity.Property(e => e.IsDrivable)
+            //    .HasField("_IsDrivable")
+            //    .HasDefaultValue(true);
+            //    entity.Property(e => e.TimeStamp)
+            //    .IsRowVersion()
+            //    .IsConcurrencyToken();
+            //    entity.Property(e => e.Display)
+            //    .HasComputedColumnSql("[PetName] + ' (' + [Color] + ')'");
 
-                entity.HasOne(c => c.MakeNavigation)
-                .WithMany(m => m.Cars)
-                .HasForeignKey(c => c.MakeId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Inventory_Makes_MakeId");
+            //    entity.HasOne(c => c.MakeNavigation)
+            //    .WithMany(m => m.Cars)
+            //    .HasForeignKey(c => c.MakeId)
+            //    .OnDelete(DeleteBehavior.ClientSetNull)
+            //    .HasConstraintName("FK_Inventory_Makes_MakeId");
 
-                entity.HasOne(c => c.RadioNavigation)
-                .WithOne(r => r.CarNavigation)
-                .HasForeignKey<Radio>(c => c.CarId);
+            //    entity.HasOne(c => c.RadioNavigation)
+            //    .WithOne(r => r.CarNavigation)
+            //    .HasForeignKey<Radio>(c => c.CarId);
 
-            });
+            //});
 
-            modelBuilder.Entity<Radio>(entity => 
-            {
-                entity.Property(e => e.CarId).HasColumnName("InvertoryId");
+            //modelBuilder.Entity<Car>()
+            //  .HasMany(p => p.Drivers)
+            //  .WithMany(p => p.Cars)
+            //  .UsingEntity<CarDriver>(
+            //     j => j
+            //         .HasOne(cd => cd.DriverNavigation)
+            //         .WithMany(d => d.CarDrivers)
+            //         .HasForeignKey(nameof(CarDriver.DriverId))
+            //         .HasConstraintName("FK_InventoryDriver_Drivers_DriverId")
+            //         .OnDelete(DeleteBehavior.Cascade),
+            //     j => j
+            //         .HasOne(cd => cd.CarNavigation)
+            //         .WithMany(c => c.CarDrivers)
+            //         .HasForeignKey(nameof(CarDriver.CarId))
+            //         .HasConstraintName("FK_InventoryDriver_Inventory_InventoryId")
+            //         .OnDelete(DeleteBehavior.ClientCascade),
+            //     j =>
+            //     {
+            //         j.HasKey(cd => new { cd.CarId, cd.DriverId });
+            //     });
 
-                //entity.HasIndex(e => e.CarId, "IX_Radios_CarId");
 
-                //entity.HasOne(r => r.CarNavigation)
-                //.WithOne(c => c.RadioNavigation)
-                //.HasForeignKey<Radio>(r => r.CarId);
+            new CarConfiguration().Configure(modelBuilder.Entity<Car>());
 
-                entity.HasIndex(r => r.CarId, "IX_Radios_CarId")
-                .IsUnique();
-            });
+            //modelBuilder.Entity<Radio>(entity => 
+            //{
+            //    entity.Property(e => e.CarId).HasColumnName("InvertoryId");
+
+            //    //entity.HasIndex(e => e.CarId, "IX_Radios_CarId");
+
+            //    //entity.HasOne(r => r.CarNavigation)
+            //    //.WithOne(c => c.RadioNavigation)
+            //    //.HasForeignKey<Radio>(r => r.CarId);
+
+            //    entity.HasIndex(r => r.CarId, "IX_Radios_CarId")
+            //    .IsUnique();
+            //});
+
+            new RadioConfiguration().Configure(modelBuilder.Entity<Radio>());
+
+            new DriverConfiguration().Configure(modelBuilder.Entity<Driver>());
 
             //modelBuilder.Entity<Make>().HasCheckConstraint("CH_Name", "[Name]<>'Lemon'", c => c.HasName("CK_Check_Name"));
 
@@ -121,9 +149,6 @@ namespace AutoLot.Samples
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Inventory_Makes_MakeId");
             });
-
-
-
         }
     }
 }

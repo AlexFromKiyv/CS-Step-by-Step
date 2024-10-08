@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 namespace AutoLot.Samples.Models;
 [Table("Inventory",Schema ="dbo")]
 [Index(nameof(MakeId),Name = "IX_Inventory_MakeId")]
+[EntityTypeConfiguration(typeof(CarConfiguration))]
 public class Car : BaseEntity
 {
     private string _color;
