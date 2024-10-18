@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AutoLot.Samples.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,7 +16,7 @@ namespace AutoLot.Samples
         public DbSet<Radio> Radios { get; set; }
         public DbSet<Driver> Drivers { get; set; }
         public DbSet<CarDriver> CarsToDrivers { get; set; }
-
+        public DbSet<CarMakeViewModel> CarMakeViewModels { get; set; }
 
         // Constructors
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) :base(options) 
@@ -138,6 +139,8 @@ namespace AutoLot.Samples
             new RadioConfiguration().Configure(modelBuilder.Entity<Radio>());
 
             new DriverConfiguration().Configure(modelBuilder.Entity<Driver>());
+
+            new CarMakeViewModelConfiguration().Configure(modelBuilder.Entity<CarMakeViewModel>());
 
             //modelBuilder.Entity<Make>().HasCheckConstraint("CH_Name", "[Name]<>'Lemon'", c => c.HasName("CK_Check_Name"));
 
