@@ -14,25 +14,22 @@ public class CarConfiguration : IEntityTypeConfiguration<Car>
         builder.HasKey(e => e.Id);
         builder.HasIndex(e => e.MakeId, "IX_Inventory_MakeId");
         builder.Property(e => e.Color)
-          .IsRequired()
-          .HasMaxLength(50)
-          .HasDefaultValue("Black");
+        .IsRequired()
+        .HasMaxLength(50);
         builder.Property(e => e.PetName)
-          .IsRequired()
-          .HasMaxLength(50);
-        builder.Property(e => e.DateBuild).HasDefaultValueSql("getdate()");
+        .IsRequired()
+        .HasMaxLength(50);
+        builder.Property(e => e.DateBuilt)
+        .HasDefaultValueSql("getdate()");
         builder.Property(e => e.IsDrivable)
-          .HasField("_isDrivable")
-          .HasDefaultValue(true);
-        builder.Property(e => e.TimeStamp)
-          .IsRowVersion()
-          .IsConcurrencyToken();
-        builder.Property(e => e.Display).HasComputedColumnSql("[PetName] + '(' + [Color] + ')'", stored: true);
-        builder.HasOne(d => d.MakeNavigation)
-          .WithMany(p => p.Cars)
-          .HasForeignKey(d => d.MakeId)
-          .OnDelete(DeleteBehavior.ClientSetNull)
-          .HasConstraintName("FK_Inventory_Makes_MakeId");
+        .HasDefaultValue(true);
+        builder.Property(e => e.Display)
+        .HasComputedColumnSql("[PetName] + ' (' + [Color] + ')'");
+        builder.HasOne(c => c.MakeNavigation)
+        .WithMany(m => m.Cars)
+        .HasForeignKey(c => c.MakeId)
+        .OnDelete(DeleteBehavior.ClientSetNull)
+        .HasConstraintName("FK_Inventory_Makes_MakeId");
 
         builder
         .HasMany(p => p.Drivers)
@@ -54,5 +51,6 @@ public class CarConfiguration : IEntityTypeConfiguration<Car>
           {
               j.HasKey(cd => new { cd.CarId, cd.DriverId });
           });
+
     }
 }

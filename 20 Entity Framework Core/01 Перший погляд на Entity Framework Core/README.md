@@ -54,35 +54,24 @@ global using System.ComponentModel.DataAnnotations.Schema;
 
 Члени DbContext які часто використовуються
 
-    Database : Надає доступ до інформації та функцій, пов’язаних із базою даних, включаючи виконання операторів SQL.
-
-    Model : Метадані про форму сутностей, зв’язки між ними та те, як вони відображаються в базі даних.
-
-    ChangeTracker : Надає доступ до інформації та операцій для екземплярів сутності, які відстежує цей DbContext.
-
-    DbSet<T> : Насправді не є членом DbContext, але властивості додано до настроюваного похідного класу DbContext. Властивості мають тип DbSet<T> і використовуються для запиту та збереження екземплярів сутностей програми. Запити LINQ щодо властивостей DbSet<T> перекладаються на запити SQL.
-
-    Entry() : Надає доступ до інформації про відстеження змін і операцій для сутності, таких як явне завантаження пов’язаних сутностей або зміна EntityState. Також можна викликати невідстежувану сутність, щоб змінити стан на відстежуваний.
-
-    Set<TEntity>() : Створює екземпляр властивості DbSet<T>, який можна використовувати для запиту та збереження даних.
-
-    SaveChanges()/SaveChangesAsync() : Зберігає всі зміни сутності в базі даних і повертає кількість задіяних записів. Виконується в транзакції (явній або неявній).
-
-    Add()/AddRange(), Update()/UpdateRange(), Remove()/RemoveRange() : Методи додавання, оновлення та видалення екземплярів сутності. Зміни зберігаються лише після успішного виконання SaveChanges(). Також доступні асинхронні версії. Примітка: Хоча ці методи доступні в похідному DbContext, вони зазвичай викликаються безпосередньо у властивостях DbSet<T>.
-
-    Find() : Знаходить сутність типу із заданими значеннями первинного ключа. Також доступні асинхронні версії. Примітка: Хоча ці методи доступні в похідному DbContext, вони зазвичай викликаються безпосередньо у властивостях DbSet<T>.
-
-    Attach()/AttachRange() : Починає відстежувати сутність (або список сутностей).Також доступні асинхронні версії. Примітка: Хоча ці методи доступні в похідному DbContext, вони зазвичай викликаються безпосередньо у властивостях DbSet<T>.
-
-    SavingChanges() : Подія запускається на початку виклику SaveChanges()/SaveChangesAsync().
-
-    SavedChanges() : Подія запускається в кінці виклику SaveChanges()/SaveChangesAsync().
-
-    SaveChangesFailed : Подія запускається, якщо виклик SaveChanges()/SaveChangesAsync() не вдається.
-
-    OnModelCreating() : Викликається, коли модель ініціалізовано, але до її завершення. Методи з API Fluent розміщуються в цьому методі для завершення форми моделі.
-
-    OnConfiguring() : Конструктор, який використовується для створення або зміни параметрів для DbContext. Примітка. Рекомендується не використовувати це, натомість використовувати DbContextOptions для налаштування екземпляра DbContext під час виконання та використовувати екземпляр IDesignTimeDbContextFactory під час розробки.
+|Член|Опис|
+|----|----|
+|Database|Надає доступ до інформації та функцій, пов’язаних із базою даних, включаючи виконання операторів SQL.|
+|Model|Метадані про форму сутностей, зв’язки між ними та те, як вони відображаються в базі даних.|
+|ChangeTracker|Надає доступ до інформації та операцій для екземплярів сутності, які відстежує цей DbContext.|
+|DbSet<T>|Насправді не є членом DbContext, але властивості додано до настроюваного похідного класу DbContext. Властивості мають тип DbSet<T> і використовуються для запиту та збереження екземплярів сутностей програми. Запити LINQ щодо властивостей DbSet<T> перекладаються на запити SQL.|
+|Entry()|Надає доступ до інформації про відстеження змін і операцій для сутності, таких як явне завантаження пов’язаних сутностей або зміна EntityState. Також можна викликати невідстежувану сутність, щоб змінити стан на відстежуваний.|
+|Set<TEntity>()|Створює екземпляр властивості DbSet<T>, який можна використовувати для запиту та збереження даних.|
+|SaveChanges()/SaveChangesAsync()|Зберігає всі зміни сутності в базі даних і повертає кількість задіяних записів. Виконується в транзакції (явній або неявній).|
+|Add()/AddRange(), Update()/UpdateRange(), Remove()/RemoveRange()|Методи додавання, оновлення та видалення екземплярів сутності. Зміни зберігаються лише після успішного виконання SaveChanges(). Також доступні асинхронні версії. Примітка: Хоча ці методи доступні в похідному DbContext, вони зазвичай викликаються безпосередньо у властивостях DbSet<T>.|
+|Find()|Знаходить сутність типу із заданими значеннями первинного ключа. Також доступні асинхронні версії. Примітка: Хоча ці методи доступні в похідному DbContext, вони зазвичай викликаються безпосередньо у властивостях DbSet<T>.
+|
+|Attach()/AttachRange()|Починає відстежувати сутність (або список сутностей).Також доступні асинхронні версії. Примітка: Хоча ці методи доступні в похідному DbContext, вони зазвичай викликаються безпосередньо у властивостях DbSet<T>.|
+|SavingChanges()|Подія запускається на початку виклику SaveChanges()/SaveChangesAsync().|
+|SavedChanges()|Подія запускається в кінці виклику SaveChanges()/SaveChangesAsync().|
+|SaveChangesFailed|Подія запускається, якщо виклик SaveChanges()/SaveChangesAsync() не вдається.|
+|OnModelCreating()|Викликається, коли модель ініціалізовано, але до її завершення. Методи з API Fluent розміщуються в цьому методі для завершення форми моделі.|
+|OnConfiguring()|Конструктор, який використовується для створення або зміни параметрів для DbContext. Примітка. Рекомендується не використовувати це, натомість використовувати DbContextOptions для налаштування екземпляра DbContext під час виконання та використовувати екземпляр IDesignTimeDbContextFactory під час розробки.|
 
 ## Побудова похідного касу від DBContext
 
@@ -104,12 +93,14 @@ global using System.ComponentModel.DataAnnotations.Schema;
 
 ### Конфігурування DbContext
 
-Екземпляр DbContext налаштовується за допомогою екземпляра класу DbContextOptions. Екземпляр DbContextOptions створюється за допомогою DbContextOptionsBuilder, оскільки клас DbContextOptions не призначений для безпосереднього створення у вашому коді. За допомогою екземпляра DbContextOptionsBuilder вибирається постачальник бази даних (разом із будь-якими параметрами, що стосуються постачальника), і встановлюються загальні параметри EF Core DbContext (наприклад, журналювання). Потім екземпляр DbContextOptions вставляється в базовий DbContext під час виконання.
+Екземпляр похідного від DbContext класу налаштовується за допомогою екземпляра класу DbContextOptions. Екземпляр DbContextOptions створюється за допомогою DbContextOptionsBuilder, оскільки клас DbContextOptions не призначений для безпосереднього створення у вашому коді. За допомогою екземпляра DbContextOptionsBuilder вибирається постачальник бази даних (разом із будь-якими параметрами, що стосуються постачальника), і встановлюються загальні параметри EF Core DbContext (наприклад, журналювання). Потім екземпляр DbContextOptions передається в базовий DbContext під час виконання.
 Ця можливість динамічної конфігурації дозволяє змінювати налаштування під час виконання, просто вибираючи різні параметри (наприклад, MySQL замість постачальника SQL Server) і створюючи новий екземпляр вашого похідного DbContext.
 
 ### DbContext Factory під час розробки
 
-DbContext Factory під час розробки — це клас, який реалізує інтерфейс IDesignTimeDbContextFactory<T>, де T — похідний клас DbContext. Інтерфейс має один метод CreateDbContext(), який ви повинні реалізувати, щоб створити екземпляр вашого похідного DbContext. Цей клас не призначений для використання у виробництві, а лише під час розробки, і існує в основному для інструментів командного рядка EF Core, які ви незабаром дослідите. У прикладах у цьому та наступному розділах він використовуватиметься для створення нових екземплярів ApplicationDbContext. Вважається поганою практикою використовувати фабрику DbContext для створення екземплярів вашого похідного класу DbContext. Пам’ятайте, що це демонстраційний код, призначений для навчання, і використання його таким чином робить демонстраційний код чистішим. Ви побачите, як правильно створити екземпляр похідного класу DbContext у розділі ASP.NET Core.
+Фабрика DbContext під час розробки — це клас, який реалізує інтерфейс IDesignTimeDbContextFactory<T>, де T — похідний клас DbContext. Інтерфейс має один метод CreateDbContext(), який ви повинні реалізувати, щоб створити екземпляр вашого похідного DbContext. Цей клас не призначений для використання у виробництві, а лише під час розробки, і існує в основному для інструментів командного рядка EF Core, які ви незабаром дослідите. У прикладах у цьому та наступному розділах він використовуватиметься для створення нових екземплярів ApplicationDbContext. Вважається поганою практикою використовувати фабрику DbContext для створення екземплярів вашого похідного класу DbContext. Пам’ятайте, що це демонстраційний код, призначений для навчання, і використання його таким чином робить демонстраційний код чистішим. Ви побачите, як правильно створити екземпляр похідного класу DbContext у розділі ASP.NET Core.
+
+Додамо клас ApplicationDbContextFactory.
 
 ```cs
 namespace AutoLot.Samples;
@@ -127,7 +118,7 @@ public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<Applicati
     }
 }
 ```
-Клас ApplicationDbContextFactory використовує метод CreateDbContext() для створення строго типізованого DbContextOptionsBuilder для класу ApplicationDbContext, встановлює постачальника бази даних на постачальника SQL Server (використовуючи рядок підключення екземпляра Docker з розділу 20), а потім створює та повертає новий екземпляр ApplicationDbContext.
+Клас ApplicationDbContextFactory використовує метод CreateDbContext() для створення строго типізованого DbContextOptionsBuilder для класу ApplicationDbContext, встановлює постачальника бази даних на постачальника SQL Server (використовуючи рядок підключення екземпляра Docker з попереднього розділу), а потім створює та повертає новий екземпляр ApplicationDbContext.
 
 Знову ж таки, фабрика контексту розроблена для інтерфейсу командного рядка EF Core для створення екземпляра похідного класу DbContext, а не для використання у виробництві. Інтерфейс командного рядка використовує фабрику під час виконання таких дій, як створення або застосування міграції бази даних. Однією з основних причин, чому ви не хочете використовувати це у виробництві, є жорстко закодований рядок підключення. Оскільки це призначено для використання під час розробки, використання встановленого рядка підключення, який вказує на базу даних розробки, працює ідеально.
 Метод CreateDbContext() приймає масив рядків з CLI як аргумент.
@@ -142,6 +133,8 @@ public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<Applicati
             // Fluent API calls go here / Сюди надходять виклики Fluent API
         }
 ```
+
+## Використання похідного класу DBContext
 
 ### Збереження змін
 
@@ -271,21 +264,17 @@ static void TransctionWithExecutionStrateies()
 
 Загальні члени та методи розширення DbSet<T>
 
-    Add()/AddRange() : Починає відстежувати сутність/сутності в стані Додано. Елемент(и) буде додано під час виклику SaveChanges(). Також доступні асинхронні версії.
+|Члени та методи розширення|Опис|
+|--------------------------|----|
+|Add()/AddRange()|Починає відстежувати сутність/сутності в стані Додано. Елемент(и) буде додано під час виклику SaveChanges(). Також доступні асинхронні версії.|
+|AsAsyncEnumerable()|Повертає колекцію як IAsyncEnumerable<T>.|
+|AsQueryable()|Повертає колекцію як IQueryable<T>.|
+|Find()|Шукає сутність у ChangeTracker за первинним ключем. Якщо об’єкт не знайдено в системі відстеження змін, у сховищі даних запитується об’єкт. Також доступна асинхронна версія.|
+|Update() UpdateRange()|Починає відстежувати сутність/сутності у зміненому стані. Елемент(и) буде оновлено під час виклику SaveChanges. Також доступні асинхронні версії.|
+|Remove() RemoveRange()|Починає відстежувати сутність/сутності у стані "Видалено". Елемент(и) буде видалено під час виклику SaveChanges(). Також доступні асинхронні версії.|
+|Attach() AttachRange()|Починає відстежувати сутність/сутності. Сутності з цифровими первинними ключами, визначеними як ідентичність, і значенням, що дорівнює нулю, відстежуються як Додані. Усі інші відстежуються як незмінені. Також доступні асинхронні версії.|
+|FromSqlRaw() FromSqlInterpolated()|Створює запит LINQ на основі необробленого або інтерпольованого рядка, що представляє запит SQL. Може поєднуватися з додатковими операторами LINQ для виконання на сервері.|
 
-    AsAsyncEnumerable() : Повертає колекцію як IAsyncEnumerable<T>.
-
-    AsQueryable() : Повертає колекцію як IQueryable<T>.
-
-    Find() : Шукає сутність у ChangeTracker за первинним ключем. Якщо об’єкт не знайдено в системі відстеження змін, у сховищі даних запитується об’єкт. Також доступна асинхронна версія.
-
-    Update()UpdateRange() : Починає відстежувати сутність/сутності у зміненому стані. Елемент(и) буде оновлено під час виклику SaveChanges. Також доступні асинхронні версії.
-
-    Remove()RemoveRange() : Починає відстежувати сутність/сутності у стані "Видалено". Елемент(и) буде видалено під час виклику SaveChanges(). Також доступні асинхронні версії.
-
-    Attach()AttachRange() : Починає відстежувати сутність/сутності. Сутності з цифровими первинними ключами, визначеними як ідентичність, і значенням, що дорівнює нулю, відстежуються як Додані. Усі інші відстежуються як незмінені. Також доступні асинхронні версії.
-
-    FromSqlRaw() FromSqlInterpolated() : Створює запит LINQ на основі необробленого або інтерпольованого рядка, що представляє запит SQL. Може поєднуватися з додатковими операторами LINQ для виконання на сервері.
 
 Тип DbSet<T> реалізує IQueryable<T>, що дозволяє використовувати запити LINQ для отримання записів із бази даних. На додаток до методів розширення, доданих EF Core, DbSet<T> підтримує ті самі методи розширення, про які ви дізналися в розділі про LINQ, наприклад ForEach(), Select() і All(). 
 Ви додасте властивості DbSet<T> до ApplicationDbContext пізніше.
@@ -295,16 +284,14 @@ static void TransctionWithExecutionStrateies()
 Екземпляр ChangeTracker відстежує стан об’єктів, завантажених у DbSet<T> в екземплярі DbContext.
 
 Значення перерахування стану сутності
+|Значення|Опис|
+|--------|----|
+|Added|Сутність відстежується, але ще не існує в базі даних.|
+|Deleted|Сутність відстежується та позначена для видалення з бази даних.|
+|Detached |Сутність не відстежується засобом відстеження змін.|
+|Modified|Сутність відстежується та був змінений.|
+|Unchanged|Сутність відстежується, існує в базі даних і не була змінена.|
 
-    Added : Сутність відстежується, але ще не існує в базі даних.
-
-    Deleted : Сутність відстежується та позначена для видалення з бази даних.
-
-    Detached : Сутність не відстежується засобом відстеження змін.
-
-    Modified : Сутність відстежується та був змінений.
-
-    Unchanged : Сутність відстежується, існує в базі даних і не була змінена.
 
 Якщо вам потрібно перевірити стан об'єкта, використовуйте такий код:
 
@@ -320,7 +307,7 @@ context.Entry(entity).State = EntityState.Deleted;
 
 ### Події ChangeTracker
 
-Є дві події, які можуть бути викликані ChangeTracker. Перша — StateChanged, а друга — Tracked. Подія StateChanged запускається, коли змінюється стан об’єкта. Він не спрацьовує під час першого відстеження сутності. Подія Tracked спрацьовує, коли сутність починає відстежуватися, або через програмне додавання до екземпляра DbSet<T>, або коли повертається із запиту.
+Є дві події, які можуть бути викликані у ChangeTracker. Перша — StateChanged, а друга — Tracked. Подія StateChanged запускається, коли змінюється стан об’єкта. Він не спрацьовує під час першого відстеження сутності. Подія Tracked спрацьовує, коли сутність починає відстежуватися, або через програмне додавання до екземпляра DbSet<T>, або коли повертається із запиту.
 Оновіть конструктор для класу ApplicationDbContext до такого, щоб указати обробники подій для подій StateChanged і Tracked:
 
 ```cs
@@ -355,7 +342,13 @@ OldState і NewState доступні через EntityStateChangedEventArgs.
 Подія Tracked запускається, коли ChangeTracker починає відстежувати сутність. У наступному прикладі виконується запис на консоль кожного разу, коли сутність завантажується з бази даних.
 
 ```cs
-
+        private void ChangeTracker_Tracked(object? sender, EntityTrackedEventArgs e)
+        {
+            if (e.FromQuery)
+            {
+                Console.WriteLine($"An entity of type {e.Entry.Entity.GetType().Name} was loaded from the database.");
+            }
+        }
 ```
 Властивість FromQuery EntityTrackedEventArgs вказує, чи була сутність завантажена через запит бази даних чи програмно.
 
@@ -365,13 +358,13 @@ OldState і NewState доступні через EntityStateChangedEventArgs.
 
 ## Сутності
 
-Строго типізовані класи, які відображаються в таблицях бази даних, офіційно називаються сутностями. Набір сутностей у програмі містить концептуальну модель фізичної бази даних. Формально кажучи, ця модель називається моделлю даних сутності (entity data model EDM ), яку зазвичай називають просто моделлю. Модель зіставляється з доменом програми/бізнесу. Сутності та їхні властивості зіставляються з таблицями та стовпцями за допомогою угод Entity Framework Core, конфігурації та Fluent API (код). Сутності не потребують прямого зіставлення зі схемою бази даних. Ви можете структурувати свої класи сутностей відповідно до потреб програми, а потім зіставляти унікальні сутності зі схемою бази даних.
+Строго типізовані класи, які відображаються в таблицях бази даних, офіційно називаються сутностями. Набір сутностей у програмі містить концептуальну модель фізичної бази даних. Формально кажучи, ця модель називається моделлю даних сутності (entity data model EDM ), яку зазвичай називають просто моделю. Модель зіставляється з доменом програми/бізнесу. Сутності та їхні властивості зіставляються з таблицями та стовпцями за допомогою угод Entity Framework Core, конфігурації та Fluent API (код). Сутності не потребують прямого зіставлення зі схемою бази даних. Ви можете структурувати свої класи сутностей відповідно до потреб програми, а потім зіставляти унікальні сутності зі схемою бази даних.
 Цей слабкий зв’язок між базою даних і вашими об’єктами означає, що ви можете формувати об’єкти відповідно до домену вашого бізнесу, незалежно від конструкції та структури бази даних. Наприклад, візьмемо просту таблицю Inventory в базі даних AutoLot і клас сутності Car з попереднього розділу.Назви різні, але сутність Car можна зіставити з таблицею  Inventory. EF Core перевіряє конфігурацію ваших сутностей у моделі, щоб зіставити представлення клієнтської сторони таблиці Inventory (у нашому прикладі класу Car) на правильні стовпці таблиці Inventory. 
-У наступних кількох розділах детально описано, як угоди EF Core, анотації даних і код (за допомогою Fluent API) відображають сутності, властивості та зв’язки між сутностями в режимі на таблиці, стовпці та зв’язки зовнішнього ключа у вашій базі даних.
+У наступних кількох розділах детально описано, як угоди EF Core, анотації даних і код (за допомогою Fluent API) відображають сутності, властивості та зв’язки між сутностями на таблиці, стовпці та зв’язки зовнішнього ключа у вашій базі даних.
 
 ### Властивості сутності та стовпці бази даних
 
-Під час використання реляційного сховища даних EF Core використовує дані зі стовпців таблиці для заповнення властивостей сутності під час читання зі сховища даних і записує властивості сутності в стовпці таблиці під час збереження даних. Якщо властивість є автоматичною властивістю, EF Core читає та записує через getter і setter. Якщо властивість має опорне поле, EF Core читатиме та записуватиме в резервне поле замість публічної власності, навіть якщо опорне поле є приватним. Хоча EF Core може читати та записувати в приватні поля, все одно має бути загальнодоступна властивість читання та запису, яка інкапсулює резервне поле. Два сценарії, коли підтримка резервного поля є перевагою, це використання шаблону INotifyPropertyChanged у програмах Windows Presentation Foundation (WPF) і коли значення за замовчуванням бази даних суперечать значенням за замовчуванням .NET.
+Під час використання реляційного сховища даних EF Core використовує дані зі стовпців таблиці для заповнення властивостей сутності під час читання зі сховища даних і записує властивості сутності в стовпці таблиці під час збереження даних. Якщо властивість є автоматичною властивістю, EF Core читає та записує через getter і setter. Якщо властивість має резервне поле, EF Core читатиме та записуватиме в резервне поле замість публічної власності, навіть якщо опорне поле є приватним. Хоча EF Core може читати та записувати в приватні поля, все одно має бути загальнодоступна властивість читання та запису, яка інкапсулює резервне поле. Два сценарії, коли підтримка резервного поля є перевагою, це використання шаблону INotifyPropertyChanged у програмах Windows Presentation Foundation (WPF) і коли значення за замовчуванням бази даних суперечать значенням за замовчуванням .NET.
 
 ### Схеми відображення таблиць
 
@@ -386,7 +379,7 @@ Microsoft.EntityFrameworkCore
 Microsoft.EntityFrameworkCore.Design
 Microsoft.EntityFrameworkCore.SqlServer
 
-Розглянемо наступний приклад, який показує, що клас Car з попереднього розділу можна розділити на два класи: базовий клас (BaseEntity) для властивостей Id і TimeStamp, а також решту властивостей у класі Car.
+Додайте папку Models. Розглянемо наступний приклад, який показує, що клас Car з попереднього розділу можна розділити на два класи: базовий клас (BaseEntity) для властивостей Id і TimeStamp, а також решту властивостей у класі Car.
 
 
 AutoLot.TPH\Models\BaseEntity.cs
@@ -428,7 +421,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<Car> Cars { get; set; }
 }
 ```
-Зверніть увагу на властивість DbSet<T> у класі ApplicationDbContext. Це інформує EF Core, що клас Car зіставляється з таблицею Cars у базі даних. Також зауважте, що для класу BaseEntity немає властивості DbSet<T>. Це пояснюється тим, що в схемі TPH вся ієрархія стає єдиною таблицею. Властивості таблиць вище ланцюга успадкування згортаються в таблицю за допомогою властивості DbSet<T>. Це показано наступним SQL:
+Зверніть увагу на властивість типу DbSet<T> у класі ApplicationDbContext. Це інформує EF Core, що клас Car зіставляється з таблицею Cars у базі даних. Також зауважте, що для класу BaseEntity немає властивості DbSet<T>. Це пояснюється тим, що в схемі TPH вся ієрархія стає єдиною таблицею. Властивості таблиць вище ланцюга успадкування згортаються в таблицю за допомогою властивості DbSet<T>. Це показано наступним SQL:
 
 ```sql
 CREATE TABLE [dbo].[Cars](
@@ -514,17 +507,14 @@ GO
 
 Терміни, що використовуються для опису навігаційних властивостей і зв’язків
 
-    Principal entity(Основна сутність) : Сутність з якої виходять відносини.
-
-    Dependent entity(Залежна сутність) : Сутність яка залежить від іншої.
-
-    Principal key(Основний ключ) : Властивість/властивості, які використовуються для визначення головної сутності. Може бути первинним або альтернативним ключем. Ключі можна налаштувати за допомогою однієї властивості або кількох властивостей.
-
-    Foreign key(Зовнішній ключ) : Властивість/властивості, які зберігаються дочірньою сутністю для зберігання основного ключа.
-
-    Required relationship(Необхідні відносини) : Зв’язок, де потрібне значення зовнішнього ключа (не допускає значення null).
-
-    Optional relationship(Необов'язковий зв'язок) : Відношення, де значення зовнішнього ключа може буте відсутьне(nullable).
+|Термін|Опис|
+|------|----|
+|Principal entity(Основна сутність)|Сутність з якої виходять відносини.|
+|Dependent entity(Залежна сутність)|Сутність яка залежить від іншої.|
+|Principal key(Основний ключ)|Властивість/властивості, які використовуються для визначення головної сутності. Може бути первинним або альтернативним ключем. Ключі можна налаштувати за допомогою однієї властивості або кількох властивостей.|
+|Foreign key(Зовнішній ключ)|Властивість/властивості, які зберігаються дочірньою сутністю для зберігання основного ключа.|
+|Required relationship(Необхідні відносини)|Зв’язок, де потрібне значення зовнішнього ключа (не допускає значення null).|
+|Optional relationship(Необов'язковий зв'язок)|Відношення, де значення зовнішнього ключа може буте відсутьне(nullable).|
 
 #### Відсутні властивості зовнішнього ключа
 
@@ -535,7 +525,8 @@ GO
 Щоб створити зв’язок «One-to-Many», клас сутності з боку One (the principal) додає властивість колекції класу сутності, який знаходиться з боку Many (the dependent). Залежна сутність також повинна мати властивості для зовнішнього ключа назад до основної. Якщо ні, EF Core створить тіньові властивості зовнішнього ключа, як пояснювалося раніше.
 Наприклад, у базі даних, створеній раніше, таблиці Makes (представлена ​​класом сутності Make) і таблиця Inventory (представлена ​​класом сутності Car) мають зв’язок «One-to-Many».
 
-Додамо сутності і відносини в проект AutoLot.Samples
+
+Додамо в проекті AutoLot.Samples папку Models. Створимо сутності і відносини. 
 
 AutoLot.Samples\Models\BaseEntity.cs
 ```cs
@@ -587,57 +578,77 @@ global using AutoLot.Samples.Models;
 Далі додайте властивості DbSet<Car> і DbSet<Make> до ApplicationDbContext.
 
 ```cs
-        public DbSet<Car> Cars { get; set; }
-        public DbSet<Make> Makes { get; set; }
+    //Properties
+    public DbSet<Car> Cars { get; set; }
+    public DbSet<Make> Makes { get; set; }
 ```
-Коли база даних оновлюється за допомогою міграцій EF Core, створюються такі таблиці. 
-Оновлення бази даних за допомогою міграцій EF Core розглядається далі в цьому розділі.
+Тепер коли у нас створено невеликий похідний клас DBContext з даними підключеня до бази даних і двома сутностями ми можемо створити базу данних. Для цого нам знадобится CLI EF Core Global Tool якій детально описан нижче.
+
+Всановимо dotnet-ef глобальний CLI інструмент EF Core
 
 ```console
-dotnet ef migrations add Initial -o Migrations -c AutoLot.Samples.ApplicationDbContext
-dotnet ef database update Initial -c AutoLot.Samples.ApplicationDbContext
+dotnet tool install --global dotnet-ef
+```
+Щоб перевірити шо він всановлено введіть команду.
+
+```console
+dotnet ef
+```
+
+Створимо нову міграцію яка створює базу даних.
+
+```console
+dotnet ef migrations add Initial_CreateDB_Add_Makes_Cars 
+```
+Після цього в каталозі проекту з'явится тека Migrations. Подивимось які зміни будуть зроблені при оновлені БД цією міграцією.
+
+```console
+dotnet ef migrations script --no-transactions
 ```
 
 Виконається наступний запит:
-```sql
-CREATE TABLE [dbo].[Makes](
-  [Id] [int] IDENTITY(1,1) NOT NULL,
-  [Name] [nvarchar](max) NULL,
-  [TimeStamp] [varbinary](max) NULL,
- CONSTRAINT [PK_Makes] PRIMARY KEY CLUSTERED
-(
-  [Id] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+```console
+CREATE TABLE [Makes] (
+    [Id] int NOT NULL IDENTITY,
+    [Name] nvarchar(max) NOT NULL,
+    [TimeStamp] varbinary(max) NOT NULL,
+    CONSTRAINT [PK_Makes] PRIMARY KEY ([Id])
+);
 GO
-CREATE TABLE [dbo].[Cars](
-  [Id] [int] IDENTITY(1,1) NOT NULL,
-  [Color] [nvarchar](max) NULL,
-  [PetName] [nvarchar](max) NULL,
-  [TimeStamp] [varbinary](max) NULL,
-  [MakeId] [int] NOT NULL,
- CONSTRAINT [PK_Cars] PRIMARY KEY CLUSTERED
-(
-  [Id] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+CREATE TABLE [Cars] (
+    [Id] int NOT NULL IDENTITY,
+    [Color] nvarchar(max) NOT NULL,
+    [PetName] nvarchar(max) NOT NULL,
+    [MakeId] int NOT NULL,
+    [TimeStamp] varbinary(max) NOT NULL,
+    CONSTRAINT [PK_Cars] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_Cars_Makes_MakeId] FOREIGN KEY ([MakeId]) REFERENCES [Makes] ([Id]) ON DELETE CASCADE
+);
 GO
-ALTER TABLE [dbo].[Cars] WITH CHECK ADD  CONSTRAINT [FK_Cars_Makes_MakeId]
-  FOREIGN KEY([MakeId]) REFERENCES [dbo].[Makes] ([Id])
-  ON DELETE CASCADE
-GO
-ALTER TABLE [dbo].[Cars] CHECK CONSTRAINT [FK_Cars_Makes_MakeId]
+
+CREATE INDEX [IX_Cars_MakeId] ON [Cars] ([MakeId]);
 GO
 ```
+
 Зверніть увагу на зовнішній ключ MakeId і перевірку обмеження FK_Cars_Makes_MakeId, створені в залежній таблиці (Cars).
+
+Для створення бази даних треба виконаним команду 
+
+```console
+dotnet ef database update
+```
+В SQL Server Object Explorer можна побачити нову БД.
 
 #### Відносини One-to-One
 
-У зв’язках «One-to-One» обидві сутності мають посилання на навігаційну властивість для іншої сутності. Під час побудови зв’язків «One-to-One» EF Core має знати, яка сторона є головною сутністю. Це можна зробити, маючи чітко визначений зовнішній ключ до головної сутності або вказавши принципала за допомогою Fluent API. Якщо EF Core не отримує інформацію за допомогою одного з цих двох методів, він вибере один на основі своєї здатності виявляти зовнішній ключ. На практиці ви повинні чітко визначити залежну, додавши властивості зовнішнього ключа. Це усуває будь-яку неоднозначність і гарантує, що ваші таблиці правильно налаштовані.
+У зв’язках «One-to-One» обидві сутності мають посилання на навігаційну властивість для іншої сутності. Під час побудови зв’язків «One-to-One» EF Core має знати, яка сторона є головною сутністю. Це можна зробити, маючи чітко визначений зовнішній ключ до головної сутності або вказавши головну сутьність за допомогою Fluent API. Якщо EF Core не отримує інформацію за допомогою одного з цих двох методів, він вибере один на основі своєї здатності виявляти зовнішній ключ. На практиці ви повинні чітко визначити залежну, додавши властивості зовнішнього ключа. Це усуває будь-яку неоднозначність і гарантує, що ваші таблиці правильно налаштовані.
 
 Додайте новий клас під назвою Radio.cs.
 
 ```cs
+namespace AutoLot.Samples.Models;
+
 public class Radio : BaseEntity
 {
     public bool HasTweeters { get; set; }
@@ -673,36 +684,51 @@ public class Car : BaseEntity
         //...
     }    
 ```
-
-Коли базу даних оновлено за допомогою таких міграцій EF Core, таблиця Cars не змінюється, і створюється така таблиця Radios:
+Зберіжіть змінені файли (Save All). Виконаємо наступну команду.
 
 ```console
-dotnet ef migrations add Radio -o Migrations -c AutoLot.Samples.ApplicationDbContext
-dotnet ef database update Radio  -c AutoLot.Samples.ApplicationDbContext
+PS D:\...\AutoLot.Samples> dotnet ef migrations has-pending-model-changes
+Build started...
+Build succeeded.
+Changes have been made to the model since the last migration. Add a new migration.
 ```
-Виконається наступний запит:
-```sql
-CREATE TABLE [dbo].[Radios](
-  [Id] [int] IDENTITY(1,1) NOT NULL,
-  [HasTweeters] [bit] NOT NULL,
-  [HasSubWoofers] [bit] NOT NULL,
-  [RadioId] [nvarchar](max) NULL,
-  [TimeStamp] [varbinary](max) NULL,
-  [CarId] [int] NOT NULL,
- CONSTRAINT [PK_Radios] PRIMARY KEY CLUSTERED
-(
-        [Id] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
-GO
-ALTER TABLE [dbo].[Radios]  WITH CHECK ADD  CONSTRAINT [FK_Radios_Cars_CarId] FOREIGN KEY([CarId])
-REFERENCES [dbo].[Cars] ([Id])
-ON DELETE CASCADE
-GO
-ALTER TABLE [dbo].[Radios] CHECK CONSTRAINT [FK_Radios_Cars_CarId]
-GO
+Це каже про те що EF Core виявив що ми зробили зміни в моделі даних. Тепер створемо міграцію з назвою яка відповідає змінам.
+
+```console
+dotnet ef migrations add Add_Radios
 ```
-Зверніть увагу на зовнішній ключ і обмеження перевірки, створені в залежній таблиці Radios.
+Подивимось зміни які буде робить міграція.
+
+```console
+ dotnet ef migrations script 20241023150501_Initial_CreateDB_Add_Makes_Cars
+...
+CREATE TABLE [Radios] (
+    [Id] int NOT NULL IDENTITY,
+    [HasTweeters] bit NOT NULL,
+    [HasSubWoofers] bit NOT NULL,
+    [RadioId] nvarchar(max) NOT NULL,
+    [CarId] int NOT NULL,
+    [TimeStamp] varbinary(max) NOT NULL,
+    CONSTRAINT [PK_Radios] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_Radios_Cars_CarId] FOREIGN KEY ([CarId]) REFERENCES [Cars] ([Id]) ON DELETE CASCADE
+);
+GO
+
+CREATE UNIQUE INDEX [IX_Radios_CarId] ON [Radios] ([CarId]);
+GO
+...
+```
+Зверніть увагу на зовнішній ключ і обмеження перевірки, створені в залежній таблиці Radios. Коли базу даних оновлено за допомогою таких міграцій EF Core, таблиця Cars не змінюється.
+
+Оновимо БД
+
+```console
+ dotnet ef database update
+ ...
+ Applying migration '20241023155227_Add_Radios'.
+Done.
+```
+
 
 #### Відносини Many-to-Many
 
@@ -747,48 +773,46 @@ public class Car : BaseEntity
 }
 ```
 
-Щоб оновити базу даних, використовуйте такі команди міграції (знову ж таки, міграції будуть повністю пояснені далі в цьому розділі):
+Збережемо всі міни та створимо нову міграцію.
 
 ```console
-dotnet ef migrations add Drivers -o Migrations -c AutoLot.Samples.ApplicationDbContext
-dotnet ef database update Drivers  -c AutoLot.Samples.ApplicationDbContext
+dotnet ef migrations add Add_Drivers
 ```
-Коли база даних оновлюється, таблиця Cars не змінюється, а таблиці Drivers і CarDriver створюються. Настуаний запит виконається:
+Подивимось як буде змінено БД.
 
-```sql
-CREATE TABLE [dbo].[Drivers](
-  [Id] [INT] IDENTITY(1,1) NOT NULL,
-  [FirstName] [NVARCHAR](MAX) NULL,
-  [LastName] [NVARCHAR](MAX) NULL,
-  [TimeStamp] [VARBINARY](MAX) NULL,
- CONSTRAINT [PK_Drivers] PRIMARY KEY CLUSTERED
-(
-  [Id] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+```console
+PS D:\...\AutoLot.Samples> dotnet ef migrations script 20241023155227_Add_Radios
+...
+
+CREATE TABLE [Drivers] (
+    [Id] int NOT NULL IDENTITY,
+    [FirstName] nvarchar(max) NOT NULL,
+    [LastName] nvarchar(max) NOT NULL,
+    [TimeStamp] varbinary(max) NOT NULL,
+    CONSTRAINT [PK_Drivers] PRIMARY KEY ([Id])
+);
 GO
-CREATE TABLE [dbo].[CarDriver](
-  [CarsId] [int] NOT NULL,
-  [DriversId] [int] NOT NULL,
- CONSTRAINT [PK_CarDriver] PRIMARY KEY CLUSTERED
-(
-  [CarsId] ASC,
-  [DriversId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
+
+CREATE TABLE [CarDriver] (
+    [CarsId] int NOT NULL,
+    [DriversId] int NOT NULL,
+    CONSTRAINT [PK_CarDriver] PRIMARY KEY ([CarsId], [DriversId]),
+    CONSTRAINT [FK_CarDriver_Cars_CarsId] FOREIGN KEY ([CarsId]) REFERENCES [Cars] ([Id]) ON DELETE CASCADE,
+    CONSTRAINT [FK_CarDriver_Drivers_DriversId] FOREIGN KEY ([DriversId]) REFERENCES [Drivers] ([Id]) ON DELETE CASCADE
+);
 GO
-ALTER TABLE [dbo].[CarDriver]  WITH CHECK ADD  CONSTRAINT [FK_CarDriver_Cars_CarsId]
-  FOREIGN KEY([CarsId]) REFERENCES [dbo].[Cars] ([Id]) ON DELETE CASCADE
-GO
-ALTER TABLE [dbo].[CarDriver] CHECK CONSTRAINT [FK_CarDriver_Cars_CarsId]
-GO
-ALTER TABLE [dbo].[CarDriver]  WITH CHECK ADD  CONSTRAINT [FK_CarDriver_Drivers_DriversId]
-  FOREIGN KEY([DriversId]) REFERENCES [dbo].[Drivers] ([Id]) ON DELETE CASCADE
-GO
-ALTER TABLE [dbo].[CarDriver] CHECK CONSTRAINT [FK_CarDriver_Drivers_DriversId]
+
+CREATE INDEX [IX_CarDriver_DriversId] ON [CarDriver] ([DriversId]);
 GO
 ```
+Коли база даних оновлюється, таблиця Cars не змінюється, а таблиці Drivers і CarDriver створюються. 
 Зверніть увагу, що складений первинний ключ, обмеження перевірки (зовнішні ключі) і каскадна поведінка створені EF Core, щоб переконатися, що таблицю CarDriver налаштовано як правильну таблицю об’єднання.
+
+Оновимо БД.
+
+```console
+dotnet ef database update
+```
 
 Еквівалентний зв’язок Car-Driver «Many-to-Many» можна досягти шляхом явного створення трьох таблиць(і саме так це має бути зроблено у версіях EF Core, раніших за EF Core 5). 
 
@@ -881,9 +905,9 @@ public class CarDriver
 |Назва стовпця |Імена стовпців зіставляються з іменами властивостей класу. |
 | Тип даних стовпця| Типи даних вибираються на основі типу даних .NET і перекладаються постачальником бази даних (SQL Server). DateTime відображається на datetime2(7), а рядок – на nvarchar(max). Рядки як частина первинного ключа відображаються на nvarchar(450).|
 | Nullability стовпців| Типи даних, які не допускають значення null, створюються як стовпці збереження Not Null.|
-| Primary key| Властивості з назвою Id або <EntityTypeName>Id буде налаштовано як первинний ключ. Ключі типу short, int, long або Guid мають значення, які контролюються сховищем даних. Числові значення створюються як стовпці Identity (SQL Server).|
+| Primary key| Властивості з назвою Id або EntityTypeNameId буде налаштовано як первинний ключ. Ключі типу short, int, long або Guid мають значення, які контролюються сховищем даних. Числові значення створюються як стовпці Identity (SQL Server).|
 | Relationships | Зв’язки між таблицями створюються, коли між двома класами сутностей є властивості навігації.|
-| Foreign key| Властивості під назвою <OtherClassName>Id є зовнішніми ключами для властивостей навігації типу <OtherClassName>.|
+| Foreign key| Властивості під назвою OtherClassNameId є зовнішніми ключами для властивостей навігації типу <OtherClassName>.|
 | Схема |Таблиці створюються за типовою схемою сховища даних (dbo на SQL Server). |
 
 У попередніх прикладах властивостей навігації всі використовують конвенції EF Core для побудови зв’язків між таблицями
@@ -912,9 +936,9 @@ public string Color
 }
 ```
 
-### Перевизначення основних конвенцій EF
+### Перевизначення основних угод EF
 
-Конвенції можна змінити за допомогою методу ConfigureConventions(). Наприклад, якщо ви хочете, щоб властивості рядка за умовчанням мали певний розмір (замість nvarchar(max)), ви можете додати такий код до класу ApplicationDbContext:
+Угоди можна змінити за допомогою методу ConfigureConventions(). Наприклад, якщо ви хочете, щоб властивості рядка за умовчанням мали певний розмір (замість nvarchar(max)), ви можете додати такий код до класу ApplicationDbContext:
 
 ```cs
 protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
@@ -966,8 +990,57 @@ public abstract class BaseEntity
     public byte[] TimeStamp { get; set; }
 }
 ```
+Створимо міграцію.
+```console
+dotnet ef migrations add ChangeBaseEntity
+```
+Застосуємо міграцію
+```console
+dotnet ef database update
+```
+База даних не оновиться.
+```console
+Cannot alter column 'TimeStamp' to be data type timestamp.
+```
+Це пояснюється тим, що SQL Server не дозволяє змінювати тип даних існуючого стовпця на тип даних із міткою часу з іншого типу даних. Стовпець потрібно видалити, а потім знову додати з новим типом даних позначки часу. EF Core бачить стовпець як уже існуючий і видає оператор alter, а не парні команди drop/add, які потрібні для внесення змін.
 
-Ось клас Car і анотації даних, які формують його в базі даних:
+видалимо останю міграцію
+```console
+dotnet ef migrations remove
+```
+В класі Закоментуємо властивість TimeStamp у класі BaseEntity
+
+```cs
+    //[Timestamp]
+    //public byte[] TimeStamp { get; set; }
+```
+По суті це означає видалити стовпец в усіх таблицях де використовується поле. Створемо мірацію
+
+```console
+ dotnet ef migrations add ChangeBaseEntityDropTimeStamp
+```
+Ця міграція видалить всі ствовпці.
+
+Знімемо коментар з властивості і створимо нову міграцію.
+```cs
+    [Timestamp]
+    public byte[] TimeStamp { get; set; }
+```
+```console
+dotnet ef migrations add ChangeBaseEntityAddTimeStamp
+```
+Оновимо базу даних.
+```console
+dotnet ef database update
+```
+Ці операцію видалюять і створюють знову стовці необхідного нам типу. Це можна подивитись виконавши команду:
+
+```console
+dotnet ef migrations script 20241023182843_Add_Drivers --no-transactions
+```
+
+
+Розглянемо клас Car і анотації даних, які формують його в базі даних:
 
 ```cs
 namespace AutoLot.Samples.Models;
@@ -994,42 +1067,20 @@ public class Car : BaseEntity
 
     Перейменування таблиці з Cars на Inventory.
 
-    Зміна стовпця TimeStamp з varbinary(max) на тип даних timestamp SQL Server.
-
     Встановлення нульового значення для стовпців Color і PetName з Null на Not Null.
 
     Явне встановлення розміру стовпців Color і PetName на nvarchar(50). Це вже було оброблено, коли конвенції EF Core для властивостей рядка були перевизначені, але включені тут для видимості.
 
     Перейменування індексу стовпця MakeId.
 
-Решта використовуваних анотацій відповідає конфігурації, визначеній угодами EF Core. Щоб підтвердити зміни, ми перевіряємо таблицю, створену EF Core:
+Решта використовуваних анотацій відповідає конфігурації, визначеній угодами EF Core. 
 
-```sql
-CREATE TABLE [dbo].[Inventory](
-        [Id] [INT] IDENTITY(1,1) NOT NULL,
-        [Color] [NVARCHAR](50) NOT NULL,
-        [PetName] [NVARCHAR](50) NOT NULL,
-        [MakeId] [INT] NOT NULL,
-        [TimeStamp] [TIMESTAMP] NULL,
- CONSTRAINT [PK_Inventory] PRIMARY KEY CLUSTERED
-(
-        [Id] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
-GO
-ALTER TABLE [dbo].[Inventory] ADD  DEFAULT (N'') FOR [Color]
-GO
-ALTER TABLE [dbo].[Inventory] ADD  DEFAULT (N'') FOR [PetName]
-GO
-ALTER TABLE [dbo].[Inventory]  WITH CHECK ADD  CONSTRAINT [FK_Inventory_Makes_MakeId]
-  FOREIGN KEY([MakeId]) REFERENCES [dbo].[Makes] ([Id]) ON DELETE CASCADE
-GO
-ALTER TABLE [dbo].[Inventory] CHECK CONSTRAINT [FK_Inventory_Makes_MakeId]
-GO
+Створимо і застосуємо нову мігацію.
+
+```console
+dotnet ef migrations add 20241024103403_ChangeCarAddAnotations
+dotnet ef database update 
 ```
-Якщо ви стежили за кожною з цих змін і запускали міграції, ви можете бути здивовані, побачивши помилку під час оновлення стовпця TimeStamp до типу даних timestamp SQL Server. Це пояснюється тим, що SQL Server не дозволяє змінювати тип даних існуючого стовпця на тип даних із міткою часу з іншого типу даних. Стовпець потрібно видалити, а потім знову додати з новим типом даних позначки часу. EF Core бачить стовпець як уже існуючий і видає оператор alter, а не парні команди drop/add, які потрібні для внесення змін. Щоб оновити базу даних, закоментуйте властивість TimeStamp у базовому класі, створіть нову міграцію та застосуйте її, а потім розкоментуйте властивість TimeStamp і створіть іншу міграцію та застосуйте її.
-
-Зверніть увагу на значення за замовчуванням, додані до стовпців Color і PetName. Якщо будь-які дані мали нульові значення для будь-якого з цих стовпців, це спричинило б помилку міграції. Ця зміна гарантує, що зміна на ненульове буде успішною шляхом розміщення порожнього рядка в цих стовпцях, якщо вони були нульовими під час застосування міграції.
 
 Змінемо сутність Radio
 
@@ -1049,34 +1100,14 @@ public class Radio : BaseEntity
 ```
 Властивість CarId зіставленна з полем під назвою InventoryId. RadioId зроблено обов’язковим і явно встановлено розмір 50.
 
-Команди міграції та результуюча таблиця показані тут:
+Створимо і застосуємо нову мігацію та подивимось зміни.
 
 ```console
-dotnet ef migrations add UpdateRadio -o Migrations -c AutoLot.Samples.ApplicationDbContext
-dotnet ef database update UpdateRadio  -c AutoLot.Samples.ApplicationDbContext
+dotnet ef migrations add ChangeRadioAddAnotations
+dotnet ef database update 
+dotnet ef migrations script 20241024103403_ChangeCarAddAnotations --no-transactions
 ```
-```sql
-CREATE TABLE [dbo].[Radios](
-        [Id] [INT] IDENTITY(1,1) NOT NULL,
-        [HasTweeters] [BIT] NOT NULL,
-        [HasSubWoofers] [BIT] NOT NULL,
-        [RadioId] [NVARCHAR](50) NOT NULL,
-        [InventoryId] [INT] NOT NULL,
-        [TimeStamp] [TIMESTAMP] NULL,
- CONSTRAINT [PK_Radios] PRIMARY KEY CLUSTERED
-(
-        [Id] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
-) ON [PRIMARY]
-GO
-ALTER TABLE [dbo].[Radios] ADD  DEFAULT (N'') FOR [RadioId]
-GO
-ALTER TABLE [dbo].[Radios]  WITH CHECK ADD  CONSTRAINT [FK_Radios_Inventory_InventoryId]
-  FOREIGN KEY([InventoryId]) REFERENCES [dbo].[Inventory] ([Id]) ON DELETE CASCADE
-GO
-ALTER TABLE [dbo].[Radios] CHECK CONSTRAINT [FK_Radios_Inventory_InventoryId]
-GO
-```
+
 Як останній крок в оновленні наших моделей, оновіть властивість Name в сутності Make так, щоб вона була обов’язковою, а також встановіть максимальну довжину 50 і зробіть те саме для властивостей FirstName і LastName в сутності Driver:
 
 ```cs
@@ -1103,10 +1134,16 @@ public class Driver : BaseEntity
     public IEnumerable<Car> Cars { get; set; } = new List<Car>(); 
 }
 ```
+```console
+dotnet ef migrations add ChangeMakeDriverAddAnotations
+dotnet ef database update 
+```
 
 #### Анотації та навігаційні властивості
 
 Анотація ForeignKey дозволяє EF Core знати, яка властивість є резервним полем для властивості навігації. Відповідно до домовленості <TypeName>Id буде автоматично встановлено як властивість зовнішнього ключа. У попередніх прикладах він явно встановлений для читабельності. Це підтримує різні стилі іменування, а також наявність кількох зовнішніх ключів до однієї таблиці. Зауважте, що у відносинах «один-до-одного» лише залежна сутність має зовнішній ключ. InverseProperty інформує EF Core про зв’язок між сутностями, вказуючи властивість навігації в іншій сутності, яка повертає до цієї сутності. InverseProperty потрібен, коли сутність пов’язана з іншою сутністю більше одного разу, а також робить код більш читабельним.
+
+
 
 ### The Fluent API (за допомогою виразів)
 
@@ -1126,7 +1163,7 @@ Fluent API — це надмножина анотацій даних під ча
 
             modelBuilder.Entity<Car>(entity => 
             {
-                entity.ToTable("Invrntory", "dbo");
+                entity.ToTable("Inventory", "dbo");
             });
         }
 ```
@@ -1140,12 +1177,23 @@ Fluent API — це надмножина анотацій даних під ча
 
             modelBuilder.Entity<Radio>(entity => 
             {
-                entity.Property(e => e.CarId).HasColumnName("InvertoryId");            
+                entity.Property(e => e.CarId).HasColumnName("InventoryId");            
             });
 
         }
 ```
 Властивість CarId класу Radio відповідає стовпцю InventoryId таблиці Radios.
+
+Після запису ціх змін в методі запустимо команду
+
+```console
+PS D:\...\AutoLot.Samples> dotnet ef migrations has-pending-model-changes
+Build started...
+Build succeeded.
+No changes have been made to the model since the last migration.
+```
+Це говорить про те шо ми не зробили змін в моделі данних.
+
 
 #### Ключі та індекси
 
@@ -1176,7 +1224,6 @@ Fluent API — це надмножина анотацій даних під ча
                 entity.ToTable("Invertory", "dbo");
                 entity.HasKey(e => e.Id);
                 entity.HasIndex(e => e.MakeId, "IX_Inventory_MakeId");
-
             });
 ```
 Щоб зробити індекс унікальним, використовуйте метод IsUnique(). Метод IsUnique() приймає необов’язковий bool, який за замовчуванням має значення true:
@@ -1196,7 +1243,7 @@ entity.HasIndex(e => e.MakeId, "IX_Inventory_MakeId").IsUnique();
                 entity.ToTable("Invertory", "dbo");
                 entity.HasKey(e => e.Id);
                 //entity.HasKey(e => new { e.Id, e.OrganizationId });
-                entity.HasIndex(e => e.MakeId, "IX_Inventory_MakeId").IsUnique();
+                //entity.HasIndex(e => e.MakeId, "IX_Inventory_MakeId").IsUnique();
                 entity.Property(e => e.Color)
                 .IsRequired()
                 .HasMaxLength(50);
@@ -1233,7 +1280,7 @@ public class Car : BaseEntity
 
     //...
 
-    public DateTime? DateBuild { get; set; }
+    public DateTime? DateBuilt { get; set; }
 }
 
 ```
@@ -1248,8 +1295,18 @@ public class Car : BaseEntity
 ```
 SQL Server використовуватиме результат функції getdate(), якщо властивість DateBuilt сутності не має значення під час збереження в базі даних.
 
+Створимо і застосуємо нову мігацію.
+
+```console
+dotnet ef migrations add ChangeCarAddDateBuilt
+dotnet ef database update 
+```
+
+#### Проблеми з значеннями за замовчуванням
+
 Проблема виникає, коли логічне або числове значення має значення бази даних за замовчуванням, яке суперечить значенню за замовчуванням CLR. Наприклад, якщо для логічної властивості (наприклад, IsDrivable) у базі даних за замовчуванням встановлено значення true, база даних установить значення true під час вставлення запису, якщо значення не вказано для цього стовпця. Це, звісно, ​​очікувана поведінка з боку бази даних. Однак значення CLR за замовчуванням для логічних властивостей є false, що спричиняє проблему через те, як EF Core обробляє значення за замовчуванням. 
-Наприклад, додайте властивість Bool під назвою IsDrivable до класу Car. Якщо ви слідкуєте за цим в БД, переконайтеся, що створили та застосували нову міграцію для оновлення бази даних.
+
+Наприклад, нехай є властивість Bool під назвою IsDrivable до класу Car. 
 
 ```cs
 public class Car : BaseEntity
@@ -1261,7 +1318,7 @@ public class Car : BaseEntity
 
 Давайте розглянемо поведінку EF Core для типу даних Boolean.
 
-Скористайтеся наведеним нижче кодом, щоб створити новий запис про автомобіль із значенням false для IsDrivable:
+Нижче код, щоб створити новий запис про автомобіль із значенням false для IsDrivable:
 
 ```cs
 context.Cars.Add(new() { MakeId = 1, Color = 'Rust', PetName = 'Lemon', IsDrivable = false });
@@ -1306,7 +1363,7 @@ EF Core попереджає вас про цю проблему, коли ви 
 ```console
 The 'bool' property 'IsDrivable' on entity type 'Car' is configured with a database-generated default. This default will always be used for inserts when the property has the value 'false', since this is the CLR default for the 'bool' type. Consider using the nullable 'bool?' type instead, so that the default will only be used for inserts when the property value is 'null'. 
 ```
-Одне з рішень для цього полягає в тому, щоб зробити вашу загальнодоступну властивість (і, отже, стовпець) нульовою, оскільки значення за замовчуванням для типу значення nullable дорівнює null, тому встановлення властивості Boolean на false працює належним чином. Однак зміна нульовості властивості може не відповідати потребам бізнесу.
+Одне з рішень для цього полягає в тому, щоб зробити вашу загальнодоступну властивість (і, отже, стовпець) null, оскільки значення за замовчуванням для типу значення nullable дорівнює null, тому встановлення властивості Boolean на false працює належним чином. Однак зміна нульовості властивості може не відповідати потребам бізнесу.
 
 Інше рішення забезпечує EF Core і його підтримка резервних( backing) полів. Пам’ятайте раніше, якщо резервне поле існує (і ідентифікується як резервне поле для властивості через угоду, анотацію даних або Fluent API), то EF Core використовуватиме резервне поле для дій читання-запису, а не загальнодоступну властивість.
 Якщо ви оновите IsDrivable, щоб використовувати резервне поле з можливістю нульового значення (але збережете властивість не нульовим), EF Core читатиме та записуватиме з поля резервної підтримки, а не властивості.Значення за замовчуванням для nullable bool є null, а не false.
@@ -1355,10 +1412,37 @@ GO
 ```
 Хоча це не показано в попередніх прикладах, числові властивості працюють так само. Якщо ви встановлюєте ненульове значення за замовчуванням, резервне поле (або сама властивість, якщо резервне поле не використовується) має бути nullable.
 
-Нарешті, попередження все одно з’являтиметься, навіть якщо поля належним чином налаштовано з резервними полями з можливістю нульових значень. Попередження можна придушити; однак я рекомендую залишити його на місці як нагадування перевірити, чи правильно налаштовано поле/властивість. Якщо ви хочете придушити його, установіть такий параметр у DbContextOptions:
+Якшо, попередження все одно з’являтиметься, навіть якщо поля належним чином налаштовано з резервними полями з можливістю нульових значень. Попередження можна придушити; однак я рекомендую залишити його на місці як нагадування перевірити, чи правильно налаштовано поле/властивість. Якщо ви хочете придушити його, установіть такий параметр у DbContextOptions:
 
 ```cs
 options.ConfigureWarnings(wc => wc.Ignore(RelationalEventId.BoolWithDefaultWarning));
+```
+
+Таким чином в наш проект додамо 
+
+```cs
+public class Car : BaseEntity
+{
+
+    //..
+    public bool? IsDrivable { get; set; }
+
+}
+
+```
+```cs
+        modelBuilder.Entity<Car>(entity =>
+        {
+            //...
+            entity.Property(e => e.IsDrivable)
+            .HasDefaultValue(true);
+        });
+```
+Створимо і застосуємо нову мігацію.
+
+```console
+dotnet ef migrations add ChangeCarAddIsDrivable
+dotnet ef database update 
 ```
 
 #### Токени RowVersion/Concurrency
@@ -1420,6 +1504,11 @@ public class Car : BaseEntity
     public string Display { get; set; }
 }
 ```
+```console
+dotnet ef migrations add ChangeCarAddDisplay
+dotnet ef database update
+```
+
 
 #### Перевірка обмежень
 
@@ -1428,16 +1517,24 @@ public class Car : BaseEntity
 
 ```cs
 
-            modelBuilder.Entity<Make>()
-               .HasCheckConstraint("CH_Name", "[Name]<>'Lemon'", c => c.HasName("CK_Check_Name"));
+        modelBuilder.Entity<Make>()
+            .ToTable(t => t.HasCheckConstraint("CH_Name", "[Name]<>'Lemon'"));
 
 ```
-Перший параметр дає обмеженню назву в моделі, другий — це SQL для обмеження, а останній призначає ім’я SQL Server для обмеження перевірки. Ось обмеження перевірки, як визначено в SQL:
+Перший параметр дає обмеженню назву в моделі, другий — це SQL для обмеження, а останній призначає ім’я SQL Server для обмеження перевірки. 
+
+```console
+ dotnet ef migrations add ChangeMakeAddCheckConstrains
+ dotnet ef database update
+ dotnet ef migrations script --no-transactions
+```
+Ось обмеження перевірки, як визначено в SQL:
 
 ```sql
-ALTER TABLE [dbo].[Makes]  WITH CHECK ADD  CONSTRAINT [CK_Check_Name] CHECK  (([Name]<>'Lemon'))
+ALTER TABLE [dbo].[Makes] ADD CONSTRAINT [CH_Name] CHECK ([Name]<>'Lemon');
+GO
 ```
-Тепер, коли до таблиці додається запис із іменем «Лимон», буде створено виняток SQL. Виконайте наступний код, щоб побачити виняток у дії:
+Тепер, коли до таблиці додається запис із іменем «Lemon», буде створено виняток SQL. Виконайте наступний код, щоб побачити виняток у дії:
 
 ```cs
 var context = new ApplicationDbContextFactory().CreateDbContext(null);
@@ -1449,7 +1546,36 @@ context.SaveChanges();
 ```console
 The INSERT statement conflicted with the CHECK constraint 'CK_Check_Name'. The conflict occurred in database 'AutoLotSamples', table 'dbo.Makes', column 'Name'.
 ```
-Можете скасувати міграцію для перевірочного обмеження та видалити міграцію, оскільки решта книги не використовує перевірочне обмеження. Його було додано в цей розділ з метою демонстрації.
+Можете скасувати міграцію для перевірочного обмеження та видалити міграцію, оскільки далі не використовується перевірочне обмеження. Його було додано в цей розділ з метою демонстрації.
+
+```console
+PS D:\...\AutoLot.Samples> dotnet ef migrations list
+Build started...
+Build succeeded.
+20241023150501_Initial_CreateDB_Add_Makes_Cars
+20241023155227_Add_Radios
+20241023182843_Add_Drivers
+20241024090325_ChangeBaseEntityDropTimeStamp
+20241024091404_ChangeBaseEntityAddTimeStamp
+20241024103403_ChangeCarAddAnotations
+20241024105231_ChangeRadioAddAnotations
+20241024113639_ChangeMakeDriverAddAnotations
+20241024162310_ChangeCarAddDateBuilt
+20241025083915_ChangeCarAddIsDrivable
+20241025085019_ChangeCarAddDisplay
+20241025093921_ChangeMakeAddCheckConstrains
+ PS D:\...\AutoLot.Samples\AutoLot.Samples> dotnet ef database update 20241025085019_ChangeCarAddDisplay
+Build started...
+Build succeeded.
+Reverting migration '20241025093921_ChangeMakeAddCheckConstrains'.
+PS D:\...\AutoLot.Samples> dotnet ef migrations remove
+Build started...
+Build succeeded.
+Removing migration '20241025093921_ChangeMakeAddCheckConstrains'.
+Reverting the model snapshot.
+Done.
+PS D:\...\AutoLot.Samples> dotnet ef migrations list
+```
 
 #### Відносини «One-to-Many».
 
@@ -1482,6 +1608,16 @@ The INSERT statement conflicted with the CHECK constraint 'CK_Check_Name'. The c
                 .HasConstraintName("FK_Inventory_Makes_MakeId");
             });
 ```
+Збереженя класів показує зміну моделі даних.
+
+```console
+ dotnet ef migrations has-pending-model-changes
+ dotnet ef migrations add ChangeRelationshipCarsMakes
+ dotnet ef migrations script
+ dotnet ef database update
+ ```
+
+
 
 #### Відносини «One-to-One».
 
@@ -1492,7 +1628,7 @@ The INSERT statement conflicted with the CHECK constraint 'CK_Check_Name'. The c
             {
                 //...
 
-                entity.HasIndex(e => e.CarId, "IX_Radios_CarId");
+                entity.HasIndex(e => e.CarId, "IX_Radios_InventoryId");
 
                 entity.HasOne(r => r.CarNavigation)
                 .WithOne(c => c.RadioNavigation)
@@ -1506,28 +1642,36 @@ The INSERT statement conflicted with the CHECK constraint 'CK_Check_Name'. The c
            {
                 // ...
 
-               entity.HasIndex(r => r.CarId, "IX_Radios_CarId")
+               entity.HasIndex(r => r.CarId, "IX_Radios_InventoryId")
                .IsUnique();
            });           
+```
+
+Ці зміни не змінюють нашу модель.
+
+```console
+PS D:\...\AutoLot.Samples> dotnet ef migrations has-pending-model-changes
+Build started...
+Build succeeded.
+No changes have been made to the model since the last migration.
 ```
 
 #### Відносини «Many-to-Many»
 
 Зв’язки «Many-to-Many» набагато краще налаштовуються за допомогою Fluent API. Імена полів зовнішнього ключа, імена індексів і каскадна поведінка можуть бути встановлені в операторах, які визначають зв’язок. Це також дозволяє безпосередньо вказувати зведену таблицю, що дозволяє додавати додаткові поля та спрощувати запити.
 
-Почніть із додавання сутності CarDriver:
+Додамо сутність CarDriver:
 
 ```cs
 namespace AutoLot.Samples.Models;
 
 [Table("InventoryToDrivers",Schema ="dbo")]
-internal class CarDriver : BaseEntity
+public class CarDriver : BaseEntity
 {
     public int DriverId { get; set; }
     [ForeignKey(nameof(DriverId))]
     public Driver DriverNavigation { get; set; }
-
-    [Column("InvertoryId")]
+    [Column("InventoryId")]
     public int CarId { get; set; }
     [ForeignKey(nameof(CarId))]
     public Car CarNavigation { get; set; }
@@ -1586,6 +1730,11 @@ modelBuilder.Entity<Car>()
              j.HasKey(cd => new { cd.CarId, cd.DriverId });
          });
 ```
+```console
+dotnet ef migrations add ChangeCarDriverRelationships
+dotnet ef migrations script 20241025121451_ChangeRelationshipCarsMakes --no-transactions
+dotnet ef database update 
+```
 
 #### Виключення сутностей із міграцій
 
@@ -1602,7 +1751,7 @@ protected override void OnModelCreating(ModelBuilder modelBuilder)
 #### Використання класів IEntityTypeConfiguration
 
 Як ви могли здогадатися на цьому етапі роботи з Fluent API, метод OnModelCreating() може стати досить довгим (і громіздким), чим складнішою стає ваша модель. Інтерфейс IEntityTypeConfiguration і атрибут EntityTypeConfiguration дозволяють перемістити конфігурацію Fluent API для сутності у власний клас. Це робить більш чистим ApplicationDbContext і підтримує принцип проектування поділу проблем.
-Почніть із створення нового каталогу під назвою Configuration у каталозі Models. У цьому новому каталозі додайте новий файл під назвою CarConfiguration.cs, зробіть його загальнодоступним і реалізуйте інтерфейс IEntityTypeConfiguration<Car>:
+Почніть із створення нового каталогу під назвою Configuration у каталозі Models. У цьому новому каталозі додайте новий клас під назвою CarConfiguration.cs, зробіть його загальнодоступним і реалізуйте інтерфейс IEntityTypeConfiguration<Car>:
 
 ```cs
 namespace AutoLot.Samples.Models.Configuration;
@@ -1680,13 +1829,12 @@ public class CarConfiguration : IEntityTypeConfiguration<Car>
     }
 
 ```
-
 Оновіть файл GlobalUsings.cs, щоб включити новий простір імен для класів конфігурації:
 
 ```cs
 global using AutoLot.Samples.Models.Configuration;
 ```
-Замініть увесь код у методі OnModelBuilding() (у класі ApplicationDbContext.cs), який налаштовує клас Car і зв’язок Car to Driver багато-до-багатьох, на такий єдиний рядок коду:
+Замініть увесь код у методі OnModelBuilding() (у класі ApplicationDbContext.cs), який налаштовує клас Car і зв’язок Car to Driver many-to many, на такий єдиний рядок коду:
 
 ```cs
 new CarConfiguration().Configure(modelBuilder.Entity<Car>());
@@ -1700,6 +1848,13 @@ public class Car : BaseEntity
 {
     //...
 }    
+```
+Перевіримо чи змінилась модель.
+```console
+PS D:\...\AutoLot.Samples> dotnet ef migrations has-pending-model-changes
+Build started...
+Build succeeded.
+No changes have been made to the model since the last migration.
 ```
 
 Потім повторіть ті самі дії для коду API Radio Fluent. Створіть новий клас під назвою RadioConfiguration, реалізуйте інтерфейс IEntityTypeConfiguration<Radio> і додайте код із методу ApplicationDbContext OnModelBuilding():
@@ -1740,10 +1895,11 @@ public class Radio : BaseEntity
 
 На цьому етапі вам може бути цікаво, який із трьох варіантів використовувати для формування ваших сутностей і їхнього зв’язку між собою та сховищем даних. Відповідь - усі три. Умовні угоди завжди активні (якщо ви не заміните їх анотаціями даних або Fluent API). Анотації даних можуть робити майже все, що можуть робити методи API Fluent, і самі зберігати інформацію в класі сутності, що може підвищити читабельність коду та підтримку. Fluent API є найпотужнішим з усіх трьох. Незалежно від того, використовуєте ви анотації даних чи Fluent API, знайте, що анотації даних переважають над вбудованими угодами, а методи Fluent API переважають над усім.
 
+
 #### Типи сутностей Owned(У власності)
 
 Іноді дві або більше сутності будуть містити однаковий набір властивостей. Можна використовувати клас C# як властивість сутності для визначення набору властивостей для іншої сутності. Коли типи, позначені атрибутом [Owned] (або налаштовані за допомогою Fluent API), додаються як властивість сутності, EF Core додасть усі властивості з класу сутності [Owned] до сутності-власника. Це збільшує можливість повторного використання коду C#.
-За лаштунками EF Core вважає це відношення один до одного. Клас у власності є залежною сутністю, а клас що аолодіє є головною сутністю. Клас, яки' є у власносі, навіть якщо він вважається сутністю, не може існувати без сутності-власника. Назви стовпців за замовчуванням із типу власності будуть відформатовані як NavigationPropertyName_OwnedEntityPropertyName (наприклад, PersonalNavigation_FirstName). Назви за замовчуванням можна змінити за допомогою Fluent API.
+За лаштунками EF Core вважає це відношення один до одного. Клас у власності є залежною сутністю, а клас що володіє є головною сутністю. Клас, який є у власносі, навіть якщо він вважається сутністю, не може існувати без сутності-власника. Назви стовпців за замовчуванням із типу власності будуть відформатовані як NavigationPropertyName_OwnedEntityPropertyName (наприклад, PersonalNavigation_FirstName). Назви за замовчуванням можна змінити за допомогою Fluent API.
 
 Додамо клас Person:
 
@@ -1807,7 +1963,7 @@ public class Driver : BaseEntity
     //...
 }
 ```
-Таблиця Driver оновлюється таким чином (зауважте, що nullability стовпці FirstName та LastName не відповідають анотаціям Required в сутності що у власності).
+Якшо проект створювався з вимкненням тпів нульових посилань C#, тоді таблиця Driver оновлюється таким чином (зауважте, що nullability стовпці FirstName та LastName не відповідають анотаціям Required в сутності що у власності).
 
 ```sql
 CREATE TABLE [dbo].[Drivers](
@@ -1862,9 +2018,9 @@ GO
 
 Існують додаткові параметри, які можна досліджувати за допомогою об’єктів власності, зокрема колекції, поділ таблиці та вкладення. Щоб отримати більше інформації, зверніться до документації EF Core.
 
-#### Типи запитів
+#### Типи запит
 
-Типи запитів — це колекції DbSet<T>(наприклад DbSet<Car>), які використовуються для відображення представлень(views), оператора SQL або таблиць без первинного ключа. У попередніх версіях EF Core для цього використовувався DbQuery<T>, але, починаючи з EF Core 3.x, тип DbQuery припинено. Типи запитів додаються до похідного DbContext за допомогою властивостей DbSet<T> і налаштовуються як безключові.
+Типи запит — це колекції DbSet<T>(наприклад DbSet<Car>), які використовуються для відображення представлень(views), оператора SQL або таблиць без первинного ключа. У попередніх версіях EF Core для цього використовувався DbQuery<T>, але, починаючи з EF Core 3.x, тип DbQuery припинено. Типи запитів додаються до похідного DbContext за допомогою властивостей DbSet<T> і налаштовуються як безключові.
 Типи запитів зазвичай використовуються для подання комбінацій таблиць, наприклад для поєднання деталей із таблиць Make та Invertory.
 Розглянемо, наприклад, цей запит:
 
@@ -1895,7 +2051,7 @@ public class CarMakeViewModel
     public override string? ToString() => FullDetail;
 }
 ```
-Атрибут Keyless вказує EF Core, що ця сутність є типом запиту та ніколи не використовуватиметься для оновлень, а також має бути виключена з засобу відстеження змін під час запиту. Зверніть увагу на використання атрибута NotMapped для створення відображуваного рядка, який об’єднує кілька властивостей в єдиний, зрозумілий людині рядок. Оновіть ApplicationDbContext, щоб включити DbSet<T> для моделі перегляду:
+Атрибут Keyless вказує EF Core, що ця сутність є типом запит та ніколи не використовуватиметься для оновлень, а також має бути виключена з засобу відстеження змін під час запиту. Зверніть увагу на використання атрибута NotMapped для створення відображуваного рядка, який об’єднує кілька властивостей в єдиний, зрозумілий людині рядок. Оновіть ApplicationDbContext, щоб включити DbSet<T> для моделі перегляду:
 
 ```cs
     public class ApplicationDbContext : DbContext
@@ -1957,6 +2113,9 @@ public class CarMakeViewModelConfiguration : IEntityTypeConfiguration<CarMakeVie
 ```
 У наведеному прикладі об’єкт встановлюється як безключовий і відображає тип запиту на сирий запит SQL. Метод HasNoKey() Fluent API не є необхідним, якщо в моделі є анотація даних Keyless, і навпаки, але він показаний у цьому прикладі для повноти.
 
+
+
+
 Типи запитів також можуть бути зіставлені з представленням бази даних. Якщо припустити, що є представлення з назвою dbo.CarMakeView, конфігурація виглядатиме так:
 
 ```cs
@@ -1972,7 +2131,13 @@ builder.HasNoKey().ToView('CarMakeView', 'dbo');
         builder.ToTable(x => x.ExcludeFromMigrations());
     }
 ```
-Останніми механізмами, з якими можна використовувати типи запитів, є методи FromSqlRaw() і FromSqlInterpolated(). Вони будуть детально розглянуті в наступному розділі, але ось короткий огляд:
+```console
+dotnet ef migrations has-pending-model-changes
+...
+No changes have been made to the model since the last migration.
+```
+
+Механізмами, з якими можна використовувати типи запитів, є методи FromSqlRaw() і FromSqlInterpolated(). Вони будуть детально розглянуті в наступному розділі, але ось короткий огляд:
 
 ```cs
 var records = context.CarMakeViewModel.FromSqlRaw(
@@ -1998,7 +2163,7 @@ modelBuilder.Entity<CarViewModel>()
 Наприклад, щоб отримати всі записи про жовті автомобілі з бази даних, виконується такий запит:
 
 ```cs
-var cars = context.Cars.Where(x=>x.Color == 'Yellow');
+var cars = context.Cars.Where(c=>c.Color == 'Yellow');
 ```
 При відкладеному виконанні запит до бази даних фактично не відбувається, доки результати не починає використовуватись. Для негайного виконання запиту використовуйте ToList().
 
@@ -2081,8 +2246,6 @@ Commands:
 Use "dotnet ef [command] --help" for more information about a command.
 ```
 
-
-
 Таблиця описує три основні команди в глобальному інструменті EF Core.
 
 | Команда | Значення в використані |
@@ -2119,8 +2282,7 @@ dotnet ef migrations add -h
 dotnet ef migrations -h
 ```
 
-Команди міграції використовуються для додавання, видалення, списків і міграцій сценаріїв. Коли міграції застосовуються до бази, у таблиці __EFMigrationsHistory створюється запис. У наступних розділах детально пояснюються команди.
-
+Команди міграції використовуються для додавання, видалення, списків і міграцій сценаріїв. Коли міграції застосовуються до бази, у таблиці __EFMigrationsHistory створюється запис. 
 Команди EF Core Migrations
 
 | Команда | Значення в використані |
