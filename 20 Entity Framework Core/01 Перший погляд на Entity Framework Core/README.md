@@ -75,7 +75,7 @@ global using System.ComponentModel.DataAnnotations.Schema;
 
 ## Побудова похідного касу від DBContext
 
-### Створення класу
+### Створення класу ApplicationDbContext
 
 Першим кроком у EF Core є створення спеціального класу, який успадковує DbContext.
 
@@ -2213,7 +2213,7 @@ var untrackedWithIdResolution =
 
 # Команди CLI EF Core Global Tool
 
-dotnet-ef глобальний інструмент CLI EF Core tooling містить необхідні команди для стоврення коду для існуючої БД, створювати/видаляти міграції бази даних і працювати з базою даних (оновлювати, видаляти тощо). Перш ніж ви зможете використовувати глобальний інструментарій dotnet-ef, його потрібно встановити за допомогою такої команди:
+dotnet-ef глобальний інструмент CLI EF Core містить необхідні команди для стоврення коду для існуючої БД, створювати/видаляти міграції бази даних і працювати з базою даних (оновлювати, видаляти тощо). Перш ніж ви зможете використовувати глобальний інструментарій dotnet-ef, його потрібно встановити за допомогою такої команди:
 
 ```console
 dotnet tool install --global dotnet-ef
@@ -2254,7 +2254,7 @@ Use "dotnet ef [command] --help" for more information about a command.
 | DbContext | Команди для керування типами DbContext. Підкоманди включають scaffold, list і info.|
 | Migrations | Команди для керування міграціями. Підкоманди включають add, list, remove і script.|
 
-Команди EF Core виконуються у файлах проекту .NET. Цільовий проект має посилатися на пакет інструментів EF Core NuGet Microsoft.EntityFrameworkCore.Design.Команди діють із файлом проекту, розташованим у тому самому каталозі, де виконуються команди, або файлом проекту в іншому каталозі, якщо на нього посилаються через параметри командного рядка. 
+Команди EF Core виконуються у файлах проекту .NET. Цільовий проект має посилатися на пакет інструментів EF Core NuGet Microsoft.EntityFrameworkCore.Design. Команди діють із файлом проекту, розташованим у тому самому каталозі, де виконуються команди, або файлом проекту в іншому каталозі, якщо на нього посилаються через параметри командного рядка. 
 Для команд EF Core CLI, яким потрібен екземпляр похідного класу DbContext (Database and Migrations), якщо в проекті є лише один, використовуватиметься він. Якщо їх більше ніж один, то DbContext потрібно вказати в параметрах командного рядка. Похідний клас DbContext буде створено за допомогою екземпляра класу, що реалізує інтерфейс IDesignTimeDbContextFactory<TContext>, якщо його можна знайти. Якщо інструменти не можуть його знайти, похідний DbContext буде створено за допомогою конструктора без параметрів. Якщо жодного з них не існує, команда не вдасться виконати. Зауважте, що використання конструктора без параметрів (а не конструктора, який приймає DbContextOptions<T>) вимагає наявності перевизначення OnConfiguring, що не вважається хорошою практикою. Найкращий (і насправді єдиний) варіант — завжди створювати IDesignTimeDbContextFactory<TContext> для кожного похідного DbContext, який є у вашій програмі.
 
 Для команд EF Core доступні загальні параметри, наведені в таблиці. Багато команд мають додаткові параметри або аргументи.
@@ -2276,53 +2276,115 @@ dotnet ef migrations add -h
 ```
 Важливо зауважити, що команди CLI не є командами C#, тому правила екранування скісних риск і лапок не застосовуються.
 
+Аби краще розібратися з роботою CLI EF Core створіть простий консольний проект наприклад MyShop. Додайте пакети
+
+Microsoft.EntityFrameworkCore
+Microsoft.EntityFrameworkCore.Design
+Microsoft.EntityFrameworkCore.SqlServer
+
+Додайте класи. 
+
+```cs
+namespace MyShop;
+
+public class Product
+{
+    public int Id { get; set; }
+    public string? Name { get; set; }
+
+}
+```
+```cs
+namespace MyShop;
+
+public class ApplicationDbContext : DbContext
+{
+    //Properties
+    public DbSet<Product> Products { get; set; }
+
+    //Constructors
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+    {
+    }
+}
+```
+```cs
+namespace MyShop;
+
+public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<ApplicationDbContext>
+{
+    public ApplicationDbContext CreateDbContext(string[] args)
+    {
+        string connectionString = @"Server=(localdb)\mssqllocaldb;Database=MyShop;Trusted_Connection=True;ConnectRetryCount=0";
+
+        var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+        optionsBuilder.UseSqlServer(connectionString);
+
+        return new ApplicationDbContext(optionsBuilder.Options);
+    }
+}
+```
+Запишить всі змінені файли. 
+
+Відкрийте командний рядок Tools > Command line > Deweloper PowerShell
+
+```console
+PS D:\...\MyShop> dir
+PS D:\...\MyShop> cd MyShop
+```
+Тепер можна виконувати команди.
+
 ## Команди migrations
 
 ```console
 dotnet ef migrations -h
 ```
-
 Команди міграції використовуються для додавання, видалення, списків і міграцій сценаріїв. Коли міграції застосовуються до бази, у таблиці __EFMigrationsHistory створюється запис. 
 Команди EF Core Migrations
 
 | Команда | Значення в використані |
 | -------- | --------- |
-|Add|Створює нову міграцію на основі змін попередньої міграції|
-|Remove|Перевіряє, чи було застосовано останню міграцію в проекті до бази даних, і, якщо ні, видаляє файл міграції (і його конструктор), а потім повертає клас знімка до попередньої міграції|
-|List|Перелічує всі міграції для похідного DbContext і їхній статус (застосовано чи очікує на розгляд)|
-|Bundle|Створює виконуваний файл для оновлення бази даних.|
-|Script|Створює сценарій SQL для всіх, одного або діапазону міграцій|
+|add|Створює нову міграцію на основі змін попередньої міграції|
+|remove|Перевіряє, чи було застосовано останню міграцію в проекті до бази даних, і, якщо ні, видаляє файл міграції (і його конструктор), а потім повертає клас знімка до попередньої міграції|
+|has-pending-model-changes|Перевіряє, чи були внесені будь-які зміни в модель з часу останньої міграції.|
+|list|Перелічує всі міграції для похідного DbContext і їхній статус (застосовано чи очікує на розгляд)|
+|bundle|Створює виконуваний файл для оновлення бази даних.|
+|script|Створює сценарій SQL для всіх, одного або діапазону міграцій|
 
-### Команда Add
+### Команда add
 
 ```console
  dotnet ef migrations add -h
 ```
-
 Команда add створює нову міграцію бази даних на основі поточної об’єктної моделі. Процес перевіряє кожну сутність із властивістю DbSet<T> у похідному DbContext (і кожну сутність, до якої можна отримати доступ із цих сутностей за допомогою властивостей навігації), і визначає, чи є якісь зміни, які потрібно застосувати до бази даних. Якщо є зміни, генерується відповідний код для оновлення бази даних.
-Для команди Add потрібен аргумент імені, який використовується для назви класу створення та файлів для міграції. На додаток до загальних параметрів, параметр -o PATH або –output-dir PATH вказує, куди мають бути розміщені файли міграції. Стандартний каталог має назву Migrations відносно поточного шляху.
+Для команди add потрібен аргумент імені, який використовується для назви класу створення та файлів для міграції. На додаток до загальних параметрів, параметр -o PATH або –output-dir PATH вказує, куди мають бути розміщені файли міграції. Стандартний каталог має назву Migrations відносно поточного шляху.
 
+Створимо міграцію.
+
+```console
+ dotnet ef migrations add InitialCreateDBAddProduct
+```
 Кожна додана міграція створює два файли, які є частинами одного класу. Імена обох файлів починаються з позначки часу та імені міграції, яке використовується як аргумент команди add. Перший файл має назву <YYYYMMDDHHMMSS>_<MigrationName>.cs, а другий — <YYYYMMDDHHMMSS>_<MigrationName>.Designer.cs. Мітка часу базується на даті створення файлу та точно збігається для обох файлів. Перший файл представляє код, згенерований для змін бази даних у цій міграції, а файл конструктора представляє код для створення та оновлення бази даних на основі всіх міграцій до цієї міграції включно.
 
 Головний файл містить два методи Up() і Down(). Метод Up() містить код для оновлення бази даних змінами цієї міграції, а метод Down() містить код для відкоту змін цієї міграції. Ось приклад:
 
 ```cs
-    public partial class InitailCreate : Migration
+    public partial class InitialCreateDBAddProduct : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Makes",
+                name: "Products",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Makes", x => x.Id);
+                    table.PrimaryKey("PK_Products", x => x.Id);
                 });
         }
 
@@ -2330,23 +2392,86 @@ dotnet ef migrations -h
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Makes");
+                name: "Products");
         }
     }
 ```
-Як бачите, метод Up() створює таблиці, стовпці, індекси тощо. Метод Down() видаляє створені елементи. Механізм міграції видасть оператори alter, add і drop, якщо необхідно, щоб база даних відповідала вашій моделі. Файл конструктора містить два атрибути, які прив’язують ці частини до імені файлу та похідного DbContext.
+Як бачите, метод Up() створює таблиці, стовпці, індекси тощо. Метод Down() видаляє створені елементи. Механізм міграції видасть оператори alter, add і drop, якщо необхідно, щоб база даних відповідала вашій моделі. 
+
+Перша міграція створює додатковий файл у цільовому каталозі з іменем похідного DbContext у форматі <DerivedDbContextName>ModelSnapshot.cs. Формат цього файлу такий самий, і містить код, який є сумою всіх міграцій. Коли міграції додаються або видаляються, цей файл автоматично оновлюється відповідно до змін.
+
+Файл з дизайном моделі містить атрибут, який прив’язує частину до імені файлу та похідного DbContext.
 
 ```cs
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241015122907_InitailCreate")]
-    partial class InitailCreate
+    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
     {
         //...
     }    
 ```
-Перша міграція створює додатковий файл у цільовому каталозі з іменем похідного DbContext у форматі <DerivedDbContextName>ModelSnapshot.cs. Формат цього файлу такий самий, як і частина конструктора, і містить код, який є сумою всіх міграцій. Коли міграції додаються або видаляються, цей файл автоматично оновлюється відповідно до змін.
 
 Надзвичайно важливо не видаляти файли міграції вручну. Це призведе до того, що <DerivedDbContext>ModelSnapshot.cs не синхронізується з вашими міграціями, фактично порушуючи їх. Якщо ви збираєтеся видалити їх вручну, видаліть їх усіх і почніть спочатку. Щоб видалити міграцію, скористайтеся командою видалення, про яку ми коротко розглянемо.
+
+Додамо трохи незграбниу сутність. 
+
+```cs
+namespace MyShop;
+
+public class Bolt
+{
+    public int Id { get; set; }
+    public double Price { get; set; }
+}
+```
+```cs
+public class ApplicationDbContext : DbContext
+{
+    //Properties
+ 
+    // ...
+
+    public DbSet<Bolt> Bolts { get; set; }
+
+    //...
+}
+```
+Виконаемо перевірку чи є зміни моделі даних
+
+```console
+dotnet ef migrations -h
+dotnet ef migrations has-pending-model-changes
+
+Changes have been made to the model since the last migration. Add a new migration.
+```
+EF Core побачив зміни моделі та запропонував зробити нову міграцію.
+
+```console
+ dotnet ef migrations add AddBolt
+
+ Done. To undo this action, use 'ef migrations remove'
+```
+### Команда list
+
+```console
+dotnet ef migrations list
+```
+Команда list використовується для показу всіх міграцій для похідного DbContext. За замовчуванням він перелічить усі міграції та запитає базу даних, щоб визначити, чи було їх застосовано. Якщо вони не були застосовані, вони будуть указані як очікуючі(Pending) на розгляд. Є можливість передати певний рядок з’єднання та інший варіант, щоб узагалі не підключатися до бази даних і натомість просто перерахувати міграції.
+
+```console
+dotnet ef migrations list -h
+
+
+Usage: dotnet ef migrations list [options]
+
+Options:
+  --connection <CONNECTION>              The connection string to the database. Defaults to the one specified in AddDbContext or OnConfiguring.
+  --no-connect                           Don't connect to the database.
+
+dotnet ef migrations list
+
+20241028092947_InitialCreateDBAddProduct (Pending)
+20241028100158_AddBolt (Pending)
+```
 
 ### Команда remove
 
@@ -2356,28 +2481,21 @@ dotnet ef migrations -h
 
 Команда видалення використовується для видалення міграцій із проекту та завжди працює з останньою міграцією (на основі позначок часу міграцій). Під час видалення міграції EF Core переконається, що її не було застосовано, перевіривши таблицю __EFMigrationsHistory у базі даних. Якщо міграцію було застосовано, процес не вдається. Якщо міграцію ще не застосовано або її було відкочено, міграцію буде видалено, а файл знімка моделі оновлено. Є один додатковий параметр, параметр force (-f || --force). Це призведе до відкоту останньої міграції, а потім її видалення за один крок.
 
-### Команда list
-
+Видалемо останню міграцію.
 ```console
-dotnet ef migrations list
+dotnet ef migrations remove
+
+Removing migration '20241028100158_AddBolt'.
+Reverting the model snapshot.
+Done.
 ```
-Команда list використовується для показу всіх міграцій для похідного DbContext. За замовчуванням він перелічить усі міграції та запитає базу даних, щоб визначити, чи було їх застосовано. Якщо вони не були застосовані, вони будуть указані як очікуючі(Pending) на розгляд. Є можливість передати певний рядок з’єднання та інший варіант, щоб узагалі не підключатися до бази даних і натомість просто перерахувати міграції.
+Видалимо код непотрібної сутності.
 
-```console
-PS D:\Temp\ProjectEF\ProjectEF> dotnet ef migrations list -h
-
-
-Usage: dotnet ef migrations list [options]
-
-Options:
-  --connection <CONNECTION>              The connection string to the database. Defaults to the one specified in AddDbContext or OnConfiguring.
-  --no-connect                           Don't connect to the database.
-```
 
 ### Команда bundle
 
 ```console
-dotnet ef migrations bundle
+dotnet ef migrations bundle -h
 ```
 Команда bundle створює виконуваний файл для оновлення бази даних. Згенерований виконуваний файл, створений для цільового середовища виконання (наприклад, Windows, Linux), застосує всі наявні міграції до бази даних.
 
@@ -2392,10 +2510,17 @@ dotnet ef migrations bundle
 Виконуваний файл використовуватиме рядок підключення з IDesignTimeDbContextFactory; однак інший рядок підключення можна передати у виконуваний файл за допомогою прапорця --connection. Якщо міграції вже було застосовано до цільової бази даних, вони не будуть застосовані повторно.
 Якщо застосувати прапорець --self-contained, розмір виконуваного файлу значно збільшиться оскільки збільшиться кодом для CLR .Net. 
 
+В нашому випадку створеться файл.
+```console
+dotnet ef migrations bundle
+
+Done. Migrations Bundle: D:\...\MyShop\efbundle.exe
+```
+
 ### Команда script
 
 ```console
-dotnet ef migrations script
+dotnet ef migrations script -h
 ```
 Команда script створює сценарій SQL на основі однієї або кількох міграцій. Команда приймає два необов’язкові аргументи, що представляють міграцію для початку та міграцію для завершення. Якщо жоден з них не введено, усі міграції виконуються за сценарієм.
 
@@ -2420,6 +2545,32 @@ dotnet ef migrations script 20241015150453_AddMakes 20241015151929_AlterMakeAddN
 |-o -output FILE|Файл, до якого потрібно записати кінцевий сценарій|
 |-i --idempotent|Створює сценарій, який перевіряє, чи було вже застосовано міграцію перед її застосуванням|
 |--no-transactions|Не загортає кожну міграцію в транзакцію|
+
+```console
+PS D:\...\MyShop> dotnet ef migrations script --no-transactions
+Build started...
+Build succeeded.
+IF OBJECT_ID(N'[__EFMigrationsHistory]') IS NULL
+BEGIN
+    CREATE TABLE [__EFMigrationsHistory] (
+        [MigrationId] nvarchar(150) NOT NULL,
+        [ProductVersion] nvarchar(32) NOT NULL,
+        CONSTRAINT [PK___EFMigrationsHistory] PRIMARY KEY ([MigrationId])
+    );
+END;
+GO
+
+CREATE TABLE [Products] (
+    [Id] int NOT NULL IDENTITY,
+    [Name] nvarchar(max) NULL,
+    CONSTRAINT [PK_Products] PRIMARY KEY ([Id])
+);
+GO
+
+INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+VALUES (N'20241028092947_InitialCreateDBAddProduct', N'8.0.10');
+GO
+```
 
 ## Команди database
 
@@ -2448,6 +2599,15 @@ dotnet ef database drop
 
 Якщо названа міграція має мітку часу, яка є ранішою за інші застосовані міграції, усі пізніші міграції відкочуються. Якщо 0 (нуль) передано як назву міграції, усі міграції повертаються, залишаючи порожню базу даних (окрім таблиці __EFMigrationsHistory).
 
+```console
+PS D:\MyWork\CS-Step-by-Step\20 Entity Framework Core\01 Перший погляд на Entity Framework Core\MyShop\MyShop> dotnet ef database update
+Build started...
+Build succeeded.
+Applying migration '20241028092947_InitialCreateDBAddProduct'.
+Done.
+```
+Після цієї команди можна побачити базу даних з таблицею в SQL Server Object Explorer. 
+
 ## Команди dbcontext
 
 ```console
@@ -2464,7 +2624,29 @@ dotnet ef dbcontext -h
 |Scaffold|Генерує DbContext і типи сутностей для бази даних|
 |Script|Генерує сценарій SQL з DbContext на основі об’єктної моделі, оминаючи будь-які міграції|
 
-Для команд list та info доступні звичайні параметри. Команда list містить список похідних класів DbContext у цільовому проекті. Команда info надає подробиці про вказаний похідний клас DbContext, включаючи рядок підключення, ім’я постачальника, ім’я бази даних і джерело даних. Команда script створює сценарій SQL, який створює вашу базу даних на основі об’єктної моделі, ігноруючи будь-які міграції, які можуть бути присутніми. Команда scaffold використовується для зворотного проектування існуючої бази даних.
+Для команд list та info доступні звичайні параметри. Команда list містить список похідних класів DbContext у цільовому проекті. Команда info надає подробиці про вказаний похідний клас DbContext, включаючи рядок підключення, ім’я постачальника, ім’я бази даних і джерело даних. 
+```console
+PS D:\...\MyShop> dotnet ef dbcontext info
+
+Type: MyShop.ApplicationDbContext
+Provider name: Microsoft.EntityFrameworkCore.SqlServer
+Database name: MyShop
+Data source: (localdb)\mssqllocaldb
+Options: None
+```
+Команда script створює сценарій SQL, який створює вашу базу даних на основі об’єктної моделі, ігноруючи будь-які міграції, які можуть бути присутніми. 
+```console
+PS D:\...\MyShop> dotnet ef dbcontext script
+
+CREATE TABLE [Products] (
+    [Id] int NOT NULL IDENTITY,
+    [Name] nvarchar(max) NULL,
+    CONSTRAINT [PK_Products] PRIMARY KEY ([Id])
+);
+GO
+```
+
+Команда scaffold використовується для зворотного проектування існуючої бази даних.
 
 ### Команда scaffold
 
@@ -2480,9 +2662,6 @@ dotnet ef dbcontext scaffold -h
 |Connection|Рядок підключення до бази даних|
 |Provider|Провайдер бази даних EF Core для використання (наприклад, Microsoft.EntityFrameworkCore.SqlServer)|
 
-```console
-dotnet ef dbcontext scaffold "Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=MyDatabase" Microsoft.EntityFrameworkCore.SqlServer
-```
 Доступні параметри включають вибір конкретних схем і таблиць, ім’я та простір імен створеного контекстного класу, вихідний каталог та простір імен згенерованих класів сутностей та багато іншого. Також доступні стандартні варіанти.
 
 Опції команди dbcontext scaffold
@@ -2502,6 +2681,22 @@ dotnet ef dbcontext scaffold "Data Source=(localdb)\MSSQLLocalDB;Initial Catalog
 
 Якщо вибрано параметр анотації даних (-d), EF Core використовуватиме анотації даних, де це можливо, і заповнюватиме відмінності за допомогою Fluent API. Якщо цей параметр не вибрано, у Fluent API кодується вся конфігурація (де вона відрізняється від домовленостей). Ви можете вказати простір імен, схему та розташування для згенерованих сутностей і похідних файлів DbContext. Якщо ви не хочете створювати всю базу даних, ви можете вибрати певні схеми та таблиці. Параметр --no-onconfiguring усуває метод OnConfiguring() із класу. Параметр –no-pluralize вимикає множинний сутність, який перетворює окремі сутності (Car) на множинні таблиці (Cars) під час створення міграцій і перетворює множинні таблиці на окремі сутності під час scaffolding.
 
+Додамо в рішеня ше один проект YourShop і встанвимо тіж самі пакети.
+
+Microsoft.EntityFrameworkCore
+Microsoft.EntityFrameworkCore.Design
+Microsoft.EntityFrameworkCore.SqlServer
+
+Виконаємо команди
+
+```console
+cd ..
+cd YourShop
+dotnet ef dbcontext scaffold "Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=MyShop" Microsoft.EntityFrameworkCore.SqlServer
+
+To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https: ...
+```
+Після цого в каталозі проекту появиться класи Product і MyShopContext.
 
 
 ### Команда optimize
@@ -2516,7 +2711,11 @@ dotnet ef dbcontext optimize -h
 |-o --output-dir|Каталог для розміщення файлів. Шляхи відносно каталогу проекту.|
 |-n --namespace NAMESPACE|Простір імен для використання. За замовчуванням відповідає каталогу.|
 
-Коли похідний DbContext компілюється, результати включають клас для кожної сутності у вашій моделі, скомпільований похідний DbContext і скомпільований похідний DbContext ModelBuilder. Наприклад, ви можете скомпілювати AutoLot.Samples.ApplicationDbContext за допомогою наступної команди:
+Коли похідний DbContext компілюється, результати включають клас для кожної сутності у вашій моделі, скомпільований похідний DbContext і скомпільований похідний DbContext ModelBuilder. 
+
+Повернемось в рішення AutoLot.Samples і відкриемо командний рядок. 
+
+Можемо скомпілювати AutoLot.Samples.ApplicationDbContext за допомогою наступної команди:
 
 ```console
 dotnet ef dbcontext optimize -o CompiledModels
