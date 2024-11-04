@@ -1072,7 +1072,7 @@ void UseConains()
 }
 //UseConains();
 
-void UseFirsAndFirsOrDefault()
+void UseFirstAndFirstOrDefault()
 {
     List<Person> people = new()
     {
@@ -1103,4 +1103,4 @@ void UseFirsAndFirsOrDefault()
 
 }
 
-UseFirsAndFirsOrDefault();
+UseFirstAndFirstOrDefault();

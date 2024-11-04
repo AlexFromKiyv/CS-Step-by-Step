@@ -231,4 +231,24 @@ static void ClearSampleData()
 }
 //ClearSampleData();
 
-LoadMakeAndCarData();
+//LoadMakeAndCarData();
+
+static void QueryData_GetAllRecords()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    IQueryable<Car> cars = context.Cars;
+    foreach (var car in cars)
+    {
+        Console.WriteLine($"{car.Id}\t{car.PetName}\t{car.Color}");
+    }
+
+    context.ChangeTracker.Clear();
+
+    List<Car> listCars = context.Cars.ToList();
+    foreach (var car in listCars)
+    {
+        Console.WriteLine($"{car.Id}\t{car.PetName}\t{car.Color}");
+    }
+}
+QueryData_GetAllRecords();

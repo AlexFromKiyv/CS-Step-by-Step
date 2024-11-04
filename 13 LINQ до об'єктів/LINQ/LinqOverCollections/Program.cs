@@ -2,7 +2,7 @@
 using System;
 using System.Collections;
 
-List<Car> myCar = new()
+List<Car> myCars = new()
 {
     new Car{ PetName = "Henry", Color = "Silver", Speed = 100, Make = "BMW"},
     new Car{ PetName = "Daisy", Color = "Tan", Speed = 90, Make = "BMW"},
@@ -23,7 +23,7 @@ void CollectionToConsole<T>(IEnumerable<T>? collection)
 
 void UseLinqForComplexObject()
 {
-    GetFastCars(myCar);
+    GetFastCars(myCars);
 
     void GetFastCars(List<Car> cars)
     {
@@ -37,7 +37,7 @@ void UseLinqForComplexObject()
 
 void UseLinqForComplexObjectWithComplexCriteria()
 {
-    GetFastCars(myCar);
+    GetFastCars(myCars);
 
     void GetFastCars(List<Car> cars)
     {
@@ -52,7 +52,7 @@ void UseLinqForComplexObjectWithComplexCriteria()
 void LinqOverArrayList()
 {
     // Here is a nongeneric collection of cars.
-    ArrayList myCars = new ArrayList() 
+    ArrayList myArrayCars = new ArrayList() 
     {
         new Car{ PetName = "Henry", Color = "Silver", Speed = 100, Make = "BMW"},
         new Car{ PetName = "Daisy", Color = "Tan", Speed = 90, Make = "BMW"},
@@ -62,7 +62,7 @@ void LinqOverArrayList()
     };
 
     // Transform ArrayList into an IEnumerable<Car>-compatible type.
-    var myCarsGeneric = myCar.OfType<Car>();
+    var myCarsGeneric = myArrayCars.OfType<Car>();
 
     var queryFastCars = from c in myCarsGeneric where c.Speed > 55 select c;
 
@@ -107,4 +107,4 @@ var queryArithmeticException = exceptions.OfType<ArithmeticException>();
 
 CollectionToConsole(queryArithmeticException);
 }
-FilteringByType();
+//FilteringByType();

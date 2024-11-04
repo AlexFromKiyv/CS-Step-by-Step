@@ -419,13 +419,6 @@ ORDER BY [i].[_Position];
 ```
 Це набагато краще, ніж попередні версії EF Core, коли використовуються зв’язки «багато до багатьох», де вам доводилося самостійно керувати зведеною таблицею.
 
-
-
-
-
-
-
-
 ### Приклада додавання різних сутностей для подальшого дослідження запитів.
 
 Додайте серію записів Make та Car для прикладів запитів на читання. 
@@ -520,3 +513,80 @@ Saved change 10 entities
 ```
 В базі даних можна побачити значеня для додавання Id було скинкто до 0.
 
+## Запит даних
+
+Запит даних за допомогою EF Core зазвичай виконується за допомогою запитів LINQ. Нагадую, що під час використання LINQ для запиту до бази даних для списку сутностей запит не виконується, доки запит не буде перебирати список, перетворюватнись на List<T> (або масив) або прив’язано до елемента керування списком (як сітка даних). Тобто до тих пір як дані реально потрібні для показу або використання. Для запитів з одним записом оператор виконується негайно, коли використовується виклик з одним записом (First(), Single() тощо).
+
+Більше прикладів LINQ можна знайти в шнтернеті за запитом "microsoft linq samples"
+
+Ви можете викликати метод ToQueryString() у більшості запитів LINQ, щоб перевірити запит, який виконується до бази даних. Основним винятком є ​​будь-які запити негайного виконання, такі як First()/FirstOrDefault(). Для розділених запитів метод ToQueryString() повертає лише перший запит, який буде виконано.
+
+### Отримання всіх запитів 
+
+Щоб отримати всі записи для таблиці, просто використовуйте властивість DbSet<T> безпосередньо без будь-яких операторів LINQ. Для негайного виконання додайте ToList() до властивості DbSet<T>.
+
+```cs
+static void QueryData_GetAllRecords()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    IQueryable<Car> cars = context.Cars;
+    foreach (var car in cars)
+    {
+        Console.WriteLine($"{car.Id}\t{car.PetName}\t{car.Color}");
+    }
+
+    context.ChangeTracker.Clear();
+
+    List<Car> listCars = context.Cars.ToList();
+    foreach (var car in listCars)
+    {
+        Console.WriteLine($"{car.Id}\t{car.PetName}\t{car.Color}");
+    }
+}
+QueryData_GetAllRecords();
+```
+Зверніть увагу, що повертається тип IQueryable<Car> під час використання DbSet<Car>, а тип повернення — List<Car> під час використання методу ToList().
+
+```console
+An entity of type Car was loaded from the database.
+1       Zippy   Black
+An entity of type Car was loaded from the database.
+2       Rusty   Rust
+An entity of type Car was loaded from the database.
+3       Mel     Black
+An entity of type Car was loaded from the database.
+4       Clunker Yellow
+An entity of type Car was loaded from the database.
+5       Bimmer  Black
+An entity of type Car was loaded from the database.
+6       Hank    Green
+An entity of type Car was loaded from the database.
+7       Pinky   Pink
+An entity of type Car was loaded from the database.
+8       Pete    Black
+An entity of type Car was loaded from the database.
+9       Brownie Brown
+An entity of type Car was loaded from the database.
+10      Lemon   Rust
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+1       Zippy   Black
+2       Rusty   Rust
+3       Mel     Black
+4       Clunker Yellow
+5       Bimmer  Black
+6       Hank    Green
+7       Pinky   Pink
+8       Pete    Black
+9       Brownie Brown
+10      Lemon   Rust
+```
