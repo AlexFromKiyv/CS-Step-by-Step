@@ -1,4 +1,7 @@
-﻿static void AddRecord()
+﻿using AutoLot.Samples.Models;
+using Microsoft.Data.SqlClient;
+
+static void AddRecord()
 {
     //The factory is not meant to be used like this, but it's demo code
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
@@ -6,10 +9,9 @@
     Make newMake = new Make { Name ="BMW" };
     Console.WriteLine($"State of the entity is {context.Entry(newMake).State}");
 
-    context.Makes.Add( newMake );
+    context.Makes.Add(newMake);
     Console.WriteLine($"State of the entity is {context.Entry(newMake).State}");
-
-    
+        
     ViewMake(newMake,"Bifore SaveChange");
     context.SaveChanges();
     Console.WriteLine($"State of the entity is {context.Entry(newMake).State}");
@@ -85,11 +87,14 @@ static void GetSchemaAndTableNameForType()
 static void AddRowWithSetIdentityInsert()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    // Definition schema and tablename    
     IEntityType metadata = context.Model.FindEntityType(typeof(Car).FullName);
     string schema = metadata.GetSchema();
     string tableName = metadata.GetTableName();
+    
+    //Cteate strategy with explecitly transaction
     string sql;
-
     var strategy = context.Database.CreateExecutionStrategy();
     strategy.Execute( () => 
     {
@@ -120,6 +125,7 @@ static void AddRowWithSetIdentityInsert()
         {
             transaction.Rollback();
             Console.WriteLine($"Insert failed:{ex.Message}");
+            //Console.WriteLine(ex.InnerException.Message);
         }
         finally
         {
@@ -138,10 +144,11 @@ static void AddEntityWithChild()
     var make = new Make { Name = "Honda" };
 
     Car car = new Car { Color = "Yellow", PetName = "Herbie" };
+    
     // IEnumerable<Car> to List<Car>
     ((List<Car>)make.Cars).Add(car);
-
     context.Makes.Add(make);
+
     context.SaveChanges();
 }
 //AddEntityWithChild();
@@ -233,22 +240,427 @@ static void ClearSampleData()
 
 //LoadMakeAndCarData();
 
+static void CollectionCarToConsole(IEnumerable<Car> cars,string text)
+{
+    Console.WriteLine($"\t{text}");
+    foreach (var car in cars)
+    {
+        Console.WriteLine($"{car.Id} {car.Color} {car.PetName}");
+    }
+}
+
+static void ShowCars()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+    var cars = context.Cars;
+    CollectionCarToConsole(cars, "All cars");
+    Console.WriteLine(context.Cars.GetType());
+}
+//ShowCars();
+
 static void QueryData_GetAllRecords()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
     IQueryable<Car> cars = context.Cars;
-    foreach (var car in cars)
-    {
-        Console.WriteLine($"{car.Id}\t{car.PetName}\t{car.Color}");
-    }
+
+    CollectionCarToConsole(cars, "All car from IQueryable<Car>");
 
     context.ChangeTracker.Clear();
-
     List<Car> listCars = context.Cars.ToList();
-    foreach (var car in listCars)
+
+    CollectionCarToConsole(listCars, "All car from List<Car>");
+}
+//QueryData_GetAllRecords();
+
+
+static void FilterData_1()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    //Yellow cars
+    IQueryable<Car> cars = context.Cars.Where(c => c.Color == "Yellow");
+    CollectionCarToConsole(cars, "All yellow cars");
+
+}
+//FilterData_1();
+
+static void FilterData_2()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    IQueryable<Car> cars2 = context.Cars
+    .Where(c => c.Color == "Yellow" && c.PetName == "Clunker");
+    CollectionCarToConsole(cars2, "All yellow cars with a petname of Clunker.");
+    context.ChangeTracker.Clear(); 
+    Console.WriteLine();
+
+    IQueryable<Car> cars3 = context.Cars
+        .Where(c => c.Color == "Yellow")
+        .Where(c=>c.PetName == "Clunker");
+    CollectionCarToConsole(cars3, "All yellow cars with a petname of Clunker.");
+    context.ChangeTracker.Clear(); 
+    Console.WriteLine();
+    
+    IQueryable<Car> cars4 = context.Cars
+    .Where(c => c.Color == "Pink" || c.PetName == "Clunker");
+    CollectionCarToConsole(cars4, "All black cars or a petname of Clunker.");
+}
+//FilterData_2();
+
+static void FilterData_3()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    IQueryable<Car> cars5 = context.Cars
+    .Where(c => !string.IsNullOrWhiteSpace(c.Color));
+    CollectionCarToConsole(cars5, "Cars with colors.");
+}
+//FilterData_3();
+
+static void SortData_1()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+
+    IQueryable<Car> cars = context.Cars
+        .OrderBy(c => c.Color);
+    CollectionCarToConsole(cars, "Cars ordered by Color.");
+    context.ChangeTracker.Clear();
+    Console.WriteLine();
+
+    IQueryable<Car> cars1 = context.Cars
+    .OrderBy(c => c.Color)
+    .ThenBy(c => c.PetName);
+    CollectionCarToConsole(cars1, "Cars ordered by Color then PetName.");
+    context.ChangeTracker.Clear();
+    Console.WriteLine();
+
+    IQueryable<Car> cars2 = context.Cars
+    .OrderByDescending(c => c.Color);
+    CollectionCarToConsole(cars2, "Cars ordered by Color descending.");
+}
+//SortData_1();
+
+static void SortData_2()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+
+    IQueryable<Car> cars = context.Cars
+        .OrderBy(c => c.Color)
+        .ThenByDescending(c => c.PetName);
+
+    CollectionCarToConsole(cars, "Cars ordered by Color then by PetName descending");
+}
+//SortData_2();
+
+static void ReversData()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+
+    IQueryable<Car> cars = context.Cars
+        .OrderBy(c => c.Color)
+        .ThenByDescending(c => c.PetName)
+        .Reverse();
+
+    string text = "Cars ordered by Color then PetName in reverse";
+    CollectionCarToConsole(cars, text);
+}
+//ReversData();
+
+static void UsingSkip()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var cars = context.Cars.Skip(2);
+
+    CollectionCarToConsole(cars, "Skip the first two records");
+}
+//UsingSkip();
+
+static void UsingTake()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var cars = context.Cars.Take(2);
+
+    CollectionCarToConsole(cars, "Take the first two records");
+}
+//UsingTake();
+
+
+static void Paging()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    int totalCar = context.Cars.Count();
+    int carOnPage = 2;
+    int totalPage = (int)Math.Ceiling( (double) totalCar / carOnPage );
+
+    int numberPage = 2;
+
+    List<Car>? cars = context.Cars
+        .Skip((numberPage - 1) * carOnPage)
+        .Take(carOnPage)
+        .ToList();
+    CollectionCarToConsole(cars, $"Page {numberPage}");
+}
+//Paging();
+
+
+static void CarToConsole(Car? car, string? text)
+{
+    Console.WriteLine($"\t{text}");
+    Console.WriteLine($"{car?.Id} {car?.Color} {car?.PetName}");
+}
+
+static void UsingFirst_WithoutParameters()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var firstCar = context.Cars.First();
+
+    CarToConsole(firstCar, "First record with database Sort");
+}
+//UsingFirst_WithoutParameters();
+
+static void UsingFirst_OrderByColor()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var cars = context.Cars.OrderBy(c => c.Color);
+    CollectionCarToConsole(cars, "Cars order by Color");
+    Console.WriteLine();
+
+    var firstCar = context.Cars.OrderBy(c=>c.Color).First();
+
+    CarToConsole(firstCar, "First record with OrderBy sort");
+}
+//UsingFirst_OrderByColor();
+
+static void UsingFirst_AsWhere()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var firstCar1 = context.Cars.Where(c=>c.Id == 3).First();
+    CarToConsole(firstCar1, "First record with Where clause");
+    Console.WriteLine();
+
+    var firstCar2 = context.Cars.First(c => c.Id == 3);
+    CarToConsole(firstCar1, "First record using First as Where clause");
+}
+//UsingFirst_AsWhere();
+
+static void UsingFirst_WithException()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    try
     {
-        Console.WriteLine($"{car.Id}\t{car.PetName}\t{car.Color}");
+        var firstCar = context.Cars.First(c => c.Id == 3);
+        CarToConsole(firstCar, "First record with Id == 3");
+        Console.WriteLine();
+
+        firstCar = context.Cars.First(c => c.Id == 300);
+        CarToConsole(firstCar, "First record with Id == 300");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+        //throw;
     }
 }
-QueryData_GetAllRecords();
+//UsingFirst_WithException();
+
+static void UsingFirstOrDefault_WithException()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var firstCar = context.Cars.FirstOrDefault(c => c.Id == 3);
+    CarToConsole(firstCar, "First record with Id == 3");
+    Console.WriteLine();
+
+    firstCar = context.Cars.FirstOrDefault(c => c.Id == 300);
+    CarToConsole(firstCar, "First record with Id == 300");
+
+    Console.WriteLine(firstCar == null);    
+}
+//UsingFirstOrDefault_WithException();
+
+static void UsingLast()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var cars = context.Cars;
+    CollectionCarToConsole(cars, "All cars");
+    Console.WriteLine();
+
+    try
+    {
+        var lastCar = context.Cars.Last();
+        CarToConsole(lastCar, "Last car");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+}
+//UsingLast();
+
+static void UsingLast_WithOrderBy()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var cars = context.Cars.OrderBy(c=>c.Color);
+    CollectionCarToConsole(cars, "All cars order by color");
+    Console.WriteLine();
+
+    try
+    {
+        var lastCar = context.Cars.OrderBy(c=>c.Color).Last();
+        CarToConsole(lastCar, "Last car");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+}
+//UsingLast_WithOrderBy();
+
+
+static void UsingSingle()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var singleCar = context.Cars.Single(c => c.Id == 3);
+    CarToConsole(singleCar, "Single record with Id == 3");
+}
+//UsingSingle();
+
+static void UsingSingleOrDefault()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    try
+    {
+        var singleCar = context.Cars.SingleOrDefault(c => c.Id > 1);
+        CarToConsole(singleCar, "Single record with Id > 1");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+
+    try
+    {
+        var singleCar = context.Cars.SingleOrDefault(c => c.Id > 100);
+        CarToConsole(singleCar, "Single record with Id > 100");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+}
+//UsingSingleOrDefault();
+
+static void UsingFind()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var car = context.Cars.Find(3);
+    CarToConsole(car, "Car with Id = 3");
+    Console.WriteLine();
+
+    car = context.Cars.Find(300);
+    CarToConsole(car, "Car with Id = 300");
+}
+//UsingFind();
+
+static void Aggregation()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    int totalCars = context.Cars.Count();
+
+    Console.WriteLine(totalCars);
+}
+//Aggregation();
+
+static void AggregationWithFilter()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var cars = context.Cars;
+    foreach (var item in cars)
+    {
+        Console.WriteLine($"{item.Id} {item.MakeId}");
+    }
+    Console.WriteLine();
+
+    Console.WriteLine(cars.Count(c=>c.MakeId == 1) );
+    Console.WriteLine(cars.Where(c => c.MakeId == 1).Count());
+
+}
+//AggregationWithFilter();
+
+static void MinMaxAverage()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var cars = context.Cars;
+   
+    Console.WriteLine(cars.Min(c => c.Id));
+    Console.WriteLine(cars.Max(c => c.Id));
+    Console.WriteLine(cars.Average(c => c.Id));
+}
+//MinMaxAverage();
+
+static void UsingAny()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var cars = context.Cars;
+
+    Console.WriteLine(cars.Any(c => c.MakeId == 1));
+    Console.WriteLine(cars.Where(c => c.MakeId==1).Any());
+}
+//UsingAny();
+
+static void UsingAll()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var cars = context.Cars;
+
+    Console.WriteLine(cars.All(c => c.MakeId == 1));
+}
+//UsingAll();
+
+static void CallStopedProcedure()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var parameterId = new SqlParameter
+    {
+        ParameterName = "@carId",
+        SqlDbType = System.Data.SqlDbType.Int,
+        Value = 3
+    };
+
+    var parameterName = new SqlParameter
+    {
+        ParameterName = "@petName",
+        SqlDbType = System.Data.SqlDbType.NVarChar,
+        Size = 50,
+        Direction = System.Data.ParameterDirection.Output
+    };
+
+    string sql = "EXEC [dbo].[GetPetName] @carId, @petName OUTPUT";
+
+    _ = context.Database.ExecuteSqlRaw(sql, parameterId, parameterName);
+
+    Console.WriteLine(parameterName.Value);
+}
+//CallStopedProcedure();
