@@ -35,7 +35,7 @@ public class ApplicationDbContext : DbContext
         };
 
         ChangeTracker.StateChanged += ChangeTracker_StateChanged;
-        //ChangeTracker.Tracked += ChangeTracker_Tracked;
+        ChangeTracker.Tracked += ChangeTracker_Tracked;
     }
 
     // Events

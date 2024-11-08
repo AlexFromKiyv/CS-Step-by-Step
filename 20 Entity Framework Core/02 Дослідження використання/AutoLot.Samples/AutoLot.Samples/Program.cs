@@ -239,6 +239,7 @@ static void ClearSampleData()
 //ClearSampleData();
 
 //LoadMakeAndCarData();
+//AddRecordsToMantToManyTables();
 
 static void CollectionCarToConsole(IEnumerable<Car> cars,string text)
 {
@@ -254,6 +255,9 @@ static void ShowCars()
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
     var cars = context.Cars;
     CollectionCarToConsole(cars, "All cars");
+    Console.WriteLine();
+    Console.WriteLine(cars.ToQueryString());
+    Console.WriteLine();
     Console.WriteLine(context.Cars.GetType());
 }
 //ShowCars();
@@ -664,3 +668,221 @@ static void CallStopedProcedure()
     Console.WriteLine(parameterName.Value);
 }
 //CallStopedProcedure();
+
+
+
+static void EagerLoading_1()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+   
+    var query = context
+        .Cars
+        .Include(c => c.MakeNavigation);
+
+    Console.WriteLine(query.ToQueryString()); Console.WriteLine();
+    var cars = query.ToList();
+    
+    foreach (var car in cars)
+    {
+        Console.WriteLine($"{car.Id} {car.MakeNavigation.Name} {car.Color}");
+    }    
+}
+//EagerLoading_1();
+
+static void EagerLoading_2()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var query = context
+        .Makes
+        .Include(m => m.Cars)
+        .ThenInclude(c=>c.Drivers);
+
+    Console.WriteLine(query.ToQueryString());
+    Console.WriteLine();
+
+    Make? make = query.First();
+    List<Car>? cars = make?.Cars.ToList();
+    CollectionCarToConsole(cars, $"Cars of {make?.Name}");
+    Console.WriteLine();
+
+    Car? car = cars.First();
+    Driver? driver = car.Drivers.First();
+    Console.WriteLine($"" +
+        $"Driver {driver.PersonInfo.FirstName} {driver.PersonInfo.LastName} " +
+        $"of car {car.Id} {car.MakeNavigation.Name} {car.Color} {car.PetName}");
+ 
+}
+//EagerLoading_2();
+
+static void EagerLoading_3()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var query = context
+        .Makes
+        .Include(m => m.Cars)
+        .ThenInclude(c => c.Drivers)
+        .OrderBy(m => m.Name);
+
+    Console.WriteLine(query.ToQueryString());
+}
+//EagerLoading_3();
+
+
+static void FilteredInclude()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var query = context
+        .Makes
+        .Include(m => m.Cars.Where(c => c.Color == "Yellow"));
+
+    Console.WriteLine(query.ToQueryString());
+    Console.WriteLine();
+
+    var makes = query.ToList();
+    Console.WriteLine(makes.Count());
+}
+//FilteredInclude();
+
+static void EagerLoadingWithSplitQueries()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var query = context
+        .Makes.AsSplitQuery()
+        .Include(m => m.Cars.Where(c => c.Color == "Yellow"));
+
+    Console.WriteLine(query.ToQueryString());
+    Console.WriteLine();
+
+    Console.WriteLine(query.Count());
+}
+//EagerLoadingWithSplitQueries();
+
+static void ManyToManyQueries()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var query = context
+        .Cars
+        .Include(c => c.Drivers)
+        .Where(c => c.Drivers.Any());
+
+    Console.WriteLine(query.ToQueryString());
+    Console.WriteLine();
+
+    Console.WriteLine(query.Count());
+}
+//ManyToManyQueries();
+
+
+static void ExplicitLoading()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    //Get the Car record
+    Car? car = context.Cars.First(c => c.Id == 1);
+    Console.WriteLine($"{car.Id} {car.MakeId} {car.MakeNavigation?.Name}");
+
+    //Load Make entity and define MakeNavigation 
+    context.Entry(car).Reference(c => c.MakeNavigation).Load();
+    Console.WriteLine($"{car.Id} {car.MakeId} {car.MakeNavigation?.Name}");
+
+}
+//ExplicitLoading();
+
+static void ExplicitLoadingCollectionOneToMany()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    Make? make = context.Makes.Single(m => m.Id == 1);
+    Console.WriteLine($"{make.Id} {make.Name}");
+    Console.WriteLine();
+
+    var query = context.Entry(make).Collection(c => c.Cars).Query();
+    string sql = query.ToQueryString();
+    Console.WriteLine(sql);
+    Console.WriteLine();
+
+    query.Load();
+    Console.WriteLine("Entities cars loaded into memory.\n");
+    List<Car>? cars = query.ToList();
+
+    CollectionCarToConsole(cars,$"{make.Name} cars");
+
+}
+//ExplicitLoadingCollectionOneToMany();
+
+static void ExplicitLoadingCollectionManyToMany()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    //Get the Car record
+    Car? car = context.Cars.First(c => c.Id == 1);
+    CarToConsole(car, "Car with id = 1");
+    Console.WriteLine();
+
+    var query = context.Entry(car).Collection(c => c.Drivers).Query();
+
+    string sql = query.ToQueryString();
+    Console.WriteLine(sql);
+    Console.WriteLine();
+    
+    //Load drivers to memory
+    query.Load();
+    Console.WriteLine();
+
+    List<Driver>? drivers = query.ToList();
+    foreach (var driver in drivers)
+    {
+        Console.WriteLine($"" +
+            $"{driver.Id} " +
+            $"{driver.PersonInfo.FirstName} " +
+            $"{driver.PersonInfo.LastName} ");
+    }
+}
+//ExplicitLoadingCollectionManyToMany();
+
+static void NoLazyLoad()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var query = context.Cars.AsQueryable();
+    Car car = query.First();
+
+    try
+    {
+        Console.WriteLine(car.MakeNavigation.Name);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+        Console.WriteLine("The navigation property has not been loaded.");
+        Console.WriteLine($"Is car.MakeNavigation == null " +
+            $":{car.MakeNavigation == null}");
+    }
+}
+//NoLazyLoad();
+
+static void LazyLoad()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(["lazy"]);
+
+    var query = context.Cars.AsQueryable();
+    Car car = query.First();
+
+    try
+    {
+        Console.WriteLine(car.MakeNavigation.Name);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+        Console.WriteLine("The navigation property has not been loaded.");
+        Console.WriteLine($"Is car.MakeNavigation == null " +
+            $":{car.MakeNavigation == null}");
+    }
+}
+LazyLoad();

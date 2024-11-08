@@ -15,5 +15,5 @@ public class Radio : BaseEntity
     [Column("InventoryId")]
     public int CarId { get; set; }
     [ForeignKey(nameof(CarId))]
-    public Car CarNavigation { get; set; }
+    public virtual Car CarNavigation { get; set; }
 }

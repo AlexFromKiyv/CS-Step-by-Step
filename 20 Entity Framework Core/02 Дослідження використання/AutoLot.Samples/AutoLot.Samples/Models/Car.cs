@@ -22,10 +22,10 @@ public class Car : BaseEntity
     public bool? IsDrivable { get; set; }
     public int MakeId { get; set; }
     [ForeignKey(nameof(MakeId))]
-    public Make MakeNavigation { get; set; }
-    public Radio RadioNavigation { get; set; }
+    public virtual Make MakeNavigation { get; set; }
+    public virtual Radio RadioNavigation { get; set; }
     [InverseProperty(nameof(Driver.Cars))]
-    public IEnumerable<Driver> Drivers { get; set; } = new List<Driver>();
+    public virtual IEnumerable<Driver> Drivers { get; set; } = new List<Driver>();
     [InverseProperty(nameof(CarDriver.CarNavigation))]
-    public IEnumerable<CarDriver> CarDrivers { get; set; } = new List<CarDriver>();
+    public virtual IEnumerable<CarDriver> CarDrivers { get; set; } = new List<CarDriver>();
 }

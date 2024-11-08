@@ -508,12 +508,17 @@ ClearSampleData();
 
 ```cs
 LoadMakeAndCarData();
+AddRecordsToMantToManyTables();
 ```
 ```console
 Saving change for Server=(localdb)\mssqllocaldb;Database=AutoLotSamples;Trusted_Connection=True;ConnectRetryCount=0
 Saved change 6 entities
 Saving change for Server=(localdb)\mssqllocaldb;Database=AutoLotSamples;Trusted_Connection=True;ConnectRetryCount=0
 Saved change 10 entities
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+Saving change for Server=(localdb)\mssqllocaldb;Database=AutoLotSamples;Trusted_Connection=True;ConnectRetryCount=0
+Saved change 12 entities
 ```
 В базі даних можна побачити значення для додавання Id було скинкто до 0.
 
@@ -548,6 +553,9 @@ static void ShowCars()
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
     var cars = context.Cars;
     CollectionCarToConsole(cars, "All cars");
+    Console.WriteLine();
+    Console.WriteLine(cars.ToQueryString());
+    Console.WriteLine();
     Console.WriteLine(context.Cars.GetType());
 }
 ShowCars();
@@ -574,11 +582,13 @@ An entity of type Car was loaded from the database.
 9 Brown Brownie
 An entity of type Car was loaded from the database.
 10 Rust Lemon
+
+SELECT [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display], [i].[IsDrivable], [i].[MakeId], [i].[PetName], [i].[TimeStamp]
+FROM [dbo].[Inventory] AS [i]
+
 Microsoft.EntityFrameworkCore.Internal.InternalDbSet`1[AutoLot.Samples.Models.Car]
 ```
 Для негайного виконання додайте ToList() до властивості DbSet<T>.
-
-
 
 Виберемо всі елементи.
 
@@ -1603,22 +1613,620 @@ exec sp_executesql N'EXEC [dbo].[GetPetName] @carId, @petName OUTPUT',
 select @p4
 ```
 
-## Запит пов’язаних даних з відповідних таблиць 
+## Запит пов’язаних даних
+
+Властивості навігації сутності використовуються для завантаження пов’язаних даних сутності. Пов’язані дані можна завантажувати активно (один оператор LINQ, один запит SQL), активно за допомогою розділених запитів (один оператор LINQ, кілька запитів SQL), явно (кілька викликів LINQ, кілька запитів SQL) або ліниво (один оператор LINQ, кілька SQL-запитів на вимогу).
+На додаток до можливості завантажувати пов’язані дані за допомогою властивостей навігації, EF Core автоматично виправлятиме сутності під час їх завантаження в засіб відстеження змін. Наприклад, припустимо, що всі записи Make завантажено у властивість колекції DbSet<Make>. Далі всі записи автомобіля завантажуються в DbSet<Car>. Незважаючи на те, що записи були завантажені окремо, вони будуть доступні один одному через властивості навігації.
+
+### Активне(Eager) завантаження пов'язяних сутностей
+
+Активне або швидке завантаження — це термін для завантаження пов’язаних записів із кількох таблиць під час одного виклику бази даних. Це аналогічно створенню запиту в T-SQL, що зв’язує дві або більше таблиць за допомогою об’єднань. Коли сутності мають властивості навігації, і ці властивості використовуються в запитах LINQ, система перекладу використовує об’єднання, щоб отримати дані з пов’язаних таблиць і завантажує відповідні сутності. Зазвичай це набагато ефективніше, ніж виконання одного запиту для отримання даних з однієї таблиці, а потім виконання додаткових запитів для кожної з пов’язаних таблиць. Для тих випадків, коли використання одного запиту менш ефективно, EF Core представив розділення запитів, про що йдеться далі.
+Методи Include() і ThenInclude() (для наступних навігаційних властивостей) використовуються для перегляду навігаційних властивостей у запитах LINQ. Якщо зв’язок потрібен, механізм перекладу LINQ створить внутрішнє об’єднання. 
+
+В класі ApplicationDbContext знімемо коментар з назначення події.
+
+```cs
+        ChangeTracker.Tracked += ChangeTracker_Tracked;
+```
+
+Щоб завантажити всі записи про автомобіль із пов’язаною інформацією про марку, виконайте такий запит LINQ:
+
+```cs
+static void EagerLoading_1()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+   
+    var query = context
+        .Cars
+        .Include(c => c.MakeNavigation);
+
+    Console.WriteLine(query.ToQueryString()); Console.WriteLine();
+    var cars = query.ToList();
+    
+    foreach (var car in cars)
+    {
+        Console.WriteLine($"{car.Id} {car.MakeNavigation.Name} {car.Color}");
+    }    
+}
+EagerLoading_1();
+```
+```
+SELECT [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display], [i].[IsDrivable], [i].[MakeId], [i].[PetName], [i].[TimeStamp], [m].[Id], [m].[Name], [m].[TimeStamp]
+FROM [dbo].[Inventory] AS [i]
+INNER JOIN [dbo].[Makes] AS [m] ON [i].[MakeId] = [m].[Id]
+
+An entity of type Car was loaded from the database.
+An entity of type Make was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Make was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Make was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Make was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Make was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Make was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+1 VW Black
+2 Ford Rust
+3 Saab Black
+4 Yugo Yellow
+5 BMW Black
+6 BMW Green
+7 BMW Pink
+8 Pinto Black
+9 Yugo Brown
+10 VW Rust
+```
+Оператор SELECT повертає всі поля для таблиць Inventory та Makes. Потім EF Core правильно підключає дані, повертаючи правильний граф об’єктів.
+Властивість MakeNavigation є обов’язковим зв’язком, оскільки властивість MakeId сутності Car не допускає значення NULL. Оскільки це обов’язково, таблиця Make об’єднується з таблицею Inventory за допомогою INNER JOIN. Якщо властивість навігації була необов’язковою (MakeId було визначено як nullable int), об’єднання було б OUTER JOIN.
+
+Кілька операторів Include() можна використовувати в одному запиті, щоб приєднати більше ніж одну сутність до оригіналу. Щоб опрацювати дерево властивостей навігації, використовуйте ThenInclude() після Include(). Наприклад, щоб отримати всі записи Make з відповідними записами про автомобілі та записи водіїв для автомобілів, скористайтеся таким оператором:
+
+```cs
+static void EagerLoading_2()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var query = context
+        .Makes
+        .Include(m => m.Cars)
+        .ThenInclude(c=>c.Drivers);
+
+    Console.WriteLine(query.ToQueryString());
+    Console.WriteLine();
+
+    Make? make = query.First();
+    List<Car>? cars = make?.Cars.ToList();
+    CollectionCarToConsole(cars, $"Cars of {make?.Name}");
+    Console.WriteLine();
+
+    Car? car = cars.First();
+    Driver? driver = car.Drivers.First();
+    Console.WriteLine($"" +
+        $"Driver {driver.PersonInfo.FirstName} {driver.PersonInfo.LastName} " +
+        $"of car {car.Id} {car.MakeNavigation.Name} {car.Color} {car.PetName}");
+}
+EagerLoading_2();
+```
+```console
+SELECT [m].[Id], [m].[Name], [m].[TimeStamp], [t0].[Id], [t0].[Color], [t0].[DateBuilt], [t0].[Display], [t0].[IsDrivable], [t0].[MakeId], [t0].[PetName], [t0].[TimeStamp], [t0].[InventoryId], [t0].[DriverId], [t0].[Id0], [t0].[TimeStamp0], [t0].[Id00], [t0].[TimeStamp00], [t0].[FirstName], [t0].[LastName]
+FROM [dbo].[Makes] AS [m]
+LEFT JOIN (
+    SELECT [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display], [i].[IsDrivable], [i].[MakeId], [i].[PetName], [i].[TimeStamp], [t].[InventoryId], [t].[DriverId], [t].[Id] AS [Id0], [t].[TimeStamp] AS [TimeStamp0], [t].[Id0] AS [Id00], [t].[TimeStamp0] AS [TimeStamp00], [t].[FirstName], [t].[LastName]
+    FROM [dbo].[Inventory] AS [i]
+    LEFT JOIN (
+        SELECT [i0].[InventoryId], [i0].[DriverId], [i0].[Id], [i0].[TimeStamp], [d].[Id] AS [Id0], [d].[TimeStamp] AS [TimeStamp0], [d].[FirstName], [d].[LastName]
+        FROM [dbo].[InventoryToDrivers] AS [i0]
+        INNER JOIN [Drivers] AS [d] ON [i0].[DriverId] = [d].[Id]
+    ) AS [t] ON [i].[Id] = [t].[InventoryId]
+) AS [t0] ON [m].[Id] = [t0].[MakeId]
+ORDER BY [m].[Id], [t0].[Id], [t0].[InventoryId], [t0].[DriverId]
+
+An entity of type Make was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type CarDriver was loaded from the database.
+An entity of type Driver was loaded from the database.
+An entity of type Person was loaded from the database.
+An entity of type CarDriver was loaded from the database.
+An entity of type Driver was loaded from the database.
+An entity of type Person was loaded from the database.
+An entity of type CarDriver was loaded from the database.
+An entity of type Driver was loaded from the database.
+An entity of type Person was loaded from the database.
+An entity of type Car was loaded from the database.
+        Cars of VW
+1 Black Zippy
+10 Rust Lemon
+
+Driver Fred Flinstone of car 1 VW Black Zippy
+```
+
+Одна річ, яка може здатися дивною, — це доданий ORDER BY, оскільки запит LINQ не містив жодного порядку. У разі використання ланцюжкових включень (з операторами Include()/ThenInclude() механізм перекладу LINQ додасть речення ORDER BY на основі порядку включених таблиць та їхніх первинних і зовнішніх ключів. Це на додаток до будь-якого порядку, який ви вказали в запиті LINQ. Розглянемо наступний оновлений приклад
+
+```cs
+static void EagerLoading_3()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var query = context
+        .Makes
+        .Include(m => m.Cars)
+        .ThenInclude(c => c.Drivers)
+        .OrderBy(m => m.Name);
+
+    Console.WriteLine(query.ToQueryString());
+}
+EagerLoading_3();
+```
+```
+SELECT [m].[Id], [m].[Name], [m].[TimeStamp], [t0].[Id], [t0].[Color], [t0].[DateBuilt], [t0].[Display], [t0].[IsDrivable], [t0].[MakeId], [t0].[PetName], [t0].[TimeStamp], [t0].[InventoryId], [t0].[DriverId], [t0].[Id0], [t0].[TimeStamp0], [t0].[Id00], [t0].[TimeStamp00], [t0].[FirstName], [t0].[LastName]
+FROM [dbo].[Makes] AS [m]
+LEFT JOIN (
+    SELECT [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display], [i].[IsDrivable], [i].[MakeId], [i].[PetName], [i].[TimeStamp], [t].[InventoryId], [t].[DriverId], [t].[Id] AS [Id0], [t].[TimeStamp] AS [TimeStamp0], [t].[Id0] AS [Id00], [t].[TimeStamp0] AS [TimeStamp00], [t].[FirstName], [t].[LastName]
+    FROM [dbo].[Inventory] AS [i]
+    LEFT JOIN (
+        SELECT [i0].[InventoryId], [i0].[DriverId], [i0].[Id], [i0].[TimeStamp], [d].[Id] AS [Id0], [d].[TimeStamp] AS [TimeStamp0], [d].[FirstName], [d].[LastName]
+        FROM [dbo].[InventoryToDrivers] AS [i0]
+        INNER JOIN [Drivers] AS [d] ON [i0].[DriverId] = [d].[Id]
+    ) AS [t] ON [i].[Id] = [t].[InventoryId]
+) AS [t0] ON [m].[Id] = [t0].[MakeId]
+ORDER BY [m].[Name], [m].[Id], [t0].[Id], [t0].[InventoryId], [t0].[DriverId]
+```
+В ORDER BY першими ідуть поля в запиті LINQ а далі сгенеровані автоматично.
+
+### Активне завантаження пов'язяних сутностей з фільтром
+
+Пов’язані дані можна фільтрувати та сортувати. Дозволеними операціями для навігації колекцією є Where(), OrderBy(), OrderByDescending(), ThenBy(), ThenByDescending(), Skip() і Take(). Наприклад, якщо ви хочете отримати всі записи Make, але лише пов’язані записи Car, де жовтий колір, ви відфільтруєте навігаційну властивість у лямбда-виразі таким чином:
+
+```cs
+static void FilteredInclude()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var query = context
+        .Makes
+        .Include(m => m.Cars.Where(c => c.Color == "Yellow"));
+
+    Console.WriteLine(query.ToQueryString());
+    Console.WriteLine();
+
+    var makes = query.ToList();
+    Console.WriteLine(makes.Count());
+}
+FilteredInclude();
+```
+```
+SELECT [m].[Id], [m].[Name], [m].[TimeStamp], [t].[Id], [t].[Color], [t].[DateBuilt], [t].[Display], [t].[IsDrivable], [t].[MakeId], [t].[PetName], [t].[TimeStamp]
+FROM [dbo].[Makes] AS [m]
+LEFT JOIN (
+    SELECT [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display], [i].[IsDrivable], [i].[MakeId], [i].[PetName], [i].[TimeStamp]
+    FROM [dbo].[Inventory] AS [i]
+    WHERE [i].[Color] = N'Yellow'
+) AS [t] ON [m].[Id] = [t].[MakeId]
+ORDER BY [m].[Id]
+
+An entity of type Make was loaded from the database.
+An entity of type Make was loaded from the database.
+An entity of type Make was loaded from the database.
+An entity of type Make was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Make was loaded from the database.
+An entity of type Make was loaded from the database.
+6
+
+```
+
+### Активне завантаження за допомогою розділених запитів
+
+Коли запит LINQ містить багато включень, це може мати негативний вплив на продуктивність. Щоб вирішити цю ситуацію, існують розділені запити. Замість виконання одного запиту EF Core розбиває запит LINQ на кілька запитів SQL, а потім об’єднує всі пов’язані дані.
+
+```cs
+static void EagerLoadingWithSplitQueries()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var query = context
+        .Makes.AsSplitQuery()
+        .Include(m => m.Cars.Where(c => c.Color == "Yellow"));
+
+    Console.WriteLine(query.ToQueryString());
+    Console.WriteLine();
+
+    Console.WriteLine(query.Count());
+}
+EagerLoadingWithSplitQueries();
+```
+
+```console
+SELECT [m].[Id], [m].[Name], [m].[TimeStamp]
+FROM [dbo].[Makes] AS [m]
+ORDER BY [m].[Id]
+
+This LINQ query is being executed in split-query mode, and the SQL shown is for the first query to be executed. Additional queries may also be executed depending on the results of the first query.
+
+6
+```
+
+```sql
+SELECT [m].[Id], [m].[Name], [m].[TimeStamp]
+FROM [dbo].[Makes] AS [m]
+ORDER BY [m].[Id]
+SELECT [t].[Id], [t].[Color], [t].[DateBuilt], [t].[Display], [t].[IsDrivable],
+              [t].[MakeId], [t].[PetName], [t].[TimeStamp], [m].[Id]
+FROM [Makes] AS [m]
+INNER JOIN (
+    SELECT [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display], [i].[IsDrivable], [i].[MakeId],
+                  [i].[PetName], [i].[TimeStamp]
+    FROM [dbo].[Inventory] AS [i]
+    WHERE [i].[Color] = N'Yellow'
+) AS [t] ON [m].[Id] = [t].[MakeId]
+ORDER BY [m].[Id]
+```
+У використання розділених запитів є недолік: якщо дані змінюються між виконанням запитів, то повернуті дані будуть непослідовними.
+
+### Many-to-many запити
+
+Підтримка EF Core для таблиць «many-to-many» дозволяє запити даних за допомогою LINQ. Ви можете написати наступний оператор LINQ, щоб отримати записи Car та пов’язаних Driver:
+```cs
+static void ManyToManyQueries()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var query = context
+        .Cars
+        .Include(c => c.Drivers)
+        .Where(c => c.Drivers.Any());
+
+    Console.WriteLine(query.ToQueryString());
+    Console.WriteLine();
+
+    Console.WriteLine(query.Count());
+}
+ManyToManyQueries();
+```
+```console
+SELECT [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display], [i].[IsDrivable], [i].[MakeId], [i].[PetName], [i].[TimeStamp], [t].[InventoryId], [t].[DriverId], [t].[Id], [t].[TimeStamp], [t].[Id0], [t].[TimeStamp0], [t].[FirstName], [t].[LastName]
+FROM [dbo].[Inventory] AS [i]
+LEFT JOIN (
+    SELECT [i1].[InventoryId], [i1].[DriverId], [i1].[Id], [i1].[TimeStamp], [d0].[Id] AS [Id0], [d0].[TimeStamp] AS [TimeStamp0], [d0].[FirstName], [d0].[LastName]
+    FROM [dbo].[InventoryToDrivers] AS [i1]
+    INNER JOIN [Drivers] AS [d0] ON [i1].[DriverId] = [d0].[Id]
+) AS [t] ON [i].[Id] = [t].[InventoryId]
+WHERE EXISTS (
+    SELECT 1
+    FROM [dbo].[InventoryToDrivers] AS [i0]
+    INNER JOIN [Drivers] AS [d] ON [i0].[DriverId] = [d].[Id]
+    WHERE [i].[Id] = [i0].[InventoryId])
+ORDER BY [i].[Id], [t].[InventoryId], [t].[DriverId]
+
+2
+```
+Як ви можете бачити зі згенерованого оператора SQL select, EF Core піклується про роботу зі зведеною таблицею, щоб правильно зіставити записи.
+
+### Явне завантаження
+
+Явне завантаження — це завантаження даних уздовж властивості навігації після того, як основний об’єкт уже завантажено. Цей процес передбачає виконання додаткового виклику бази даних для отримання відповідних даних. Це може бути корисно, якщо вашій програмі потрібно вибірково отримати пов’язані записи замість того, щоб завжди витягувати всі повязані дани.
+Процес починається з сутності, яка вже завантажена та використовує метод Entry() у похідному DbContext.
+
+```cs
+static void ExplicitLoading()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    //Get the Car record
+    Car? car = context.Cars.First(c => c.Id == 1);
+    Console.WriteLine($"{car.Id} {car.MakeId} {car.MakeNavigation?.Name}");
+
+    //Load Make entity and define MakeNavigation 
+    context.Entry(car).Reference(c => c.MakeNavigation).Load();
+    Console.WriteLine($"{car.Id} {car.MakeId} {car.MakeNavigation?.Name}");
+
+}
+ExplicitLoading();
+```
+Процес починається з сутності, яка вже завантажена та використовує метод Entry() у похідному DbContext. Під час запиту щодо пов'язаною властивості навігації (наприклад, отримання інформації про марку автомобіля) використовуйте метод Reference().
+
+```
+An entity of type Car was loaded from the database.
+1 1
+An entity of type Make was loaded from the database.
+1 1 VW
+```
+```sql
+--Get the Car record
+SELECT TOP(1) [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display], [i].[IsDrivable],
+    [i].[MakeId], [i].[PetName], [i].[TimeStamp]
+FROM [dbo].[Inventory] AS [i]
+WHERE [i].[Id] = 1
+
+--Load Make entity and define MakeNavigation 
+SELECT [m].[Id], [m].[Name], [m].[TimeStamp]
+FROM [Makes] AS [m]
+WHERE [m].[Id] = 5
+```
+Якшо властивість навігації коллекція то використовується інший підхід. Наприклад треба отримати всі Car певного Make.
+
+```cs
+static void ExplicitLoadingCollectionOneToMany()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    Make? make = context.Makes.Single(m => m.Id == 1);
+    Console.WriteLine($"{make.Id} {make.Name}");
+    Console.WriteLine();
+
+    var query = context.Entry(make).Collection(c => c.Cars).Query();
+    string sql = query.ToQueryString();
+    Console.WriteLine(sql);
+    Console.WriteLine();
+
+    query.Load();
+    Console.WriteLine("Entities cars loaded into memory.\n");
+    List<Car>? cars = query.ToList();
+
+    CollectionCarToConsole(cars,$"{make.Name} cars");
+
+}
+ExplicitLoadingCollectionOneToMany();
+```
+Під час запиту до властивості навігації колекції використовуйте метод Collection(). Запит відкладено, доки не буде виконано Load(), ToList() або агрегатну функцію (наприклад, Count(), Max()).
+
+```console
+An entity of type Make was loaded from the database.
+1 VW
+
+DECLARE @__p_0 int = 1;
+
+SELECT [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display], [i].[IsDrivable], [i].[MakeId], [i].[PetName], [i].[TimeStamp]
+FROM [dbo].[Inventory] AS [i]
+WHERE [i].[MakeId] = @__p_0
+
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+Entities cars loaded into memory.
+
+        VW cars
+1 Black Zippy
+10 Rust Lemon
+```
+Такий самий підхід можна використовувати для відношення між сутностями Many-To-Many. Наприклад треба отримати всіх Driver для певного Car
+
+```cs
+static void ExplicitLoadingCollectionManyToMany()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    //Get the Car record
+    Car? car = context.Cars.First(c => c.Id == 1);
+    CarToConsole(car, "Car with id = 1");
+    Console.WriteLine();
+
+    var query = context.Entry(car).Collection(c => c.Drivers).Query();
+
+    string sql = query.ToQueryString();
+    Console.WriteLine(sql);
+    Console.WriteLine();
+    
+    //Load drivers to memory
+    query.Load();
+    Console.WriteLine();
+
+    List<Driver>? drivers = query.ToList();
+    foreach (var driver in drivers)
+    {
+        Console.WriteLine($"" +
+            $"{driver.Id} " +
+            $"{driver.PersonInfo.FirstName} " +
+            $"{driver.PersonInfo.LastName} ");
+    }
+}
+ExplicitLoadingCollectionManyToMany();
+```
+```
+An entity of type Car was loaded from the database.
+        Car with id = 1
+1 Black Zippy
+
+DECLARE @__p_0 int = 1;
+
+SELECT [t].[Id], [t].[TimeStamp], [t].[FirstName], [t].[LastName], [i].[Id], [t].[InventoryId], [t].[DriverId], [t0].[InventoryId], [t0].[DriverId], [t0].[Id], [t0].[TimeStamp], [t0].[Id0], [t0].[Color], [t0].[DateBuilt], [t0].[Display], [t0].[IsDrivable], [t0].[MakeId], [t0].[PetName], [t0].[TimeStamp0]
+FROM [dbo].[Inventory] AS [i]
+INNER JOIN (
+    SELECT [d].[Id], [d].[TimeStamp], [i0].[InventoryId], [i0].[DriverId], [d].[FirstName], [d].[LastName]
+    FROM [dbo].[InventoryToDrivers] AS [i0]
+    INNER JOIN [Drivers] AS [d] ON [i0].[DriverId] = [d].[Id]
+) AS [t] ON [i].[Id] = [t].[InventoryId]
+LEFT JOIN (
+    SELECT [i1].[InventoryId], [i1].[DriverId], [i1].[Id], [i1].[TimeStamp], [i2].[Id] AS [Id0], [i2].[Color], [i2].[DateBuilt], [i2].[Display], [i2].[IsDrivable], [i2].[MakeId], [i2].[PetName], [i2].[TimeStamp] AS [TimeStamp0]
+    FROM [dbo].[InventoryToDrivers] AS [i1]
+    INNER JOIN [dbo].[Inventory] AS [i2] ON [i1].[InventoryId] = [i2].[Id]
+    WHERE [i2].[Id] = @__p_0
+) AS [t0] ON [t].[Id] = [t0].[DriverId]
+WHERE [i].[Id] = @__p_0
+ORDER BY [i].[Id], [t].[InventoryId], [t].[DriverId], [t].[Id], [t0].[InventoryId], [t0].[DriverId]
+
+An entity of type Driver was loaded from the database.
+An entity of type Person was loaded from the database.
+An entity of type CarDriver was loaded from the database.
+An entity of type Driver was loaded from the database.
+An entity of type Person was loaded from the database.
+An entity of type CarDriver was loaded from the database.
+An entity of type Driver was loaded from the database.
+An entity of type Person was loaded from the database.
+An entity of type CarDriver was loaded from the database.
+
+1 Fred Flinstone
+2 Wilma Flinstone
+3 BamBam Flinstone
+```
+У цьому випажку виконується багато роботи, щоб просто отримати записи про Driver для вибраного запису про Car.
+Це показує нам два важливі факти:
+1) Якщо ви можете написати все в одному запиті за допомогою швидкого завантаження, зазвичай це краще зробити, що позбавляє необхідності повертатися до бази даних для отримання відповідних записів.
+2) EF Core не завжди створює найкращі запити.
+У попередньому розділі я вже показав вам, як використовувати швидке завантаження. Далі в цьому розділі я покажу вам, як використовувати оператори SQL з додатковими операторами LINQ або без них для отримання даних із бази даних. Це корисно, коли EF Core створює неоптимальні запити.
 
 
+### Ліниве завантаження
+Ліниве  або відкладене завантаження — це завантаження запису на вимогу, коли властивість навігації використовується для доступу до пов’язаного запису, який ще не завантажено в пам’ять. Хоча це може здатися гарною ідеєю ввімкнути це, увімкнення відкладеного завантаження може спричинити проблеми з продуктивністю вашої програми через потенційно непотрібні зворотні переходи до вашої бази даних. Відкладене завантаження може бути корисним у програмах інтелектуального клієнта (WPF, WinForms), але не рекомендується використовувати у веб-додатках або програмах-службах. З цієї причини відкладене завантаження вимкнено за замовчуванням у EF Core.
+Щоб використовувати відкладене завантаження, властивості навігації, які потрібно завантажувати відкладено, мають бути позначені як virtual. Це відбувається тому, що властивості навігації обернуті проксі. Тоді цей проксі змусить EF Core звернутись до бази даних, якщо властивість навігації не було завантажено, коли на неї посилається ваша програма.
+Щоб використовувати відкладене завантаження з проксі, похідний DbContext має бути правильно налаштований.
+Почніть із додавання пакета до проекту. 
+    
+    Microsoft.EntityFrameworkCore.Proxies   
+
+Потім ви повинні вибрати використання проксі із відкладеним завантаженням у похідних параметрах DbContext. Хоча зазвичай це встановлюється в коді вашої програми під час налаштування вашого похідного DbContext, ми збираємося підключитися до проксі за допомогою класу ApplicationDbContextFactory, який ми створили раніше. Пам’ятайте, що цей клас призначений для використання під час розробки, і його не слід використовувати в коді програми. Однак для навчання та дослідження він підійде чудово.
+
+Змінемо метод CreateDbContext() класу  ApplicationDbContextFactory. Ми скористаємося параметром args, щоб вказати, що ми хочемо, щоб метод повертав похідний DbContext, налаштований на використання проксі із відкладеним завантаженням.
+
+```cs
+   public ApplicationDbContext CreateDbContext(string[]? args)
+   {
+       string connectionString = @"Server=(localdb)\mssqllocaldb;Database=AutoLotSamples;Trusted_Connection=True;ConnectRetryCount=0";
+
+       var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+       
+       if (args != null && args[0].Equals("lazy"))
+       {
+           optionsBuilder.UseLazyLoadingProxies();
+       }
+      
+       optionsBuilder.UseSqlServer(connectionString);
+
+       return new ApplicationDbContext(optionsBuilder.Options);
+   }
+```
+
+Далі оновимо клас автомобіля до наступного
+
+```cs
+public class Car : BaseEntity
+{
+
+    //...
+
+    public virtual Make MakeNavigation { get; set; }
+    public virtual Radio RadioNavigation { get; set; }
+    [InverseProperty(nameof(Driver.Cars))]
+    public virtual IEnumerable<Driver> Drivers { get; set; } = new List<Driver>();
+    [InverseProperty(nameof(CarDriver.CarNavigation))]
+    public virtual IEnumerable<CarDriver> CarDrivers { get; set; } = new List<CarDriver>();
+}
+
+```
+Тепер, коли властивості позначено як віртуальні, їх можна використовувати з відкладеним завантаженням. Наступний метод — спроба отримати Make (зверніть увагу, що ми ще не використовуємо параметр args методу CreateDbContext())
+
+```cs
+static void NoLazyLoad()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var query = context.Cars.AsQueryable();
+    Car car = query.First();
+
+    try
+    {
+        Console.WriteLine(car.MakeNavigation.Name);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+        Console.WriteLine("The navigation property has not been loaded.");
+        Console.WriteLine($"Is car.MakeNavigation == null " +
+            $":{car.MakeNavigation == null}");
+    }
+}
+NoLazyLoad();
+```
+```
+An entity of type Car was loaded from the database.
+Object reference not set to an instance of an object.
+The navigation property has not been loaded.
+Is car.MakeNavigation == null :True
+```
+Під час запуску  ви отримаєте виняток нульового посилання під час спроби отримати доступ до властивості Name екземпляра Make. Це тому, що запис Make не було завантажено, і ми не використовуємо версію похідного DbContext() із підтримкою проксі.
+
+Оновіть метод, щоб передати аргумент «lazy» у CreateDbContext(), який увімкне підтримку проксі-сервера відкладеного завантаження:
+
+```cs
+static void LazyLoad()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(["lazy"]);
+
+    var query = context.Cars.AsQueryable();
+    Car car = query.First();
+
+    try
+    {
+        Console.WriteLine(car.MakeNavigation.Name);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+        Console.WriteLine("The navigation property has not been loaded.");
+        Console.WriteLine($"Is car.MakeNavigation == null " +
+            $":{car.MakeNavigation == null}");
+    }
+}
+LazyLoad();
+```
+Коли ви знову запустите код, ви можете бути здивовані, отримавши InvalidOperationException. При використанні відкладених проксі-серверів усі навігаційні властивості на моделях мають бути позначені як віртуальні, навіть ті, які безпосередньо не залучені до блоку коду, що виконується. Поки що ми оновили лише сутність Car. Оновіть решту моделей до наступного:
 
 
+```cs
+public class CarDriver : BaseEntity
+{
+    \\...
 
+    public virtual Driver DriverNavigation { get; set; }
+    public virtual Car CarNavigation { get; set; }
+}
 
+public class Driver : BaseEntity
+{
+    \\...
+    public virtual IEnumerable<Car> Cars { get; set; } = new List<Car>();
+    public virtual IEnumerable<CarDriver> CarDrivers { get; set; } = new List<CarDriver>();
+}
 
+public class Make : BaseEntity
+{
+    \\...
+    public virtual IEnumerable<Car> Cars { get; set; } = new List<Car>();
+}
 
+public class Radio : BaseEntity
+{
+    \\...
+    public virtual Car CarNavigation { get; set; }
+}
+```
+Незважаючи на те, що клас Owned Person представляє зв’язок, він не є навігаційною властивістю, а властивості типу Owned не потрібно позначати віртуальними.
 
+Тепер запит до БД буде виконано.
 
+```console
+An entity of type CarProxy was loaded from the database.
+An entity of type MakeProxy was loaded from the database.
+VW
+```
 
+```sql
+--Get the Car
+SELECT [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display], [i].[IsDrivable],
+    [i].[MakeId], [i].[PetName], [i].[TimeStamp]
+FROM [dbo].[Inventory] AS [i]
+WHERE [i].[Id] = 1
+--Get the Make 
+--Parameters removed for readability
+SELECT [m].[Id], [m].[Name], [m].[TimeStamp]
+FROM [Makes] AS [m]
+WHERE [m].[Id] = 5
+```
+Якщо ви хочете дізнатися більше про відкладене завантаження та як його використовувати з EF Core можете найти документацію за запитом "EF Core lazy loading".
 
-
-
-
-
-
-
+## 

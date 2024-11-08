@@ -13,6 +13,12 @@ public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<Applicati
         string connectionString = @"Server=(localdb)\mssqllocaldb;Database=AutoLotSamples;Trusted_Connection=True;ConnectRetryCount=0";
 
         var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+        
+        if (args != null && args[0].Equals("lazy"))
+        {
+            optionsBuilder.UseLazyLoadingProxies();
+        }
+       
         optionsBuilder.UseSqlServer(connectionString);
 
         return new ApplicationDbContext(optionsBuilder.Options);

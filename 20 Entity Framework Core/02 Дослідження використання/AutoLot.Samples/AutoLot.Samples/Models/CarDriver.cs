@@ -11,9 +11,9 @@ public class CarDriver : BaseEntity
 {
     public int DriverId { get; set; }
     [ForeignKey(nameof(DriverId))]
-    public Driver DriverNavigation { get; set; }
+    public virtual Driver DriverNavigation { get; set; }
     [Column("InventoryId")]
     public int CarId { get; set; }
     [ForeignKey(nameof(CarId))]
-    public Car CarNavigation { get; set; }
+    public virtual Car CarNavigation { get; set; }
 }
