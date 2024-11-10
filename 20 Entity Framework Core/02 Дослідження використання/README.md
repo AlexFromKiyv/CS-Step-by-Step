@@ -2229,4 +2229,268 @@ WHERE [m].[Id] = 5
 ```
 Якщо ви хочете дізнатися більше про відкладене завантаження та як його використовувати з EF Core можете найти документацію за запитом "EF Core lazy loading".
 
+## Оновлення записів
+
+Записи завантажуються у DbSet<T> і стають як відстежувані сутності, змінюються за допомогою коду, а потім записуються викликом SaveChanges() в контексті. Коли виконується SaveChanges(), ChangeTracker повідомляє про всі змінені сутності, а EF Core (разом із провайдером бази даних) створює відповідні оператори SQL для оновлення записів.
+
+### Оновлення відстежуваних сутностей
+
+Коли відстежувана сутність редагується, EntityState встановлюється на Modified. Після успішного збереження змін стан повертається до Unchanged.
+Оновлення окремого запису схоже на додавання окремого запису, за винятком того, що початковий запис отримується з бази даних, а не створюється за допомогою коду. Завантажте запис із бази даних у відстежувану сутність, внесіть деякі зміни та викличте SaveChanges(). Зауважте, що вам не потрібно викликати методи Update()/UpdateRange() для DbSet<T>, оскільки сутності вже відстежуються.
+
+```cs
+static void UpdateOneRecord()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var car = context.Cars.First();
+    car.Color = "Green";
+    context.SaveChanges();
+
+    ShowFirstCar();
+}
+UpdateOneRecord();
+
+static void ShowFirstCar()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var car = context.Cars.Include(c => c.MakeNavigation).First();
+
+    Console.WriteLine($"{car.Id} {car.MakeNavigation.Name} {car.Color} {car.PetName}");
+}
+```
+```console
+An entity of type Car was loaded from the database.
+Saving change for Server=(localdb)\mssqllocaldb;Database=AutoLotSamples;Trusted_Connection=True;ConnectRetryCount=0
+An entity of type Car was update.
+Saved change 1 entities
+An entity of type Car was loaded from the database.
+An entity of type Make was loaded from the database.
+1 VW Green Zippy
+```
+```sql
+exec sp_executesql N'SET NOCOUNT ON;
+UPDATE [dbo].[Inventory] SET [Color] = @p0
+WHERE [Id] = @p1 AND [TimeStamp] = @p2;
+SELECT [Display], [TimeStamp]
+FROM [dbo].[Inventory]
+WHERE @@ROWCOUNT = 1 AND [Id] = @p1;
+',N'@p1 int,@p0 nvarchar(50),@p2 varbinary(8)',@p1=1,@p0=N'Green',@p2=0x0000000000000867
+```
+Код оновлює лише один запис, але процес є таким самим, якщо оновлено та збережено кілька відстежуваних об’єктів. Попередня пропозиція where перевіряла не лише стовпець Id, а й стовпець TimeStamp. Це EF Core, який використовує перевірку паралелізму, описано далі в цьому розділі.
+
+### Оновлення невідстежуваних сутностей
+
+Невідстежувані сутності також можна використовувати для оновлення записів бази даних. Процес подібний до оновлення відстежуваних сутностей, за винятком того, що сутність створюється в коді (а не запитується), і EF Core має бути повідомлено, що сутність уже має існувати в базі даних і її потрібно оновити. Є два способи повідомити EF Core, що цю сутність потрібно обробити як оновлення. По-перше, це виклик методу Update() для DbSet<T>, який встановлює стан Modified:
+
+```cs
+    context.Cars.Update(updatedCar);
+```
+Другий — використання екземпляра контексту та методу Entry() для встановлення стану Modified :
+
+```cs
+context.Entry(updatedCar).State = EntityState.Modified;
+```
+У будь-якому випадку SaveChanges() все одно потрібно викликати, щоб значення зберігалися.
+
+Вам може бути цікаво, коли ви можете оновити сутність, яка не відстежується. Подумайте про вихідний виклик ASP.NET Core, який надсилає значення для сутності через HTTP. Оновлені дані потрібно зберігати, і використання цієї техніки позбавляє потреби ще одного виклику бази даних, щоб отримати сутність у ChangeTracker.
+
+У наведеному нижче прикладі запис зчитується як невідстежуваний (імітується зворотне відправлення в ASP.NET Core) і змінюється одна властивість Color. Потім він встановлює стан як Modified шляхом виклику методу Update() на DbSet<T>.
+
+```cs
+static void UpdateNontrackedEntities()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var car = context.Cars.AsNoTracking().First();
+    car.Color = "Orange";
+    context.Cars.Update(car);
+    context.SaveChanges();
+
+    ShowFirstCar();
+}
+UpdateNontrackedEntities();
+```
+```console
+Saving change for Server=(localdb)\mssqllocaldb;Database=AutoLotSamples;Trusted_Connection=True;ConnectRetryCount=0
+An entity of type Car was update.
+Saved change 1 entities
+An entity of type Car was loaded from the database.
+An entity of type Make was loaded from the database.
+1 VW Orange Zippy
+```
+Оскільки сутність не відстежується, EF Core оновлює всі значення властивостей у створеному SQL
+```sql
+exec sp_executesql N'SET NOCOUNT ON;
+UPDATE [dbo].[Inventory] SET [Color] = @p0, [DateBuilt] = @p1, [IsDrivable] = @p2,
+    [MakeId] = @p3, [PetName] = @p4
+WHERE [Id] = @p5 AND [TimeStamp] = @p6;
+SELECT [Display], [TimeStamp]
+FROM [dbo].[Inventory]
+WHERE @@ROWCOUNT = 1 AND [Id] = @p5;
+',N'@p5 int,@p0 nvarchar(50),@p1 datetime2(7),@p2 bit,@p3 int,@p4 nvarchar(50),@p6 varbinary(8)',@p5=1,@p0=N'Orange',@p1='2021-06-21 01:12:46.5800000',@p2=1,@p3=5,@p4=N'Hank',@p6=0x000000000000088F
+```
+
+## Видалення записів
+
+Одну чи кілька сутностей позначають для видалення шляхом виклику Remove() (для окремої сутності) або RemoveRange() (для списку сутностей) у відповідній властивості DbSet<T> або встановлення стану для сутності/сутностей на Deleted. Процес видалення призведе до каскадних ефектів навігаційних властивостей на основі правил, налаштованих у OnModelCreating() (або за угодами EF Core). Якщо через каскадну політику видаленню заборонено, створюється виняток.
+
+Коли метод Remove() викликається для сутності, яка відстежується, її EntityState має значення Deleted. Після успішного виконання методу SaveChanges() сутність видаляється з ChangeTracker, а її стан змінюється на Detached. Зауважте, що сутність все ще існує у вашій програмі, якщо вона не вийшла за межі області дії та не була зібрана як сміття.
+
+### Видалення відстежуваних записів
+
+Процес видалення такий самий як процес оновлення. Після відстеження сутності викличте Remove() для цього екземпляра, а потім викличте SaveChanges(), щоб видалити запис із бази даних.
+
+```cs
+static void DeleteOneRecord()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    // Viewing green cars
+    var greenCars = context.Cars.Where(c => c.Color == "Green").ToList();
+    CollectionCarToConsole(greenCars,"Green cars");
+
+    // Removing green car
+    var greenCar = context.Cars.First(c => c.Color == "Green");
+    context.Cars.Remove(greenCar);
+    context.SaveChanges();
+    CarToConsole(greenCar,"Green car still in memory?");
+    Console.WriteLine(context.Entry(greenCar).State);
+
+    // Viewing green cars
+    greenCars = context.Cars.Where(c => c.Color == "Green").ToList();
+    CollectionCarToConsole(greenCars, "Green cars");
+}
+DeleteOneRecord();
+```
+```console
+An entity of type Car was loaded from the database.
+        Green cars
+6 Green Hank
+Saving change for Server=(localdb)\mssqllocaldb;Database=AutoLotSamples;Trusted_Connection=True;ConnectRetryCount=0
+Saved change 1 entities
+        Green car still in memory?
+6 Green Hank
+Detached
+        Green cars
+```
+```sql
+exec sp_executesql N'SET NOCOUNT ON;
+DELETE FROM [dbo].[Inventory]
+WHERE [Id] = @p0 AND [TimeStamp] = @p1;
+SELECT @@ROWCOUNT;
+',N'@p0 int,@p1 varbinary(8)',@p0=2,@p1=0x00000000000008EB
+```
+Підкреслимо, що після виклику SaveChanges() екземпляр сутності все ще існує, але його більше немає в ChangeTracker. Під час перевірки стану EntityState стан буде Detached.
+
+
+### Видалення сутності, що не відстежуються
+
+
+Спочатку загрузимо початкові дані в БД.
+
+```cs
+static void LoadInitialDataToDatabase()
+{
+    ClearSampleData();
+    LoadMakeAndCarData();
+    AddRecordsToMantToManyTables();
+}
+LoadInitialDataToDatabase();
+```
+```console
+Saving change for Server=(localdb)\mssqllocaldb;Database=AutoLotSamples;Trusted_Connection=True;ConnectRetryCount=0
+Saved change 6 entities
+Saving change for Server=(localdb)\mssqllocaldb;Database=AutoLotSamples;Trusted_Connection=True;ConnectRetryCount=0
+Saved change 10 entities
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+Saving change for Server=(localdb)\mssqllocaldb;Database=AutoLotSamples;Trusted_Connection=True;ConnectRetryCount=0
+Saved change 12 entities
+```
+Невідстежувані об’єкти можуть видаляти записи так само, як невідстежувані об’єкти можуть оновлювати записи.Різниця полягає в тому, що сутність відстежується шляхом виклику Remove()/RemoveRange() або встановлення стану на Deleted, а потім виклику SaveChanges().
+
+У наступному прикладі використовується той самий шаблон як при оновленні невідстежуваних об’єктів. Він читає запис як невідстежуваний, а потім використовує метод Remove() на DbSet<T> (перший приклад) або вручну змінює EntityState на Deleted (другий приклад). У кожному разі код викликає SaveChanges(), щоб зберегти видалення. Виклик Clear() на ChangeTracker гарантує, що між першим і другим прикладами немає жодного забруднення.
+```cs
+static void DeleteNontrackedEntities()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var car = context.Cars.AsNoTracking().First(c => c.Color == "Green");
+    context.Cars.Remove(car);
+    context.SaveChanges();
+
+    context.ChangeTracker.Clear();
+    car = context.Cars.AsNoTracking().First(c => c.Color == "Yellow");
+    context.Entry(car).State = EntityState.Deleted;
+    context.SaveChanges();
+
+    context.ChangeTracker.Clear();
+    var cars = context.Cars;
+    CollectionCarToConsole(cars, "All cars");
+
+}
+DeleteNontrackedEntities();
+```
+```
+Saving change for Server=(localdb)\mssqllocaldb;Database=AutoLotSamples;Trusted_Connection=True;ConnectRetryCount=0
+Saved change 1 entities
+Saving change for Server=(localdb)\mssqllocaldb;Database=AutoLotSamples;Trusted_Connection=True;ConnectRetryCount=0
+Saved change 1 entities
+        All cars
+An entity of type Car was loaded from the database.
+1 Black Zippy
+An entity of type Car was loaded from the database.
+2 Rust Rusty
+An entity of type Car was loaded from the database.
+3 Black Mel
+An entity of type Car was loaded from the database.
+5 Black Bimmer
+An entity of type Car was loaded from the database.
+7 Pink Pinky
+An entity of type Car was loaded from the database.
+8 Black Pete
+An entity of type Car was loaded from the database.
+9 Brown Brownie
+An entity of type Car was loaded from the database.
+10 Rust Lemon
+```
+
+### Виловлювання помилки каскадного видалення
+
+EF Core викличе DbUpdateException, коли спроба видалити запис не вдається через правила каскаду.
+
+```cs
+static void CatchCascadeDeleteFailures()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var make = context.Makes.First();
+    Console.WriteLine(make.Name);
+
+    context.Makes.Remove(make);
+
+    try
+    {
+        context.SaveChanges();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+        Console.WriteLine(ex.InnerException.Message);
+    }
+}
+CatchCascadeDeleteFailures();
+```
+```
+An entity of type Make was loaded from the database.
+VW
+Saving change for Server=(localdb)\mssqllocaldb;Database=AutoLotSamples;Trusted_Connection=True;ConnectRetryCount=0
+An exception orruced! An error occurred while saving the entity changes. See the inner exception for details. entities
+An error occurred while saving the entity changes. See the inner exception for details.
+The DELETE statement conflicted with the REFERENCE constraint "FK_Inventory_Makes_MakeId". The conflict occurred in database "AutoLotSamples", table "dbo.Inventory", column 'MakeId'.
+```
+
+
 ## 

@@ -885,4 +885,114 @@ static void LazyLoad()
             $":{car.MakeNavigation == null}");
     }
 }
-LazyLoad();
+//LazyLoad();
+
+static void UpdateOneRecord()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var car = context.Cars.First();
+    car.Color = "Green";
+    context.SaveChanges();
+
+    ShowFirstCar();
+}
+//UpdateOneRecord();
+
+static void ShowFirstCar()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var car = context.Cars.Include(c => c.MakeNavigation).First();
+
+    Console.WriteLine($"{car.Id} {car.MakeNavigation.Name} {car.Color} {car.PetName}");
+}
+
+static void UpdateNontrackedEntities()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var car = context.Cars.AsNoTracking().First();
+    car.Color = "Orange";
+
+    context.Cars.Update(car); //!!!
+    //or
+    //context.Entry(car).State = EntityState.Modified;
+
+    context.SaveChanges();
+
+    ShowFirstCar();
+}
+//UpdateNontrackedEntities();
+
+static void LoadInitialDataToDatabase()
+{
+    ClearSampleData();
+    LoadMakeAndCarData();
+    AddRecordsToMantToManyTables();
+}
+//LoadInitialDataToDatabase();
+
+static void DeleteOneRecord()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    // Viewing green cars
+    var greenCars = context.Cars.Where(c => c.Color == "Green").ToList();
+    CollectionCarToConsole(greenCars,"Green cars");
+
+    // Removing green car
+    var greenCar = context.Cars.First(c => c.Color == "Green");
+    context.Cars.Remove(greenCar);
+    context.SaveChanges();
+    CarToConsole(greenCar,"Green car still in memory?");
+    Console.WriteLine(context.Entry(greenCar).State);
+
+    // Viewing green cars
+    greenCars = context.Cars.Where(c => c.Color == "Green").ToList();
+    CollectionCarToConsole(greenCars, "Green cars");
+}
+//DeleteOneRecord();
+
+
+static void DeleteNontrackedEntities()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var car = context.Cars.AsNoTracking().First(c => c.Color == "Green");
+    context.Cars.Remove(car);
+    context.SaveChanges();
+
+    context.ChangeTracker.Clear();
+    car = context.Cars.AsNoTracking().First(c => c.Color == "Yellow");
+    context.Entry(car).State = EntityState.Deleted;
+    context.SaveChanges();
+
+    context.ChangeTracker.Clear();
+    var cars = context.Cars;
+    CollectionCarToConsole(cars, "All cars");
+
+}
+//DeleteNontrackedEntities();
+
+static void CatchCascadeDeleteFailures()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var make = context.Makes.First();
+    Console.WriteLine(make.Name);
+
+    context.Makes.Remove(make);
+
+    try
+    {
+        context.SaveChanges();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+        Console.WriteLine(ex.InnerException.Message);
+    }
+}
+CatchCascadeDeleteFailures();
+

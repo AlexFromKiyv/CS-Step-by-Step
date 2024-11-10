@@ -584,7 +584,7 @@ global using AutoLot.Samples.Models;
 ```
 Тепер коли у нас створено невеликий похідний клас DBContext з даними підключеня до бази даних і двома сутностями ми можемо створити базу данних. Для цого нам знадобится CLI EF Core Global Tool якій детально описан нижче.
 
-Всановимо dotnet-ef глобальний CLI інструмент EF Core
+Якщо не встановлено, всановимо dotnet-ef глобальний CLI інструмент EF Core
 
 ```console
 dotnet tool install --global dotnet-ef
