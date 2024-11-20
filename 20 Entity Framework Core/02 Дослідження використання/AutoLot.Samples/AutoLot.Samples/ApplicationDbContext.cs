@@ -61,4 +61,13 @@ public class ApplicationDbContext : DbContext
         new DriverConfiguration().Configure(modelBuilder.Entity<Driver>());
         new CarMakeViewModelConfiguration().Configure(modelBuilder.Entity<CarMakeViewModel>());
     }
+
+    //DB Function
+    [DbFunction("udf_CountOfMakes",Schema ="dbo")]
+    public static int InventoryCountFor(int makeId)
+        => throw new NotSupportedException();
+
+    [DbFunction("udtf_GetCarsForMake",Schema ="dbo")]
+    public IQueryable<Car> GetCarsFor(int makeId)
+        => FromExpression(() => GetCarsFor(makeId));
 }

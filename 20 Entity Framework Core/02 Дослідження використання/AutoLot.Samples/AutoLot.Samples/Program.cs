@@ -1,5 +1,9 @@
 ﻿using AutoLot.Samples.Models;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore.Update.Internal;
+using Microsoft.Extensions.DependencyInjection;
+using System.Xml.Serialization;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 static void AddRecord()
 {
@@ -240,6 +244,7 @@ static void ClearSampleData()
 
 //LoadMakeAndCarData();
 //AddRecordsToMantToManyTables();
+
 
 static void CollectionCarToConsole(IEnumerable<Car> cars,string text)
 {
@@ -994,5 +999,545 @@ static void CatchCascadeDeleteFailures()
         Console.WriteLine(ex.InnerException.Message);
     }
 }
-CatchCascadeDeleteFailures();
+//CatchCascadeDeleteFailures();
 
+static void CarCountWithGlobalFilter()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var query = context.Cars;
+    Console.WriteLine(query.ToQueryString());
+    Console.WriteLine();
+
+    int totalCars = query.Count();
+
+    Console.WriteLine($"Total cars: {totalCars}");
+
+    int drivableCars = query.Where(c => c.IsDrivable == true).Count();
+    Console.WriteLine($"Drivable cars: {drivableCars}");
+}
+//CarCountWithGlobalFilter();
+
+static void CarCountWithoutGlobalFilter()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var query = context.Cars.IgnoreQueryFilters();
+    Console.WriteLine(query.ToQueryString());
+    Console.WriteLine();
+
+    int totalCars = query.Count();
+
+    Console.WriteLine($"Total cars: {totalCars}");
+
+    int drivableCars = query.Where(c => c.IsDrivable == true).Count();
+    Console.WriteLine($"Drivable cars: {drivableCars}");
+}
+//CarCountWithoutGlobalFilter();
+
+static void GlobalQueryFiltersOnNavigationProperties()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var query = context.Radios;
+    Console.WriteLine(query.ToQueryString());
+    Console.WriteLine();
+
+    var query1 = context.Radios.IgnoreQueryFilters();
+    Console.WriteLine(query1.ToQueryString());
+}
+//GlobalQueryFiltersOnNavigationProperties();
+
+
+static void ReletedDataWithGlobalQueryFilters()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var queryCars = context.Cars.IgnoreQueryFilters().Where(c=>c.MakeId==1);
+
+    Console.WriteLine($"Car with MakerId = 1 : {queryCars.Count()}");
+    Console.WriteLine();
+    context.ChangeTracker.Clear();
+ 
+    var make = context.Makes.First(m => m.Id == 1);
+    context.Entry(make).Collection(m => m.Cars).Load();
+
+}
+//ReletedDataWithGlobalQueryFilters();
+
+static void ReletedDataWithIgnoreGlobalQueryFilters()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+ 
+    var make = context.Makes.First(m => m.Id == 1);
+    context.Entry(make).Collection(m => m.Cars).Query().IgnoreQueryFilters().Load();
+
+}
+//ReletedDataWithIgnoreGlobalQueryFilters();
+
+static void ShowSchemaTableName()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    IEntityType? metadata = context.Model.FindEntityType(typeof(Car).FullName);
+
+    Console.WriteLine(metadata?.GetSchema());
+    Console.WriteLine(metadata?.GetTableName());
+
+}
+//ShowSchemaTableName();
+
+static void UsingFromSqlRawInterpolated()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    int carId = 1;
+    var query = context.Cars
+        .FromSqlInterpolated($"Select * from dbo.Inventory where Id = {carId}")
+        .Include(c => c.MakeNavigation);
+
+    Console.WriteLine(query.ToQueryString());
+    Console.WriteLine();
+
+    var car = query.First();
+    Console.WriteLine($"{car.Id} {car.PetName}");
+}
+//UsingFromSqlRawInterpolated();
+
+static void ProjectionsToIds()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var query = context.Cars.Select(c => c.Id);
+    Console.WriteLine(query.ToQueryString());
+    Console.WriteLine();
+
+    List<int> ids = query.ToList();
+    foreach (var item in ids)
+    {
+        Console.Write(item+"\t");
+    }
+}
+//ProjectionsToIds();
+
+static void ProjectionToCarMakeViewModel()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+    
+    var query = context.Cars.Select(c => new CarMakeViewModel
+    {
+        CarId = c.Id,
+        Color = c.Color,
+        DateBuild = c.DateBuilt.GetValueOrDefault(),
+        Display = c.Display,
+        IsDrivable = c.IsDrivable.GetValueOrDefault(false),
+        Make = c.MakeNavigation.Name,
+        MakeId = c.MakeId,
+        PetName = c.PetName
+    });
+    Console.WriteLine(query.ToQueryString());
+    Console.WriteLine();
+
+    foreach (CarMakeViewModel cmvm in query)
+    {
+        Console.WriteLine(cmvm.CarId+"\t"+cmvm.Make+"\t"+cmvm.Color);
+    }
+}
+//ProjectionToCarMakeViewModel();
+
+
+static void AddACar()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    Car car = new()
+    {
+        Color = "Yellow",
+        MakeId = 1,
+        PetName = "Herbie"
+    };
+
+    context.Cars.Add(car);
+    context.SaveChanges();
+}
+//AddACar();
+
+static void AddACarWithDefaultsSet()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    Car car = new()
+    {
+        Color = "Yellow",
+        MakeId = 1,
+        PetName = "Herbie",
+        IsDrivable = true,
+        DateBuilt = new DateTime(2021, 01, 01)
+    };
+
+    context.Cars.Add(car);
+    context.SaveChanges();
+}
+//AddACarWithDefaultsSet();
+
+static void UpdateACar()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+    var car = context.Cars.First(c => c.Id == 1);
+    car.Color = "White";
+    context.SaveChanges();
+}
+
+
+static void ThrowConcurrencyException()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+    try
+    {
+        Car car = context.Cars.First();
+
+        //update the database outside of the context
+        FormattableString sql = $"Update dbo.Inventory set Color='Pink' where Id = {car.Id}";
+        context.Database
+            .ExecuteSqlInterpolated(sql);
+
+        //update the car record in the change tracker and then try and save changes
+        car.Color = "Yellow";
+        context.SaveChanges();
+    }
+    catch (DbUpdateConcurrencyException ex)
+    {
+        //Get the entity that failed to update
+        var entry = ex.Entries[0];
+        //Get the original values (when the entity was loaded)
+        PropertyValues originalProperty = entry.OriginalValues;
+        //Get the current values (updated by this code path)
+        PropertyValues currentProperty = entry.OriginalValues;
+        // get the current values from the data store –
+        //Note: This needs another database call
+        PropertyValues? databaseProperty = entry.GetDatabaseValues();
+    }
+}
+//ThrowConcurrencyException();
+
+static void UsingMappedDBFunction()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+    var query = context.Makes.Where(m => ApplicationDbContext.InventoryCountFor(m.Id) > 1);
+    Console.WriteLine(query.ToQueryString());
+    Console.WriteLine();
+
+    List<Make> makes = query.ToList();
+    foreach (var make in makes)
+    {
+        Console.WriteLine($"{make.Name}");
+    }
+}
+//UsingMappedDBFunction();
+
+static void UsingTableValuedDBFunction()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+    var query = context.GetCarsFor(5);
+    Console.WriteLine(query.ToQueryString());
+    Console.WriteLine();
+
+    List<Car>? cars = query.ToList();
+    CollectionCarToConsole(cars,"Cars MakeId = 5");
+}
+//UsingTableValuedDBFunction();
+
+static void UsingEFFunctions_Like()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+    var query = context.Cars.IgnoreQueryFilters().Where(c => EF.Functions.Like(c.PetName, "%r%"));
+    Console.WriteLine(query.ToQueryString());
+    Console.WriteLine();
+
+    List<Car>? cars = query.ToList();
+    CollectionCarToConsole(cars, "Cars are Like(c.PetName, \"%r%\")");
+}
+//UsingEFFunctions_Like();
+
+static void Batching()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+    var cars = new List<Car>
+    {
+        new Car {Color = "Yellow", MakeId = 1, PetName = "Herbie"},
+        new Car {Color = "White", MakeId = 2, PetName = "Mach 5"},
+        new Car {Color = "Pink", MakeId = 3, PetName = "Avon"},
+        new Car {Color = "Blue", MakeId = 4, PetName = "Blueberry"},
+    };
+    context.Cars.AddRange(cars);
+    context.SaveChanges();
+}
+//Batching();
+
+static void UsingValueConverter()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var car = context.Cars.First();
+    car.Price = "777.00";
+    context.SaveChanges();
+    
+}
+//UsingValueConverter();
+
+static void ShowPriceOfFirstCar()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+    var car = context.Cars.First();
+    Console.WriteLine($"{car.Id} {car.PetName} {car.Price}");
+
+}
+//ShowPriceOfFirstCar();
+
+static void ShadowProperties()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var car = new Car()
+    {
+        Color = "White",
+        PetName = "Snuppy",
+        MakeId = 1,
+        Price = "1000.00"
+        //Compile error
+        //IsDeleted = false
+    };
+
+    context.Cars.AddRange(car);
+    context.Entry(car).Property("IsDeleted").CurrentValue = true;
+    context.SaveChanges();
+}
+//ShadowProperties();
+
+static void UsingShadowPropertiesWithLINQ()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var cars = context.Cars.ToList();
+
+    foreach (var car in cars.Where(c => c.Id % 2 == 0))
+    {
+        context.Entry(car).Property("IsDeleted").CurrentValue = false;
+    }
+    context.SaveChanges();
+
+    var noDeletedCars = context.Cars.Where(c => !EF.Property<bool>(c,"IsDeleted")).ToList();
+    foreach (var car in noDeletedCars)
+    {
+        Console.WriteLine($"{car.Id} {car.PetName} is deleted " +
+            $"{context.Entry(car).Property("IsDeleted").CurrentValue}");
+    }
+}
+//UsingShadowPropertiesWithLINQ();
+
+static void UsingLinqForTemporalTable()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var query = context.Cars;
+    Console.WriteLine(query.ToQueryString());
+    Console.WriteLine();
+
+    var cars = query.ToList();
+    CollectionCarToConsole(cars, "Cars");
+}
+//UsingLinqForTemporalTable();
+
+static void UsingFromSqlRawInterpolatedWithTemporalTable()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    int carId = 1;
+    var query = context.Cars
+        .FromSqlInterpolated($"Select *,PeriodEnd,PeriodStart from dbo.Inventory where Id = {carId}")
+        .Include(c => c.MakeNavigation);
+
+    Console.WriteLine(query.ToQueryString());
+    Console.WriteLine();
+
+    var car = query.First();
+    Console.WriteLine($"{car.Id} {car.MakeNavigation.Name} {car.PetName}");
+}
+//UsingFromSqlRawInterpolatedWithTemporalTable();
+
+static void MainTableAndHistoryTableInteractions_1()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var car = new Car
+    {
+        Color = "LightBlue",
+        MakeId = 1,
+        PetName = "Sky",
+        Price = "500.00"
+    };
+    context.Cars.Add(car);
+    context.SaveChanges();
+}
+//MainTableAndHistoryTableInteractions_1();
+
+
+static void MainTableAndHistoryTableInteractions_2()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    int maxId = context.Cars.Max(c => c.Id);
+    var car = context.Cars.Find(maxId);
+
+    if (car == null) return;
+
+    car.Color = "Red";
+    context.Cars.Update(car);
+    context.SaveChanges();
+
+}
+//MainTableAndHistoryTableInteractions_2();
+
+static void MainTableAndHistoryTableInteractions_3()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    int maxId = context.Cars.Max(c => c.Id);
+    var car = context.Cars.Find(maxId);
+
+    if (car == null) return;
+     
+    context.Cars.Remove(car);
+    context.SaveChanges();
+
+}
+//MainTableAndHistoryTableInteractions_3();
+
+static void PreparationQueryingTemporalTables()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var car = new Car
+    {
+        Color = "Navy",
+        MakeId = 1,
+        PetName = "Warrior",
+    };
+    context.Cars.Add(car);
+    context.SaveChanges();
+    Thread.Sleep(5000);
+
+    car.Color = "DarkBlue";
+    context.Cars.Update(car);
+    context.SaveChanges();
+    Thread.Sleep(5000);
+
+    context.Cars.Remove(car);
+    context.SaveChanges();
+}
+//PreparationQueryingTemporalTables();
+
+static void QueryingTemporalTables()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var query = context.Cars
+        .TemporalAll()
+        .OrderBy(e=> EF.Property<DateTime>(e,"PeriodStart"))
+        .Select( e => new 
+        {
+            Car = e,
+            PeriodStart = EF.Property<DateTime>(e,"PeriodStart"),
+            PeriodEnd = EF.Property<DateTime>(e, "PeriodEnd")
+        });
+
+    Console.WriteLine(query.ToQueryString());
+    Console.WriteLine();
+
+
+    foreach ( var car in query)
+    {
+        Console.WriteLine($"{car.Car.PetName} {car.PeriodStart} {car.PeriodEnd}");
+    }
+}
+//QueryingTemporalTables();
+
+static void ClearingTemporalTables()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+    
+    var strategy = context.Database.CreateExecutionStrategy();
+    strategy.Execute(()=>
+    { 
+        using var transaction = context.Database.BeginTransaction();
+
+        string sql = "ALTER TABLE [dbo].[Inventory] SET (SYSTEM_VERSIONING = OFF)";
+        context.Database.ExecuteSqlRaw(sql);
+        sql = "DELETE FROM audits.InventoryAudit";
+        context.Database.ExecuteSqlRaw(sql);
+        sql = "ALTER TABLE dbo.Inventory SET (SYSTEM_VERSIONING = ON (HISTORY_TABLE=audits.InventoryAudit))";
+        context.Database.ExecuteSqlRaw(sql);
+
+        transaction.Commit();
+    });
+}
+//ClearingTemporalTables();
+
+static void SchemaAndNameForTemporal()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var serviceCollection = new ServiceCollection();
+    serviceCollection.AddDbContextDesignTimeServices(context);
+    var serviceProvider = serviceCollection.BuildServiceProvider();
+    IModel? designTimeModel = serviceProvider.GetService<IModel>();
+
+    var designTimeEntity = designTimeModel?.FindEntityType(typeof(Car).FullName);
+
+    string? historySchema = designTimeEntity?.GetHistoryTableSchema();
+    string? tableName = designTimeEntity?.GetHistoryTableName();
+
+    Console.WriteLine(historySchema + "\t" + tableName);
+}
+//SchemaAndNameForTemporal();
+
+static void ClearSampleDataAndTemporal()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+    string?[] entities =
+    [
+        typeof(Driver).FullName,
+        typeof(Car).FullName,
+        typeof(Make).FullName
+    ];
+
+    var serviceCollection = new ServiceCollection();
+    serviceCollection.AddDbContextDesignTimeServices(context);
+    var serviceProvider = serviceCollection.BuildServiceProvider();
+    IModel? designTimeModel = serviceProvider.GetService<IModel>();
+
+    foreach (var entityName in entities)
+    {
+        var entity = context.Model.FindEntityType(entityName);
+        var tableName = entity.GetTableName();
+        var schemaName = entity.GetSchema();
+        context.Database.ExecuteSqlRaw($"DELETE FROM {schemaName}.{tableName}");
+        context.Database.ExecuteSqlRaw($"DBCC CHECKIDENT (\"{schemaName}.{tableName}\", RESEED, 0);");
+        if (entity.IsTemporal())
+        {
+            var strategy = context.Database.CreateExecutionStrategy();
+            strategy.Execute(() =>
+            {
+                using var trans = context.Database.BeginTransaction();
+                var designTimeEntity = designTimeModel.FindEntityType(entityName);
+                var historySchema = designTimeEntity.GetHistoryTableSchema();
+                var historyTable = designTimeEntity.GetHistoryTableName();
+                context.Database.ExecuteSqlRaw($"ALTER TABLE {schemaName}.{tableName} SET (SYSTEM_VERSIONING = OFF)");
+                context.Database.ExecuteSqlRaw($"DELETE FROM {historySchema}.{historyTable}");
+                context.Database.ExecuteSqlRaw($"ALTER TABLE {schemaName}.{tableName} SET (SYSTEM_VERSIONING = ON (HISTORY_TABLE={historySchema}.{historyTable}))");
+                trans.Commit();
+            });
+        }
+    }
+}
+//ClearSampleDataAndTemporal();

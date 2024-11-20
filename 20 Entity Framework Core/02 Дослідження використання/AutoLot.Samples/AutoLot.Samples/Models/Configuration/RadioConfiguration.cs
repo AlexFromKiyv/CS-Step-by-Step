@@ -15,5 +15,7 @@ internal class RadioConfiguration : IEntityTypeConfiguration<Radio>
         builder.HasOne(d => d.CarNavigation)
           .WithOne(p => p.RadioNavigation)
           .HasForeignKey<Radio>(d => d.CarId);
+
+        builder.HasQueryFilter(r => r.CarNavigation.IsDrivable == true);
     }
 }

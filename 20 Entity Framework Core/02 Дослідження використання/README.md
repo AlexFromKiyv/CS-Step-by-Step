@@ -87,6 +87,11 @@ WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();
 ```
 Формат запиту пов’язаний із процесом пакетування, який використовується EF Core для покращення продуктивності операцій з базою даних. Усі значення, передані в інструкцію SQL, параметризовані, щоб зменшити загрозу сценарних атак. Також зауважте, що нещодавно додана сутність запитується щодо властивостей, згенерованих базою даних (як можна здогадатись для заповненя властивостей сутності в пам'яті).
 
+### Як побачити запрос на сервері.
+
+Для того аби відслідковувати які sql-запити виконуються на сервері можна встановити Azure Data Studio. В н'му встанвити розширення SQL Server Profiler і прочитати як їм користуватися по запиту документації "SQL Server Profiler extension".
+
+
 ### Додавання нового запису за допомогою Attach
 
 Коли первинний ключ сутності зіставляється зі стовпцем ідентифікації в SQL Server, EF Core розглядатиме цей екземпляр сутності як Доданий під час додавання до ChangeTracker, якщо значення властивості первинного ключа дорівнює нулю.
@@ -2090,10 +2095,10 @@ An entity of type CarDriver was loaded from the database.
 
        var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
        
-       if (args != null && args[0].Equals("lazy"))
-       {
-           optionsBuilder.UseLazyLoadingProxies();
-       }
+        if (args != null && args.Length == 1 && args[0].Equals("lazy", StringComparison.OrdinalIgnoreCase))
+        {
+            optionsBuilder.UseLazyLoadingProxies();
+        }
       
        optionsBuilder.UseSqlServer(connectionString);
 
@@ -2493,4 +2498,1490 @@ The DELETE statement conflicted with the REFERENCE constraint "FK_Inventory_Make
 ```
 
 
-## 
+## Важливі можливості EF Core
+
+### Глобальні фільтри запитів
+
+Глобальні фільтри запитів дозволяють додавати речення where до всіх запитів LINQ для певної сутності. Наприклад, загальний шаблон проектування бази даних полягає у використанні м’яких видалень замість жорстких видалень. До таблиці додається поле для вказівки видаленого статусу запису. Якщо запис «видалено», значення встановлюється на true (або 1), але не видаляється з бази даних. Це називається м’яким видаленням. Щоб відфільтрувати м’яко видалені записи зі звичайних операцій, кожне речення where має перевіряти значення цього поля. Додати включення цього фільтра в кожен запит може зайняти багато часу, якщо не проблематично.
+EF Core дозволяє додавати глобальний фільтр запиту до сутності, який потім застосовується до кожного запиту, що включає цю сутність. У прикладі м’якого видалення, описаному раніше, ви встановлюєте фільтр для класу сутності, щоб виключити м’яко видалені записи. Вам більше не потрібно пам’ятати про включення пропозиції where, щоб відфільтрувати м’яко видалені записи в кожному запиті, який ви пишете.
+
+Припустімо, що всі записи про автомобілі, у яких IsDrivable = false, слід відфільтрувати зі звичайних запитів.
+
+Подивимось загальну кількість записів.
+
+```cs
+static void CarCountWithGlobalFilter()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var query = context.Cars;
+    Console.WriteLine(query.ToQueryString());
+    Console.WriteLine();
+
+    int totalCars = query.Count();
+
+    Console.WriteLine($"Total cars: {totalCars}");
+
+    int drivableCars = query.Where(c => c.IsDrivable == true).Count();
+    Console.WriteLine($"Drivable cars: {drivableCars}");
+}
+CarCountWithGlobalFilter();
+```
+```console
+SELECT [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display], [i].[IsDrivable], [i].[MakeId], [i].[PetName], [i].[TimeStamp]
+FROM [dbo].[Inventory] AS [i]
+
+Total cars: 8
+Drivable cars: 7
+```
+Відкрийте клас CarConfiguration і додайте наступний рядок до методу Configure().
+```cs
+  public void Configure(EntityTypeBuilder<Car> builder)
+  {
+      //...
+
+      builder.HasQueryFilter(c => c.IsDrivable == true);
+  }
+```
+Запусимо наш метод знову і отримаємо
+
+```console
+SELECT [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display], [i].[IsDrivable], [i].[MakeId], [i].[PetName], [i].[TimeStamp]
+FROM [dbo].[Inventory] AS [i]
+WHERE [i].[IsDrivable] = CAST(1 AS bit)
+
+Total cars: 7
+Drivable cars: 7
+
+```
+За наявності глобального фільтра запитів запити, пов’язані з об’єктом Car, автоматично відфільтровують некеровані автомобілі. Як бачите фільтр спрацював зміниівши логіку виконання. 
+Фільтри не можна додавати один до одного. Спрацьовує останній. Якщо ви додасте ще один фільтр запиту для сутності Car, він замінить існуючий фільтр запиту.
+
+Якщо вам потрібно отримати всі записи, включно з тими, які відфільтровано за допомогою фільтра глобального запиту, додайте метод IgnoreQueryFilters() до запиту LINQ:
+
+```cs
+static void CarCountWithoutGlobalFilter()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var query = context.Cars.IgnoreQueryFilters();
+    Console.WriteLine(query.ToQueryString());
+    Console.WriteLine();
+
+    int totalCars = query.Count();
+
+    Console.WriteLine($"Total cars: {totalCars}");
+
+    int drivableCars = query.Where(c => c.IsDrivable == true).Count();
+    Console.WriteLine($"Drivable cars: {drivableCars}");
+}
+CarCountWithoutGlobalFilter();
+```
+```console
+SELECT [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display], [i].[IsDrivable], [i].[MakeId], [i].[PetName], [i].[TimeStamp]
+FROM [dbo].[Inventory] AS [i]
+
+Total cars: 8
+Drivable cars: 7
+```
+Після додавання IgnoreQueryFilters() до запиту LINQ згенерований оператор SQL більше не містить речення where.
+
+Важливо зауважити, що виклик IgnoreQueryFilters() видаляє фільтр запиту для кожної сутності в запиті LINQ, включно з усіма, які беруть участь у операторах Include() або ThenInclude().
+
+Глобальні фільтри запитів є повністю конструкцією EF Core. Жодних змін до бази даних не вноситься. Пам'ятайте якшо програма не показує яких записів а в базі даних вони існують то можливо спрацьовує глобальний фільтр. 
+
+### Глобальні фільтри запитів у властивостях навігації
+
+Глобальні фільтри запитів також можна встановити у властивостях навігації. Припустімо, що ви хочете відфільтрувати будь-які радіоприймачі, які є в автомобілі, які на ходу. Фільтр запиту створюється у навігаційній властивості CarNavigation сутності Radio, ось так (за допомогою класу RadioConfiguration):
+
+```cs
+    public void Configure(EntityTypeBuilder<Radio> builder)
+    {
+        //...
+        builder.HasQueryFilter(r => r.CarNavigation.IsDrivable == false);
+    }
+```
+
+Запити до Radio , будуть відфільтровуватись.
+
+```cs
+static void GlobalQueryFiltersOnNavigationProperties()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var query = context.Radios;
+    Console.WriteLine(query.ToQueryString());
+    Console.WriteLine();
+
+    var query1 = context.Radios.IgnoreQueryFilters();
+    Console.WriteLine(query1.ToQueryString());
+}
+GlobalQueryFiltersOnNavigationProperties();
+```
+```sql
+SELECT [r].[Id], [r].[InventoryId], [r].[HasSubWoofers], [r].[HasTweeters], [r].[RadioId], [r].[TimeStamp]
+FROM [Radios] AS [r]
+INNER JOIN (
+    SELECT [i].[Id], [i].[IsDrivable]
+    FROM [dbo].[Inventory] AS [i]
+    WHERE [i].[IsDrivable] = CAST(1 AS bit)
+) AS [t] ON [r].[InventoryId] = [t].[Id]
+WHERE [t].[IsDrivable] = CAST(1 AS bit)
+
+SELECT [r].[Id], [r].[InventoryId], [r].[HasSubWoofers], [r].[HasTweeters], [r].[RadioId], [r].[TimeStamp]
+FROM [Radios] AS [r]
+```
+Під час виконання стандартного запиту LINQ будь-які записи, які містять некерований автомобіль, будуть виключені з результату. Щоб видалити фільтр запиту, використовуйте IgnoreQueryFilters().
+
+Застереження: EF Core не виявляє циклічні глобальні фільтри запитів, тому будьте обережні, додаючи фільтри запитів до властивостей навігації.
+
+### Явне завантаження з фільтрами глобальних запитів
+
+Глобальні фільтри запитів також діють під час явного завантаження пов’язаних даних. Наприклад, якщо ви хочете завантажити записи про автомобіль для марки, фільтр IsDrivable запобіжить завантаженню в пам’ять непридатних автомобілів.
+
+```cs
+static void ReletedDataWithGlobalQueryFilters()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var queryCars = context.Cars.IgnoreQueryFilters().Where(c=>c.MakeId==1);
+
+    Console.WriteLine($"Car with MakerId = 1 : {queryCars.Count()}");
+    Console.WriteLine();
+    context.ChangeTracker.Clear();
+ 
+    var make = context.Makes.First(m => m.Id == 1);
+    context.Entry(make).Collection(m => m.Cars).Load();
+
+}
+ReletedDataWithGlobalQueryFilters();
+```
+```console
+Car with MakerId = 1 : 2
+
+An entity of type Make was loaded from the database.
+An entity of type Car was loaded from the database.
+```
+```sql
+SELECT [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display],
+    [i].[IsDrivable], [i].[MakeId], [i].[PetName], [i].[TimeStamp]
+FROM [dbo].[Inventory] AS [i]
+WHERE ([i].[IsDrivable] = CAST(1 AS bit)) AND ([i].[MakeId] = 1)
+```
+Як видно один Car не завантажується оскільки спрацьовує глобальний фільтр.
+
+Є невелика особливість в ігноруванні фільтрів запитів під час явного завантаження даних. Метод Collection() повертає тип CollectionEntry<Make,Car> і явно не реалізує інтерфейс IQueryable<T>. Щоб викликати IgnoreQueryFilters(), ви повинні спочатку викликати Query(), який повертає IQueryable<Car>.
+
+```cs
+static void ReletedDataWithIgnoreGlobalQueryFilters()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+ 
+    var make = context.Makes.First(m => m.Id == 1);
+    context.Entry(make).Collection(m => m.Cars).Query().IgnoreQueryFilters().Load();
+
+}
+ReletedDataWithIgnoreGlobalQueryFilters();
+```
+```console
+An entity of type Make was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+```
+```sql
+SELECT [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display], [i].[IsDrivable],
+    [i].[MakeId], [i].[PetName], [i].[TimeStamp]
+FROM [dbo].[Inventory] AS [i]
+WHERE [i].[MakeId] = 1
+```
+Той самий процес застосовується під час використання методу Reference() для отримання даних із посилальної властивості навігації. Спочатку викличте Query(), а потім IgnoreQueryFilters().
+
+### Сирі запити SQL з LINQ
+
+Іноді отримати правильний оператор LINQ для складного запиту може бути складніше, ніж просто написати SQL безпосередньо. Або згенерований SQL із вашого запиту LINQ неоптимальний. EF Core має механізм, який дозволяє виконувати необроблені оператори SQL на DbSet<T>. Методи FromSqlRaw() і FromSqlRawInterpolated() приймають рядок, який замінює запит LINQ. Цей запит виконується на стороні сервера.
+Якщо необроблений оператор SQL не завершується (наприклад, не є збереженою процедурою, визначеною користувачем функцією, оператором, який використовує загальний вираз таблиці, і не закінчується крапкою з комою), тоді до запиту можна додати додаткові оператори LINQ. Додаткові оператори LINQ, такі як Include(), OrderBy() або Where(), будуть об’єднані з оригінальним необробленим викликом SQL і будь-якими глобальними фільтрами запитів, і весь запит буде виконано на стороні сервера.
+У разі використання одного з варіантів FromSql запит має бути написаний із використанням схеми сховища даних та імені таблиці, а не імен сутностей. FromSqlRaw() надішле рядок так, як він написаний. FromSqlInterpolated() використовує інтерполяцію рядка C#, і кожен інтерпольований рядок транслюється в параметрі SQL. Слід використовувати інтерпольовану версію кожного разу, коли ви використовуєте змінні для додаткового захисту, властивого параметризованим запитам.
+
+Щоб отримати схему бази даних і назву таблиці, використовуйте властивість Model у похідному DbContext. Модель надає метод під назвою FindEntityType(), який повертає IEntityType, який, у свою чергу, має методи для отримання назви схеми та таблиці. Наступний код відображає назву схеми та таблиці:
+
+```cs
+static void ShowSchemaTableName()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    IEntityType? metadata = context.Model.FindEntityType(typeof(Car).FullName);
+
+    Console.WriteLine(metadata?.GetSchema());
+    Console.WriteLine(metadata?.GetTableName());
+
+}
+ShowSchemaTableName();
+```
+```console
+dbo
+Inventory
+```
+
+Якщо припустити, що глобальний фільтр запиту з попереднього розділу встановлено для об’єкта Car, наступний оператор LINQ отримає перший інвентарний запис, де ідентифікатор дорівнює одиниці, включить пов’язані дані Make та відфільтрує некеровані автомобілі:
+
+```cs
+static void UsingFromSqlRawInterpolated()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    int carId = 1;
+    var query = context.Cars
+        .FromSqlInterpolated($"Select * from dbo.Inventory where Id = {carId}")
+        .Include(c => c.MakeNavigation);
+
+    Console.WriteLine(query.ToQueryString());
+    Console.WriteLine();
+
+    var car = query.First();
+    Console.WriteLine($"{car.Id} {car.PetName}");
+}
+UsingFromSqlRawInterpolated();
+```
+```
+DECLARE p0 int = 1;
+
+SELECT [a].[Id], [a].[Color], [a].[DateBuilt], [a].[Display], [a].[IsDrivable], [a].[MakeId], [a].[PetName], [a].[TimeStamp], [m].[Id], [m].[Name], [m].[TimeStamp]
+FROM (
+    Select * from dbo.Inventory where Id = @p0
+) AS [a]
+INNER JOIN [dbo].[Makes] AS [m] ON [a].[MakeId] = [m].[Id]
+WHERE [a].[IsDrivable] = CAST(1 AS bit)
+
+An entity of type Car was loaded from the database.
+An entity of type Make was loaded from the database.
+1 Zippy
+```
+На жаль, ім’я таблиці та схеми не можна додати до запиту за допомогою інтерполяції рядка C#, оскільки SQL Server не підтримує параметризацію цих елементів. Механізм перекладу LINQ to SQL поєднує необроблений оператор SQL з рештою операторів LINQ.
+
+Знайте, що під час використання необробленого SQL із LINQ необхідно дотримуватися кількох правил.
+
+    SQL-запит повинен повертати дані для всіх властивостей типу сутності.
+
+    Назви стовпців мають відповідати властивостям, на які вони зіставлені.
+
+    SQL-запит не може містити пов’язані дані.
+
+
+### Проекції
+
+На додаток до використання необроблених SQL-запитів із LINQ, моделі перегляду можна заповнювати проекціями.
+Проекція полягає в тому, що інший тип об’єкта складається в кінці запиту LINQ, проектуючи дані в інший тип даних. Проекція може бути підмножиною вихідних даних (наприклад, отримання всіх значень Id об’єктів Car, які відповідають пропозиції where) або спеціального типу, наприклад CarMakeViewModel.
+
+Спроектуємо таблицю Inventory в список Id.
+```cs
+static void ProjectionsToIds()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var query = context.Cars.Select(c => c.Id);
+    Console.WriteLine(query.ToQueryString());
+    Console.WriteLine();
+
+    List<int> ids = query.ToList();
+    foreach (var item in ids)
+    {
+        Console.Write(item+"\t");
+    }
+}
+ProjectionsToIds();
+```
+```console
+SELECT [i].[Id]
+FROM [dbo].[Inventory] AS [i]
+WHERE [i].[IsDrivable] = CAST(1 AS bit)
+
+1       2       3       5       7       8       9
+```
+
+Щоб заповнити спеціальний тип, використовуйте ключове слово new у методі Select(). Значення нового типу заповнюються за допомогою ініціалізації об’єктів, а механізм перекладу LINQ to SQL піклується про те, щоб навігаційні властивості, які використовуються для нового типу, були отримані з бази даних. Це робиться за допомогою швидкого завантаження.
+```cs
+static void ProjectionToCarMakeViewModel()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+    
+    var query = context.Cars.Select(c => new CarMakeViewModel
+    {
+        CarId = c.Id,
+        Color = c.Color,
+        DateBuild = c.DateBuilt.GetValueOrDefault(),
+        Display = c.Display,
+        IsDrivable = c.IsDrivable.GetValueOrDefault(false),
+        Make = c.MakeNavigation.Name,
+        MakeId = c.MakeId,
+        PetName = c.PetName
+    });
+    Console.WriteLine(query.ToQueryString());
+    Console.WriteLine();
+
+    foreach (CarMakeViewModel cmvm in query)
+    {
+        Console.WriteLine(cmvm.CarId+"\t"+cmvm.Make+"\t"+cmvm.Color);
+    }
+}
+ProjectionToCarMakeViewModel();
+```
+```console
+SELECT [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display], [i].[IsDrivable], [m].[Name], [i].[MakeId], [i].[PetName]
+FROM [dbo].[Inventory] AS [i]
+INNER JOIN [dbo].[Makes] AS [m] ON [i].[MakeId] = [m].[Id]
+WHERE [i].[IsDrivable] = CAST(1 AS bit)
+
+1       VW      Black
+2       Ford    Rust
+3       Saab    Black
+5       BMW     Black
+7       BMW     Pink
+8       Pinto   Black
+9       Yugo    Brown
+```
+
+###  Обробка значень, згенерованих базою даних
+
+На додаток до відстеження змін і генерації SQL-запитів із LINQ, значною перевагою використання EF Core над ADO.NET є бездоганна обробка значень, згенерованих базою даних. Після додавання або оновлення сутності EF Core запитує будь-які дані, згенеровані базою даних, і автоматично оновлює сутність правильними значеннями. У ADO.NET вам потрібно буде зробити це самостійно.
+Наприклад, таблиця Inventory має цілочисельний первинний ключ, який визначено в SQL Server як стовпець Identity. Стовпці ідентифікаційних даних заповнюються SQL Server унікальним номером (із послідовності), коли додається запис, і цей первинний ключ не можна оновлювати під час звичайних оновлень запису (за винятком особливого випадку ввімкнення вставки ідентифікаційних даних). Крім того, у таблиці Inventory є стовпець Timestamp, який використовується для перевірки паралельності. Стовпець Timestamp підтримується SQL Server і оновлюється під час будь-якої дії додавання або редагування. Ми також додали до таблиці два стовпці зі значеннями за замовчуванням, DateBuilt і IsDrivable, і один обчислений стовпець, Display.
+
+Наступний код додає новий рядок до таблиці. 
+
+```cs
+static void AddACar()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    Car car = new()
+    {
+        Color = "Yellow",
+        MakeId = 1,
+        PetName = "Herbie"
+    };
+
+    context.Cars.Add(car);
+    context.SaveChanges();
+}
+AddACar();
+```
+
+Коли виконується SaveChanges(), виконується два запити до бази даних. Перший, вставляє новий запис у таблицю:
+
+```sql
+--Process the insert
+INSERT INTO [Dbo].[Inventory] ([Color], [MakeId], [PetName])
+VALUES (N'Yellow', 1, N'Herbie');
+```
+Другий повертає значення для первинного ключа та всіх інших даних, створених сервером. У цьому випадку запит повертає значення Id, DateBuilt, Display, IsDrivable та Timestamp. Потім EF Core оновлює сутність зі згенерованими сервером значеннями.
+```sql
+--Return the server maintained values to EF Core
+SELECT [Id], [DateBuilt], [Display], [IsDrivable], [TimeStamp]
+FROM [dbo].[Inventory]
+WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();
+```
+EF Core фактично виконує параметризовані запити, але я спростив приклади SQL для зручності читання.
+
+Під час додавання запису, який призначає значення властивостям із значеннями за замовчуванням, ви побачите, що EF Core не запитує ці властивості, оскільки сутність уже має правильні значення.
+
+```cs
+static void AddACarWithDefaultsSet()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    Car car = new()
+    {
+        Color = "Yellow",
+        MakeId = 1,
+        PetName = "Herbie",
+        IsDrivable = true,
+        DateBuilt = new DateTime(2021, 01, 01)
+    };
+
+    context.Cars.Add(car);
+    context.SaveChanges();
+}
+//AddACarWithDefaultsSet();
+```
+Коли виконується SaveChanges(), запускаються наступні два оператори SQL. Зверніть увагу, що витягуються лише значення Id (первинний ключ), Display і TimeStamp:
+```sql
+--Insert the values
+INSERT INTO [dbo].[Inventory] ([Color], [DateBuilt], [IsDrivable], [MakeId], [PetName])
+VALUES (N'Yellow','2021-01-01 00:00:00',1,1, N'Herbie');
+--Get the database managed values
+SELECT [Id], [Display], [TimeStamp]
+FROM [dbo].[Inventory]
+WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();
+```
+
+Під час оновлення записів значення первинного ключа вже відомі, тому повертаються лише поля неосновного ключа, які контролюються базою даних. Наступний код отримує запис автомобіля з бази даних, змінює колір, а потім зберігає оновлений автомобіль:
+
+```cs
+static void UpdateACar()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+    var car = context.Cars.First(c => c.Id == 1);
+    car.Color = "White";
+    context.SaveChanges();
+}
+```
+Команда SaveChanges() виконує наступний SQL, який спочатку зберігає оновлення, а потім повертає нові значення Display і TimeStamp.
+
+```sql
+--Update the Car Record
+UPDATE [dbo].[Inventory] SET [Color] = N'White'
+WHERE [Id] = 1 AND [TimeStamp] = 0x00000000000007E1;
+--Return the updated Display and TimeStamp values to EF Core
+SELECT [Display], [TimeStamp]
+FROM [dbo].[Inventory]
+WHERE @@ROWCOUNT = 1 AND [Id] = 1;
+```
+Цей процес також працює під час додавання та/або оновлення кількох елементів у базі даних. EF Core знає, як підключити значення, отримані з бази даних, до правильних об’єктів у вашій колекції.
+
+### Перевірка паралельності
+
+Проблеми паралельності виникають, коли два окремі процеси (користувачі або системи) намагаються оновити один і той же запис приблизно в один і той же час. Наприклад, User 1 і User 2 отримують дані для Customer A. User 1 оновлює адресу та зберігає зміни. User 2 оновлює кредитний рейтинг і намагається зберегти той самий запис. Якщо збереження для User 2 працює, зміни від User 1 буде скасовано, оскільки адресу було змінено після того, як User 2 отримав запис. Іншим варіантом є невдача збереження для User 2, у цьому випадку зміни User 1 зберігаються, а зміни User 2 – ні.
+Спосіб вирішення цієї ситуації залежить від вимог до програми. Рішення варіюються від бездіяльності (друге оновлення перезаписує перше) до використання оптимістичного паралелізму (друге оновлення не вдається) до більш складних рішень, таких як перевірка окремих полів. За винятком вибору нічого не робити (загалом це вважається поганою ідеєю програмування), розробники повинні знати, коли виникають проблеми з паралельністю, щоб їх можна було правильно вирішити.
+На щастя, багато сучасних баз даних мають інструменти, які допомагають команді розробників вирішувати проблеми паралелізму. SQL Server має вбудований тип даних під назвою timestamp, синонім rowversion. Якщо стовпець визначено з типом даних timestamp, коли запис додається до бази даних, значення для стовпця створюється SQL Server, а коли запис оновлюється, значення для стовпця також оновлюється.Фактично гарантовано, що це значення буде унікальним і повністю контролюється SQL Server, тому вам не потрібно нічого робити, окрім як «додати поле».
+
+EF Core може використовувати тип даних timestamp SQL Server, реалізувавши властивість Timestamp для сутності (представленої як byte[] у C#). Властивості сутності, визначені атрибутом Timestamp або позначенням Fluent API, додаються до клаузи where під час оновлення або видалення записів. Замість того, щоб просто використовувати значення первинного ключа, згенерований SQL додає значення властивості timestamp до клаузи where, як ви бачили в попередньому прикладі. Це обмежує результати тими записами, де значення первинного ключа та позначки часу збігаються. Якщо інший користувач (або система) оновив запис, значення часових позначок не збігатимуться, і оператор оновлення або видалення не оновить запис. Ось попередній приклад оновлення:
+```sql
+UPDATE [dbo].[Inventory] SET [Color] = N'White'
+WHERE [Id] = 1 AND [TimeStamp] = 0x00000000000007E1;
+```
+Бази даних (такі як SQL Server) повідомляють про кількість записів, на які впливає додавання, оновлення або видалення записів. Якщо база даних повідомляє про кількість задіяних записів, що відрізняється від кількості записів, які ChangeTracker очікує змінити, EF Core створює виняток DbUpdateConcurrencyException і повертає всю транзакцію назад. Виняток DbUpdateConcurrencyException містить інформацію для всіх записів, які не збереглися, включаючи вихідні значення (коли сутність було завантажено з бази даних) і поточні значення (якщо їх оновив користувач/система). Існує також метод отримання поточних значень бази даних (це потребує ще одного звернення до сервера). Маючи таку велику кількість інформації, розробник може потім обробити помилку паралельного виконання відповідно до вимог програми. Наступний код показує це в дії.
+
+```cs
+static void ThrowConcurrencyException()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+    try
+    {
+        Car car = context.Cars.First();
+
+        //update the database outside of the context
+        FormattableString sql = $"Update dbo.Inventory set Color='Pink' where Id = {car.Id}";
+        context.Database
+            .ExecuteSqlInterpolated(sql);
+
+        //update the car record in the change tracker and then try and save changes
+        car.Color = "Yellow";
+        context.SaveChanges();
+    }
+    catch (DbUpdateConcurrencyException ex)
+    {
+        //Get the entity that failed to update
+        var entry = ex.Entries[0];
+        //Get the original values (when the entity was loaded)
+        PropertyValues originalProperty = entry.OriginalValues;
+        //Get the current values (updated by this code path)
+        PropertyValues currentProperty = entry.OriginalValues;
+        // get the current values from the data store –
+        //Note: This needs another database call
+        PropertyValues? databaseProperty = entry.GetDatabaseValues();
+    }
+}
+ThrowConcurrencyException();
+```
+```console
+An entity of type Car was loaded from the database.
+Saving change for Server=(localdb)\mssqllocaldb;Database=AutoLotSamples;Trusted_Connection=True;ConnectRetryCount=0
+An exception orruced! The database operation was expected to affect 1 row(s), but actually affected 0 row(s); data may have been modified or deleted since entities were loaded. See https://go.microsoft.com/fwlink/?LinkId=527962 for information on understanding and handling optimistic concurrency exceptions. entities
+```
+
+### Стійкість підключення
+
+Перехідні помилки важко налагодити та важче відтворити. На щастя, багато постачальників баз даних мають вбудований механізм повторної спроби для збоїв у системі баз даних (проблеми з базою даних tempdb, обмеження на кількість користувачів тощо), який може бути використаний EF Core. Для SQL Server SqlServerRetryingExecutionStrategy виявляє тимчасові помилки (як визначено командою SQL Server), і якщо ввімкнено для похідного DbContext через DbContextOptions, EF Core автоматично повторює операцію, доки не буде досягнуто максимального ліміту повторів. Для SQL Server існує метод швидкого доступу, який можна використовувати для ввімкнення SqlServerRetryingExecutionStrategy з усіма значеннями за замовчуванням.
+Розглянемо метод в ApplicationDbContextFactory.
+```cs
+    public ApplicationDbContext CreateDbContext(string[]? args)
+    {
+
+        //...
+       
+        optionsBuilder.UseSqlServer(connectionString, options => options.EnableRetryOnFailure());
+
+        return new ApplicationDbContext(optionsBuilder.Options);
+    }
+
+```
+
+
+У SqlServerOptions використовується метод EnableRetryOnFailure(). Максимальну кількість повторних спроб і ліміт часу між повторними спробами можна налаштувати відповідно до вимог програми. Якщо ліміт повторних спроб досягнуто без завершення операції, EF Core повідомить програму про проблеми з підключенням, викинувши RetryLimitExceededException. Цей виняток, якщо його обробляє розробник, може передавати відповідну інформацію користувачеві, забезпечуючи кращий досвід.
+
+```cs
+try
+{
+  Context.SaveChanges();
+}
+catch (RetryLimitExceededException ex)
+{
+  //A retry limit error occurred
+  //Should handle intelligently
+  Console.WriteLine($'Retry limit exceeded! {ex.Message}');
+}
+```
+При використанні стратегії виконання явні транзакції повинні бути створені в контексті стратегії виконання:
+
+```cs
+static void TransactionWithExecutionStrategies()
+{
+  //The factory is not meant to be used like this, but it's demo code :-)
+  var context = new ApplicationDbContextFactory().CreateDbContext(null);
+  var strategy = context.Database.CreateExecutionStrategy();
+  strategy.Execute(() =>
+  {
+    using var trans = context.Database.BeginTransaction();
+    try
+    {
+      //actionToExecute();
+      trans.Commit();
+    }
+    catch (Exception ex)
+    {
+      trans.Rollback();
+    }
+  });
+}
+```
+Для постачальників баз даних, які не надають вбудовану стратегію виконання, також можна створити власні стратегії виконання. Пошуковий запит "connection-resiliency".
+
+### Відображення функцій бази даних
+
+Функції SQL Server можна зіставляти з методами C# і включати в оператори LINQ. Метод C# є лише покажчиком місця заповнення, оскільки функція сервера вкладаеться в згенерований SQL для запиту. Підтримку відображення табличної функції додано в EF Core до вже існуючої підтримки відображення скалярної функції.
+EF Core вже підтримує багато вбудованих функцій SQL Server. Оператор C# null coalescing (??) перекладається на функцію об’єднання SQL Server. String.IsNullOrEmpty() перетворюється на нульову перевірку та використовує функцію len SQL Server для перевірки порожнього рядка.
+Щоб побачити відображення визначеної користувачем функції в дії, створіть визначену користувачем функцію, яка повертає кількість записів Invertory на основі MakeId:
+
+```sql
+CREATE FUNCTION udf_CountOfMakes ( @makeid int )
+RETURNS int
+AS
+BEGIN
+    DECLARE @Result int
+    SELECT @Result = COUNT(makeid) FROM dbo.Inventory WHERE makeid = @makeid
+    RETURN @Result
+END
+GO
+```
+
+Щоб використовувати це в C#, створіть нову функцію в похідному класі DbContext. Тіло C# цієї функції ніколи не виконується; це просто заповнювач, який відображається на функцію SQL Server. Зауважте, що цей метод можна розмістити де завгодно, але зазвичай його розміщують у похідному класі DbContext для видимості:
+
+```cs
+    //DB Function
+    [DbFunction("udf_CountOfMakes",Schema ="dbo")]
+    public static int InventoryCountFor(int makeId)
+        => throw new NotSupportedException();
+```
+
+Цю функцію тепер можна використовувати в запитах LINQ і вона стає частиною згенерованого SQL.
+
+```cs
+static void UsingMappedDBFunction()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+    var query = context.Makes.Where(m => ApplicationDbContext.InventoryCountFor(m.Id) > 1);
+    Console.WriteLine(query.ToQueryString());
+    Console.WriteLine();
+
+    List<Make> makes = query.ToList();
+    foreach (var make in makes)
+    {
+        Console.WriteLine($"{make.Name}");
+    }
+}
+UsingMappedDBFunction();
+```
+```console
+SELECT [m].[Id], [m].[Name], [m].[TimeStamp]
+FROM [dbo].[Makes] AS [m]
+WHERE [dbo].[udf_CountOfMakes]([m].[Id]) > 1
+
+An entity of type Make was loaded from the database.
+An entity of type Make was loaded from the database.
+VW
+BMW
+```
+
+EF Core також підтримує відображення табличних(table-valued) функцій. Додайте таку функцію до своєї бази даних:
+
+```sql
+CREATE FUNCTION udtf_GetCarsForMake ( @makeId int )
+RETURNS TABLE
+AS
+RETURN
+(   
+   SELECT Id, IsDrivable, DateBuilt, Color, PetName, MakeId, TimeStamp, Display
+   FROM Inventory WHERE MakeId = @makeId
+)
+GO
+```
+Додайте наступний код до класу ApplicationDbContext:
+
+```cs
+    [DbFunction("udtf_GetCarsForMake",Schema ="dbo")]
+    public IQueryable<Car> GetCarsFor(int makeId)
+        => FromExpression(() => GetCarsFor(makeId));
+```
+Виклик FromExpression() дозволяє викликати функцію безпосередньо в похідному DbContext замість використання звичайного DbSet<T>.
+```cs
+static void UsingTableValuedDBFunction()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+    var query = context.GetCarsFor(5);
+    Console.WriteLine(query.ToQueryString());
+    Console.WriteLine();
+
+    List<Car>? cars = query.ToList();
+    CollectionCarToConsole(cars,"Cars MakeId = 5");
+}
+UsingTableValuedDBFunction();
+```
+```console
+DECLARE @__makeId_1 int = 5;
+
+SELECT [u].[Id], [u].[Color], [u].[DateBuilt], [u].[Display], [u].[IsDrivable], [u].[MakeId], [u].[PetName], [u].[TimeStamp]
+FROM [dbo].[udtf_GetCarsForMake](@__makeId_1) AS [u]
+WHERE [u].[IsDrivable] = CAST(1 AS bit)
+
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+        Cars MakeId = 5
+5 Black Bimmer
+7 Pink Pinky
+```
+Щоб отримати додаткові відомості про відображення функцій бази даних, зверніться до документації за запитом "EF Core user defined function mapping".
+
+### EF.Functions
+
+Статичний клас EF було створено як заповнювач для методів CLR, які транслюються у функції бази даних, використовуючи той самий механізм, що й відображення функцій бази даних, описане в попередньому розділі.Основна відмінність полягає в тому, що всі деталі впровадження обробляються постачальниками баз даних.
+|Функція|Опис|
+|-------|----|
+|Like()|Реалізація операції SQL LIKE. Чутливість до регістру та синтаксис залежать від бази даних. Для SQL Server порівняння не враховує регістр, і потрібно вказати оператор підстановки (%).|
+|Random()|Повертає псевдовипадкове число від 0 до 1 включно. Зіставляється з функцією RAND SQL Server.|
+|Collate<TProperty>()|Визначає сортування, яке буде використовуватися в запиті LINQ.|
+|Contains()|Відображає функцію SQL Server CONTAINS. Щоб використовувати Contains(), таблиця має мати повнотекстовий індекс.|
+|FreeText()|Відображає на сервері функцію зберігання FREETEXT. Щоб використовувати FreeText(), таблиця має мати повнотекстовий індекс.|
+|DataLength()|Повертає кількість байтів, використаних для представлення виразу.|
+|DateDiffYear(),DateDiffDay(),...|Підраховує кількість часових інтервалів між датою початку та датою завершення. Зіставляється з функцією DATEDIFF SQL Server.|
+|DateFromParts()|Ініціалізує новий екземпляр структури DateTime для вказаного року, місяця, дня. Відображає функцію DATEFROMPARTS SQL Server.|
+|DateTime2FromParts()|Ініціалізує новий екземпляр структури DateTime для вказаного року, місяця, дня, години, хвилини, секунди, дробів і точності. Зіставляється з функцією SQL Server DATETIME2FROMPARTS.|
+|DateTimeFromParts()|ніціалізує новий екземпляр структури DateTime для вказаного року, місяця, дня, години, хвилини, секунди, мілісекунди. Зіставляється з функцією DATETIMEFROMPARTS SQL Server.|
+|DateTimeOffsetFromParts()|Ініціалізує новий екземпляр структури DateTimeOffset для вказаного року, місяця, дня, години, хвилини, секунди, часток, hourOffset, minuteOffset і точності. Зіставляється з функцією SQL Server DATETIMEOFFSETFROMPARTS.|
+|SmallDateTimeFromParts()|Ініціалізує новий екземпляр структури DateTime для вказаного року, місяця, дня, години та хвилини. Відповідає функції SMALLDATETIMEFROMPARTS SQL Server.|
+|TimeFromParts()|Ініціалізує новий екземпляр структури TimeSpan для вказаних годин, хвилин, секунд, часток і точності. Зіставляється з функцією TIMEFROMPARTS SQL Server.|
+|IsDate()|Перевіряє, чи даний рядок є датою. Зіставляється з ISDATE() SQL Server.|
+
+Приклад для Like.
+```cs
+static void UsingEFFunctions_Like()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+    var query = context.Cars.IgnoreQueryFilters().Where(c => EF.Functions.Like(c.PetName, "%r%"));
+    Console.WriteLine(query.ToQueryString());
+    Console.WriteLine();
+
+    List<Car>? cars = query.ToList();
+    CollectionCarToConsole(cars, "Cars are Like(c.PetName, \"%r%\")");
+}
+UsingEFFunctions_Like();
+```
+```console
+SELECT [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display], [i].[IsDrivable], [i].[MakeId], [i].[PetName], [i].[TimeStamp]
+FROM [dbo].[Inventory] AS [i]
+WHERE [i].[PetName] LIKE N'%r%'
+
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+        Cars are Like(c.PetName, "%r%")
+2 Rust Rusty
+5 Black Bimmer
+9 Brown Brownie
+11 Yellow Herbie
+
+```
+
+Зверніть увагу, що символ підстановки SQL Server (%) використовується так само, як і в запиті T-SQL.
+
+### Пакетування операторів
+
+EF Core значно підвищиє продуктивність під час збереження змін у базі даних, виконавши оператори одним або кількома пакетами. Це зменшує переміщення між додатком і базою даних, підвищуючи продуктивність і потенційно знижуючи витрати (наприклад, для хмарних баз даних, де клієнти стягують плату за транзакцію). EF Core групує оператори  create, update, та delete я за допомогою параметрів із табличними значеннями(table-valued). Кількість операторів, які EF групує, залежить від постачальника бази даних. Наприклад, для SQL Server пакетування неефективне при кількості операторів менше 4 і понад 40, тому EF Core збільшить кількість операторів до 42. Незалежно від кількості пакетів, усі оператори все одно виконуються в транзакції. Розмір пакета також можна налаштувати за допомогою DbContextOptions, але рекомендується дозволити EF Core обчислювати розмір пакета для більшості (якщо не всіх) ситуацій.
+```cs
+static void Batching()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+    var cars = new List<Car>
+    {
+        new Car {Color = "Yellow", MakeId = 1, PetName = "Herbie"},
+        new Car {Color = "White", MakeId = 2, PetName = "Mach 5"},
+        new Car {Color = "Pink", MakeId = 3, PetName = "Avon"},
+        new Car {Color = "Blue", MakeId = 4, PetName = "Blueberry"},
+    };
+    context.Cars.AddRange(cars);
+    context.SaveChanges();
+}
+Batching();
+```
+
+Якшо ви подивитесь в SQL Server Profiler extension як виконується цей метод то ви побачиете
+
+```sql
+exec sp_executesql N'SET IMPLICIT_TRANSACTIONS OFF;
+SET NOCOUNT ON;
+MERGE [dbo].[Inventory] USING (
+VALUES (@p0, @p1, @p2, 0),
+(@p3, @p4, @p5, 1),
+(@p6, @p7, @p8, 2),
+(@p9, @p10, @p11, 3)) AS i ([Color], [MakeId], [PetName], _Position) ON 1=0
+WHEN NOT MATCHED THEN
+INSERT ([Color], [MakeId], [PetName])
+VALUES (i.[Color], i.[MakeId], i.[PetName])
+OUTPUT INSERTED.[Id], INSERTED.[DateBuilt], INSERTED.[Display], INSERTED.[IsDrivable], INSERTED.[TimeStamp], i._Position;
+',N'@p0 nvarchar(50),@p1 int,@p2 nvarchar(50),@p3 nvarchar(50),@p4 int,@p5 nvarchar(50),@p6 nvarchar(50),@p7 int,@p8 nvarchar(50),@p9 nvarchar(50),@p10 int,@p11 nvarchar(50)',@p0=N'Yellow',@p1=1,@p2=N'Herbie',@p3=N'White',@p4=2,@p5=N'Mach 5',@p6=N'Pink',@p7=3,@p8=N'Avon',@p9=N'Blue',@p10=4,@p11=N'Blueberry'
+```
+EF Core об’єднує оператори в один виклик.
+
+### Перетворювачі значень
+
+Перетворювачі значень використовуються для автоматичного перетворення даних під час отримання та збереження в базі даних. EF Core поставляється з довгим списком вбудованих перетворювачів значень (повний список можна переглянути за азпитом "EF Core value conversion"). Окрім вбудованих конвертерів значень, ви також можете створити власні. Наприклад, ви можете зберегти ціну автомобіля в базі даних як числове значення, але відобразити ціну як рядок валюти.
+
+Деякі з перетворювачів значень EF Core
+
+|Перетворювач|Опис|
+|------------|----|
+|BoolToStringConverter|Перетворює логічні значення в і з двох рядкових значень.|
+|BytesToStringConverter|Перетворює масиви байтів у рядки та з них.|
+|CharToStringConverter|Перетворює Char у односимвольний рядок і з нього.|
+|DateTimeOffsetToBinaryConverter|Перетворює DateTime на двійкове представлення та з нього на long. DateTime скорочується з точністю до 0,1 мілісекунди.|
+|DateTimeOffsetToBytesConverter|Перетворює DateTime у та з масивів байтів.|
+|DateTimeOffsetToStringConverter|Converts DateTimeOffset to and from strings.|
+|DateTimeToBinaryConverter|Converts DateTime using ToBinary(). This will preserve the DateTimeKind.|
+|DateTimeToStringConverter|Перетворює DateTime на рядки та з них.|
+|DateTimeToTicksConverter|Перетворює DateTime у та з Ticks.|
+|EnumToNumberConverter<TEnum,TNumber>|Перетворює значення переліку на базове числове представлення та з нього.|
+|EnumToStringConverter<TEnum>|Converts enum values to and from their string representation.|
+|GuidToStringConverter|Перетворює Guid на рядок і з нього за допомогою стандартного формату «8-4-4-4-12».|
+|NumberToStringConverter<TNumber>|Перетворює числові значення на та з їхнього рядкового представлення.|
+|StringToBoolConverter|Перетворює рядки в логічні значення та з них.|
+|StringToBytesConverter|Перетворює рядки в масиви байтів і з них.|
+|StringToCharConverter|Перетворює рядки на значення Char і з них.|
+|StringToDateTimeConverter|Перетворює рядки на значення DateTimeOffset і з них.|
+|StringToEnumConverter<TEnum>|Перетворює рядки в значення enum і з них.|
+|StringToGuidConverter|Перетворює рядки в і з Guid за допомогою стандартного формату «8-4-4-4-12».|
+|StringToNumberConverter<TNumber>|Перетворює рядки в числові значення та з них.|
+|StringToTimeSpanConverter|Перетворює рядки на значення TimeSpan і з них.|
+|StringToUriConverter|Перетворює рядки на значення Uri та з них.|
+|TimeSpanToStringConverter|Перетворює TimeSpan у та з рядків.|
+|TimeSpanToTicksConverter|Перетворює TimeSpan у та з Ticks.|
+|UriToStringConverter|Перетворює Uri на рядок і з нього.|
+|ValueConverter|Визначає перетворення з об’єкта одного типу в моделі на об’єкт того самого чи іншого типу в сховищі.|
+
+Багато вбудованих конвертерів значень не потребують жодної конфігурації. У багатьох ситуаціях EF Core автоматично перетворює тип даних C# bool на бітовий тип даних SQL Server без будь-якого втручання з вашого боку.
+
+Перетворювачі значень встановлені на моделі. Хоча вони дозволяють зіставляти різні типи даних між вашою моделлю та базою даних, конвертери використовуватимуться лише під час використання EF Core для запиту до бази даних. Прямий запит до бази даних повертає тип бази даних, а не перетворений тип.
+
+Наприклад, щоб повернути рядкове значення з бази даних замість десяткового, почніть з оновлення класу Car, щоб мати рядкову властивість Price:
+
+```cs
+public class Car : BaseEntity
+{
+    //...
+    public string Price { get; set; }
+     //...
+}
+```
+Додайте наступні оператори global using у файл GlobalUsings.cs
+```cs
+global using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+global using System.Globalization;
+```
+Далі додайте код у метод Configure() класу CarConfiguration, щоб використовувати вбудований StringToNumberConverter:
+
+```cs
+    public void Configure(EntityTypeBuilder<Car> builder)
+    {
+        // ...
+
+        builder.Property(c => c.Price).HasConversion(new StringToNumberConverter<decimal>()); 
+    }
+```
+Оскільки ми змінили модель даних треба створити міграцію і зробити зміни а базі даних.
+
+```console
+dotnet ef migrations add ChangeCar_AddPrice
+dotnet ef database update
+```
+Перевіремо роботу перетворювача.
+
+```cs
+static void UsingValueConverter()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var car = context.Cars.First();
+    car.Price = "777.00";
+    context.SaveChanges();
+}
+UsingValueConverter();
+
+static void ShowPriceOfFirstCar()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+    var car = context.Cars.First();
+    Console.WriteLine($"{car.Id} {car.PetName} {car.Price}");
+}
+ShowPriceOfFirstCar();
+```
+```
+An entity of type Car was loaded from the database.
+Saving change for Server=(localdb)\mssqllocaldb;Database=AutoLotSamples;Trusted_Connection=True;ConnectRetryCount=0
+An entity of type Car was update.
+Saved change 1 entities
+An entity of type Car was loaded from the database.
+1 Zippy 777.00
+```
+
+Якщо ви хочете більше контролювати значення, наприклад, щоб відформатувати ціну з вказівкою валюти, ви можете створити спеціальний перетворювач.
+
+```cs
+        CultureInfo provider = new CultureInfo("en-US");
+        NumberStyles numberStyles = NumberStyles.Number | NumberStyles.AllowCurrencySymbol;
+        builder.Property(c => c.Price).HasConversion(
+            v => decimal.Parse(v, numberStyles, provider),
+            v => v.ToString("C2")
+            ); 
+```
+Перший параметр перетворює значення, що надходять до бази даних, а другий параметр – форматує дані, що надходять із бази даних.
+
+Щоб отримати додаткові відомості про перетворення значень, прочитайте документацію за запитом "EF Core value conversions"
+
+
+Додавання стовпця Price порушує функцію UsingTableValuedDBFunction(), яка була використана раніше в цьому розділі. Щоб виправити це, оновіть функцію, включивши новий стовпець:
+```sql
+CREATE FUNCTION udtf_GetCarsForMake ( @makeId int )
+RETURNS TABLE
+AS
+RETURN
+(   
+   SELECT Id, IsDrivable, DateBuilt, Color, PetName, MakeId, TimeStamp, Display,Price
+   FROM Inventory WHERE MakeId = @makeId
+)
+```
+
+### Shadow(тінові) властивості.
+
+Тіньові властивості — це властивості, які явно не визначені у вашій моделі, але існують завдяки EF Core.Вони корисні, коли в базі даних є дані, які не слід відображати для зіставлених типів сутностей.Значення та стан цих властивостей повністю підтримується інструментом Change Tracker. Одним із прикладів використання тіньових властивостей є представлення зовнішніх ключів для властивостей навігації, якщо зовнішній ключ не визначено як частину сутності. Іншим прикладом є тимчасові таблиці. 
+
+Тіньові властивості, які не додає EF Core до сутності, можна визначити лише через Fluent API за допомогою методу Property(). Якщо ім’я властивості, передане в метод Property(), збігається з існуючою властивістю сутності (раніше визначеною тіньовою властивістю або явною властивістю), код API Fluent налаштовує наявну властивість. В іншому випадку для сутності створюється тіньова властивість. Щоб додати тінову властивість типу bool? з назвою IsDeleted до сутності Car зі значенням за замовчуванням true, додайте наступний код до методу Configure() класу CarConfiguration.
+```cs
+    public void Configure(EntityTypeBuilder<Car> builder)
+    {
+        //...
+        builder.Property<bool?>("IsDeleted").IsRequired(false).HasDefaultValue(true);
+    }
+```
+Післяціх змін слід додаьт нову міграцію та оновити БД.
+
+```console
+ dotnet ef migrations add ChangeCarAddShadowPropertyIsDeleted
+ dotnet ef database update
+```
+Також слід змінити udtf_GetCarsForMake добавивиши IsDeleted
+
+```sql
+CREATE FUNCTION udtf_GetCarsForMake ( @makeId int )
+-- ...
+   SELECT Id, IsDrivable, DateBuilt, Color, PetName, MakeId, TimeStamp, Display, Price, IsDeleted
+--- ...
+```
+
+Доступ до тіньових властивостей можна отримати лише через Change Tracker, тому їх потрібно завантажити з бази даних як відстежувані сутності. Наприклад, наступний код не компілюється:
+
+```cs
+static void ShadowProperties()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var car = new Car()
+    {
+        Color = "Red",
+        PetName = "Snuppy",
+        MakeId = 1,
+        // Compile error
+        IsDeleted = false
+    };
+}
+```
+Щойно запис додано до засобу Change Tracker, можна отримати доступ до властивості IsDeleted:
+
+```cs
+static void ShadowProperties()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var car = new Car()
+    {
+        Color = "White",
+        PetName = "Snuppy",
+        MakeId = 1,
+        Price = "1000.00"
+        //Compile error
+        //IsDeleted = false
+    };
+
+    context.Cars.AddRange(car);
+    context.Entry(car).Property("IsDeleted").CurrentValue = true;
+    context.SaveChanges();
+}
+ShadowProperties();
+```
+```console
+Saving change for Server=(localdb)\mssqllocaldb;Database=AutoLotSamples;Trusted_Connection=True;ConnectRetryCount=0
+Saved change 1 entities
+```
+
+Тіньові властивості також можна отримати в запитах LINQ. Наступний код спочатку завантажує всі записи про автомобіль у Change Tracker, а потім встановлює IsDeleted = false для кожного у якого парне Id.
+```cs
+static void UsingShadowPropertiesWithLINQ()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var cars = context.Cars.ToList();
+
+    foreach (var car in cars.Where(c => c.Id % 2 == 0))
+    {
+        context.Entry(car).Property("IsDeleted").CurrentValue = false;
+    }
+    context.SaveChanges();
+
+    var noDeletedCars = context.Cars.Where(c => !EF.Property<bool>(c,"IsDeleted")).ToList();
+    foreach (var car in noDeletedCars)
+    {
+        Console.WriteLine($"{car.Id} {car.PetName} is deleted " +
+            $"{context.Entry(car).Property("IsDeleted").CurrentValue}");
+    }
+}
+UsingShadowPropertiesWithLINQ();
+```
+```console
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+Saving change for Server=(localdb)\mssqllocaldb;Database=AutoLotSamples;Trusted_Connection=True;ConnectRetryCount=0
+An entity of type Car was update.
+An entity of type Car was update.
+An entity of type Car was update.
+An entity of type Car was update.
+Saved change 4 entities
+2 Rusty is deleted False
+4 Clunker is deleted False
+6 Hank is deleted False
+8 Pete is deleted False
+```
+
+### Підтримка Часової таблиці SQL Server
+
+Часові таблиці SQL Server автоматично відстежують усі дані, які коли-небудь зберігалися в таблиці. Це досягається за допомогою таблиці історії, у якій зберігається копія даних із міткою часу щоразу, коли вноситься зміна або видалtyyz в основній таблиці. Потім архівні дані доступні для запиту, аудиту або відновлення. EF Core підтримує створення часових таблиць, перетворення звичайних таблиць у часові таблиці, запит історичних даних і відновлення даних із певного моменту часу.
+
+#### Налаштування часових таблиць
+
+Щоб додати підтримку часових таблиць за замовчуванням, скористайтеся методом ToTable() Fluent API. Цей метод також можна використовувати для визначення назви та схеми таблиці, але в нашому прикладі він не потрібен через атрибут Table в сутності Car. Оновіть метод Configure() класу CarConfiguration, щоб додати виклик ToTable().
+
+```cs
+    public void Configure(EntityTypeBuilder<Car> builder)
+    {
+        //...
+        //specify table name and schema – not needed because of the Table attribute
+        //builder.ToTable('Inventory', 'dbo', b=> b.IsTemporal());
+        builder.ToTable(tb => tb.IsTemporal());
+    }
+```
+Розділені таблиці не підтримуються для використання як часові таблиці. Це включає будь-які таблиці, створені з сутностей за допомогою Qwned сутностей.
+
+Після цього треба додадти міграцію і оновити БД.
+
+```console
+  dotnet ef migrations add AddTemporal
+  dotnet ef database update
+```
+Після створення нової міграції EF Core та оновлення бази даних таблиця Inventory перетворюється на часову таблицю системної версії(system-versioned) з двома додатковими стовпцями datetime2, PeriodEnd і PeriodStart. Це також створює таблицю історії під назвою <ClassName>History (InventoryHistory, у цьому прикладі) у тій же схемі, що й основна таблиця (dbo, у цьому прикладі). Ця таблиця історії є клоном оновленої таблиці інвентаризації та зберігає історію будь-яких змін у таблиці інвентаризації.
+
+Додамо в БД схему audits.
+
+Додамо нову міграцію.
+```console
+ dotnet ef migrations add AddSchemaAudits
+```
+В файлі міграції зробимо зміни.
+
+```cs
+protected override void Up(MigrationBuilder migrationBuilder)
+{
+    migrationBuilder.EnsureSchema("audits");
+}
+protected override void Down(MigrationBuilder migrationBuilder)
+{
+    migrationBuilder.DropSchema("audits");
+}
+```
+Примінимо міграцію.
+```console
+dotnet ef database update
+```
+Змінемо імя таблиці на InventoryAudit; і розміщує таблицю в схемі audits:
+
+```cs
+    public void Configure(EntityTypeBuilder<Car> builder)
+    {
+        //...
+        builder.ToTable(b => b.IsTemporal(t =>
+        {
+            t.UseHistoryTable("InventoryAudit", "audits");
+        }));
+    }
+```
+Створимо і застосуємо міграцію.
+
+```console
+dotnet ef migrations add ChangeTableNameAndSchame
+dotnet ef database update
+```
+Після того, як цю зміну буде перенесено до бази даних, під час перевірки таблиць за допомогою Azure Data Studio (або SSMS) ви побачите, що таблиця Inventory позначена як System-Versioned, а коли ви розгорнете вузол, ви побачите audits.InventoryAudit.
+
+![temporal table](TemporalTable.jpg)
+
+
+Важливе зауваження щодо часових таблиць: звичайні запити не повертатимуть поля позначок часу. Якщо ви виконаєте наступний запит, ви побачите повернуті лише звичайні поля. 
+
+```sql
+SELECT * FROM dbo.Inventory
+```
+Щоб повернути нові поля, їх потрібно вказати явно, наприклад:
+
+```sql
+SELECT *,PeriodEnd,PeriodStart  FROM dbo.Inventory
+```
+
+Під час використання LINQ для запиту до таблиці EF Core включає в запит властивості позначки часу.
+
+```cs
+static void UsingLinqForTemporalTable()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var query = context.Cars;
+    Console.WriteLine(query.ToQueryString());
+    Console.WriteLine();
+
+    var cars = query.ToList();
+    CollectionCarToConsole(cars, "Cars");
+}
+UsingLinqForTemporalTable();
+```
+```console
+SELECT [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display], [i].[IsDeleted], [i].[IsDrivable], [i].[MakeId], [i].[PeriodEnd], [i].[PeriodStart], [i].[PetName], [i].[Price], [i].[TimeStamp]
+FROM [dbo].[Inventory] AS [i]
+WHERE [i].[IsDrivable] = CAST(1 AS bit)
+
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+        Cars
+1 Black Zippy
+2 Rust Rusty
+3 Black Mel
+4 Yellow Clunker
+5 Black Bimmer
+6 Green Hank
+7 Pink Pinky
+8 Black Pete
+9 Brown Brownie
+13 White Snuppy
+
+```
+Зверніть увагу на те, що згенерований SQL містить два стовпці з міткою часу. EF Core додає додаткові стовпці до вашої сутності як тіньові властивості. Як було показано в попередньому розділі, тіньові властивості існують як стовпці в таблиці бази даних, але не визначені явно в сутності.
+
+Проблема виникає, коли ви створюєте FromSqlRaw()/FromSqlInterpolated(), збережених процедур або визначених користувачем функцій. Як ви зрозуміли, під час заповнення сутностей будь-якими способами, окрім LINQ, запит має повертати кожну властивість, яка очікується. Незважаючи на те, що властивості PeriodEnd і PeriodStart не визначені в сутності Car, EF Core все одно очікує їх повернення.
+
+Це порушує деякий попередній код у цьому розділі. Щоб виправити це, спочатку поверніться до локальної функції UsingFromSqlRawInterpolated() і переконайтесь шо він не працює.
+
+Створимо новий вариант методу.
+
+```cs
+static void UsingFromSqlRawInterpolatedWithTemporalTable()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    int carId = 1;
+    var query = context.Cars
+        .FromSqlInterpolated($"Select *,ValidFrom,ValidTo from dbo.Inventory where Id = {carId}")
+        .Include(c => c.MakeNavigation);
+
+    Console.WriteLine(query.ToQueryString());
+    Console.WriteLine();
+
+    var car = query.First();
+    Console.WriteLine($"{car.Id} {car.MakeNavigation.Name} {car.PetName}");
+}
+UsingFromSqlRawInterpolatedWithTemporalTable();
+```
+```console
+DECLARE p0 int = 1;
+
+SELECT [a].[Id], [a].[Color], [a].[DateBuilt], [a].[Display], [a].[IsDeleted], [a].[IsDrivable], [a].[MakeId], [a].[PeriodEnd], [a].[PeriodStart], [a].[PetName], [a].[Price], [a].[TimeStamp], [m].[Id], [m].[Name], [m].[TimeStamp]
+FROM (
+    Select *,PeriodEnd,PeriodStart from dbo.Inventory where Id = @p0
+) AS [a]
+INNER JOIN [dbo].[Makes] AS [m] ON [a].[MakeId] = [m].[Id]
+WHERE [a].[IsDrivable] = CAST(1 AS bit)
+
+An entity of type Car was loaded from the database.
+An entity of type Make was loaded from the database.
+1 VW Zippy
+```
+Також требе зробити зміни в table-valued функції БД udtf_GetCarsForMake()
+
+```sql
+CREATE FUNCTION udtf_GetCarsForMake ( @makeId int )
+-- ...
+   SELECT Id, IsDrivable, DateBuilt, Color, PetName, 
+   MakeId, TimeStamp, Display, Price, IsDeleted, PeriodEnd, PeriodStart
+--- ...
+```
+
+#### Взаємодії основної таблиці та таблиці історії
+
+Оскільки значення стовпців PeriodStart і PeriodEnd підтримуються SQL Server, ви можете продовжувати використовувати сутність Car, як і до додавання підтримки тимчасової таблиці. Оновлення та видалення завжди спрямовані на основну таблицю, а запити, які не посилаються на тіньові властивості, отримують поточний стан таблиці. Хоча при використанні зі звичайними операціями CRUD на основі LINQ немає жодних відмінностей між нечасовою та часовою таблицями, за лаштунками існує постійна взаємодія з таблицею історії.
+Щоб побачити це в дії, така локальна функція додає,  запис в таблиці Inventory за допомогою звичайної взаємодії EF Core:
+
+```cs
+static void MainTableAndHistoryTableInteractions1()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var car = new Car
+    {
+        Color = "LightBlue",
+        MakeId = 1,
+        PetName = "Sky",
+        Price = "500.00"
+    };
+    context.Cars.Add(car);
+    context.SaveChanges();
+
+}
+MainTableAndHistoryTableInteractions1();
+```
+```console
+Saving change for Server=(localdb)\mssqllocaldb;Database=AutoLotSamples;Trusted_Connection=True;ConnectRetryCount=0
+Saved change 1 entities
+```
+Кожна вставка, редагування або видалення відстежується в таблиці історії. Коли запис вставляється в таблицю, значення PeriodStart встановлюється на час початку транзакції вставки, а PeriodEnd встановлюється на максимальну дату для datetime2, яка становить 31.12.9999 23:59:59.9999999.
+
+```cs
+static void MainTableAndHistoryTableInteractions_2()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    int maxId = context.Cars.Max(c => c.Id);
+    var car = context.Cars.Find(maxId);
+
+    if (car == null) return;
+
+    car.Color = "Red";
+    context.Cars.Update(car);
+    context.SaveChanges();
+
+}
+MainTableAndHistoryTableInteractions_2();
+```
+```console
+An entity of type Car was loaded from the database.
+Saving change for Server=(localdb)\mssqllocaldb;Database=AutoLotSamples;Trusted_Connection=True;ConnectRetryCount=0
+An entity of type Car was update.
+Saved change 1 entities
+```
+Коли запис оновлюється, копія запису, який потрібно оновити, додається в таблицю історії (перед оператором оновлення), а значення PeriodEnd встановлюється на початок транзакції. У головній таблиці для значення PeriodStart встановлено час початку транзакції оновлення, а для PeriodEnd – максимальну дату.
+
+```cs
+static void MainTableAndHistoryTableInteractions_3()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    int maxId = context.Cars.Max(c => c.Id);
+    var car = context.Cars.Find(maxId);
+
+    if (car == null) return;
+     
+    context.Cars.Remove(car);
+    context.SaveChanges();
+
+}
+MainTableAndHistoryTableInteractions_3();
+```
+```console
+An entity of type Car was loaded from the database.
+Saving change for Server=(localdb)\mssqllocaldb;Database=AutoLotSamples;Trusted_Connection=True;ConnectRetryCount=0
+Saved change 1 entities
+```
+Коли запис видаляється, копія запису, який потрібно видалити, додається до таблиці історії (перед оператором видалення), а значення PeriodEnd встановлюється на початок транзакції. У головній таблиці запис просто видаляється. Тепер, коли ви надсилаєте запит до двох таблиць, ви побачите, що в таблиці Inventory немає жодних даних і два записи в таблиці InventoryAudit.
+
+
+#### Запити до часових таблиць
+
+Як бачимо часовою таблицєю опікується SQL Server. Він додав реченя FOR SYSTEM_TIME, яка використовує основну таблицю та таблицю історії для реконструкції стану даних у вказаний час(и). Є п’ять підпунктів, які можна використовувати з пунктом FOR SYSTEM_TIME
+
+Підпункти під час запиту до часових таблиць (T-SQL)
+
+|Підпункт|Кваліфікаційні рядки|Опис|
+|--------|--------------------|----|
+|AS OF <date_time>|PeriodStart <= date_time and PeriodEnd > date_time|Повертає рядки, які були поточними на вказаний момент часу. Внутрішнє об’єднання між основною таблицею та таблицею історії для повернення дійсних рядків.|
+|FROM <start_date_time> TO <end_date_time>|PeriodStart < end_date_time and PeriodEnd > start_date_time|Повертає всі версії рядків, які були поточними протягом указаного діапазону часу. Зверніть увагу, що межі є ексклюзивними.|
+|BETWEEN <start_date_time> TO <end_date_time>|PeriodStart <= end_date_time and PeriodEnd > start_date_time|Повертає всі версії рядків, які були поточними протягом указаного діапазону часу. Зауважте, що межа PeriodStart є включною, а межа PeriodEnd є виключною.|
+|CONTAINED IN (<start_date_time>, <end_date_time>)|PeriodStart >= start_date_time and PeriodEnd >= end_date_time|Повертає всі рядки, які були активними лише протягом указаного діапазону часу. Зверніть увагу, що межі є включними.|
+|ALL||Повертає всі записи.|
+
+Речення FOR SYSTEM_TIME відфільтровує записи, які мають нульовий період дійсності (PeriodStary = PeriodEnd).
+Щоб зробити наш приклад більш змістовним, додайте кілька викликів Thread.Sleep() після кожного виклику SaveChanges().
+```cs
+static void PreparationQueryingTemporalTables()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var car = new Car
+    {
+        Color = "Navy",
+        MakeId = 1,
+        PetName = "Warrior",
+    };
+    context.Cars.Add(car);
+    context.SaveChanges();
+    Thread.Sleep(5000);
+
+    car.Color = "DarkBlue";
+    context.Cars.Update(car);
+    context.SaveChanges();
+    Thread.Sleep(5000);
+
+    context.Cars.Remove(car);
+    context.SaveChanges();
+}
+PreparationQueryingTemporalTables();
+```
+```
+Saving change for Server=(localdb)\mssqllocaldb;Database=AutoLotSamples;Trusted_Connection=True;ConnectRetryCount=0
+Saved change 1 entities
+Saving change for Server=(localdb)\mssqllocaldb;Database=AutoLotSamples;Trusted_Connection=True;ConnectRetryCount=0
+An entity of type Car was update.
+Saved change 1 entities
+Saving change for Server=(localdb)\mssqllocaldb;Database=AutoLotSamples;Trusted_Connection=True;ConnectRetryCount=0
+Saved change 1 entities
+```
+Після цого в часовій таблиці з'являться додадкові данні.
+
+EF Core має оператори запитів, які перекладаються постачальником SQL Server на FOR SYSTEM_TIME і підпункти
+
+Підтримка EF Core для підпунктів System Time під час запиту до часових таблиць
+|Метод|Переводиться|Опис|
+|-----|------------|----|
+|TemporalAsOf()|AS OF <date_time>|Повертає рядки, які були поточними на вказаний момент часу. Внутрішнє об’єднання між основною таблицею та таблицею історії для повернення дійсних рядків.|
+|TemporalFromTo()|FROM <start_date_time> TO <end_date_time>|Повертає всі версії рядків, які були поточними протягом указаного діапазону часу. Зверніть увагу, що межі є ексклюзивними.|
+|TemporalBetween()|BETWEEN <start_date_time> TO <end_date_time>|Повертає всі версії рядків, які були поточними протягом указаного діапазону часу. Зауважте, що межа PeriodStart є включною, а межа PeriodEnd є виключною.|
+|TemporalContainedIn()|CONTAINED IN (<start_date_time>, <end_date_time>)|Повертає всі рядки, які були активними лише протягом указаного діапазону часу. Зверніть увагу, що межі є включними.|
+|TemporalAll()|ALL|Повертає всі записи.|
+
+Пам’ятайте, що PeriodStart і PeriodEnd є тіньовими властивостями, які не визначені в сутності Car. Таким чином, наступний запит не працюватиме:
+
+```cs
+//This doesn't work with shadow properties
+var cars = context.Cars.TemporalAll().OrderBy(e => e.PeriodStart);
+```
+Замість цього вам потрібно використовувати метод EF.Property<>() для доступу до тіньових властивостей:
+```cs
+var cars = context.Cars.TemporalAll().OrderBy(e => EF.Property<DateTime>(e, "PeriodStart"));
+```
+Важливо зауважити, що якщо вам потрібні архівні данні від і до, ви повинні отримати їх явно у своєму запиті за допомогою методу EF.Property<>(). Наступний оператор LINQ повертає всі поточні та історичні дані, використовуючи проекцію для запису кожного рядка та його часових значень:
+
+```cs
+static void QueryingTemporalTables()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var query = context.Cars
+        .TemporalAll()
+        .OrderBy(e=> EF.Property<DateTime>(e,"PeriodStart"))
+        .Select( e => new 
+        {
+            Car = e,
+            PeriodStart = EF.Property<DateTime>(e,"PeriodStart"),
+            PeriodEnd = EF.Property<DateTime>(e, "PeriodEnd")
+        });
+
+    Console.WriteLine(query.ToQueryString());
+    Console.WriteLine();
+
+
+    foreach ( var car in query)
+    {
+        Console.WriteLine($"{car.Car.PetName} {car.PeriodStart} {car.PeriodEnd}");
+    }
+}
+QueryingTemporalTables();
+```
+```console
+SELECT [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display], [i].[IsDeleted], [i].[IsDrivable], [i].[MakeId], [i].[PeriodEnd], [i].[PeriodStart], [i].[PetName], [i].[Price], [i].[TimeStamp]
+FROM [dbo].[Inventory] FOR SYSTEM_TIME ALL AS [i]
+WHERE [i].[IsDrivable] = CAST(1 AS bit)
+ORDER BY [i].[PeriodStart]
+
+Zippy 19.11.2024 7:36:37 31.12.9999 23:59:59
+Rusty 19.11.2024 7:36:37 31.12.9999 23:59:59
+Mel 19.11.2024 7:36:37 31.12.9999 23:59:59
+Clunker 19.11.2024 7:36:37 31.12.9999 23:59:59
+Bimmer 19.11.2024 7:36:37 31.12.9999 23:59:59
+Hank 19.11.2024 7:36:37 31.12.9999 23:59:59
+Pinky 19.11.2024 7:36:37 31.12.9999 23:59:59
+Pete 19.11.2024 7:36:37 31.12.9999 23:59:59
+Brownie 19.11.2024 7:36:37 31.12.9999 23:59:59
+Sky 19.11.2024 7:38:31 19.11.2024 7:39:38
+Sky 19.11.2024 7:39:38 19.11.2024 7:40:48
+Warrior 19.11.2024 8:32:32 19.11.2024 8:32:37
+Warrior 19.11.2024 8:32:37 19.11.2024 8:32:43
+```
+Як останнє зауваження щодо запитів до тимчасових таблиць, усі запити, які використовують один із Temporal операторів, є запитами без відстеження. Наприклад, якщо ви хочете відновити запис, який було видалено, ви повинні використати один із Temporal операторів, щоб отримати історичний запис і викликати Add() у DbSet<T>, а потім викликати SaveChanges().
+
+#### Очищення часових таблиць
+
+Як повністю очистити часові таблиці. Коротка відповідь полягає в тому, що ви не можете, не видаливши керування версіями, очистити історичні дані. Коли керування версіями вимкнено, таблиця історії та основна таблиця від’єднуються. Потім ви можете видалити всі записи з головної таблиці (яка більше не записує історію) і таблиці історії; тоді ви можете знову ввімкнути керування версіями, і таблиці буде повторно зв’язано. Щоб зробити це в Azure Data Studio або SSMS, введіть такі команди:
+
+```sql
+ALTER TABLE [dbo].[Inventory]
+     SET (SYSTEM_VERSIONING = OFF)
+DELETE FROM [dbo].[Inventory]
+DELETE FROM [audits].[InventoryAudit]
+ALTER TABLE [dbo].[Inventory]
+     SET (SYSTEM_VERSIONING = ON (HISTORY_TABLE=audits.InventoryAudit))
+```
+Якщо таблиця історії має настроюване ім’я (наприклад, audits.InventoryAudit), його потрібно вказати під час повторного ввімкнення керування версіями, інакше буде створено нову таблицю історії.
+
+Щоб очистити таблицю історії за допомогою EF Core, ті самі оператори виконуються в явній транзакції за допомогою команди ExecuteSqlRaw() на фасаді бази даних контексту:
+```cs
+static void ClearingTemporalTables()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+    
+    var strategy = context.Database.CreateExecutionStrategy();
+    strategy.Execute(()=>
+    { 
+        using var transaction = context.Database.BeginTransaction();
+
+        string sql = "ALTER TABLE [dbo].[Inventory] SET (SYSTEM_VERSIONING = OFF)";
+        context.Database.ExecuteSqlRaw(sql);
+        sql = "DELETE FROM audits.InventoryAudit";
+        context.Database.ExecuteSqlRaw(sql);
+        sql = "ALTER TABLE dbo.Inventory SET (SYSTEM_VERSIONING = ON (HISTORY_TABLE=audits.InventoryAudit))";
+        context.Database.ExecuteSqlRaw(sql);
+
+        transaction.Commit();
+    });
+}
+ClearingTemporalTables();
+```
+
+#### Design-time model.
+
+В попередньому прикладі ми в коді прописали назву часової таблиці. Зробити процес очистки база даних більш загальним трохи складніше. Для сутності є метод (IsTemporal()), який перевіряє, чи є таблиця тимчасовою, і два методи для отримання імені таблиці історії (GetHistoryTableName()) і схеми (GetHistoryTableSchema()). Хоча IsTemporal() працює під час виконання, методи отримання назви таблиці та схеми не працюють із моделлю середовища виконання. Модель середовища виконання містить лише те, що потрібно для виконання EF Core (і вашого коду), тоді як модель часу розробки(design-time model) містить усе. Щоб використовувати ці методи, ви повинні отримати екземпляр моделі часу розробки під час виконання.
+
+Щоб увімкнути доступ до моделі часу розробки під час виконання, необхідно оновити файл проекту. Пакет Microsoft.EntityFrameworkCore.Design є пакетом DevelopmentDependency. Це означає, що залежність не потраплятиме в інші проекти, і ви не можете за замовчуванням посилатися на її типи. Щоб посилатися на його типи у своєму коді, оновіть метадані пакета у файлі проекту, видаливши тег <IncludeAssets>:
+
+```xml
+      <!--<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>-->
+```
+Отримаємо дані в моделі для temporal таблиці.
+
+```cs
+static void SchemaAndNameForTemporal()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var serviceCollection = new ServiceCollection();
+
+    serviceCollection.AddDbContextDesignTimeServices(context);
+
+    var serviceProvider = serviceCollection.BuildServiceProvider();
+    IModel? designTimeModel = serviceProvider.GetService<IModel>();
+
+    var designTimeEntity = designTimeModel?.FindEntityType(typeof(Car).FullName);
+
+    string? historySchema = designTimeEntity?.GetHistoryTableSchema();
+    string? tableName = designTimeEntity?.GetHistoryTableName();
+
+    Console.WriteLine(historySchema + "\t" + tableName);
+}
+//SchemaAndNameForTemporal();
+```
+```console
+audits  InventoryAudit
+```
+Щоб отримати модель часу розробки, створіть новий ServiceCollection і додайте DbContextDesignTimeServices.Після створення постачальника послуг ви можете отримати екземпляр моделі часу розробки. З неї можна отримати дані про часову таблицю і схему.
+
+Стовримо метод очистики даних в БД з очисткою часової таблиці.
+
+```cs
+static void ClearSampleDataAndTemporal()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+    string?[] entities =
+    [
+        typeof(Driver).FullName,
+        typeof(Car).FullName,
+        typeof(Make).FullName
+    ];
+
+    var serviceCollection = new ServiceCollection();
+    serviceCollection.AddDbContextDesignTimeServices(context);
+    var serviceProvider = serviceCollection.BuildServiceProvider();
+    IModel? designTimeModel = serviceProvider.GetService<IModel>();
+
+    foreach (var entityName in entities)
+    {
+        var entity = context.Model.FindEntityType(entityName);
+        var tableName = entity.GetTableName();
+        var schemaName = entity.GetSchema();
+        context.Database.ExecuteSqlRaw($"DELETE FROM {schemaName}.{tableName}");
+        context.Database.ExecuteSqlRaw($"DBCC CHECKIDENT (\"{schemaName}.{tableName}\", RESEED, 0);");
+        if (entity.IsTemporal())
+        {
+            var strategy = context.Database.CreateExecutionStrategy();
+            strategy.Execute(() =>
+            {
+                using var trans = context.Database.BeginTransaction();
+                var designTimeEntity = designTimeModel.FindEntityType(entityName);
+                var historySchema = designTimeEntity.GetHistoryTableSchema();
+                var historyTable = designTimeEntity.GetHistoryTableName();
+                context.Database.ExecuteSqlRaw($"ALTER TABLE {schemaName}.{tableName} SET (SYSTEM_VERSIONING = OFF)");
+                context.Database.ExecuteSqlRaw($"DELETE FROM {historySchema}.{historyTable}");
+                context.Database.ExecuteSqlRaw($"ALTER TABLE {schemaName}.{tableName} SET (SYSTEM_VERSIONING = ON (HISTORY_TABLE={historySchema}.{historyTable}))");
+                trans.Commit();
+            });
+        }
+    }
+}
+ClearSampleDataAndTemporal();
+```
+
+
