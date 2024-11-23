@@ -25,7 +25,7 @@ public class Car : BaseEntity
     public Make MakeNavigation { get; set; }
     public Radio RadioNavigation { get; set; }
     [InverseProperty(nameof(Driver.Cars))]
-    public IEnumerable<Driver> Drivers { get; set; }
+    public IEnumerable<Driver> Drivers { get; set; }  = new List<Driver>();
     [InverseProperty(nameof(CarDriver.CarNavigation))]
     public IEnumerable<CarDriver> CarDrivers { get; set; } = new List<CarDriver>();
 }

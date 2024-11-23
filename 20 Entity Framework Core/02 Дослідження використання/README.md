@@ -21,6 +21,8 @@ dotnet ef database update
 ```
 Таким чином у нас є сутності і їх відображення в БД для досліджень.
 
+# CRUD
+
 ## Додавання записів
 
 Записи додаються до бази даних шляхом їх створення в коді, додавання до їхнього DbSet<T> і виклику SaveChanges()/SaveChangesAsync() у контексті. Коли виконується SaveChanges(), ChangeTracker повідомляє про всі додані об’єкти, а EF Core (разом із постачальником бази даних) створює відповідний оператор(и) SQL для вставлення запису(ів).
@@ -38,22 +40,21 @@ static void AddRecords()
 {
     //The factory is not meant to be used like this, but it's demo code
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
-    
-    Make newMake = new Make { Name ="BMW" };
-    Console.WriteLine($"State of the entity is {context.Entry(newMake).State}");
 
-    context.Makes.Add(newMake);
-    Console.WriteLine($"State of the entity is {context.Entry(newMake).State}");
+    Make make = new Make { Name = "BMW" };
+    Console.WriteLine($"State of the entity is {context.Entry(make).State}");
 
-    
-    ViewMake(newMake,"Bifore SaveChange");
+    context.Makes.Add(make);
+    Console.WriteLine($"State of the entity is {context.Entry(make).State}");
+
+    ViewMake(make, "Bifore SaveChange");
     context.SaveChanges();
-    Console.WriteLine($"State of the entity is {context.Entry(newMake).State}");
-    ViewMake(newMake, "After SaveChange");
+    Console.WriteLine($"State of the entity is {context.Entry(make).State}");
+    ViewMake(make, "After SaveChange");
 }
 AddRecords();
 
-static void ViewMake(Make make,string text)
+static void ViewMake(Make make, string text)
 {
     Console.WriteLine($"\t{text}");
     Console.WriteLine($"\tId:{make.Id}");
@@ -65,13 +66,13 @@ State of the entity is Detached
 State of the entity is Added
         Bifore SaveChange
         Id:0
-        Name:VW
+        Name:BMW
 Saving change for Server=(localdb)\mssqllocaldb;Database=AutoLotSamples;Trusted_Connection=True;ConnectRetryCount=0
 Saved change 1 entities
 State of the entity is Unchanged
         After SaveChange
-        Id:6
-        Name:VW
+        Id:1
+        Name:BMW
 ```
 Щоб додати новий запис Make до бази даних, створіть новий екземпляр сутності та викличте метод Add() відповідного DbSet<T>. Щоб ініціювати збереження даних, необхідно також викликати SaveChanges() похідного класу DbContext.
 Після того, як сутність було додано до засобу відстеження змін (за допомогою методу Add()), стан було змінено на Added. Повідомлення про збереження змін надходить від обробника подій SavingChanges, а повідомлення «Saved 1 entities» — від обробника подій SavedChanges. Після виклику SaveChanges() у контексті стан сутності змінюється на Unchanged.
@@ -89,12 +90,12 @@ WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();
 
 ### Як побачити запрос на сервері.
 
-Для того аби відслідковувати які sql-запити виконуються на сервері можна встановити Azure Data Studio. В н'му встанвити розширення SQL Server Profiler і прочитати як їм користуватися по запиту документації "SQL Server Profiler extension".
+Для того аби відслідковувати які sql-запити виконуються на сервері можна встановити Azure Data Studio. В ньому встанвити розширення SQL Server Profiler і прочитати як їм користуватися по запиту документації "SQL Server Profiler extension".
 
 
 ### Додавання нового запису за допомогою Attach
 
-Коли первинний ключ сутності зіставляється зі стовпцем ідентифікації в SQL Server, EF Core розглядатиме цей екземпляр сутності як Доданий під час додавання до ChangeTracker, якщо значення властивості первинного ключа дорівнює нулю.
+Коли первинний ключ сутності зіставляється зі стовпцем ідентифікації в SQL Server, EF Core розглядатиме цей екземпляр сутності як Added під час додавання до ChangeTracker, якщо значення властивості первинного ключа дорівнює 0. Наступний код додає новий запис Car за допомогою методу Attach() замість методу Add(). Зауважте, що SaveChanges() все одно має бути викликано для збереження даних.
 
 ```cs
 static void AddRecordsWithAttach()
@@ -102,32 +103,24 @@ static void AddRecordsWithAttach()
     //The factory is not meant to be used like this, but it's demo code
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
-    Make newMake = new Make { Name = "BMW" };
-    context.Makes.Add(newMake);
-    context.SaveChanges();
-
-    Car newCar = new Car
+    Car car = new Car
     {
         Color = "Blue",
         DateBuilt = new DateTime(2012, 12, 01),
         IsDrivable = true,
         PetName = "Bluesmobile",
-        MakeId = newMake.Id
+        MakeId = 1
     };
 
-    Console.WriteLine($"State of the {newCar.PetName} is {context.Entry(newCar).State}");
-    context.Cars.Attach(newCar);
-    Console.WriteLine($"State of the {newCar.PetName} is {context.Entry(newCar).State}");
+    Console.WriteLine($"State of the {car.PetName} is {context.Entry(car).State}");
+    context.Cars.Attach(car);
+    Console.WriteLine($"State of the {car.PetName} is {context.Entry(car).State}");
     context.SaveChanges();
-    Console.WriteLine($"State of the {newCar.PetName} is {context.Entry(newCar).State}");
+    Console.WriteLine($"State of the {car.PetName} is {context.Entry(car).State}");
 }
 AddRecordsWithAttach();
 ```
-Наступний код додає новий запис Car за допомогою методу Attach() замість методу Add(). Зауважте, що SaveChanges() все одно має бути викликано для збереження даних.
-
 ```console
-Saving change for Server=(localdb)\mssqllocaldb;Database=AutoLotSamples;Trusted_Connection=True;ConnectRetryCount=0
-Saved change 1 entities
 State of the Bluesmobile is Detached
 State of the Bluesmobile is Added
 Saving change for Server=(localdb)\mssqllocaldb;Database=AutoLotSamples;Trusted_Connection=True;ConnectRetryCount=0
@@ -149,12 +142,7 @@ FROM [dbo].[Inventory]
 WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();
 ',N'@p0 nvarchar(50),@p1 datetime2(7),@p2 bit,@p3 int,@p4 nvarchar(50)',@p0=N'Blue',@p1='2016-12-01 00:00:00',@p2=1,@p3=1,@p4=N'Bluesmobile'
 ```
-Щоб розглянути наступний приклад можна очистити БД видаливши її і створивши.
 
-```console
-dotnet ef database drop
-dotnet ef database update
-```
 
 ### Додавання кількох записів одночасно
 
@@ -166,26 +154,19 @@ static void AddMultipleRecords()
     //The factory is not meant to be used like this, but it's demo code
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
-    Make newMake = new Make { Name = "BMW" };
-    context.Makes.Add(newMake);
-    context.SaveChanges();
-
     var cars = new List<Car>
     {
-        new() { Color = "Yellow", MakeId = newMake.Id, PetName = "Herbie" },
-        new() { Color = "White", MakeId = newMake.Id, PetName = "Mach 5" },
-        new() { Color = "Pink", MakeId = newMake.Id, PetName = "Avon" },
-        new() { Color = "Blue", MakeId = newMake.Id, PetName = "Blueberry" },
+        new() { Color = "Yellow", MakeId = 1, PetName = "Herbie" },
+        new() { Color = "White", MakeId = 1, PetName = "Mach 5" },
+        new() { Color = "Pink", MakeId = 1, PetName = "Avon" },
+        new() { Color = "Blue", MakeId = 1, PetName = "Blueberry" },
     };
     context.Cars.AddRange(cars);
     context.SaveChanges();
 }
 AddMultipleRecords();
-
 ```
 ```console
-Saving change for Server=(localdb)\mssqllocaldb;Database=AutoLotSamples;Trusted_Connection=True;ConnectRetryCount=0
-Saved change 1 entities
 Saving change for Server=(localdb)\mssqllocaldb;Database=AutoLotSamples;Trusted_Connection=True;ConnectRetryCount=0
 Saved change 4 entities
 ```
@@ -219,12 +200,12 @@ ORDER BY [i].[_Position];
 static void GetSchemaAndTableNameForType()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
-    IEntityType metadata = context.Model.FindEntityType(typeof(Car).FullName);
-    var schema = metadata.GetSchema();
-    var tableName = metadata.GetTableName();
+    IEntityType? metadata = context.Model.FindEntityType(typeof(Car).FullName!);
+    string? schema = metadata?.GetSchema();
+    string? tableName = metadata?.GetTableName();
     Console.WriteLine($"{schema} {tableName}");
 }
-//GetSchemaAndTableNameForType();
+GetSchemaAndTableNameForType();
 ```
 ```console
 dbo Inventory
@@ -257,21 +238,21 @@ static void AddRowWithSetIdentityInsert()
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
     // Definition schema and tablename    
-    IEntityType metadata = context.Model.FindEntityType(typeof(Car).FullName);
-    string schema = metadata.GetSchema();
-    string tableName = metadata.GetTableName();
-    
+    IEntityType? metadata = context.Model.FindEntityType(typeof(Car).FullName!);
+    string? schema = metadata?.GetSchema();
+    string? tableName = metadata?.GetTableName();
+
     //Cteate strategy with explecitly transaction
     string sql;
     var strategy = context.Database.CreateExecutionStrategy();
-    strategy.Execute( () => 
+    strategy.Execute(() =>
     {
         using var transaction = context.Database.BeginTransaction();
         try
         {   //Settings on server
             sql = $"SET IDENTITY_INSERT {schema}.{tableName} ON";
             context.Database.ExecuteSqlRaw(sql);
-            
+
             // Insert row
             Car car = new Car
             {
@@ -310,6 +291,7 @@ Saved change 1 entities
 Insert succeeded
 ```
 Якщо все проходить успішно, транзакцію зафіксовано. Якщо будь-яка його частина виходить з ладу, транзакція відкочується. У блоці finally вставку ідентифікаційної інформації вимкнуто.
+
 EF Core надає два методи виконання команд безпосередньо в базі даних. Метод ExecuteSqlRaw() виконує рядок точно так, як він написаний, тоді як ExecuteSqlInterpolated() використовує інтерполяцію рядка C# для створення параметризованого запиту. Якщо використовуються відомі значення, як у цьому прикладі, метод ExecuteSqlRaw() є безпечним для використання. Однак, якщо ви збираєте вхідні дані від користувачів, вам слід використовувати версію ExecuteSqlInterpolated() для додаткового захисту.
 
 Попередній код виконував наступні команди для бази даних:
@@ -334,10 +316,11 @@ SET IDENTITY_INSERT dbo.Inventory OFF
 static void AddEntityWithChild()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
-    
+   
     var make = new Make { Name = "Honda" };
 
     Car car = new Car { Color = "Yellow", PetName = "Herbie" };
+ 
     // IEnumerable<Car> to List<Car>
     ((List<Car>)make.Cars).Add(car);
 
@@ -372,7 +355,7 @@ WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();
 
 ### Додавання записів в таблиці з відношенням many-to-many
 
-Для таблиць «many-to-many» записи можна додавати безпосередньо від однієї сутності до іншої, не переходячи через зведену таблицю. Тепер ви можете написати такий код, щоб додати записи Driver безпосередньо до записів Car:
+Для таблиць «many-to-many» записи можна додавати безпосередньо від однієї сутності до іншої, не переходячи через зведену таблицю. Додамо записи Driver безпосередньо до записів Car:
 ```cs
 static void AddRecordsToMantToManyTables()
 {
@@ -428,7 +411,7 @@ ORDER BY [i].[_Position];
 ```
 Це набагато краще, ніж попередні версії EF Core, коли використовуються зв’язки «багато до багатьох», де вам доводилося самостійно керувати зведеною таблицею.
 
-### Приклада додавання різних сутностей для подальшого дослідження запитів.
+### Приклад додавання різних сутностей для подальшого дослідження запитів.
 
 Додайте серію записів Make та Car для прикладів запитів на читання. 
 
@@ -479,13 +462,13 @@ Saved change 10 entities
 
 ### Приклад очистки таблиць БД.
 
-Cтворимо метод, який очищає зразки даних, щоб, коли приклади запускаються кілька разів, попередні виконання не заважали прикладам. Створіть новий метод під назвою ClearSampleData().
+Cтворимо метод, який очищає зразки даних попереднього виконання. Створіть новий метод під назвою ClearSampleData().
 
 ```cs
 static void ClearSampleData()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
-    string?[] entities = 
+    string?[] entities =
     {
         typeof(Driver).FullName,
         typeof(Car).FullName,
@@ -494,9 +477,9 @@ static void ClearSampleData()
 
     foreach (var entityName in entities)
     {
-        var entity = context.Model.FindEntityType(entityName);
-        string? tableName = entity.GetTableName();
-        string? schemaName = entity.GetSchema();
+        var entity = context.Model.FindEntityType(entityName!);
+        string? tableName = entity?.GetTableName();
+        string? schemaName = entity?.GetSchema();
 
         string sql = $"DELETE FROM {schemaName}.{tableName}";
         context.Database.ExecuteSqlRaw(sql);
@@ -509,11 +492,19 @@ ClearSampleData();
 ```
 Метод використовує метод FindEntityType() у властивості Model ApplicationDbContext, щоб отримати назву таблиці та схеми, а потім видаляє записи. Після видалення записів код використовує команду DBCC CHECKIDENT, щоб скинути ідентифікатор для кожної таблиці.
 
-Загрузимо дані знову 
+
+### Метод для очистки і заповнення початкових даних
+
+Створимо метод який буду виклккати подляд попереньо створені методи.
 
 ```cs
-LoadMakeAndCarData();
-AddRecordsToMantToManyTables();
+static void ClearAndFillDB()
+{
+    ClearSampleData();
+    LoadMakeAndCarData();
+    AddRecordsToMantToManyTables();
+}
+ClearAndFillDB();
 ```
 ```console
 Saving change for Server=(localdb)\mssqllocaldb;Database=AutoLotSamples;Trusted_Connection=True;ConnectRetryCount=0
@@ -525,7 +516,6 @@ An entity of type Car was loaded from the database.
 Saving change for Server=(localdb)\mssqllocaldb;Database=AutoLotSamples;Trusted_Connection=True;ConnectRetryCount=0
 Saved change 12 entities
 ```
-В базі даних можна побачити значення для додавання Id було скинкто до 0.
 
 ## Запит даних з однієї таблиці
 
@@ -557,15 +547,19 @@ static void ShowCars()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
     var cars = context.Cars;
+    Console.WriteLine(cars.ToQueryString());
+    Console.WriteLine(context.Cars.GetType());
+    Console.WriteLine();
     CollectionCarToConsole(cars, "All cars");
     Console.WriteLine();
-    Console.WriteLine(cars.ToQueryString());
-    Console.WriteLine();
-    Console.WriteLine(context.Cars.GetType());
 }
 ShowCars();
 ```
 ```console
+SELECT [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display], [i].[IsDrivable], [i].[MakeId], [i].[PetName], [i].[TimeStamp]
+FROM [dbo].[Inventory] AS [i]
+Microsoft.EntityFrameworkCore.Internal.InternalDbSet`1[AutoLot.Samples.Models.Car]
+
         All cars
 An entity of type Car was loaded from the database.
 1 Black Zippy
@@ -587,11 +581,6 @@ An entity of type Car was loaded from the database.
 9 Brown Brownie
 An entity of type Car was loaded from the database.
 10 Rust Lemon
-
-SELECT [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display], [i].[IsDrivable], [i].[MakeId], [i].[PetName], [i].[TimeStamp]
-FROM [dbo].[Inventory] AS [i]
-
-Microsoft.EntityFrameworkCore.Internal.InternalDbSet`1[AutoLot.Samples.Models.Car]
 ```
 Для негайного виконання додайте ToList() до властивості DbSet<T>.
 
@@ -603,17 +592,15 @@ static void QueryData_GetAllRecords()
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
     IQueryable<Car> cars = context.Cars;
-
     CollectionCarToConsole(cars, "All car from IQueryable<Car>");
 
     context.ChangeTracker.Clear();
     List<Car> listCars = context.Cars.ToList();
-
     CollectionCarToConsole(listCars, "All car from List<Car>");
 }
 QueryData_GetAllRecords();
 ```
-Зверніть увагу, що повертається тип IQueryable<Car> під час використання DbSet<Car>, а тип повернення — List<Car> під час використання методу ToList(). Метод використовує метод Clear() на ChangeTracker для скидання ApplicationDbContext
+Зверніть увагу, що повертається тип IQueryable<Car> під час використання DbSet<Car>, а тип повернення — List<Car> під час використання методу ToList().
 
 ```console
         All car from IQueryable<Car>
@@ -659,6 +646,7 @@ An entity of type Car was loaded from the database.
 9 Brown Brownie
 10 Rust Lemon
 ```
+Метод використовує метод Clear() на ChangeTracker для скидання ApplicationDbContext до початкового стану коли сутності не відслідковуються. Якшо цю сторку закоментувати другий раз считування з БД не буде а будуть використовуватись дані з пам'яті.
 
 ### Where. Фільтрація записів.
 
@@ -668,14 +656,19 @@ static void FilterData_1()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
-    //Yellow cars
-    IQueryable<Car> cars = context.Cars.Where(c => c.Color == "Yellow");
-    CollectionCarToConsole(cars, "All yellow cars");
+    IQueryable<Car> query = context.Cars.Where(c => c.Color == "Yellow");
+    Console.WriteLine(query.ToQueryString());
+    Console.WriteLine();
 
+    CollectionCarToConsole(query, "All yellow cars");
 }
 FilterData_1();
 ```
 ```console
+SELECT [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display], [i].[IsDrivable], [i].[MakeId], [i].[PetName], [i].[TimeStamp]
+FROM [dbo].[Inventory] AS [i]
+WHERE [i].[Color] = N'Yellow'
+
         All yellow cars
 An entity of type Car was loaded from the database.
 4 Yellow Clunker
@@ -687,41 +680,59 @@ static void FilterData_2()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
-    IQueryable<Car> cars2 = context.Cars
+    IQueryable<Car> query1 = context.Cars
     .Where(c => c.Color == "Yellow" && c.PetName == "Clunker");
-    CollectionCarToConsole(cars2, "All yellow cars with a petname of Clunker.");
-    context.ChangeTracker.Clear(); 
+    Console.WriteLine(query1.ToQueryString());
     Console.WriteLine();
+    CollectionCarToConsole(query1, "All yellow cars with a petname of Clunker.");
+    Console.WriteLine();
+    context.ChangeTracker.Clear();
 
-    IQueryable<Car> cars3 = context.Cars
+    IQueryable<Car> query2 = context.Cars
         .Where(c => c.Color == "Yellow")
-        .Where(c=>c.PetName == "Clunker");
-    CollectionCarToConsole(cars3, "All yellow cars with a petname of Clunker.");
-    context.ChangeTracker.Clear(); 
+        .Where(c => c.PetName == "Clunker");
+    Console.WriteLine(query2.ToQueryString());
     Console.WriteLine();
-    
-    IQueryable<Car> cars4 = context.Cars
+    CollectionCarToConsole(query2, "All yellow cars with a petname of Clunker.");
+    Console.WriteLine();
+    context.ChangeTracker.Clear();
+
+    IQueryable<Car> query3 = context.Cars
     .Where(c => c.Color == "Pink" || c.PetName == "Clunker");
-    CollectionCarToConsole(cars4, "All black cars or a petname of Clunker.");
+    Console.WriteLine(query3.ToQueryString());
+    Console.WriteLine();
+    CollectionCarToConsole(query3, "All pink cars or a petname of Clunker.");
 }
 FilterData_2();
 ```
 ```console
-        All yellow cars with a petname of Clunker.
-An entity of type Car was loaded from the database.
-4 Yellow Clunker
+SELECT [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display], [i].[IsDrivable], [i].[MakeId], [i].[PetName], [i].[TimeStamp]
+FROM [dbo].[Inventory] AS [i]
+WHERE [i].[Color] = N'Yellow' AND [i].[PetName] = N'Clunker'
 
         All yellow cars with a petname of Clunker.
 An entity of type Car was loaded from the database.
 4 Yellow Clunker
 
-        All black cars or a petname of Clunker.
+SELECT [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display], [i].[IsDrivable], [i].[MakeId], [i].[PetName], [i].[TimeStamp]
+FROM [dbo].[Inventory] AS [i]
+WHERE [i].[Color] = N'Yellow' AND [i].[PetName] = N'Clunker'
+
+        All yellow cars with a petname of Clunker.
+An entity of type Car was loaded from the database.
+4 Yellow Clunker
+
+SELECT [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display], [i].[IsDrivable], [i].[MakeId], [i].[PetName], [i].[TimeStamp]
+FROM [dbo].[Inventory] AS [i]
+WHERE [i].[Color] = N'Pink' OR [i].[PetName] = N'Clunker'
+
+        All pink cars or a petname of Clunker.
 An entity of type Car was loaded from the database.
 4 Yellow Clunker
 An entity of type Car was loaded from the database.
 7 Pink Pinky
 ```
-У прикладі згенерований запит для cars2 і cars3 ідентичний. Щоб створити оператор ||, ви повинні використовувати ту саму метод Where() з логічним виразом ||. 
+У прикладі згенерований запит для query1 і query2 ідентичний. Щоб створити оператор ||, ви повинні використовувати ту саму метод Where() з логічним виразом ||. 
 
 Зауважте, що повернутий тип також є IQueryable<Car>, коли використовується методу Where.
 
@@ -732,13 +743,19 @@ static void FilterData_3()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
-    IQueryable<Car> cars5 = context.Cars
+    IQueryable<Car> query = context.Cars
     .Where(c => !string.IsNullOrWhiteSpace(c.Color));
-    CollectionCarToConsole(cars5, "Cars with colors.");
+    Console.WriteLine(query.ToQueryString());
+    Console.WriteLine();
+    CollectionCarToConsole(query, "Cars with colors.");
 }
 FilterData_3();
 ```
 ```console
+SELECT [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display], [i].[IsDrivable], [i].[MakeId], [i].[PetName], [i].[TimeStamp]
+FROM [dbo].[Inventory] AS [i]
+WHERE [i].[Color] <> N''
+
         Cars with colors.
 An entity of type Car was loaded from the database.
 1 Black Zippy
@@ -761,13 +778,8 @@ An entity of type Car was loaded from the database.
 An entity of type Car was loaded from the database.
 10 Rust Lemon
 ```
-EF Core обробляє перетворення string.IsNullOrWhiteSpace() у SQL. Буде наступний запитю
+EF Core обробляє перетворення string.IsNullOrWhiteSpace() у SQL [i].[Color] <> N''.
 
-```sql
-SELECT [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display], [i].[IsDrivable], [i].[MakeId], [i].[PetName], [i].[TimeStamp]
-FROM [dbo].[Inventory] AS [i]
-WHERE [i].[Color] <> N''
-```
 
 ### Orderby. Сортування записів.
 
@@ -778,23 +790,22 @@ static void SortData_1()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
-
-    IQueryable<Car> cars = context.Cars
+    IQueryable<Car> query1 = context.Cars
         .OrderBy(c => c.Color);
-    CollectionCarToConsole(cars, "Cars ordered by Color.");
+    CollectionCarToConsole(query1, "Cars ordered by Color.");
     context.ChangeTracker.Clear();
     Console.WriteLine();
 
-    IQueryable<Car> cars1 = context.Cars
+    IQueryable<Car> query2 = context.Cars
     .OrderBy(c => c.Color)
     .ThenBy(c => c.PetName);
-    CollectionCarToConsole(cars1, "Cars ordered by Color then PetName.");
+    CollectionCarToConsole(query2, "Cars ordered by Color then PetName.");
     context.ChangeTracker.Clear();
     Console.WriteLine();
 
-    IQueryable<Car> cars2 = context.Cars
+    IQueryable<Car> query3 = context.Cars
     .OrderByDescending(c => c.Color);
-    CollectionCarToConsole(cars2, "Cars ordered by Color descending.");
+    CollectionCarToConsole(query3, "Cars ordered by Color descending.");
 }
 SortData_1();
 ```
@@ -846,7 +857,6 @@ SortData_1();
 static void SortData_2()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
-
 
     IQueryable<Car> cars = context.Cars
         .OrderBy(c => c.Color)
@@ -922,14 +932,23 @@ static void UsingSkip()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
-    var cars = context.Cars.Skip(2);
+    var query = context.Cars.Skip(2);
+    Console.WriteLine(query.ToQueryString());
+    Console.WriteLine();
 
-    CollectionCarToConsole(cars, "Skip the first two records");
+    CollectionCarToConsole(query, "Skip the first two records");
 }
 UsingSkip();
 ```
 
 ```console
+DECLARE @__p_0 int = 2;
+
+SELECT [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display], [i].[IsDrivable], [i].[MakeId], [i].[PetName], [i].[TimeStamp]
+FROM [dbo].[Inventory] AS [i]
+ORDER BY (SELECT 1)
+OFFSET @__p_0 ROWS
+
         Skip the first two records
 3 Black Mel
 4 Yellow Clunker
@@ -942,14 +961,7 @@ UsingSkip();
 ```
 
 Команда SQL Server OFFSET має меншу продуктивність, чим більше записів пропускається. Більшість програм, ймовірно, не використовуватимуть EF Core (або будь-яку ORM) із величезними обсягами даних, але переконайтеся, що ви тестуєте продуктивність усіх викликів, які використовують Skip(). Якщо є проблема з продуктивністю, можливо, краще перейти до FromSqlRaw()/FromSqlInterpolated(), щоб оптимізувати запит.
-Код прикладу пропускає перші два записи та повертає решту. Трохи відредагований (для читабельності) запит показаний тут:
-```sql
-SELECT [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display],
-    [i].[IsDrivable], [i].[MakeId], [i].[PetName], [i].[TimeStamp]
-FROM [dbo].[Inventory] AS [i]
-ORDER BY (SELECT 1)
-OFFSET 2 ROWS
-```
+Код прикладу пропускає перші два записи та повертає решту. 
 Зверніть увагу, що згенерований запит додає речення ORDER BY, навіть якщо оператор LINQ не мав жодного порядку. Це тому, що команду SQL Server OFFSET не можна використовувати без ORDER BY.
 
 Метод Take() створює запит SQL Server, який використовує команду TOP.
@@ -959,25 +971,26 @@ static void UsingTake()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
-    var cars = context.Cars.Take(2);
+    var query = context.Cars.Take(2);
+    Console.WriteLine(query.ToQueryString());
+    Console.WriteLine();
 
-    CollectionCarToConsole(cars, "Take the first two records");
+    CollectionCarToConsole(query, "Take the first two records");
 }
 UsingTake();
 ```
 ```console
+DECLARE @__p_0 int = 2;
+
+SELECT TOP(@__p_0) [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display], [i].[IsDrivable], [i].[MakeId], [i].[PetName], [i].[TimeStamp]
+FROM [dbo].[Inventory] AS [i]
+
         Take the first two records
 1 Black Zippy
 2 Rust Rusty
 ```
-Тут показано виконаний запит:
 
-```sql
-SELECT TOP(2) [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display],
-    [i].[IsDrivable], [i].[MakeId], [i].[PetName], [i].[TimeStamp]
-FROM [dbo].[Inventory] AS [i]
-```
-Комбінація методів Skip() і Take() дає змогу переглядати дані постранично. Наприклад, якщо розмір вашої сторінки дорівнює двом, і вам потрібно отримати другу сторінку, виконайте наступний запит LINQ
+Комбінація методів Skip() і Take() дає змогу переглядати дані постранично. Наприклад, якщо розмір вашої сторінки дорівнює двом, і вам потрібно отримати третю сторінку, виконайте наступний запит LINQ
 
 ```cs
 static void Paging()
@@ -986,32 +999,35 @@ static void Paging()
 
     int totalCar = context.Cars.Count();
     int carOnPage = 2;
-    int totalPage = (int)Math.Ceiling( (double) totalCar / carOnPage );
+    int totalPage = (int)Math.Ceiling((double)totalCar / carOnPage);
 
-    int numberPage = 2;
+    int numberPage = 3;
 
-    List<Car>? cars = context.Cars
+    var query = context.Cars
         .Skip((numberPage - 1) * carOnPage)
-        .Take(carOnPage)
-        .ToList();
-    CollectionCarToConsole(cars, $"Page {numberPage}");
+        .Take(carOnPage);
+    Console.WriteLine(query.ToQueryString());
+    Console.WriteLine();
+
+    CollectionCarToConsole(query, $"Page {numberPage}");
 }
 Paging();
 ```
 ```console
-        Page 2
-3 Black Mel
-4 Yellow Clunker
-```
-При поєднанні Skip() і Take() SQL Server використовує не команду TOP, а іншу версію команди OFFSET, як показано тут:
+DECLARE @__p_0 int = 4;
+DECLARE @__p_1 int = 2;
 
-```sql
-SELECT [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display], [i].[IsDrivable],
-    [i].[MakeId], [i].[PetName], [i].[TimeStamp]
+SELECT [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display], [i].[IsDrivable], [i].[MakeId], [i].[PetName], [i].[TimeStamp]
 FROM [dbo].[Inventory] AS [i]
 ORDER BY (SELECT 1)
-OFFSET 2 ROWS FETCH NEXT 2 ROWS ONLY
+OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+
+        Page 3
+5 Black Bimmer
+6 Green Hank
 ```
+При поєднанні Skip() і Take() SQL Server використовує не команду TOP, а іншу версію команди OFFSET через це може погіршуватись продуктивність.
+
 
 ### First/FirstOrDefault, Last/LastOrGefault, Single/SingleOrDefault методи.
 
@@ -1020,11 +1036,11 @@ OFFSET 2 ROWS FETCH NEXT 2 ROWS ONLY
 |Метод|Опис|
 |-----|----|
 |First()|Повертає перший запис, який відповідає умові запиту та будь-яким пунктам порядку.Якщо порядок не вказано, то повернутий запис базується на порядку бази даних.Якщо запис не повертається, створюється виняток.|
-|FirstOrDefault()|Поведінка FirstOrDefault() відповідає First(), за винятком того, що якщо жоден запис не відповідає запиту, метод повертає значення за замовчуванням для типу (null).|
+|FirstOrDefault()|Поведінка FirstOrDefault() відповідає First(), за винятком того, що якщо жоден запис не відповідає запиту, метод повертає значення за замовчуванням для типу.|
 |Single()|Повертає один запис, який відповідає умові запиту та будь-яким пунктам порядку.Якщо порядок не вказано, то повернутий запис базується на порядку бази даних.Якщо запиту не відповідає жоден запис або більше ніж один запис, створюється виняток.|
-|SingleOrDefault()|Поведінка SingleOrDefault() відповідає Single(), за винятком того, що якщо жоден запис не відповідає запиту, метод повертає значення за замовчуванням для типу (null).|
+|SingleOrDefault()|Поведінка SingleOrDefault() відповідає Single(), за винятком того, що якщо жоден запис не відповідає запиту, метод повертає значення за замовчуванням для типу.|
 |Last()|повертає останній запис, який відповідає умові запиту та будь-яким пунктам порядку. Якщо порядок не вказано, створюється виняток. Якщо запис не повертається, створюється виняток.|
-|LastOrDefault()|Поведінка відповідає Last(), за винятком того, що якщо жоден запис не відповідає запиту, метод повертає значення за замовчуванням для типу (null).|
+|LastOrDefault()|Поведінка відповідає Last(), за винятком того, що якщо жоден запис не відповідає запиту, метод повертає значення за замовчуванням для типу.|
 
 Усі методи також можуть приймати Expression<Func<T, bool>> для фільтрації набору результатів. Це означає, що ви можете розмістити вираз Where() у виклику методів First()/Single(), якщо є лише одне речення Where().Наступні твердження еквівалентні:
 
@@ -1203,7 +1219,7 @@ True
 У разі використання форми Last() і LastOrDefault() без параметрів буде повернуто останній запис (на основі будь-яких попередніх положень порядку). Під час використання Last() запит LINQ має містити використання OrderBy()/OrderByDescending(), інакше буде викинуто виключення InvalidOperationException:
 
 ```cs
-static void UsingLast()
+static void UsingLastWithoutOrderBy()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
@@ -1221,7 +1237,7 @@ static void UsingLast()
         Console.WriteLine(ex.Message);
     }
 }
-UsingLast();
+UsingLastWithoutOrderBy();
 ```
 ```console
         All cars
@@ -1241,7 +1257,7 @@ Queries performing 'Last' operation must have a deterministic sort order. Rewrit
 Тому терба відсортувати послідовність.
 
 ```cs
-static void UsingLast_WithOrderBy()
+static void UsingLastWithOrderBy()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
@@ -1259,7 +1275,7 @@ static void UsingLast_WithOrderBy()
         Console.WriteLine(ex.Message);
     }
 }
-UsingLast_WithOrderBy();
+UsingLastWithOrderBy();
 ```
 ```console
         All cars order by color
@@ -1361,22 +1377,14 @@ static void UsingSingleOrDefault()
         Console.WriteLine(ex.Message);
     }
 
-    try
-    {
-        var singleCar = context.Cars.SingleOrDefault(c => c.Id > 100);
-        CarToConsole(singleCar, "Single record with Id > 100");
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine(ex.Message);
-    }
+    var singleCar1 = context.Cars.SingleOrDefault(c => c.Id > 100);
+    CarToConsole(singleCar1, "Single record with Id > 100");
 }
 UsingSingleOrDefault();
 ```
 ```console
 Sequence contains more than one element
         Single record with Id > 100
-
 ```
 
 
@@ -1552,7 +1560,7 @@ static void UsingAll()
 UsingAll();
 ```
 ```
-false
+False
 ```
 ```sql
 SELECT CASE
@@ -1564,11 +1572,11 @@ SELECT CASE
 END
 ```
 
-### Отримання даних із збережених процедур
+## Отримання даних із збережених процедур
 
-Останній шаблон пошуку даних, який потрібно дослідити, — це отримання даних із збережених процедур. Хоча в EF Core є деякі прогалини щодо збережених процедур, пам’ятайте, що EF Core створено на основі ADO.NET. Нам просто потрібно опустити рівень і згадати, як ми називали збережені процедури до ORM.
+Останній шаблон пошуку даних, який потрібно дослідити, — це отримання даних із збережених процедур. Хоча в EF Core є деякі прогалини щодо збережених процедур, пам’ятайте, що EF Core створено на основі ADO.NET. Нам просто потрібно опустити рівень і згадати, як ми використовували збережені процедури до ORM.
 
-Першим кроком є ​​створення збереженої процедури в нашій базі даних:
+Першим кроком є ​​створення збереженої процедури в нашій базі даних. Заходимо в SQL Server Object Explorer > на БД правий клік > New Query
 
 ```sql
 CREATE PROCEDURE [dbo].[GetPetName]
@@ -1645,9 +1653,10 @@ static void EagerLoading_1()
         .Cars
         .Include(c => c.MakeNavigation);
 
-    Console.WriteLine(query.ToQueryString()); Console.WriteLine();
-    var cars = query.ToList();
+    Console.WriteLine(query.ToQueryString()); 
+    Console.WriteLine();
     
+    var cars = query.ToList();
     foreach (var car in cars)
     {
         Console.WriteLine($"{car.Id} {car.MakeNavigation.Name} {car.Color}");
@@ -1697,10 +1706,9 @@ static void EagerLoading_2()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
-    var query = context
-        .Makes
+    var query = context.Makes
         .Include(m => m.Cars)
-        .ThenInclude(c=>c.Drivers);
+        .ThenInclude(c => c.Drivers);
 
     Console.WriteLine(query.ToQueryString());
     Console.WriteLine();
@@ -1710,11 +1718,11 @@ static void EagerLoading_2()
     CollectionCarToConsole(cars, $"Cars of {make?.Name}");
     Console.WriteLine();
 
-    Car? car = cars.First();
-    Driver? driver = car.Drivers.First();
+    Car? car = cars?.First();
+    Driver? driver = car?.Drivers.First();
     Console.WriteLine($"" +
-        $"Driver {driver.PersonInfo.FirstName} {driver.PersonInfo.LastName} " +
-        $"of car {car.Id} {car.MakeNavigation.Name} {car.Color} {car.PetName}");
+        $"Driver {driver?.PersonInfo.FirstName} {driver?.PersonInfo.LastName} " +
+        $"of car {car?.Id} {car?.MakeNavigation.Name} {car?.Color} {car?.PetName}");
 }
 EagerLoading_2();
 ```
@@ -1751,7 +1759,7 @@ An entity of type Car was loaded from the database.
 Driver Fred Flinstone of car 1 VW Black Zippy
 ```
 
-Одна річ, яка може здатися дивною, — це доданий ORDER BY, оскільки запит LINQ не містив жодного порядку. У разі використання ланцюжкових включень (з операторами Include()/ThenInclude() механізм перекладу LINQ додасть речення ORDER BY на основі порядку включених таблиць та їхніх первинних і зовнішніх ключів. Це на додаток до будь-якого порядку, який ви вказали в запиті LINQ. Розглянемо наступний оновлений приклад
+Одна річ, яка може здатися дивною, — це доданий ORDER BY, оскільки запит LINQ не містив жодного порядку. У разі використання ланцюжкових включень (з операторами Include()/ThenInclude()) механізм перекладу LINQ додасть речення ORDER BY на основі порядку включених таблиць та їхніх первинних і зовнішніх ключів. Це на додаток до будь-якого порядку, який ви вказали в запиті LINQ. Розглянемо наступний оновлений приклад
 
 ```cs
 static void EagerLoading_3()
@@ -1800,8 +1808,7 @@ static void FilteredInclude()
     Console.WriteLine(query.ToQueryString());
     Console.WriteLine();
 
-    var makes = query.ToList();
-    Console.WriteLine(makes.Count());
+    _ = query.ToList();
 }
 FilteredInclude();
 ```
@@ -1822,9 +1829,8 @@ An entity of type Make was loaded from the database.
 An entity of type Car was loaded from the database.
 An entity of type Make was loaded from the database.
 An entity of type Make was loaded from the database.
-6
-
 ```
+Як видно завантажується лише один Car.
 
 ### Активне завантаження за допомогою розділених запитів
 
@@ -1856,7 +1862,6 @@ This LINQ query is being executed in split-query mode, and the SQL shown is for 
 
 6
 ```
-
 ```sql
 SELECT [m].[Id], [m].[Name], [m].[TimeStamp]
 FROM [dbo].[Makes] AS [m]
@@ -1890,6 +1895,7 @@ static void ManyToManyQueries()
     Console.WriteLine(query.ToQueryString());
     Console.WriteLine();
 
+    _ = query.ToList();
     Console.WriteLine(query.Count());
 }
 ManyToManyQueries();
@@ -1909,6 +1915,26 @@ WHERE EXISTS (
     WHERE [i].[Id] = [i0].[InventoryId])
 ORDER BY [i].[Id], [t].[InventoryId], [t].[DriverId]
 
+An entity of type Car was loaded from the database.
+An entity of type CarDriver was loaded from the database.
+An entity of type Driver was loaded from the database.
+An entity of type Person was loaded from the database.
+An entity of type CarDriver was loaded from the database.
+An entity of type Driver was loaded from the database.
+An entity of type Person was loaded from the database.
+An entity of type CarDriver was loaded from the database.
+An entity of type Driver was loaded from the database.
+An entity of type Person was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type CarDriver was loaded from the database.
+An entity of type Driver was loaded from the database.
+An entity of type Person was loaded from the database.
+An entity of type CarDriver was loaded from the database.
+An entity of type Driver was loaded from the database.
+An entity of type Person was loaded from the database.
+An entity of type CarDriver was loaded from the database.
+An entity of type Driver was loaded from the database.
+An entity of type Person was loaded from the database.
 2
 ```
 Як ви можете бачити зі згенерованого оператора SQL select, EF Core піклується про роботу зі зведеною таблицею, щоб правильно зіставити записи.
@@ -1916,7 +1942,6 @@ ORDER BY [i].[Id], [t].[InventoryId], [t].[DriverId]
 ### Явне завантаження
 
 Явне завантаження — це завантаження даних уздовж властивості навігації після того, як основний об’єкт уже завантажено. Цей процес передбачає виконання додаткового виклику бази даних для отримання відповідних даних. Це може бути корисно, якщо вашій програмі потрібно вибірково отримати пов’язані записи замість того, щоб завжди витягувати всі повязані дани.
-Процес починається з сутності, яка вже завантажена та використовує метод Entry() у похідному DbContext.
 
 ```cs
 static void ExplicitLoading()
@@ -1965,16 +1990,15 @@ static void ExplicitLoadingCollectionOneToMany()
     Console.WriteLine($"{make.Id} {make.Name}");
     Console.WriteLine();
 
-    var query = context.Entry(make).Collection(c => c.Cars).Query();
-    string sql = query.ToQueryString();
-    Console.WriteLine(sql);
+    var query = context.Entry(make).Collection(m => m.Cars).Query();
+    Console.WriteLine(query.ToQueryString());
     Console.WriteLine();
 
     query.Load();
     Console.WriteLine("Entities cars loaded into memory.\n");
     List<Car>? cars = query.ToList();
 
-    CollectionCarToConsole(cars,$"{make.Name} cars");
+    CollectionCarToConsole(cars, $"{make.Name} cars");
 
 }
 ExplicitLoadingCollectionOneToMany();
@@ -2012,11 +2036,9 @@ static void ExplicitLoadingCollectionManyToMany()
     Console.WriteLine();
 
     var query = context.Entry(car).Collection(c => c.Drivers).Query();
-
-    string sql = query.ToQueryString();
-    Console.WriteLine(sql);
+    Console.WriteLine(query.ToQueryString());
     Console.WriteLine();
-    
+
     //Load drivers to memory
     query.Load();
     Console.WriteLine();
@@ -2126,7 +2148,7 @@ public class Car : BaseEntity
 Тепер, коли властивості позначено як віртуальні, їх можна використовувати з відкладеним завантаженням. Наступний метод — спроба отримати Make (зверніть увагу, що ми ще не використовуємо параметр args методу CreateDbContext())
 
 ```cs
-static void NoLazyLoad()
+static void LazyLoad()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
@@ -2145,7 +2167,7 @@ static void NoLazyLoad()
             $":{car.MakeNavigation == null}");
     }
 }
-NoLazyLoad();
+LazyLoad();
 ```
 ```
 An entity of type Car was loaded from the database.
@@ -2160,22 +2182,10 @@ Is car.MakeNavigation == null :True
 ```cs
 static void LazyLoad()
 {
+
     var context = new ApplicationDbContextFactory().CreateDbContext(["lazy"]);
+    //...
 
-    var query = context.Cars.AsQueryable();
-    Car car = query.First();
-
-    try
-    {
-        Console.WriteLine(car.MakeNavigation.Name);
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine(ex.Message);
-        Console.WriteLine("The navigation property has not been loaded.");
-        Console.WriteLine($"Is car.MakeNavigation == null " +
-            $":{car.MakeNavigation == null}");
-    }
 }
 LazyLoad();
 ```
@@ -2252,27 +2262,17 @@ static void UpdateOneRecord()
     car.Color = "Green";
     context.SaveChanges();
 
-    ShowFirstCar();
+    CarToConsole(car, "First car");
 }
 UpdateOneRecord();
-
-static void ShowFirstCar()
-{
-    var context = new ApplicationDbContextFactory().CreateDbContext(null);
-
-    var car = context.Cars.Include(c => c.MakeNavigation).First();
-
-    Console.WriteLine($"{car.Id} {car.MakeNavigation.Name} {car.Color} {car.PetName}");
-}
 ```
 ```console
 An entity of type Car was loaded from the database.
 Saving change for Server=(localdb)\mssqllocaldb;Database=AutoLotSamples;Trusted_Connection=True;ConnectRetryCount=0
 An entity of type Car was update.
 Saved change 1 entities
-An entity of type Car was loaded from the database.
-An entity of type Make was loaded from the database.
-1 VW Green Zippy
+        First car
+1 Green Zippy
 ```
 ```sql
 exec sp_executesql N'SET NOCOUNT ON;
@@ -2321,9 +2321,8 @@ UpdateNontrackedEntities();
 Saving change for Server=(localdb)\mssqllocaldb;Database=AutoLotSamples;Trusted_Connection=True;ConnectRetryCount=0
 An entity of type Car was update.
 Saved change 1 entities
-An entity of type Car was loaded from the database.
-An entity of type Make was loaded from the database.
-1 VW Orange Zippy
+        First car
+1 Orange Zippy
 ```
 Оскільки сутність не відстежується, EF Core оновлює всі значення властивостей у створеному SQL
 ```sql
@@ -2396,24 +2395,9 @@ SELECT @@ROWCOUNT;
 Спочатку загрузимо початкові дані в БД.
 
 ```cs
-static void LoadInitialDataToDatabase()
-{
-    ClearSampleData();
-    LoadMakeAndCarData();
-    AddRecordsToMantToManyTables();
-}
-LoadInitialDataToDatabase();
+ClearAndFillDB();
 ```
-```console
-Saving change for Server=(localdb)\mssqllocaldb;Database=AutoLotSamples;Trusted_Connection=True;ConnectRetryCount=0
-Saved change 6 entities
-Saving change for Server=(localdb)\mssqllocaldb;Database=AutoLotSamples;Trusted_Connection=True;ConnectRetryCount=0
-Saved change 10 entities
-An entity of type Car was loaded from the database.
-An entity of type Car was loaded from the database.
-Saving change for Server=(localdb)\mssqllocaldb;Database=AutoLotSamples;Trusted_Connection=True;ConnectRetryCount=0
-Saved change 12 entities
-```
+
 Невідстежувані об’єкти можуть видаляти записи так само, як невідстежувані об’єкти можуть оновлювати записи.Різниця полягає в тому, що сутність відстежується шляхом виклику Remove()/RemoveRange() або встановлення стану на Deleted, а потім виклику SaveChanges().
 
 У наступному прикладі використовується той самий шаблон як при оновленні невідстежуваних об’єктів. Він читає запис як невідстежуваний, а потім використовує метод Remove() на DbSet<T> (перший приклад) або вручну змінює EntityState на Deleted (другий приклад). У кожному разі код викликає SaveChanges(), щоб зберегти видалення. Виклик Clear() на ChangeTracker гарантує, що між першим і другим прикладами немає жодного забруднення.
@@ -2434,7 +2418,6 @@ static void DeleteNontrackedEntities()
     context.ChangeTracker.Clear();
     var cars = context.Cars;
     CollectionCarToConsole(cars, "All cars");
-
 }
 DeleteNontrackedEntities();
 ```
@@ -2496,11 +2479,12 @@ An exception orruced! An error occurred while saving the entity changes. See the
 An error occurred while saving the entity changes. See the inner exception for details.
 The DELETE statement conflicted with the REFERENCE constraint "FK_Inventory_Makes_MakeId". The conflict occurred in database "AutoLotSamples", table "dbo.Inventory", column 'MakeId'.
 ```
+Таким чином аби видалити таку сутність спочатку треба видилиті всі Car з таким MakeId а потім виділити сутність.
 
 
-## Важливі можливості EF Core
+# Важливі можливості EF Core
 
-### Глобальні фільтри запитів
+## Глобальні фільтри запитів
 
 Глобальні фільтри запитів дозволяють додавати речення where до всіх запитів LINQ для певної сутності. Наприклад, загальний шаблон проектування бази даних полягає у використанні м’яких видалень замість жорстких видалень. До таблиці додається поле для вказівки видаленого статусу запису. Якщо запис «видалено», значення встановлюється на true (або 1), але не видаляється з бази даних. Це називається м’яким видаленням. Щоб відфільтрувати м’яко видалені записи зі звичайних операцій, кожне речення where має перевіряти значення цього поля. Додати включення цього фільтра в кожен запит може зайняти багато часу, якщо не проблематично.
 EF Core дозволяє додавати глобальний фільтр запиту до сутності, який потім застосовується до кожного запиту, що включає цю сутність. У прикладі м’якого видалення, описаному раніше, ви встановлюєте фільтр для класу сутності, щоб виключити м’яко видалені записи. Вам більше не потрібно пам’ятати про включення пропозиції where, щоб відфільтрувати м’яко видалені записи в кожному запиті, який ви пишете.
@@ -2510,7 +2494,7 @@ EF Core дозволяє додавати глобальний фільтр за
 Подивимось загальну кількість записів.
 
 ```cs
-static void CarCountWithGlobalFilter()
+static void HowManyCarsIsDrivable()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
@@ -2525,7 +2509,7 @@ static void CarCountWithGlobalFilter()
     int drivableCars = query.Where(c => c.IsDrivable == true).Count();
     Console.WriteLine($"Drivable cars: {drivableCars}");
 }
-CarCountWithGlobalFilter();
+HowManyCarsIsDrivable();
 ```
 ```console
 SELECT [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display], [i].[IsDrivable], [i].[MakeId], [i].[PetName], [i].[TimeStamp]
@@ -2598,7 +2582,7 @@ Drivable cars: 7
     public void Configure(EntityTypeBuilder<Radio> builder)
     {
         //...
-        builder.HasQueryFilter(r => r.CarNavigation.IsDrivable == false);
+        builder.HasQueryFilter(r => r.CarNavigation.IsDrivable == true);
     }
 ```
 
@@ -2625,8 +2609,8 @@ INNER JOIN (
     SELECT [i].[Id], [i].[IsDrivable]
     FROM [dbo].[Inventory] AS [i]
     WHERE [i].[IsDrivable] = CAST(1 AS bit)
-) AS [t] ON [r].[InventoryId] = [t].[Id]
-WHERE [t].[IsDrivable] = CAST(1 AS bit)
+) AS [i0] ON [r].[InventoryId] = [i0].[Id]
+WHERE [i0].[IsDrivable] = CAST(1 AS bit)
 
 SELECT [r].[Id], [r].[InventoryId], [r].[HasSubWoofers], [r].[HasTweeters], [r].[RadioId], [r].[TimeStamp]
 FROM [Radios] AS [r]
@@ -2644,15 +2628,14 @@ static void ReletedDataWithGlobalQueryFilters()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
-    var queryCars = context.Cars.IgnoreQueryFilters().Where(c=>c.MakeId==1);
+    var query = context.Cars.IgnoreQueryFilters().Where(c=>c.MakeId==1);
 
-    Console.WriteLine($"Car with MakerId = 1 : {queryCars.Count()}");
+    Console.WriteLine($"Car with MakerId = 1 : {query.Count()}");
     Console.WriteLine();
     context.ChangeTracker.Clear();
  
     var make = context.Makes.First(m => m.Id == 1);
     context.Entry(make).Collection(m => m.Cars).Load();
-
 }
 ReletedDataWithGlobalQueryFilters();
 ```
@@ -2696,10 +2679,12 @@ WHERE [i].[MakeId] = 1
 ```
 Той самий процес застосовується під час використання методу Reference() для отримання даних із посилальної властивості навігації. Спочатку викличте Query(), а потім IgnoreQueryFilters().
 
-### Сирі запити SQL з LINQ
+## Сирі запити SQL з LINQ
 
 Іноді отримати правильний оператор LINQ для складного запиту може бути складніше, ніж просто написати SQL безпосередньо. Або згенерований SQL із вашого запиту LINQ неоптимальний. EF Core має механізм, який дозволяє виконувати необроблені оператори SQL на DbSet<T>. Методи FromSqlRaw() і FromSqlRawInterpolated() приймають рядок, який замінює запит LINQ. Цей запит виконується на стороні сервера.
+
 Якщо необроблений оператор SQL не завершується (наприклад, не є збереженою процедурою, визначеною користувачем функцією, оператором, який використовує загальний вираз таблиці, і не закінчується крапкою з комою), тоді до запиту можна додати додаткові оператори LINQ. Додаткові оператори LINQ, такі як Include(), OrderBy() або Where(), будуть об’єднані з оригінальним необробленим викликом SQL і будь-якими глобальними фільтрами запитів, і весь запит буде виконано на стороні сервера.
+
 У разі використання одного з варіантів FromSql запит має бути написаний із використанням схеми сховища даних та імені таблиці, а не імен сутностей. FromSqlRaw() надішле рядок так, як він написаний. FromSqlInterpolated() використовує інтерполяцію рядка C#, і кожен інтерпольований рядок транслюється в параметрі SQL. Слід використовувати інтерпольовану версію кожного разу, коли ви використовуєте змінні для додаткового захисту, властивого параметризованим запитам.
 
 Щоб отримати схему бази даних і назву таблиці, використовуйте властивість Model у похідному DbContext. Модель надає метод під назвою FindEntityType(), який повертає IEntityType, який, у свою чергу, має методи для отримання назви схеми та таблиці. Наступний код відображає назву схеми та таблиці:
@@ -2709,7 +2694,7 @@ static void ShowSchemaTableName()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
-    IEntityType? metadata = context.Model.FindEntityType(typeof(Car).FullName);
+    IEntityType? metadata = context.Model.FindEntityType(typeof(Car).FullName!);
 
     Console.WriteLine(metadata?.GetSchema());
     Console.WriteLine(metadata?.GetTableName());
@@ -2722,7 +2707,7 @@ dbo
 Inventory
 ```
 
-Якщо припустити, що глобальний фільтр запиту з попереднього розділу встановлено для об’єкта Car, наступний оператор LINQ отримає перший інвентарний запис, де ідентифікатор дорівнює одиниці, включить пов’язані дані Make та відфільтрує некеровані автомобілі:
+Якщо припустити, що глобальний фільтр запиту з попереднього розділу встановлено для об’єкта Car, наступний оператор LINQ отримає перший запис, де Id = 1, включить пов’язані дані Make та відфільтрує автомобілі IsDrivable == ture:
 
 ```cs
 static void UsingFromSqlRawInterpolated()
@@ -2767,7 +2752,7 @@ An entity of type Make was loaded from the database.
     SQL-запит не може містити пов’язані дані.
 
 
-### Проекції
+## Проекції
 
 На додаток до використання необроблених SQL-запитів із LINQ, моделі перегляду можна заповнювати проекціями.
 Проекція полягає в тому, що інший тип об’єкта складається в кінці запиту LINQ, проектуючи дані в інший тип даних. Проекція може бути підмножиною вихідних даних (наприклад, отримання всіх значень Id об’єктів Car, які відповідають пропозиції where) або спеціального типу, наприклад CarMakeViewModel.
@@ -2840,7 +2825,7 @@ WHERE [i].[IsDrivable] = CAST(1 AS bit)
 9       Yugo    Brown
 ```
 
-###  Обробка значень, згенерованих базою даних
+##  Обробка значень, згенерованих базою даних
 
 На додаток до відстеження змін і генерації SQL-запитів із LINQ, значною перевагою використання EF Core над ADO.NET є бездоганна обробка значень, згенерованих базою даних. Після додавання або оновлення сутності EF Core запитує будь-які дані, згенеровані базою даних, і автоматично оновлює сутність правильними значеннями. У ADO.NET вам потрібно буде зробити це самостійно.
 Наприклад, таблиця Inventory має цілочисельний первинний ключ, який визначено в SQL Server як стовпець Identity. Стовпці ідентифікаційних даних заповнюються SQL Server унікальним номером (із послідовності), коли додається запис, і цей первинний ключ не можна оновлювати під час звичайних оновлень запису (за винятком особливого випадку ввімкнення вставки ідентифікаційних даних). Крім того, у таблиці Inventory є стовпець Timestamp, який використовується для перевірки паралельності. Стовпець Timestamp підтримується SQL Server і оновлюється під час будь-якої дії додавання або редагування. Ми також додали до таблиці два стовпці зі значеннями за замовчуванням, DateBuilt і IsDrivable, і один обчислений стовпець, Display.
@@ -2861,8 +2846,20 @@ static void AddACar()
 
     context.Cars.Add(car);
     context.SaveChanges();
+
+    Console.WriteLine(
+        car.Id+"\t"+
+        car.DateBuilt+"\t"+
+        car.Display+"\t"+
+        car.TimeStamp
+        );
 }
 AddACar();
+```
+```
+Saving change for Server=(localdb)\mssqllocaldb;Database=AutoLotSamples;Trusted_Connection=True;ConnectRetryCount=0
+Saved change 1 entities
+11      21.11.2024 17:29:23     Herbie (Yellow) System.Byte[]
 ```
 
 Коли виконується SaveChanges(), виконується два запити до бази даних. Перший, вставляє новий запис у таблицю:
@@ -2879,7 +2876,7 @@ SELECT [Id], [DateBuilt], [Display], [IsDrivable], [TimeStamp]
 FROM [dbo].[Inventory]
 WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();
 ```
-EF Core фактично виконує параметризовані запити, але я спростив приклади SQL для зручності читання.
+EF Core фактично виконує параметризовані запити.
 
 Під час додавання запису, який призначає значення властивостям із значеннями за замовчуванням, ви побачите, що EF Core не запитує ці властивості, оскільки сутність уже має правильні значення.
 
@@ -2937,10 +2934,11 @@ WHERE @@ROWCOUNT = 1 AND [Id] = 1;
 ```
 Цей процес також працює під час додавання та/або оновлення кількох елементів у базі даних. EF Core знає, як підключити значення, отримані з бази даних, до правильних об’єктів у вашій колекції.
 
-### Перевірка паралельності
+## Перевірка паралельності
 
 Проблеми паралельності виникають, коли два окремі процеси (користувачі або системи) намагаються оновити один і той же запис приблизно в один і той же час. Наприклад, User 1 і User 2 отримують дані для Customer A. User 1 оновлює адресу та зберігає зміни. User 2 оновлює кредитний рейтинг і намагається зберегти той самий запис. Якщо збереження для User 2 працює, зміни від User 1 буде скасовано, оскільки адресу було змінено після того, як User 2 отримав запис. Іншим варіантом є невдача збереження для User 2, у цьому випадку зміни User 1 зберігаються, а зміни User 2 – ні.
 Спосіб вирішення цієї ситуації залежить від вимог до програми. Рішення варіюються від бездіяльності (друге оновлення перезаписує перше) до використання оптимістичного паралелізму (друге оновлення не вдається) до більш складних рішень, таких як перевірка окремих полів. За винятком вибору нічого не робити (загалом це вважається поганою ідеєю програмування), розробники повинні знати, коли виникають проблеми з паралельністю, щоб їх можна було правильно вирішити.
+
 На щастя, багато сучасних баз даних мають інструменти, які допомагають команді розробників вирішувати проблеми паралелізму. SQL Server має вбудований тип даних під назвою timestamp, синонім rowversion. Якщо стовпець визначено з типом даних timestamp, коли запис додається до бази даних, значення для стовпця створюється SQL Server, а коли запис оновлюється, значення для стовпця також оновлюється.Фактично гарантовано, що це значення буде унікальним і повністю контролюється SQL Server, тому вам не потрібно нічого робити, окрім як «додати поле».
 
 EF Core може використовувати тип даних timestamp SQL Server, реалізувавши властивість Timestamp для сутності (представленої як byte[] у C#). Властивості сутності, визначені атрибутом Timestamp або позначенням Fluent API, додаються до клаузи where під час оновлення або видалення записів. Замість того, щоб просто використовувати значення первинного ключа, згенерований SQL додає значення властивості timestamp до клаузи where, як ви бачили в попередньому прикладі. Це обмежує результати тими записами, де значення первинного ключа та позначки часу збігаються. Якщо інший користувач (або система) оновив запис, значення часових позначок не збігатимуться, і оператор оновлення або видалення не оновить запис. Ось попередній приклад оновлення:
@@ -2988,10 +2986,10 @@ Saving change for Server=(localdb)\mssqllocaldb;Database=AutoLotSamples;Trusted_
 An exception orruced! The database operation was expected to affect 1 row(s), but actually affected 0 row(s); data may have been modified or deleted since entities were loaded. See https://go.microsoft.com/fwlink/?LinkId=527962 for information on understanding and handling optimistic concurrency exceptions. entities
 ```
 
-### Стійкість підключення
+## Стійкість підключення
 
 Перехідні помилки важко налагодити та важче відтворити. На щастя, багато постачальників баз даних мають вбудований механізм повторної спроби для збоїв у системі баз даних (проблеми з базою даних tempdb, обмеження на кількість користувачів тощо), який може бути використаний EF Core. Для SQL Server SqlServerRetryingExecutionStrategy виявляє тимчасові помилки (як визначено командою SQL Server), і якщо ввімкнено для похідного DbContext через DbContextOptions, EF Core автоматично повторює операцію, доки не буде досягнуто максимального ліміту повторів. Для SQL Server існує метод швидкого доступу, який можна використовувати для ввімкнення SqlServerRetryingExecutionStrategy з усіма значеннями за замовчуванням.
-Розглянемо метод в ApplicationDbContextFactory.
+Змінемо метод в ApplicationDbContextFactory.
 ```cs
     public ApplicationDbContext CreateDbContext(string[]? args)
     {
@@ -3004,7 +3002,6 @@ An exception orruced! The database operation was expected to affect 1 row(s), bu
     }
 
 ```
-
 
 У SqlServerOptions використовується метод EnableRetryOnFailure(). Максимальну кількість повторних спроб і ліміт часу між повторними спробами можна налаштувати відповідно до вимог програми. Якщо ліміт повторних спроб досягнуто без завершення операції, EF Core повідомить програму про проблеми з підключенням, викинувши RetryLimitExceededException. Цей виняток, якщо його обробляє розробник, може передавати відповідну інформацію користувачеві, забезпечуючи кращий досвід.
 
@@ -3045,10 +3042,11 @@ static void TransactionWithExecutionStrategies()
 ```
 Для постачальників баз даних, які не надають вбудовану стратегію виконання, також можна створити власні стратегії виконання. Пошуковий запит "connection-resiliency".
 
-### Відображення функцій бази даних
+## Відображення функцій бази даних
 
 Функції SQL Server можна зіставляти з методами C# і включати в оператори LINQ. Метод C# є лише покажчиком місця заповнення, оскільки функція сервера вкладаеться в згенерований SQL для запиту. Підтримку відображення табличної функції додано в EF Core до вже існуючої підтримки відображення скалярної функції.
 EF Core вже підтримує багато вбудованих функцій SQL Server. Оператор C# null coalescing (??) перекладається на функцію об’єднання SQL Server. String.IsNullOrEmpty() перетворюється на нульову перевірку та використовує функцію len SQL Server для перевірки порожнього рядка.
+
 Щоб побачити відображення визначеної користувачем функції в дії, створіть визначену користувачем функцію, яка повертає кількість записів Invertory на основі MakeId:
 
 ```sql
@@ -3066,10 +3064,15 @@ GO
 Щоб використовувати це в C#, створіть нову функцію в похідному класі DbContext. Тіло C# цієї функції ніколи не виконується; це просто заповнювач, який відображається на функцію SQL Server. Зауважте, що цей метод можна розмістити де завгодно, але зазвичай його розміщують у похідному класі DbContext для видимості:
 
 ```cs
+public class ApplicationDbContext : DbContext
+{
+    //...
+
     //DB Function
     [DbFunction("udf_CountOfMakes",Schema ="dbo")]
     public static int InventoryCountFor(int makeId)
         => throw new NotSupportedException();
+}
 ```
 
 Цю функцію тепер можна використовувати в запитах LINQ і вона стає частиною згенерованого SQL.
@@ -3117,9 +3120,13 @@ GO
 Додайте наступний код до класу ApplicationDbContext:
 
 ```cs
+public class ApplicationDbContext : DbContext
+{
+    //...
     [DbFunction("udtf_GetCarsForMake",Schema ="dbo")]
     public IQueryable<Car> GetCarsFor(int makeId)
         => FromExpression(() => GetCarsFor(makeId));
+}
 ```
 Виклик FromExpression() дозволяє викликати функцію безпосередньо в похідному DbContext замість використання звичайного DbSet<T>.
 ```cs
@@ -3150,7 +3157,7 @@ An entity of type Car was loaded from the database.
 ```
 Щоб отримати додаткові відомості про відображення функцій бази даних, зверніться до документації за запитом "EF Core user defined function mapping".
 
-### EF.Functions
+## EF.Functions
 
 Статичний клас EF було створено як заповнювач для методів CLR, які транслюються у функції бази даних, використовуючи той самий механізм, що й відображення функцій бази даних, описане в попередньому розділі.Основна відмінність полягає в тому, що всі деталі впровадження обробляються постачальниками баз даних.
 |Функція|Опис|
@@ -3200,7 +3207,6 @@ An entity of type Car was loaded from the database.
 11 Yellow Herbie
 
 ```
-
 Зверніть увагу, що символ підстановки SQL Server (%) використовується так само, як і в запиті T-SQL.
 
 ### Пакетування операторів
@@ -3243,7 +3249,7 @@ EF Core об’єднує оператори в один виклик.
 
 ### Перетворювачі значень
 
-Перетворювачі значень використовуються для автоматичного перетворення даних під час отримання та збереження в базі даних. EF Core поставляється з довгим списком вбудованих перетворювачів значень (повний список можна переглянути за азпитом "EF Core value conversion"). Окрім вбудованих конвертерів значень, ви також можете створити власні. Наприклад, ви можете зберегти ціну автомобіля в базі даних як числове значення, але відобразити ціну як рядок валюти.
+Перетворювачі значень використовуються для автоматичного перетворення даних під час отримання та збереження в базі даних. EF Core поставляється з довгим списком вбудованих перетворювачів значень (повний список можна переглянути за запитом "EF Core value conversion"). Окрім вбудованих конвертерів значень, ви також можете створити власні. Наприклад, ви можете зберегти ціну автомобіля в базі даних як числове значення, але відобразити ціну як рядок валюти.
 
 Деякі з перетворювачів значень EF Core
 
@@ -3363,24 +3369,24 @@ RETURNS TABLE
 AS
 RETURN
 (   
-   SELECT Id, IsDrivable, DateBuilt, Color, PetName, MakeId, TimeStamp, Display,Price
+   SELECT Id, IsDrivable, DateBuilt, Color, PetName, MakeId, TimeStamp, Display, Price
    FROM Inventory WHERE MakeId = @makeId
 )
 ```
 
 ### Shadow(тінові) властивості.
 
-Тіньові властивості — це властивості, які явно не визначені у вашій моделі, але існують завдяки EF Core.Вони корисні, коли в базі даних є дані, які не слід відображати для зіставлених типів сутностей.Значення та стан цих властивостей повністю підтримується інструментом Change Tracker. Одним із прикладів використання тіньових властивостей є представлення зовнішніх ключів для властивостей навігації, якщо зовнішній ключ не визначено як частину сутності. Іншим прикладом є тимчасові таблиці. 
+Тіньові властивості — це властивості, які явно не визначені у вашій моделі, але існують завдяки EF Core. Вони корисні, коли в базі даних є дані, які не слід відображати для зіставлених типів сутностей. Значення та стан цих властивостей повністю підтримується інструментом Change Tracker. Одним із прикладів використання тіньових властивостей є представлення зовнішніх ключів для властивостей навігації, якщо зовнішній ключ не визначено як частину сутності. Іншим прикладом є часові таблиці. 
 
 Тіньові властивості, які не додає EF Core до сутності, можна визначити лише через Fluent API за допомогою методу Property(). Якщо ім’я властивості, передане в метод Property(), збігається з існуючою властивістю сутності (раніше визначеною тіньовою властивістю або явною властивістю), код API Fluent налаштовує наявну властивість. В іншому випадку для сутності створюється тіньова властивість. Щоб додати тінову властивість типу bool? з назвою IsDeleted до сутності Car зі значенням за замовчуванням true, додайте наступний код до методу Configure() класу CarConfiguration.
 ```cs
     public void Configure(EntityTypeBuilder<Car> builder)
     {
         //...
-        builder.Property<bool?>("IsDeleted").IsRequired(false).HasDefaultValue(true);
+        builder.Property<bool?>("IsDeleted").IsRequired(false).HasDefaultValue(false);
     }
 ```
-Післяціх змін слід додаьт нову міграцію та оновити БД.
+Після ціх змін слід додати нову міграцію та оновити БД.
 
 ```console
  dotnet ef migrations add ChangeCarAddShadowPropertyIsDeleted
@@ -3424,7 +3430,6 @@ static void ShadowProperties()
         Color = "White",
         PetName = "Snuppy",
         MakeId = 1,
-        Price = "1000.00"
         //Compile error
         //IsDeleted = false
     };
@@ -3488,7 +3493,7 @@ Saved change 4 entities
 
 ### Підтримка Часової таблиці SQL Server
 
-Часові таблиці SQL Server автоматично відстежують усі дані, які коли-небудь зберігалися в таблиці. Це досягається за допомогою таблиці історії, у якій зберігається копія даних із міткою часу щоразу, коли вноситься зміна або видалtyyz в основній таблиці. Потім архівні дані доступні для запиту, аудиту або відновлення. EF Core підтримує створення часових таблиць, перетворення звичайних таблиць у часові таблиці, запит історичних даних і відновлення даних із певного моменту часу.
+Часові таблиці SQL Server автоматично відстежують усі дані, які коли-небудь зберігалися в таблиці. Це досягається за допомогою таблиці історії, у якій зберігається копія даних із міткою часу щоразу, коли вноситься зміна або видалення в основній таблиці. Потім архівні дані доступні для запиту, аудиту або відновлення. EF Core підтримує створення часових таблиць, перетворення звичайних таблиць у часові таблиці, запит історичних даних і відновлення даних із певного моменту часу.
 
 #### Налаштування часових таблиць
 
@@ -3579,9 +3584,6 @@ static void UsingLinqForTemporalTable()
     var query = context.Cars;
     Console.WriteLine(query.ToQueryString());
     Console.WriteLine();
-
-    var cars = query.ToList();
-    CollectionCarToConsole(cars, "Cars");
 }
 UsingLinqForTemporalTable();
 ```
@@ -3589,29 +3591,6 @@ UsingLinqForTemporalTable();
 SELECT [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display], [i].[IsDeleted], [i].[IsDrivable], [i].[MakeId], [i].[PeriodEnd], [i].[PeriodStart], [i].[PetName], [i].[Price], [i].[TimeStamp]
 FROM [dbo].[Inventory] AS [i]
 WHERE [i].[IsDrivable] = CAST(1 AS bit)
-
-An entity of type Car was loaded from the database.
-An entity of type Car was loaded from the database.
-An entity of type Car was loaded from the database.
-An entity of type Car was loaded from the database.
-An entity of type Car was loaded from the database.
-An entity of type Car was loaded from the database.
-An entity of type Car was loaded from the database.
-An entity of type Car was loaded from the database.
-An entity of type Car was loaded from the database.
-An entity of type Car was loaded from the database.
-        Cars
-1 Black Zippy
-2 Rust Rusty
-3 Black Mel
-4 Yellow Clunker
-5 Black Bimmer
-6 Green Hank
-7 Pink Pinky
-8 Black Pete
-9 Brown Brownie
-13 White Snuppy
-
 ```
 Зверніть увагу на те, що згенерований SQL містить два стовпці з міткою часу. EF Core додає додаткові стовпці до вашої сутності як тіньові властивості. Як було показано в попередньому розділі, тіньові властивості існують як стовпці в таблиці бази даних, але не визначені явно в сутності.
 
@@ -3628,7 +3607,7 @@ static void UsingFromSqlRawInterpolatedWithTemporalTable()
 
     int carId = 1;
     var query = context.Cars
-        .FromSqlInterpolated($"Select *,ValidFrom,ValidTo from dbo.Inventory where Id = {carId}")
+        .FromSqlInterpolated($"Select *, PeriodStart, PeriodEnd from dbo.Inventory where Id = {carId}")
         .Include(c => c.MakeNavigation);
 
     Console.WriteLine(query.ToQueryString());
@@ -3669,7 +3648,7 @@ CREATE FUNCTION udtf_GetCarsForMake ( @makeId int )
 Щоб побачити це в дії, така локальна функція додає,  запис в таблиці Inventory за допомогою звичайної взаємодії EF Core:
 
 ```cs
-static void MainTableAndHistoryTableInteractions1()
+static void MainTableAndHistoryTableInteractions_1()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
@@ -3678,20 +3657,19 @@ static void MainTableAndHistoryTableInteractions1()
         Color = "LightBlue",
         MakeId = 1,
         PetName = "Sky",
-        Price = "500.00"
     };
     context.Cars.Add(car);
     context.SaveChanges();
-
 }
-MainTableAndHistoryTableInteractions1();
+MainTableAndHistoryTableInteractions_1();
 ```
 ```console
 Saving change for Server=(localdb)\mssqllocaldb;Database=AutoLotSamples;Trusted_Connection=True;ConnectRetryCount=0
 Saved change 1 entities
 ```
-Кожна вставка, редагування або видалення відстежується в таблиці історії. Коли запис вставляється в таблицю, значення PeriodStart встановлюється на час початку транзакції вставки, а PeriodEnd встановлюється на максимальну дату для datetime2, яка становить 31.12.9999 23:59:59.9999999.
+Коли запис вставляється в основній таблиці, значення PeriodStart встановлюється на час початку транзакції вставки, а PeriodEnd встановлюється на максимальну дату для datetime2, яка становить 31.12.9999 23:59:59.9999999.
 
+Редагування або видалення відстежується в таблиці історії.
 ```cs
 static void MainTableAndHistoryTableInteractions_2()
 {
@@ -3705,7 +3683,6 @@ static void MainTableAndHistoryTableInteractions_2()
     car.Color = "Red";
     context.Cars.Update(car);
     context.SaveChanges();
-
 }
 MainTableAndHistoryTableInteractions_2();
 ```
@@ -3729,7 +3706,6 @@ static void MainTableAndHistoryTableInteractions_3()
      
     context.Cars.Remove(car);
     context.SaveChanges();
-
 }
 MainTableAndHistoryTableInteractions_3();
 ```
@@ -3848,19 +3824,19 @@ FROM [dbo].[Inventory] FOR SYSTEM_TIME ALL AS [i]
 WHERE [i].[IsDrivable] = CAST(1 AS bit)
 ORDER BY [i].[PeriodStart]
 
-Zippy 19.11.2024 7:36:37 31.12.9999 23:59:59
-Rusty 19.11.2024 7:36:37 31.12.9999 23:59:59
-Mel 19.11.2024 7:36:37 31.12.9999 23:59:59
-Clunker 19.11.2024 7:36:37 31.12.9999 23:59:59
-Bimmer 19.11.2024 7:36:37 31.12.9999 23:59:59
-Hank 19.11.2024 7:36:37 31.12.9999 23:59:59
-Pinky 19.11.2024 7:36:37 31.12.9999 23:59:59
-Pete 19.11.2024 7:36:37 31.12.9999 23:59:59
-Brownie 19.11.2024 7:36:37 31.12.9999 23:59:59
-Sky 19.11.2024 7:38:31 19.11.2024 7:39:38
-Sky 19.11.2024 7:39:38 19.11.2024 7:40:48
-Warrior 19.11.2024 8:32:32 19.11.2024 8:32:37
-Warrior 19.11.2024 8:32:37 19.11.2024 8:32:43
+Zippy 23.11.2024 8:11:41 31.12.9999 23:59:59
+Rusty 23.11.2024 8:11:41 31.12.9999 23:59:59
+Mel 23.11.2024 8:11:41 31.12.9999 23:59:59
+Clunker 23.11.2024 8:11:41 31.12.9999 23:59:59
+Bimmer 23.11.2024 8:11:41 31.12.9999 23:59:59
+Hank 23.11.2024 8:11:41 31.12.9999 23:59:59
+Pinky 23.11.2024 8:11:41 31.12.9999 23:59:59
+Pete 23.11.2024 8:11:41 31.12.9999 23:59:59
+Brownie 23.11.2024 8:11:41 31.12.9999 23:59:59
+Sky 23.11.2024 8:13:25 23.11.2024 8:13:50
+Sky 23.11.2024 8:13:50 23.11.2024 8:14:10
+Warrior 23.11.2024 8:15:41 23.11.2024 8:15:46
+Warrior 23.11.2024 8:15:46 23.11.2024 8:15:51
 ```
 Як останнє зауваження щодо запитів до тимчасових таблиць, усі запити, які використовують один із Temporal операторів, є запитами без відстеження. Наприклад, якщо ви хочете відновити запис, який було видалено, ви повинні використати один із Temporal операторів, щоб отримати історичний запис і викликати Add() у DbSet<T>, а потім викликати SaveChanges().
 
@@ -3904,7 +3880,7 @@ ClearingTemporalTables();
 
 #### Design-time model.
 
-В попередньому прикладі ми в коді прописали назву часової таблиці. Зробити процес очистки база даних більш загальним трохи складніше. Для сутності є метод (IsTemporal()), який перевіряє, чи є таблиця тимчасовою, і два методи для отримання імені таблиці історії (GetHistoryTableName()) і схеми (GetHistoryTableSchema()). Хоча IsTemporal() працює під час виконання, методи отримання назви таблиці та схеми не працюють із моделлю середовища виконання. Модель середовища виконання містить лише те, що потрібно для виконання EF Core (і вашого коду), тоді як модель часу розробки(design-time model) містить усе. Щоб використовувати ці методи, ви повинні отримати екземпляр моделі часу розробки під час виконання.
+В попередньому прикладі ми в коді прописали назву часової таблиці. Зробити процес очистки база даних більш загальним трохи складніше. Для сутності є метод (IsTemporal()), який перевіряє, чи є таблиця часовою, і два методи для отримання імені таблиці історії (GetHistoryTableName()) і схеми (GetHistoryTableSchema()). Хоча IsTemporal() працює під час виконання, методи отримання назви таблиці та схеми не працюють із моделлю середовища виконання. Модель середовища виконання містить лише те, що потрібно для виконання EF Core (і вашого коду), тоді як модель часу розробки(design-time model) містить усе. Щоб використовувати ці методи, ви повинні отримати екземпляр моделі часу розробки під час виконання.
 
 Щоб увімкнути доступ до моделі часу розробки під час виконання, необхідно оновити файл проекту. Пакет Microsoft.EntityFrameworkCore.Design є пакетом DevelopmentDependency. Це означає, що залежність не потраплятиме в інші проекти, і ви не можете за замовчуванням посилатися на її типи. Щоб посилатися на його типи у своєму коді, оновіть метадані пакета у файлі проекту, видаливши тег <IncludeAssets>:
 
@@ -3983,5 +3959,3 @@ static void ClearSampleDataAndTemporal()
 }
 ClearSampleDataAndTemporal();
 ```
-
-

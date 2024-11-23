@@ -1,29 +1,31 @@
-﻿using AutoLot.Samples.Models;
+﻿//
+// CRUD
+//
+
+using AutoLot.Samples.Models;
 using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore.Update.Internal;
 using Microsoft.Extensions.DependencyInjection;
-using System.Xml.Serialization;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
-static void AddRecord()
+static void AddRecords()
 {
     //The factory is not meant to be used like this, but it's demo code
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
-    
-    Make newMake = new Make { Name ="BMW" };
-    Console.WriteLine($"State of the entity is {context.Entry(newMake).State}");
 
-    context.Makes.Add(newMake);
-    Console.WriteLine($"State of the entity is {context.Entry(newMake).State}");
-        
-    ViewMake(newMake,"Bifore SaveChange");
+    Make make = new Make { Name = "BMW" };
+    Console.WriteLine($"State of the entity is {context.Entry(make).State}");
+
+    context.Makes.Add(make);
+    Console.WriteLine($"State of the entity is {context.Entry(make).State}");
+
+    ViewMake(make, "Bifore SaveChange");
     context.SaveChanges();
-    Console.WriteLine($"State of the entity is {context.Entry(newMake).State}");
-    ViewMake(newMake, "After SaveChange");
+    Console.WriteLine($"State of the entity is {context.Entry(make).State}");
+    ViewMake(make, "After SaveChange");
 }
-//AddRecord();
+//AddRecords();
 
-static void ViewMake(Make make,string text)
+static void ViewMake(Make make, string text)
 {
     Console.WriteLine($"\t{text}");
     Console.WriteLine($"\tId:{make.Id}");
@@ -35,24 +37,20 @@ static void AddRecordsWithAttach()
     //The factory is not meant to be used like this, but it's demo code
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
-    Make newMake = new Make { Name = "BMW" };
-    context.Makes.Add(newMake);
-    context.SaveChanges();
-
-    Car newCar = new Car
+    Car car = new Car
     {
         Color = "Blue",
         DateBuilt = new DateTime(2012, 12, 01),
         IsDrivable = true,
         PetName = "Bluesmobile",
-        MakeId = newMake.Id
+        MakeId = 1
     };
 
-    Console.WriteLine($"State of the {newCar.PetName} is {context.Entry(newCar).State}");
-    context.Cars.Attach(newCar);
-    Console.WriteLine($"State of the {newCar.PetName} is {context.Entry(newCar).State}");
+    Console.WriteLine($"State of the {car.PetName} is {context.Entry(car).State}");
+    context.Cars.Attach(car);
+    Console.WriteLine($"State of the {car.PetName} is {context.Entry(car).State}");
     context.SaveChanges();
-    Console.WriteLine($"State of the {newCar.PetName} is {context.Entry(newCar).State}");
+    Console.WriteLine($"State of the {car.PetName} is {context.Entry(car).State}");
 }
 //AddRecordsWithAttach();
 
@@ -61,29 +59,24 @@ static void AddMultipleRecords()
     //The factory is not meant to be used like this, but it's demo code
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
-    Make newMake = new Make { Name = "BMW" };
-    context.Makes.Add(newMake);
-    context.SaveChanges();
-
     var cars = new List<Car>
     {
-        new() { Color = "Yellow", MakeId = newMake.Id, PetName = "Herbie" },
-        new() { Color = "White", MakeId = newMake.Id, PetName = "Mach 5" },
-        new() { Color = "Pink", MakeId = newMake.Id, PetName = "Avon" },
-        new() { Color = "Blue", MakeId = newMake.Id, PetName = "Blueberry" },
+        new() { Color = "Yellow", MakeId = 1, PetName = "Herbie" },
+        new() { Color = "White", MakeId = 1, PetName = "Mach 5" },
+        new() { Color = "Pink", MakeId = 1, PetName = "Avon" },
+        new() { Color = "Blue", MakeId = 1, PetName = "Blueberry" },
     };
     context.Cars.AddRange(cars);
     context.SaveChanges();
 }
 //AddMultipleRecords();
 
-
 static void GetSchemaAndTableNameForType()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
-    IEntityType metadata = context.Model.FindEntityType(typeof(Car).FullName);
-    var schema = metadata.GetSchema();
-    var tableName = metadata.GetTableName();
+    IEntityType? metadata = context.Model.FindEntityType(typeof(Car).FullName!);
+    string? schema = metadata?.GetSchema();
+    string? tableName = metadata?.GetTableName();
     Console.WriteLine($"{schema} {tableName}");
 }
 //GetSchemaAndTableNameForType();
@@ -93,21 +86,21 @@ static void AddRowWithSetIdentityInsert()
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
     // Definition schema and tablename    
-    IEntityType metadata = context.Model.FindEntityType(typeof(Car).FullName);
-    string schema = metadata.GetSchema();
-    string tableName = metadata.GetTableName();
-    
+    IEntityType? metadata = context.Model.FindEntityType(typeof(Car).FullName!);
+    string? schema = metadata?.GetSchema();
+    string? tableName = metadata?.GetTableName();
+
     //Cteate strategy with explecitly transaction
     string sql;
     var strategy = context.Database.CreateExecutionStrategy();
-    strategy.Execute( () => 
+    strategy.Execute(() =>
     {
         using var transaction = context.Database.BeginTransaction();
         try
         {   //Settings on server
             sql = $"SET IDENTITY_INSERT {schema}.{tableName} ON";
             context.Database.ExecuteSqlRaw(sql);
-            
+
             // Insert row
             Car car = new Car
             {
@@ -129,7 +122,6 @@ static void AddRowWithSetIdentityInsert()
         {
             transaction.Rollback();
             Console.WriteLine($"Insert failed:{ex.Message}");
-            //Console.WriteLine(ex.InnerException.Message);
         }
         finally
         {
@@ -144,15 +136,15 @@ static void AddRowWithSetIdentityInsert()
 static void AddEntityWithChild()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
-    
+
     var make = new Make { Name = "Honda" };
 
     Car car = new Car { Color = "Yellow", PetName = "Herbie" };
-    
+
     // IEnumerable<Car> to List<Car>
     ((List<Car>)make.Cars).Add(car);
-    context.Makes.Add(make);
 
+    context.Makes.Add(make);
     context.SaveChanges();
 }
 //AddEntityWithChild();
@@ -175,7 +167,7 @@ static void AddRecordsToMantToManyTables()
 
     //Cast the IEnumerable to a List to access the Add method
     //Range support works with LINQ to Objects, but is not translatable to SQL calls
-    ((List<Driver>) cars[0].Drivers).AddRange(drivers.Take(..3));
+    ((List<Driver>)cars[0].Drivers).AddRange(drivers.Take(..3));
     ((List<Driver>)cars[1].Drivers).AddRange(drivers.Take(3..));
     context.SaveChanges();
 }
@@ -220,7 +212,7 @@ static void LoadMakeAndCarData()
 static void ClearSampleData()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
-    string?[] entities = 
+    string?[] entities =
     {
         typeof(Driver).FullName,
         typeof(Car).FullName,
@@ -229,9 +221,9 @@ static void ClearSampleData()
 
     foreach (var entityName in entities)
     {
-        var entity = context.Model.FindEntityType(entityName);
-        string? tableName = entity.GetTableName();
-        string? schemaName = entity.GetSchema();
+        var entity = context.Model.FindEntityType(entityName!);
+        string? tableName = entity?.GetTableName();
+        string? schemaName = entity?.GetSchema();
 
         string sql = $"DELETE FROM {schemaName}.{tableName}";
         context.Database.ExecuteSqlRaw(sql);
@@ -242,12 +234,18 @@ static void ClearSampleData()
 }
 //ClearSampleData();
 
-//LoadMakeAndCarData();
-//AddRecordsToMantToManyTables();
-
-
-static void CollectionCarToConsole(IEnumerable<Car> cars,string text)
+static void ClearAndFillDB()
 {
+    ClearSampleData();
+    LoadMakeAndCarData();
+    AddRecordsToMantToManyTables();
+}
+//ClearAndFillDB();
+
+static void CollectionCarToConsole(IEnumerable<Car>? cars, string text)
+{
+    if (cars == null) return;
+
     Console.WriteLine($"\t{text}");
     foreach (var car in cars)
     {
@@ -259,11 +257,11 @@ static void ShowCars()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
     var cars = context.Cars;
+    Console.WriteLine(cars.ToQueryString());
+    Console.WriteLine(context.Cars.GetType());
+    Console.WriteLine();
     CollectionCarToConsole(cars, "All cars");
     Console.WriteLine();
-    Console.WriteLine(cars.ToQueryString());
-    Console.WriteLine();
-    Console.WriteLine(context.Cars.GetType());
 }
 //ShowCars();
 
@@ -272,25 +270,23 @@ static void QueryData_GetAllRecords()
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
     IQueryable<Car> cars = context.Cars;
-
     CollectionCarToConsole(cars, "All car from IQueryable<Car>");
 
     context.ChangeTracker.Clear();
     List<Car> listCars = context.Cars.ToList();
-
     CollectionCarToConsole(listCars, "All car from List<Car>");
 }
 //QueryData_GetAllRecords();
-
 
 static void FilterData_1()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
-    //Yellow cars
-    IQueryable<Car> cars = context.Cars.Where(c => c.Color == "Yellow");
-    CollectionCarToConsole(cars, "All yellow cars");
+    IQueryable<Car> query = context.Cars.Where(c => c.Color == "Yellow");
+    Console.WriteLine(query.ToQueryString());
+    Console.WriteLine();
 
+    CollectionCarToConsole(query, "All yellow cars");
 }
 //FilterData_1();
 
@@ -298,22 +294,28 @@ static void FilterData_2()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
-    IQueryable<Car> cars2 = context.Cars
+    IQueryable<Car> query1 = context.Cars
     .Where(c => c.Color == "Yellow" && c.PetName == "Clunker");
-    CollectionCarToConsole(cars2, "All yellow cars with a petname of Clunker.");
-    context.ChangeTracker.Clear(); 
+    Console.WriteLine(query1.ToQueryString());
     Console.WriteLine();
+    CollectionCarToConsole(query1, "All yellow cars with a petname of Clunker.");
+    Console.WriteLine();
+    context.ChangeTracker.Clear();
 
-    IQueryable<Car> cars3 = context.Cars
+    IQueryable<Car> query2 = context.Cars
         .Where(c => c.Color == "Yellow")
-        .Where(c=>c.PetName == "Clunker");
-    CollectionCarToConsole(cars3, "All yellow cars with a petname of Clunker.");
-    context.ChangeTracker.Clear(); 
+        .Where(c => c.PetName == "Clunker");
+    Console.WriteLine(query2.ToQueryString());
     Console.WriteLine();
-    
-    IQueryable<Car> cars4 = context.Cars
+    CollectionCarToConsole(query2, "All yellow cars with a petname of Clunker.");
+    Console.WriteLine();
+    context.ChangeTracker.Clear();
+
+    IQueryable<Car> query3 = context.Cars
     .Where(c => c.Color == "Pink" || c.PetName == "Clunker");
-    CollectionCarToConsole(cars4, "All black cars or a petname of Clunker.");
+    Console.WriteLine(query3.ToQueryString());
+    Console.WriteLine();
+    CollectionCarToConsole(query3, "All pink cars or a petname of Clunker.");
 }
 //FilterData_2();
 
@@ -321,9 +323,11 @@ static void FilterData_3()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
-    IQueryable<Car> cars5 = context.Cars
+    IQueryable<Car> query = context.Cars
     .Where(c => !string.IsNullOrWhiteSpace(c.Color));
-    CollectionCarToConsole(cars5, "Cars with colors.");
+    Console.WriteLine(query.ToQueryString());
+    Console.WriteLine();
+    CollectionCarToConsole(query, "Cars with colors.");
 }
 //FilterData_3();
 
@@ -331,30 +335,28 @@ static void SortData_1()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
-
-    IQueryable<Car> cars = context.Cars
+    IQueryable<Car> query1 = context.Cars
         .OrderBy(c => c.Color);
-    CollectionCarToConsole(cars, "Cars ordered by Color.");
+    CollectionCarToConsole(query1, "Cars ordered by Color.");
     context.ChangeTracker.Clear();
     Console.WriteLine();
 
-    IQueryable<Car> cars1 = context.Cars
+    IQueryable<Car> query2 = context.Cars
     .OrderBy(c => c.Color)
     .ThenBy(c => c.PetName);
-    CollectionCarToConsole(cars1, "Cars ordered by Color then PetName.");
+    CollectionCarToConsole(query2, "Cars ordered by Color then PetName.");
     context.ChangeTracker.Clear();
     Console.WriteLine();
 
-    IQueryable<Car> cars2 = context.Cars
+    IQueryable<Car> query3 = context.Cars
     .OrderByDescending(c => c.Color);
-    CollectionCarToConsole(cars2, "Cars ordered by Color descending.");
+    CollectionCarToConsole(query3, "Cars ordered by Color descending.");
 }
 //SortData_1();
 
 static void SortData_2()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
-
 
     IQueryable<Car> cars = context.Cars
         .OrderBy(c => c.Color)
@@ -383,9 +385,11 @@ static void UsingSkip()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
-    var cars = context.Cars.Skip(2);
+    var query = context.Cars.Skip(2);
+    Console.WriteLine(query.ToQueryString());
+    Console.WriteLine();
 
-    CollectionCarToConsole(cars, "Skip the first two records");
+    CollectionCarToConsole(query, "Skip the first two records");
 }
 //UsingSkip();
 
@@ -393,12 +397,13 @@ static void UsingTake()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
-    var cars = context.Cars.Take(2);
+    var query = context.Cars.Take(2);
+    Console.WriteLine(query.ToQueryString());
+    Console.WriteLine();
 
-    CollectionCarToConsole(cars, "Take the first two records");
+    CollectionCarToConsole(query, "Take the first two records");
 }
 //UsingTake();
-
 
 static void Paging()
 {
@@ -406,18 +411,19 @@ static void Paging()
 
     int totalCar = context.Cars.Count();
     int carOnPage = 2;
-    int totalPage = (int)Math.Ceiling( (double) totalCar / carOnPage );
+    int totalPage = (int)Math.Ceiling((double)totalCar / carOnPage);
 
-    int numberPage = 2;
+    int numberPage = 3;
 
-    List<Car>? cars = context.Cars
+    var query = context.Cars
         .Skip((numberPage - 1) * carOnPage)
-        .Take(carOnPage)
-        .ToList();
-    CollectionCarToConsole(cars, $"Page {numberPage}");
+        .Take(carOnPage);
+    Console.WriteLine(query.ToQueryString());
+    Console.WriteLine();
+
+    CollectionCarToConsole(query, $"Page {numberPage}");
 }
 //Paging();
-
 
 static void CarToConsole(Car? car, string? text)
 {
@@ -443,7 +449,7 @@ static void UsingFirst_OrderByColor()
     CollectionCarToConsole(cars, "Cars order by Color");
     Console.WriteLine();
 
-    var firstCar = context.Cars.OrderBy(c=>c.Color).First();
+    var firstCar = context.Cars.OrderBy(c => c.Color).First();
 
     CarToConsole(firstCar, "First record with OrderBy sort");
 }
@@ -453,7 +459,7 @@ static void UsingFirst_AsWhere()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
-    var firstCar1 = context.Cars.Where(c=>c.Id == 3).First();
+    var firstCar1 = context.Cars.Where(c => c.Id == 3).First();
     CarToConsole(firstCar1, "First record with Where clause");
     Console.WriteLine();
 
@@ -494,11 +500,11 @@ static void UsingFirstOrDefault_WithException()
     firstCar = context.Cars.FirstOrDefault(c => c.Id == 300);
     CarToConsole(firstCar, "First record with Id == 300");
 
-    Console.WriteLine(firstCar == null);    
+    Console.WriteLine(firstCar == null);
 }
 //UsingFirstOrDefault_WithException();
 
-static void UsingLast()
+static void UsingLastWithoutOrderBy()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
@@ -516,19 +522,19 @@ static void UsingLast()
         Console.WriteLine(ex.Message);
     }
 }
-//UsingLast();
+//UsingLastWithoutOrderBy();
 
-static void UsingLast_WithOrderBy()
+static void UsingLastWithOrderBy()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
-    var cars = context.Cars.OrderBy(c=>c.Color);
+    var cars = context.Cars.OrderBy(c => c.Color);
     CollectionCarToConsole(cars, "All cars order by color");
     Console.WriteLine();
 
     try
     {
-        var lastCar = context.Cars.OrderBy(c=>c.Color).Last();
+        var lastCar = context.Cars.OrderBy(c => c.Color).Last();
         CarToConsole(lastCar, "Last car");
     }
     catch (Exception ex)
@@ -536,8 +542,7 @@ static void UsingLast_WithOrderBy()
         Console.WriteLine(ex.Message);
     }
 }
-//UsingLast_WithOrderBy();
-
+//UsingLastWithOrderBy();
 
 static void UsingSingle()
 {
@@ -547,6 +552,32 @@ static void UsingSingle()
     CarToConsole(singleCar, "Single record with Id == 3");
 }
 //UsingSingle();
+
+static void UsingSingle_WithExceptions()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    try
+    {
+        var singleCar = context.Cars.Single(c => c.Id > 1);
+        CarToConsole(singleCar, "Single record with Id > 1");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+
+    try
+    {
+        var singleCar = context.Cars.Single(c => c.Id > 100);
+        CarToConsole(singleCar, "Single record with Id > 100");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
+}
+//UsingSingle_WithExceptions();
 
 static void UsingSingleOrDefault()
 {
@@ -562,15 +593,8 @@ static void UsingSingleOrDefault()
         Console.WriteLine(ex.Message);
     }
 
-    try
-    {
-        var singleCar = context.Cars.SingleOrDefault(c => c.Id > 100);
-        CarToConsole(singleCar, "Single record with Id > 100");
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine(ex.Message);
-    }
+    var singleCar1 = context.Cars.SingleOrDefault(c => c.Id > 100);
+    CarToConsole(singleCar1, "Single record with Id > 100");
 }
 //UsingSingleOrDefault();
 
@@ -608,7 +632,7 @@ static void AggregationWithFilter()
     }
     Console.WriteLine();
 
-    Console.WriteLine(cars.Count(c=>c.MakeId == 1) );
+    Console.WriteLine(cars.Count(c => c.MakeId == 1));
     Console.WriteLine(cars.Where(c => c.MakeId == 1).Count());
 
 }
@@ -619,7 +643,7 @@ static void MinMaxAverage()
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
     var cars = context.Cars;
-   
+
     Console.WriteLine(cars.Min(c => c.Id));
     Console.WriteLine(cars.Max(c => c.Id));
     Console.WriteLine(cars.Average(c => c.Id));
@@ -633,7 +657,7 @@ static void UsingAny()
     var cars = context.Cars;
 
     Console.WriteLine(cars.Any(c => c.MakeId == 1));
-    Console.WriteLine(cars.Where(c => c.MakeId==1).Any());
+    Console.WriteLine(cars.Where(c => c.MakeId == 1).Any());
 }
 //UsingAny();
 
@@ -674,23 +698,22 @@ static void CallStopedProcedure()
 }
 //CallStopedProcedure();
 
-
-
 static void EagerLoading_1()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
-   
+
     var query = context
         .Cars
         .Include(c => c.MakeNavigation);
 
-    Console.WriteLine(query.ToQueryString()); Console.WriteLine();
+    Console.WriteLine(query.ToQueryString());
+    Console.WriteLine();
+
     var cars = query.ToList();
-    
     foreach (var car in cars)
     {
         Console.WriteLine($"{car.Id} {car.MakeNavigation.Name} {car.Color}");
-    }    
+    }
 }
 //EagerLoading_1();
 
@@ -698,10 +721,9 @@ static void EagerLoading_2()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
-    var query = context
-        .Makes
+    var query = context.Makes
         .Include(m => m.Cars)
-        .ThenInclude(c=>c.Drivers);
+        .ThenInclude(c => c.Drivers);
 
     Console.WriteLine(query.ToQueryString());
     Console.WriteLine();
@@ -711,12 +733,11 @@ static void EagerLoading_2()
     CollectionCarToConsole(cars, $"Cars of {make?.Name}");
     Console.WriteLine();
 
-    Car? car = cars.First();
-    Driver? driver = car.Drivers.First();
+    Car? car = cars?.First();
+    Driver? driver = car?.Drivers.First();
     Console.WriteLine($"" +
-        $"Driver {driver.PersonInfo.FirstName} {driver.PersonInfo.LastName} " +
-        $"of car {car.Id} {car.MakeNavigation.Name} {car.Color} {car.PetName}");
- 
+        $"Driver {driver?.PersonInfo.FirstName} {driver?.PersonInfo.LastName} " +
+        $"of car {car?.Id} {car?.MakeNavigation.Name} {car?.Color} {car?.PetName}");
 }
 //EagerLoading_2();
 
@@ -734,7 +755,6 @@ static void EagerLoading_3()
 }
 //EagerLoading_3();
 
-
 static void FilteredInclude()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
@@ -746,8 +766,7 @@ static void FilteredInclude()
     Console.WriteLine(query.ToQueryString());
     Console.WriteLine();
 
-    var makes = query.ToList();
-    Console.WriteLine(makes.Count());
+    _ = query.ToList();
 }
 //FilteredInclude();
 
@@ -766,6 +785,7 @@ static void EagerLoadingWithSplitQueries()
 }
 //EagerLoadingWithSplitQueries();
 
+
 static void ManyToManyQueries()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
@@ -778,10 +798,10 @@ static void ManyToManyQueries()
     Console.WriteLine(query.ToQueryString());
     Console.WriteLine();
 
+    _ = query.ToList();
     Console.WriteLine(query.Count());
 }
 //ManyToManyQueries();
-
 
 static void ExplicitLoading()
 {
@@ -798,6 +818,7 @@ static void ExplicitLoading()
 }
 //ExplicitLoading();
 
+
 static void ExplicitLoadingCollectionOneToMany()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
@@ -806,16 +827,15 @@ static void ExplicitLoadingCollectionOneToMany()
     Console.WriteLine($"{make.Id} {make.Name}");
     Console.WriteLine();
 
-    var query = context.Entry(make).Collection(c => c.Cars).Query();
-    string sql = query.ToQueryString();
-    Console.WriteLine(sql);
+    var query = context.Entry(make).Collection(m => m.Cars).Query();
+    Console.WriteLine(query.ToQueryString());
     Console.WriteLine();
 
     query.Load();
     Console.WriteLine("Entities cars loaded into memory.\n");
     List<Car>? cars = query.ToList();
 
-    CollectionCarToConsole(cars,$"{make.Name} cars");
+    CollectionCarToConsole(cars, $"{make.Name} cars");
 
 }
 //ExplicitLoadingCollectionOneToMany();
@@ -830,11 +850,9 @@ static void ExplicitLoadingCollectionManyToMany()
     Console.WriteLine();
 
     var query = context.Entry(car).Collection(c => c.Drivers).Query();
-
-    string sql = query.ToQueryString();
-    Console.WriteLine(sql);
+    Console.WriteLine(query.ToQueryString());
     Console.WriteLine();
-    
+
     //Load drivers to memory
     query.Load();
     Console.WriteLine();
@@ -850,29 +868,9 @@ static void ExplicitLoadingCollectionManyToMany()
 }
 //ExplicitLoadingCollectionManyToMany();
 
-static void NoLazyLoad()
-{
-    var context = new ApplicationDbContextFactory().CreateDbContext(null);
-
-    var query = context.Cars.AsQueryable();
-    Car car = query.First();
-
-    try
-    {
-        Console.WriteLine(car.MakeNavigation.Name);
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine(ex.Message);
-        Console.WriteLine("The navigation property has not been loaded.");
-        Console.WriteLine($"Is car.MakeNavigation == null " +
-            $":{car.MakeNavigation == null}");
-    }
-}
-//NoLazyLoad();
-
 static void LazyLoad()
 {
+    //var context = new ApplicationDbContextFactory().CreateDbContext(null);
     var context = new ApplicationDbContextFactory().CreateDbContext(["lazy"]);
 
     var query = context.Cars.AsQueryable();
@@ -900,18 +898,9 @@ static void UpdateOneRecord()
     car.Color = "Green";
     context.SaveChanges();
 
-    ShowFirstCar();
+    CarToConsole(car, "First car");
 }
 //UpdateOneRecord();
-
-static void ShowFirstCar()
-{
-    var context = new ApplicationDbContextFactory().CreateDbContext(null);
-
-    var car = context.Cars.Include(c => c.MakeNavigation).First();
-
-    Console.WriteLine($"{car.Id} {car.MakeNavigation.Name} {car.Color} {car.PetName}");
-}
 
 static void UpdateNontrackedEntities()
 {
@@ -919,24 +908,12 @@ static void UpdateNontrackedEntities()
 
     var car = context.Cars.AsNoTracking().First();
     car.Color = "Orange";
-
-    context.Cars.Update(car); //!!!
-    //or
-    //context.Entry(car).State = EntityState.Modified;
-
+    context.Cars.Update(car);
     context.SaveChanges();
 
-    ShowFirstCar();
+    CarToConsole(car, "First car");
 }
 //UpdateNontrackedEntities();
-
-static void LoadInitialDataToDatabase()
-{
-    ClearSampleData();
-    LoadMakeAndCarData();
-    AddRecordsToMantToManyTables();
-}
-//LoadInitialDataToDatabase();
 
 static void DeleteOneRecord()
 {
@@ -944,13 +921,13 @@ static void DeleteOneRecord()
 
     // Viewing green cars
     var greenCars = context.Cars.Where(c => c.Color == "Green").ToList();
-    CollectionCarToConsole(greenCars,"Green cars");
+    CollectionCarToConsole(greenCars, "Green cars");
 
     // Removing green car
     var greenCar = context.Cars.First(c => c.Color == "Green");
     context.Cars.Remove(greenCar);
     context.SaveChanges();
-    CarToConsole(greenCar,"Green car still in memory?");
+    CarToConsole(greenCar, "Green car still in memory?");
     Console.WriteLine(context.Entry(greenCar).State);
 
     // Viewing green cars
@@ -959,6 +936,7 @@ static void DeleteOneRecord()
 }
 //DeleteOneRecord();
 
+//ClearAndFillDB();
 
 static void DeleteNontrackedEntities()
 {
@@ -976,7 +954,6 @@ static void DeleteNontrackedEntities()
     context.ChangeTracker.Clear();
     var cars = context.Cars;
     CollectionCarToConsole(cars, "All cars");
-
 }
 //DeleteNontrackedEntities();
 
@@ -996,12 +973,12 @@ static void CatchCascadeDeleteFailures()
     catch (Exception ex)
     {
         Console.WriteLine(ex.Message);
-        Console.WriteLine(ex.InnerException.Message);
+        Console.WriteLine(ex?.InnerException?.Message);
     }
 }
 //CatchCascadeDeleteFailures();
 
-static void CarCountWithGlobalFilter()
+static void HowManyCarsAreDrivable()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
@@ -1016,7 +993,7 @@ static void CarCountWithGlobalFilter()
     int drivableCars = query.Where(c => c.IsDrivable == true).Count();
     Console.WriteLine($"Drivable cars: {drivableCars}");
 }
-//CarCountWithGlobalFilter();
+//HowManyCarsAreDrivable();
 
 static void CarCountWithoutGlobalFilter()
 {
@@ -1048,27 +1025,25 @@ static void GlobalQueryFiltersOnNavigationProperties()
 }
 //GlobalQueryFiltersOnNavigationProperties();
 
-
 static void ReletedDataWithGlobalQueryFilters()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
-    var queryCars = context.Cars.IgnoreQueryFilters().Where(c=>c.MakeId==1);
+    var query = context.Cars.IgnoreQueryFilters().Where(c => c.MakeId == 1);
 
-    Console.WriteLine($"Car with MakerId = 1 : {queryCars.Count()}");
+    Console.WriteLine($"Car with MakerId = 1 : {query.Count()}");
     Console.WriteLine();
     context.ChangeTracker.Clear();
- 
+
     var make = context.Makes.First(m => m.Id == 1);
     context.Entry(make).Collection(m => m.Cars).Load();
-
 }
 //ReletedDataWithGlobalQueryFilters();
 
 static void ReletedDataWithIgnoreGlobalQueryFilters()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
- 
+
     var make = context.Makes.First(m => m.Id == 1);
     context.Entry(make).Collection(m => m.Cars).Query().IgnoreQueryFilters().Load();
 
@@ -1079,7 +1054,7 @@ static void ShowSchemaTableName()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
-    IEntityType? metadata = context.Model.FindEntityType(typeof(Car).FullName);
+    IEntityType? metadata = context.Model.FindEntityType(typeof(Car).FullName!);
 
     Console.WriteLine(metadata?.GetSchema());
     Console.WriteLine(metadata?.GetTableName());
@@ -1115,7 +1090,7 @@ static void ProjectionsToIds()
     List<int> ids = query.ToList();
     foreach (var item in ids)
     {
-        Console.Write(item+"\t");
+        Console.Write(item + "\t");
     }
 }
 //ProjectionsToIds();
@@ -1123,7 +1098,7 @@ static void ProjectionsToIds()
 static void ProjectionToCarMakeViewModel()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
-    
+
     var query = context.Cars.Select(c => new CarMakeViewModel
     {
         CarId = c.Id,
@@ -1140,11 +1115,10 @@ static void ProjectionToCarMakeViewModel()
 
     foreach (CarMakeViewModel cmvm in query)
     {
-        Console.WriteLine(cmvm.CarId+"\t"+cmvm.Make+"\t"+cmvm.Color);
+        Console.WriteLine(cmvm.CarId + "\t" + cmvm.Make + "\t" + cmvm.Color);
     }
 }
 //ProjectionToCarMakeViewModel();
-
 
 static void AddACar()
 {
@@ -1159,6 +1133,13 @@ static void AddACar()
 
     context.Cars.Add(car);
     context.SaveChanges();
+
+    Console.WriteLine(
+        car.Id+"\t"+
+        car.DateBuilt+"\t"+
+        car.Display+"\t"+
+        car.TimeStamp
+        );
 }
 //AddACar();
 
@@ -1187,7 +1168,7 @@ static void UpdateACar()
     car.Color = "White";
     context.SaveChanges();
 }
-
+//UpdateACar();
 
 static void ThrowConcurrencyException()
 {
@@ -1220,6 +1201,26 @@ static void ThrowConcurrencyException()
 }
 //ThrowConcurrencyException();
 
+static void TransactionWithExecutionStrategies()
+{
+    //The factory is not meant to be used like this, but it's demo code :-)
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+    var strategy = context.Database.CreateExecutionStrategy();
+    strategy.Execute(() =>
+    {
+        using var trans = context.Database.BeginTransaction();
+        try
+        {
+            //actionToExecute();
+            trans.Commit();
+        }
+        catch (Exception ex)
+        {
+            trans.Rollback();
+        }
+    });
+}
+
 static void UsingMappedDBFunction()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
@@ -1243,7 +1244,7 @@ static void UsingTableValuedDBFunction()
     Console.WriteLine();
 
     List<Car>? cars = query.ToList();
-    CollectionCarToConsole(cars,"Cars MakeId = 5");
+    CollectionCarToConsole(cars, "Cars MakeId = 5");
 }
 //UsingTableValuedDBFunction();
 
@@ -1281,7 +1282,6 @@ static void UsingValueConverter()
     var car = context.Cars.First();
     car.Price = "777.00";
     context.SaveChanges();
-    
 }
 //UsingValueConverter();
 
@@ -1290,7 +1290,6 @@ static void ShowPriceOfFirstCar()
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
     var car = context.Cars.First();
     Console.WriteLine($"{car.Id} {car.PetName} {car.Price}");
-
 }
 //ShowPriceOfFirstCar();
 
@@ -1303,7 +1302,6 @@ static void ShadowProperties()
         Color = "White",
         PetName = "Snuppy",
         MakeId = 1,
-        Price = "1000.00"
         //Compile error
         //IsDeleted = false
     };
@@ -1326,7 +1324,7 @@ static void UsingShadowPropertiesWithLINQ()
     }
     context.SaveChanges();
 
-    var noDeletedCars = context.Cars.Where(c => !EF.Property<bool>(c,"IsDeleted")).ToList();
+    var noDeletedCars = context.Cars.Where(c => !EF.Property<bool>(c, "IsDeleted")).ToList();
     foreach (var car in noDeletedCars)
     {
         Console.WriteLine($"{car.Id} {car.PetName} is deleted " +
@@ -1341,10 +1339,7 @@ static void UsingLinqForTemporalTable()
 
     var query = context.Cars;
     Console.WriteLine(query.ToQueryString());
-    Console.WriteLine();
 
-    var cars = query.ToList();
-    CollectionCarToConsole(cars, "Cars");
 }
 //UsingLinqForTemporalTable();
 
@@ -1354,7 +1349,7 @@ static void UsingFromSqlRawInterpolatedWithTemporalTable()
 
     int carId = 1;
     var query = context.Cars
-        .FromSqlInterpolated($"Select *,PeriodEnd,PeriodStart from dbo.Inventory where Id = {carId}")
+        .FromSqlInterpolated($"Select *, PeriodStart, PeriodEnd from dbo.Inventory where Id = {carId}")
         .Include(c => c.MakeNavigation);
 
     Console.WriteLine(query.ToQueryString());
@@ -1365,6 +1360,11 @@ static void UsingFromSqlRawInterpolatedWithTemporalTable()
 }
 //UsingFromSqlRawInterpolatedWithTemporalTable();
 
+// drop and update database by dotnet ef
+
+//LoadMakeAndCarData();
+//AddRecordsToMantToManyTables();
+
 static void MainTableAndHistoryTableInteractions_1()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
@@ -1374,13 +1374,11 @@ static void MainTableAndHistoryTableInteractions_1()
         Color = "LightBlue",
         MakeId = 1,
         PetName = "Sky",
-        Price = "500.00"
     };
     context.Cars.Add(car);
     context.SaveChanges();
 }
 //MainTableAndHistoryTableInteractions_1();
-
 
 static void MainTableAndHistoryTableInteractions_2()
 {
@@ -1394,7 +1392,6 @@ static void MainTableAndHistoryTableInteractions_2()
     car.Color = "Red";
     context.Cars.Update(car);
     context.SaveChanges();
-
 }
 //MainTableAndHistoryTableInteractions_2();
 
@@ -1406,10 +1403,9 @@ static void MainTableAndHistoryTableInteractions_3()
     var car = context.Cars.Find(maxId);
 
     if (car == null) return;
-     
+
     context.Cars.Remove(car);
     context.SaveChanges();
-
 }
 //MainTableAndHistoryTableInteractions_3();
 
@@ -1443,11 +1439,11 @@ static void QueryingTemporalTables()
 
     var query = context.Cars
         .TemporalAll()
-        .OrderBy(e=> EF.Property<DateTime>(e,"PeriodStart"))
-        .Select( e => new 
+        .OrderBy(e => EF.Property<DateTime>(e, "PeriodStart"))
+        .Select(e => new
         {
             Car = e,
-            PeriodStart = EF.Property<DateTime>(e,"PeriodStart"),
+            PeriodStart = EF.Property<DateTime>(e, "PeriodStart"),
             PeriodEnd = EF.Property<DateTime>(e, "PeriodEnd")
         });
 
@@ -1455,7 +1451,7 @@ static void QueryingTemporalTables()
     Console.WriteLine();
 
 
-    foreach ( var car in query)
+    foreach (var car in query)
     {
         Console.WriteLine($"{car.Car.PetName} {car.PeriodStart} {car.PeriodEnd}");
     }
@@ -1465,10 +1461,10 @@ static void QueryingTemporalTables()
 static void ClearingTemporalTables()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
-    
+
     var strategy = context.Database.CreateExecutionStrategy();
-    strategy.Execute(()=>
-    { 
+    strategy.Execute(() =>
+    {
         using var transaction = context.Database.BeginTransaction();
 
         string sql = "ALTER TABLE [dbo].[Inventory] SET (SYSTEM_VERSIONING = OFF)";
@@ -1483,12 +1479,16 @@ static void ClearingTemporalTables()
 }
 //ClearingTemporalTables();
 
+//PreparationQueryingTemporalTables();
+
 static void SchemaAndNameForTemporal()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
     var serviceCollection = new ServiceCollection();
+
     serviceCollection.AddDbContextDesignTimeServices(context);
+
     var serviceProvider = serviceCollection.BuildServiceProvider();
     IModel? designTimeModel = serviceProvider.GetService<IModel>();
 
@@ -1540,4 +1540,4 @@ static void ClearSampleDataAndTemporal()
         }
     }
 }
-//ClearSampleDataAndTemporal();
+ClearSampleDataAndTemporal();

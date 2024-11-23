@@ -15,8 +15,7 @@ namespace AutoLot.Samples.Migrations
                 schema: "dbo",
                 table: "Inventory",
                 type: "decimal(18,2)",
-                nullable: false,
-                defaultValue: 0m);
+                nullable: true);
         }
 
         /// <inheritdoc />

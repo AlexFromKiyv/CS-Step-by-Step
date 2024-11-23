@@ -25,7 +25,6 @@ public class CarConfiguration : IEntityTypeConfiguration<Car>
         .HasDefaultValue(true);
         builder.Property(e => e.Display)
         .HasComputedColumnSql("[PetName] + ' (' + [Color] + ')'");
-
         builder.HasOne(c => c.MakeNavigation)
         .WithMany(m => m.Cars)
         .HasForeignKey(c => c.MakeId)
@@ -54,20 +53,21 @@ public class CarConfiguration : IEntityTypeConfiguration<Car>
           });
 
         builder.HasQueryFilter(c => c.IsDrivable == true);
+
         builder.Property(c => c.Price).HasConversion(new StringToNumberConverter<decimal>());
 
         //CultureInfo provider = new CultureInfo("en-us");
-        //NumberStyles numberStyles = NumberStyles.Number | NumberStyles.Currency;
+        //NumberStyles numberStyles = NumberStyles.Number | NumberStyles.AllowCurrencySymbol;
         //builder.Property(c => c.Price).HasConversion(
         //    v => decimal.Parse(v, numberStyles, provider),
         //    v => v.ToString("C2")
         //    );
 
-        builder.Property<bool?>("IsDeleted").IsRequired(false).HasDefaultValue(true);
+        builder.Property<bool?>("IsDeleted").IsRequired(false).HasDefaultValue(false);
 
         //specify table name and schema – not needed because of the Table attribute
         //builder.ToTable('Inventory', 'dbo', b=> b.IsTemporal());
-        //builder.ToTable(t => t.IsTemporal());
+        //builder.ToTable(tb => tb.IsTemporal());
 
         builder.ToTable(b => b.IsTemporal(t =>
         {

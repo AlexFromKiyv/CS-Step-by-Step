@@ -56,6 +56,8 @@ public class ApplicationDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Fluent API calls go here
+
         new CarConfiguration().Configure(modelBuilder.Entity<Car>());
         new RadioConfiguration().Configure(modelBuilder.Entity<Radio>());
         new DriverConfiguration().Configure(modelBuilder.Entity<Driver>());
@@ -63,11 +65,12 @@ public class ApplicationDbContext : DbContext
     }
 
     //DB Function
-    [DbFunction("udf_CountOfMakes",Schema ="dbo")]
+    [DbFunction("udf_CountOfMakes", Schema = "dbo")]
     public static int InventoryCountFor(int makeId)
         => throw new NotSupportedException();
 
-    [DbFunction("udtf_GetCarsForMake",Schema ="dbo")]
+    [DbFunction("udtf_GetCarsForMake", Schema = "dbo")]
     public IQueryable<Car> GetCarsFor(int makeId)
-        => FromExpression(() => GetCarsFor(makeId));
+    => FromExpression(() => GetCarsFor(makeId));
+
 }

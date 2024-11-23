@@ -769,7 +769,7 @@ public class Car : BaseEntity
 {
     // ...
 
-    public IEnumerable<Driver> Drivers { get; set; }
+    public IEnumerable<Driver> Drivers { get; set; } = new List<Driver>();
 }
 ```
 

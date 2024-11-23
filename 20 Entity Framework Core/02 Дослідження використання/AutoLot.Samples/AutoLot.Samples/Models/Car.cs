@@ -17,11 +17,11 @@ public class Car : BaseEntity
 
     [Required, StringLength(50)]
     public string PetName { get; set; }
-    public string? Price { get; set; } = "0.00";
-
     [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
     public string Display { get; set; }
     public bool? IsDrivable { get; set; }
+
+    public string? Price { get; set; }
     public int MakeId { get; set; }
     [ForeignKey(nameof(MakeId))]
     public virtual Make MakeNavigation { get; set; }
