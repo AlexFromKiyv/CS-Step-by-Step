@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace YourOwnExceptions;
+namespace BaseClassExeption;
 
 public class Car_v1
 {
@@ -19,9 +19,11 @@ public class Car_v1
         Name = name;
         CurrentSpeed = currentSpeed;
     }
+
     public Car_v1()
     {
     }
+
     public void Accelerate(int delta)
     {
         if (_carIsDead)
@@ -33,30 +35,14 @@ public class Car_v1
             CurrentSpeed += delta;
             if (CurrentSpeed > MAXSPEED)
             {
-                int tempCurrentSpeed = CurrentSpeed;
+                Console.WriteLine($"{Name} has overheated!");
                 CurrentSpeed = 0;
                 _carIsDead = true;
-                throw new CarIsDead_v1_Exception($"{Name} has overheated!", "Speed too high.", tempCurrentSpeed);
             }
-            Console.WriteLine($"Current speed {Name}:{CurrentSpeed}");
+            else
+            {
+                Console.WriteLine($"Current speed {Name}:{CurrentSpeed}");
+            }
         }
     }
-}
-
-public class CarIsDead_v1_Exception : ApplicationException
-{
-    private string? _messageDetails;
-    public string? CauseOfError { get; }
-    public int Speed { get; }
-
-    public CarIsDead_v1_Exception()
-    {
-    }
-    public CarIsDead_v1_Exception(string? message, string? cause,int speed)
-    {
-        _messageDetails = message;
-        CauseOfError = cause;
-        Speed = speed;
-    }
-    public override string Message => $"Car error message:\t{_messageDetails}";
 }

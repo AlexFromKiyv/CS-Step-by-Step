@@ -1,15 +1,15 @@
-﻿
-using YourOwnExceptions;
+﻿using YourOwnExceptions;
 
-//ExplorationSystemExceptions();
+
 void ExplorationSystemExceptions()
 {
     NullReferenceException exception = new();
 
     Console.WriteLine( exception is SystemException);
 }
+//ExplorationSystemExceptions();
 
-//ExplorationCarIsDead_v1_Exception();
+
 void ExplorationCarIsDead_v1_Exception()
 {
     Car_v1 car = new("Nissan Leaf", 35);
@@ -19,7 +19,6 @@ void ExplorationCarIsDead_v1_Exception()
         {
             car.Accelerate(20);
         }
-
     }
     catch (CarIsDead_v1_Exception e)
     {
@@ -28,8 +27,8 @@ void ExplorationCarIsDead_v1_Exception()
         Console.WriteLine($"Speed:\t{e.Speed}");
     }
 }
+//ExplorationCarIsDead_v1_Exception();
 
-//ExplorationCarIsDead_v2_Exception();
 void ExplorationCarIsDead_v2_Exception()
 {
     Car_v2 car = new("Nissan Leaf", 35);
@@ -48,8 +47,9 @@ void ExplorationCarIsDead_v2_Exception()
         Console.WriteLine($"Speed:\t{e.Speed}");
     }
 }
+//ExplorationCarIsDead_v2_Exception();
 
-ExplorationCarIsDead_v3_Exception();
+
 void ExplorationCarIsDead_v3_Exception()
 {
     Car_v3 car = new("Nissan Leaf", 35);
@@ -68,15 +68,14 @@ void ExplorationCarIsDead_v3_Exception()
         Console.WriteLine($"Speed:\t{e.Speed}");
     }
 }
+//ExplorationCarIsDead_v3_Exception();
 
-UsingBuilInExceptions();
 void UsingBuilInExceptions()
 {
-
     // account = null
     try
     {
-        AddSum(null, 12);
+        DoSomething(null, 12);
     }
     catch (Exception e)
     {
@@ -86,14 +85,14 @@ void UsingBuilInExceptions()
     // sum < 0
     try
     {
-        AddSum("3234 2345", -10);
+        DoSomething("3234 2345", -10);
     }
     catch (Exception e)
     {
         Console.WriteLine(e.Message);
     }
 
-    void AddSum(string account, decimal sum)
+    void DoSomething(string? account, decimal sum)
     {
         if (account is null)
         {
@@ -106,3 +105,4 @@ void UsingBuilInExceptions()
         }
     }
 }
+UsingBuilInExceptions();

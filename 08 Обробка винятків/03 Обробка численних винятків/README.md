@@ -4,80 +4,85 @@
 
 В блоці try можуть виникнути числені винятки. Припустимо ми створили власний виняток і превірили шо він перехоплюється, а потім вирішили поставити ше одне обмеженя на швидкість.
 
+
+MultipleExceptions\Program.cs
 ```cs
-    class Car_v1
+namespace MultipleExceptions;
+
+class Car_v1
+{
+    public const int MAXSPEED = 140;
+    private bool _carIsDead;
+    public Car_v1(string name, int currentSpeed)
     {
+        Name = name;
+        CurrentSpeed = currentSpeed;
+    }
+    public Car_v1() { }
 
-        public const int MAXSPEED = 140;
-        private bool _carIsDead;
+    public string Name { get; set; } = "";
+    public int CurrentSpeed { get; set; }
 
-        public Car_v1(string name, int currentSpeed)
+    public void Accelerate(int delta)
+    {
+        if (delta < 0)
         {
-            Name = name;
-            CurrentSpeed = currentSpeed;
+            throw new ArgumentOutOfRangeException(nameof(delta), "Acceleration must be greater than zero.");
         }
-        public Car_v1() { }
 
-        public string Name { get; set; } = "";
-        public int CurrentSpeed { get; set; }
-
-
-        public void Accelerate(int delta)
+        if (_carIsDead)
         {
-
-            if (delta < 0)
+            Console.WriteLine($"{Name} is out of order ...");
+        }
+        else
+        {
+            CurrentSpeed += delta;
+            if (CurrentSpeed > MAXSPEED)
             {
-                throw new ArgumentOutOfRangeException(nameof(delta), "Acceleration must be greater than zero.");
+                int tempCurrentSpeed = CurrentSpeed;
+                CurrentSpeed = 0;
+                _carIsDead = true;
+                throw new CarIsDead_v1_Exception("Speed too high.",tempCurrentSpeed,$"{Name} broke down.");
             }
-
-
-            if (_carIsDead)
-            {
-                Console.WriteLine($"{Name} is out of order ...");
-            }
-            else
-            {
-                CurrentSpeed += delta;
-                if (CurrentSpeed > MAXSPEED)
-                {
-                    int tempCurrentSpeed = CurrentSpeed;
-                    CurrentSpeed = 0;
-                    _carIsDead = true;
-                    throw new CarIsDead_v1_Exception("Speed too high.",tempCurrentSpeed,$"{Name} broke down.");
-
-                }
-                Console.WriteLine($"Current speed {Name}:{CurrentSpeed}");
-            }
+            Console.WriteLine($"Current speed {Name}:{CurrentSpeed}");
         }
     }
+}
 
-    public class CarIsDead_v1_Exception : ApplicationException
+public class CarIsDead_v1_Exception : ApplicationException
+{
+    public CarIsDead_v1_Exception()
     {
-        public CarIsDead_v1_Exception()
-        {
-        }
-
-        public CarIsDead_v1_Exception(string? message) : base(message)
-        {
-        }
-
-        public CarIsDead_v1_Exception(string? message, Exception? innerException) : base(message, innerException)
-        {
-        }
-
-        protected CarIsDead_v1_Exception(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-        }
-
-        public CarIsDead_v1_Exception(string? cause, int speed,  string? message) : base(message)
-        {
-            Cause = cause;
-            Speed = speed;
-        }
-
-        public string? Cause { get; }
-        public int Speed { get; }
     }
+
+    public CarIsDead_v1_Exception(string? message) : base(message)
+    {
+    }
+
+    public CarIsDead_v1_Exception(string? message, Exception? innerException) : base(message, innerException)
+    {
+    }
+
+    protected CarIsDead_v1_Exception(SerializationInfo info, StreamingContext context) : base(info, context)
+    {
+    }
+
+    public CarIsDead_v1_Exception(string? cause, int speed,  string? message) : base(message)
+    {
+        Cause = cause;
+        Speed = speed;
+    }
+
+    public CarIsDead_v1_Exception(string? cause, int speed, string? message, Exception? innerException) : base(message,innerException)
+    {
+        Cause = cause;
+        Speed = speed;
+    }
+
+    public string? Cause { get; }
+    public int Speed { get; }
+}
+
 ```
 ```cs
 ExplorationUncaughtException();
@@ -106,12 +111,10 @@ Unhandled exception. System.ArgumentOutOfRangeException: Acceleration must be gr
 В цьому випадку програма викидує виняток і закінчує роботу програми з помилкою. Блок catch можна повторити аби реагувати на різні винятки.
 
 ```cs
-ExplorationPairExceptions();
 void ExplorationPairExceptions()
 {
     //For ArgumentOutOfRangeException
     Console.WriteLine("\nCase 1\n");
-
     Car_v1 car = new("Nissan Leaf", 75);
     try
     {
@@ -131,9 +134,7 @@ void ExplorationPairExceptions()
 
     //For CarIsDead_v1_Exception
     Console.WriteLine("\nCase 2\n");
-
     car.CurrentSpeed = 35;
-
     try
     {
         for (int i = 0; i < 10; i++)
@@ -152,8 +153,8 @@ void ExplorationPairExceptions()
         Console.WriteLine($"Cause:\t{e.Cause}");
         Console.WriteLine($"Speed:\t{e.Speed}");
     }
-
 }
+ExplorationPairExceptions();
 ```
 ```
 Case 1
@@ -214,7 +215,6 @@ Unhandled exception. System.DivideByZeroException: Attempted to divide by zero.
 ```
 Тут програма вивалюється з помилкою бо нема блока catch якій зловить всі інші помилки. 
 ```cs
-ExplorationThreeExceptionsGood();
 void ExplorationThreeExceptionsGood()
 {
     Car_v1 car = new("Nissan Leaf", 35);
@@ -223,9 +223,7 @@ void ExplorationThreeExceptionsGood()
         for (int i = 0; i < 10; i++)
         {
             car.Accelerate(30);
-
             int speed = 0;
-
             speed = car.CurrentSpeed / speed;
         }
     }
@@ -243,17 +241,15 @@ void ExplorationThreeExceptionsGood()
     }
     catch (Exception e)
     {
-        Console.WriteLine();
-
-        string stringForShow = "\n" +
+        string stringForShow = "\n\n" +
             $"Attention! There is a problem!\n\n" +
             $" Message: {e.Message}\n" +
             $" Is System:{e is SystemException}\n" +
             e.StackTrace;
-
         Console.WriteLine(stringForShow);
     }
 }
+ExplorationThreeExceptionsGood();
 ``` 
 ```
 Current speed Nissan Leaf:65
@@ -305,20 +301,14 @@ void ExplorationCatchOrder()
 ## Загальний оператор catch
 
 ```cs
-
-ExplorationGenericCatch();
 void ExplorationGenericCatch()
 {
     Car_v1 car = new("Nissan Leaf", 135);
-
     try
     {
         int speed = 0;
-
         speed = car.CurrentSpeed / speed;
-
         car.Accelerate(50);
- 
     }
     catch 
     {
@@ -326,18 +316,18 @@ void ExplorationGenericCatch()
     }
     Console.WriteLine("Work after try.");
 }
+ExplorationGenericCatch();
 ```
 ```
 Something bad happened.
 Work after try.
 ```
 
-Catch шо не отримує об'єкту Exception спрацовує коли в try виникає будь-який виняток. Вона буде корисна коли не хочеться ділитись додадковою інформацією і треба видадт загальне зауваження видавати загальне завуваженя для всіх помилок.
+Catch шо не отримує об'єкту Exception спрацовує коли в try виникає будь-який виняток. Вона буде корисна коли не хочеться ділитись додадковою інформацією і треба видати загальне зауваження видавати загальне завуваженя для всіх помилок.
 
 ## Повторний викид винятку.
 
 ```cs
-ExplorationRethrowingException();
 void ExplorationRethrowingException()
 {
     Car_v1 car = new("Nissan Leaf", 130);
@@ -348,6 +338,7 @@ void ExplorationRethrowingException()
         int speed = 0;
         speed = car.CurrentSpeed / speed;
     }
+
     catch (CarIsDead_v1_Exception e)
     {
         Console.WriteLine($"\nMessage:{e.Message}");
@@ -355,11 +346,12 @@ void ExplorationRethrowingException()
         Console.WriteLine($"Speed:\t{e.Speed}\n\n");
         throw;
     }
-    catch (Exception e) 
+    catch (Exception e)
     {
         Console.WriteLine(e.Message);
     }
 }
+ExplorationRethrowingException();
 ```
 ```
 Message:Nissan Leaf broke down.
@@ -372,15 +364,13 @@ Unhandled exception. MultipleExceptions.CarIsDead_v1_Exception: Nissan Leaf brok
    at Program.<<Main>$>g__ExplorationRethrowingExceptions|0_6() in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\Program.cs:line 193
    at Program.<Main>$(String[] args) in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\Program.cs:line 187
 ```
-Коли блок catch може лише частвково обробити помилку в блоці можна знову викинути виняток. Середовище виконання знову отримує виняток і закінчує роботу прорами з помилкою.
-Тобто це обробка винятку трохи краще ніж це б зробило середовище.
+Коли блок catch може лише частково обробити помилку в блоці можна знову викинути виняток. Середовище виконання знову отримує виняток і закінчує роботу прорами з помилкою. Тобто це обробка винятку трохи краще ніж це б зробило середовище.
 
 ## Inner Exceptions
 
 Під час обробки винятку коли ви обробляєте дані зверетраючись до ресурсів може виникнути інший виняток.
 
 ```cs
-ExplorationUnhandledInnerException();
 void ExplorationUnhandledInnerException()
 {
     Car_v1 car = new("Nissan Leaf", 130);
@@ -398,6 +388,7 @@ void ExplorationUnhandledInnerException()
         Console.WriteLine($"Speed:\t{e.Speed}\n\n");
     }
 }
+ExplorationUnhandledInnerException();
 ```
 ```
 Unhandled exception. System.IO.FileNotFoundException: Could not find file 'D:\carError.txt'.
@@ -410,18 +401,18 @@ File name: 'D:\carError.txt'
    at Program.<<Main>$>g__ExplorationUnhandledInnerException|0_7() in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\Program.cs:line 223
    at Program.<Main>$(String[] args) in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\Program.cs:line 212
 ```
-Тут в блоці catch спроба відкрити неіснуючого файлу.(Доступ до типу FileStream забезпечують glodal using). Як видно з прикладу виняток не оброблюється. Краший варіант не накладати на блок catch забагато роботи, а виділити в окрему функцію. Як поступити з винятком який виник при обробці винятку.
+Тут в блоці catch спроба відкрити неіснуючого файлу.(Доступ до типу FileStream забезпечують glodal using). Як видно з прикладу виняток не оброблюється. Краший варіант не накладати на блок catch забагато роботи, а виділити в окрему функцію. 
+
+Як поступити з винятком який виник при обробці винятку.
 
 ```cs
-ExplorationHandledInnerException();
-void ExplorationHandledInnerException()
+void ExplorationAttemptHandledInnerException()
 {
     Car_v1 car = new("Nissan Leaf", 130);
     try
     {
         car.Accelerate(11);
     }
-
     catch (CarIsDead_v1_Exception e)
     {
         try
@@ -430,7 +421,7 @@ void ExplorationHandledInnerException()
         }
         catch (Exception iE)
         {
-            Console.WriteLine( iE.Message );
+            Console.WriteLine(iE.Message);
         }
 
         Console.WriteLine($"\nMessage:{e.Message}");
@@ -440,6 +431,7 @@ void ExplorationHandledInnerException()
         Console.WriteLine($"Inner Exeption is null:\t{e.InnerException is null}");
     }
 }
+ExplorationAttemptHandledInnerException();
 ```
 ```
 Unhandled exception. MultipleExceptions.CarIsDead_v1_Exception: Nissan Leaf broke down.
@@ -456,13 +448,11 @@ File name: 'D:\carError.txt'
    at Program.<Main>$(String[] args) in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\Program.cs:line 231
 ```
 Тут не получилось коректно обробити виняток. Але видно шо обробка винятку ініїцювала новий. Краши практики кажуть шо треба використати властивість InnerException того ж типу винятку.
+
 ```cs
-ExplorationWriteIntoInnerException();
 void ExplorationWriteIntoInnerException()
 {
- 
     Car_v1 car = new("Nissan Leaf", 130);
-
     try
     {
         MyAccelerate(11, car);
@@ -472,7 +462,8 @@ void ExplorationWriteIntoInnerException()
         Console.WriteLine(e.Message);
         Console.WriteLine(e.Cause);
         Console.WriteLine(e.Speed);
-        Console.WriteLine(e.InnerException?.Message);
+        Console.WriteLine("");
+        Console.WriteLine($"InnerException:{e.InnerException?.Message}");
     }
     
  void MyAccelerate(int delta, Car_v1 car)
@@ -498,6 +489,7 @@ void ExplorationWriteIntoInnerException()
         }
     }
 }
+ExplorationWriteIntoInnerException();
 ```
 ```
 Nissan Leaf broke down.
@@ -506,7 +498,7 @@ Speed too high.
 
 InnerException:Could not find file 'D:\carError.txt'.
 ```
-Помістити об'ект винятку в InnerException це кращий спосиб задокументувати шо відбувся виняток в обробці винятку. Звернфть увагу шо для цього використовувався відповідний конструктор. Після створення обї'кта винятку ми перекидаєм його в стек викликів. В цьому випадку програма буде оброблювати всі винятки коректо у випадку існувані чи не існування файла.
+Помістити об'ект винятку в InnerException це кращий спосиб задокументувати шо відбувся виняток в обробці винятку. Зверніть увагу шо для цього використовувався відповідний конструктор. Після створення обї'кта винятку ми перекидаєм його в стек викликів. В цьому випадку програма буде оброблювати всі винятки коректо у випадку існувані чи не існування файла.
 
 ## finally
 
@@ -569,13 +561,11 @@ InnerException:Could not find file 'D:\carError.txt'.
                     CurrentSpeed = 0;
                     _carIsDead = true;
                     throw new CarIsDead_v2_Exception("Speed too high.",DateTime.Now, tempCurrentSpeed, $"{Name} broke down.");
-
                 }
                 Console.WriteLine($"Current speed {Name}:{CurrentSpeed}");
             }
         }
     }
-
 
     public class CarIsDead_v2_Exception : ApplicationException
     {
@@ -604,10 +594,8 @@ InnerException:Could not find file 'D:\carError.txt'.
     }
 ```
 ```cs
-ExplorationFinally();
 void ExplorationFinally()
 {
-
     Car_v2 car = new("Nissan Leaf", 90, 140);
     car.RadioSwitch(true);
     try
@@ -625,7 +613,6 @@ void ExplorationFinally()
         Console.WriteLine($"Time:\t{e.ErrorTimeStamp}");
         Console.WriteLine();
     }
-
     catch (Exception e)
     {
         Console.WriteLine(e.Message);
@@ -634,8 +621,8 @@ void ExplorationFinally()
     {
         car.RadioSwitch(false);
     }        
-
-}   
+}
+ExplorationFinally();  
 ```
 ```
 Jamming ...
@@ -656,19 +643,16 @@ Quiet time...
 На процес коли спрацьовує catch можна поставити додадкові умови.
 
 ```cs
-ExplorationCathWhen();
 void ExplorationCathWhen()
 {
-
     Car_v2 car = new("Nissan Leaf", 90, 140);
-    car.RadioSwitch(true);
     try
     {
         car.Accelerate(20);
         car.Accelerate(20);
         car.Accelerate(20);
     }
-    catch (CarIsDead_v2_Exception e) when(e.ErrorTimeStamp.DayOfWeek == DayOfWeek.Wednesday)
+    catch (CarIsDead_v2_Exception e) when (e.ErrorTimeStamp.DayOfWeek == DayOfWeek.Wednesday)
     {
         Console.WriteLine();
         Console.WriteLine($"Message:\t{e.Message}");
@@ -681,23 +665,14 @@ void ExplorationCathWhen()
     {
         Console.WriteLine(e.Message);
     }
-    finally
-    {
-        car.RadioSwitch(false);
-    }
+
 }
+ExplorationCathWhen();
 ```
 ```
-Jamming ...
 Current speed Nissan Leaf:110
 Current speed Nissan Leaf:130
-
-Message:        Nissan Leaf broke down.
-Cause:  Speed too high.
-Speed:  150
-Time:   19.04.2023 11:47:44
-
-Quiet time...
+Nissan Leaf broke down.
 
 ```
 Умова в when накладає "фільтр" на обробку винятків. Якшо запустити цей код не в середу то відповідний блок catch не зпрацює і не буде видно деталей помилки.
@@ -707,26 +682,24 @@ Quiet time...
 
 ## Call stack
 
-Методи можуть викликать инщі методи які в свою чергу можуть звертатися до бібліoтеки і визивати інші методи. Цепочка визовів зберігаеться в стеку.
+Методи можуть викликать інщі методи які в свою чергу можуть звертатися до бібліoтеки і визивати інші методи. Цепочка визовів зберігаеться в стеку.
 
 Додамо в наше рішеня Exceptions проект типу Class Library з назвою MyClassLibrary. І в ному змінемо файл Class1.cs на MyClass.cs
 
 ```cs
-namespace MyClassLibrary
-{
-    public class MyClass
-    {
-        public static void PublicMethodInLibrary()
-        {
-            Console.WriteLine("PublicMethodInLibrary");
-            PrivateMethodInLibrary();
-        }
+namespace MyClassLibrary;
 
-        private static void PrivateMethodInLibrary() 
-        {
-            Console.WriteLine("PrivateMethodInLibrary");
-            File.OpenText("bad path to file");
-        }
+public class MyClass
+{
+    public static void PublicMethodInLibrary()
+    {
+        Console.WriteLine("PublicMethodInLibrary");
+        PrivateMethodInLibrary();
+    }
+    private static void PrivateMethodInLibrary() 
+    {
+        Console.WriteLine("PrivateMethodInLibrary");
+        File.OpenText("bad path to file");
     }
 }
 ```
@@ -737,10 +710,8 @@ using MyClassLibrary;
 
 //...
 
-ExplorationCallStack();
 void ExplorationCallStack()
 {
-
     Method_In_MyApp_1();
 
     void Method_In_MyApp_1()
@@ -755,6 +726,7 @@ void ExplorationCallStack()
         MyClass.PublicMethodInLibrary();
     }
 }
+ExplorationCallStack();
 ```
 ```
 Method_In_MyApp_1
@@ -783,12 +755,11 @@ File name: 'D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeption
 
 Постає питання де перехоплювати виняток і як будувати бібіліотеку.
 
-При створені бібліотеки яка використовується в програмі може небути достатьньо інформації шоб виправити виняток розумним способом. В бібліотеці можна стоврити виняток, додати даних, зарегеструвати помилку, і викинути знову аби він був перехоплений више в стеку визовів. Програма маючи більше даних і дані винятку має можливість виправити її.
+При створені бібліотеки яка використовується в програмі може небути достатьньо інформації шоб виправити виняток розумним способом. В бібліотеці можна створити виняток, додати даних, зарегеструвати помилку, і викинути знову аби він був перехоплений више в стеку визовів. Програма маючи більше даних і дані винятку має можливість виправити її.
 
 Існує три способи повторно викинути виняток в блоці catch. 
 
 ```cs
-ExplorationRethrowing1();
 void ExplorationRethrowing1()
 {
     Method_In_MyApp_1();
@@ -809,23 +780,21 @@ void ExplorationRethrowing1()
 
     void Method_In_MyApp_2()
     {
-
         Console.WriteLine("Method_In_MyApp_2");
         try
         {
             MyClass.PublicMethodInLibrary();
         }
-        catch
+        catch 
         {
             // save log about exception
             throw;
         }
     }
 }
+ExplorationRethrowing1();
 ```
 ```
-Method_In_MyApp_1
-Method_In_MyApp_2
 PublicMethodInLibrary
 PrivateMethodInLibrary
 
@@ -838,15 +807,16 @@ Stack:   at Microsoft.Win32.SafeHandles.SafeFileHandle.CreateFile(String fullPat
    at System.IO.Strategies.FileStreamHelpers.ChooseStrategyCore(String path, FileMode mode, FileAccess access, FileShare share, FileOptions options, Int64 preallocationSize, Nullable`1 unixCreateMode)
    at System.IO.StreamReader.ValidateArgsAndOpenPath(String path, Encoding encoding, Int32 bufferSize)
    at System.IO.File.OpenText(String path)
-   at MyClassLibrary.MyClass.PrivateMethodInLibrary() in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MyClassLibrary\MyClass.cs:line 14
+   at MyClassLibrary.MyClass.PrivateMethodInLibrary() in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MyClassLibrary\MyClass.cs:line 13
    at MyClassLibrary.MyClass.PublicMethodInLibrary() in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MyClassLibrary\MyClass.cs:line 8
-   at Program.<<Main>$>g__Method_In_MyApp_2|0_18() in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\Program.cs:line 413
-   at Program.<<Main>$>g__Method_In_MyApp_1|0_17() in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\Program.cs:line 398
+   at Program.<<Main>$>g__Method_In_MyApp_2|0_20() in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\Program.cs:line 392
+   at Program.<<Main>$>g__Method_In_MyApp_1|0_19() in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\Program.cs:line 378
 ```
+Як ми бачимо ми обробили виняток і програма не закінчилась з помилкою.
+
 Якшо в блоці catch просто використати throw виняток перекиниться вище з повним стеком викликів.
 
 ```cs
-ExplorationRethrowing2();
 void ExplorationRethrowing2()
 {
     Method_In_MyApp_1();
@@ -880,6 +850,7 @@ void ExplorationRethrowing2()
         }
     }
 }
+ExplorationRethrowing2();
 ```
 ```
 Method_In_MyApp_1
@@ -895,8 +866,20 @@ Stack:   at Program.<<Main>$>g__Method_In_MyApp_2|0_21() in D:\MyWork\CS-Step-by
 ```
 Тут перхоплено виняток наче проблема виникнула в цьому місці. Зазвичай це погана практика, оскільки ви втратили деяку потенційно корисну інформацію і може заплутати в вирішені проблеми. Але може бути корисною, якщо ви хочете навмисно видалити цю інформацію, яка містить конфіденційні дані.
 
+Аби перекинути всю фнформацію достатньо зробити блок:
+
 ```cs
-ExplorationRethrowing3();
+        catch
+        {
+            // save log about exception
+            throw;
+        }
+```
+
+Обробку винятку можна покращити.
+
+
+```cs
 void ExplorationRethrowing3()
 {
     Method_In_MyApp_1();
@@ -933,6 +916,7 @@ void ExplorationRethrowing3()
         }
     }
 }
+ExplorationRethrowing3();
 ```
 ```
 Method_In_MyApp_1

@@ -10,21 +10,21 @@ Exception - це ситуації які виникають в процесі р
 
 ## Роль обробки винятків в .Net
 
-Помилки це звічайна річ і вони виникають постійно. Підходи коли помилкам давали числові значення не ідеальні, трохи застарілі але ще працюють. Кілкість чисел-помилок може в проекти дуже збільшуватися.
+Помилки це звічайна річ і вони виникають постійно. Підходи коли помилкам давали числові значення не ідеальні, трохи застарілі але ще працюють. Кілкість чисел-помилок може в проекті дуже збільшуватися.
 
 Аби команди не придумували свої варіанти, .Net дає свою стандартну струкруровану обробку винятків. Це уніфікований підхід до обробки помилок. Iншою перевагою структурованої обробки винятків .Net є шо замість загадкового числа створюється об'єкт помилки в якому міститься тип , опис а також детальний знімок стеку викликів якій ініціював проблему. Також користувач може отримати додадтоку інформацію як можна вирішити проблему у вигляді спеціальних даних або посилання.
 
 Аби обробити виняток треба використати:
 - Тип класу шо представляє виняток.
 - Член класу який видає виняток за обставин.
-- Блок коду який викликає члена у видаку різних обставин.
+- Блок коду який викликає члена у випадку різних обставин.
 - Блок коду який перехоплює виняток. 
 
 Об'єкт шо представляє проблему яка винилка є єкземпляром класу шо розширюється від  System.Exception або його нащадків.
 
 ## System.Exception
 
-Всі винятки ініційовані в .Net остаточно походять від System.Exception. Рішення Exeptions, проект BaseClassExeption.
+Всі винятки ініційовані в .Net остаточно походять від System.Exception. 
 
 ```cs
     //
@@ -54,17 +54,19 @@ Exception - це ситуації які виникають в процесі р
 
 ## Виняткова ситуація.
 
-Розглянемо ситуацію коли ми можемо створити виняток.  Файл Classes_v1.cs
+Розглянемо ситуацію коли ми можемо створити виняток.  
+
+Exeptions\BaseClassExeption\Car_v1.cs
+
 ```cs
-    class Car_v1
+    namespace BaseClassExeption;
+    
+    public class Car_v1
     {
         public const int MAXSPEED = 140;
 
-
         public string Name { get; set; } = "";
         public int CurrentSpeed { get; set; }
-
-
         private bool _carIsDead;
 
         public Car_v1(string name, int currentSpeed)
@@ -79,7 +81,6 @@ Exception - це ситуації які виникають в процесі р
 
         public void Accelerate(int delta)
         {
-
             if (_carIsDead)
             {
                 Console.WriteLine($"{Name} is out of order ..."); 
@@ -102,7 +103,7 @@ Exception - це ситуації які виникають в процесі р
     }
 ```
 ```cs
-ExplorationTheOccurationOfAnException();
+
 void ExplorationTheOccurationOfAnException()
 {
     Car_v1 car = new("Nissan Leaf", 35);
@@ -111,8 +112,8 @@ void ExplorationTheOccurationOfAnException()
 	{
 		car.Accelerate(20);
 	}
-
 }
+ExplorationTheOccurationOfAnException();
 ```
 ```
 Current speed Nissan Leaf:55
@@ -130,8 +131,11 @@ Nissan Leaf is out of order ...
 
 ## throw і загальний виняток.
 
+Exeptions\BaseClassExeption\Car_v2.cs
 ```cs
-    class Car_v2
+    namespace BaseClassExeption;
+
+    public class Car_v2
     {
         public const int MAXSPEED = 140;
         public string Name { get; set; } = "";
@@ -150,7 +154,6 @@ Nissan Leaf is out of order ...
 
         public void Accelerate(int delta)
         {
-
             if (_carIsDead)
             {
                 Console.WriteLine($"{Name} is out of order ...");
@@ -170,7 +173,6 @@ Nissan Leaf is out of order ...
     }
 ```
 ```cs
-ExplorationThrow();
 void ExplorationThrow()
 {
     Car_v2 car = new("Nissan Leaf", 35);
@@ -179,8 +181,8 @@ void ExplorationThrow()
 	{
 		car.Accelerate(20);
 	}
-
 }
+ExplorationThrow();
 ```
 ```
 Current speed Nissan Leaf:55
@@ -204,7 +206,6 @@ Unhandled exception. System.Exception: Nissan Leaf has overheated!
 ## Конструкція try ... catch і загальний виняток.
 
 ```cs
-ExplorationTryCatch();
 void ExplorationTryCatch()
 {
     Car_v2 car = new("Nissan Leaf", 35);
@@ -220,18 +221,16 @@ void ExplorationTryCatch()
     }
     catch (Exception e)
     {
-        Console.WriteLine(  );
-
-        string stringForShow = "\n" +
+        string stringForShow = "\n\n" +
             $"Attention! Problem occured!\n\n" +
             $" Method: {e.TargetSite}\n" +
             $" Message: {e.Message}\n" +
             $" Source: {e.Source}\n";
-
         Console.WriteLine(stringForShow);
     }
     Console.WriteLine("---The end of try---");
 }
+ExplorationTryCatch();
 ```
 ```
 ---The begin of try---
@@ -251,16 +250,15 @@ Attention! Problem occured!
 
 ---The end of try---
 ```
-Як ви бачите виняток створюється врезультаті використовування об'єктів класу. Коли виникає виняток управління переходіть в точку де використовується метод класу тому цей метод повинет бути готовий до такої ситуації. Для цого використовуеться спробав виконати можливо метод який може викинути виняток і для цього використовується блок try. Якшо цей блок виконується без винятку блок catch пропускаеться. У видадку винятка блок catch спрацьовує і перхопляє об'єкт винятку. В цей момент можна використати вміст цього об'екту аби показати проблему. 
+Як ви бачите виняток створюється в результаті використовування об'єктів класу. Коли виникає виняток управління переходіть в точку де використовується метод класу тому цей метод повинет бути готовий до такої ситуації. Для цого використовуеться спроба виконати можливо метод який може викинути виняток і для цього використовується блок try. Якшо цей блок виконується без винятку блок catch пропускаеться. У видадку винятка блок catch спрацьовує і перхопляє об'єкт винятку. В цей момент можна використати вміст цього об'екту аби показати проблему. 
 
-Як ви бачите програма не вивалюється з помилкою. Коли виникають винятки можливи ситуації коли программа продовжує працювати але нге так єфективно.(наприклад немає доступу до даних). 
+Як ви бачите програма не вивалюється з помилкою. Коли виникають винятки можливи ситуації коли программа продовжує працювати але не так єфективно.(наприклад немає доступу до даних). 
 
 ## Властивості об'єкта Exception детально.
 
 ### TargetSite
 
 ```cs
-ExplorationExceptionMemberTargetSite();
 void ExplorationExceptionMemberTargetSite()
 {
     Car_v2 car = new("Nissan Leaf", 35);
@@ -275,16 +273,14 @@ void ExplorationExceptionMemberTargetSite()
     }
     catch (Exception e)
     {
-        Console.WriteLine();
-
-        string stringForShow = "\n" +
+        string stringForShow = "\n\n" +
             $" Member Name: {e.TargetSite}\n" +
             $" Class defining member: {e.TargetSite?.DeclaringType}\n" +
             $" Memeber Type: {e.TargetSite?.MemberType}\n";
-
         Console.WriteLine(stringForShow);
     }
 }
+ExplorationExceptionMemberTargetSite();
 ```
 ```
 Current speed Nissan Leaf:55
@@ -303,29 +299,24 @@ TargetSite - властивість шо містить об'єкт System.Refle
 ### StackTrace
 
 ```cs
-ExplorationExceptionMemberStackTrace();
 void ExplorationExceptionMemberStackTrace()
 {
     Car_v2 car = new("Nissan Leaf", 35);
-
     try
     {
         for (int i = 0; i < 10; i++)
         {
             car.Accelerate(20);
         }
-
     }
     catch (Exception e)
     {
-        Console.WriteLine();
-
-        string stringForShow = "\n" +
+        string stringForShow = "\n\n" +
             $" Stack: {e.StackTrace}\n";
-
         Console.WriteLine(stringForShow);
     }
 }
+ExplorationExceptionMemberStackTrace();
 ```
 ```
 Current speed Nissan Leaf:55
@@ -361,7 +352,6 @@ System.Exception.StackTrace - показує серію викликів які 
 
         public void Accelerate(int delta)
         {
-
             if (_carIsDead)
             {
                 Console.WriteLine($"{Name} is out of order ...");
@@ -384,29 +374,24 @@ System.Exception.StackTrace - показує серію викликів які 
     }
 ```
 ```cs
-ExplorationExceptionMemberHelpLink();
 void ExplorationExceptionMemberHelpLink()
 {
-    Car_v2 car = new("Nissan Leaf", 35);
-
+    Car_v3 car = new("Nissan Leaf", 35);
     try
     {
         for (int i = 0; i < 10; i++)
         {
             car.Accelerate(20);
         }
-
     }
     catch (Exception e)
     {
-        Console.WriteLine();
-
-        string stringForShow = "\n" +
+        string stringForShow = "\n\n" +
             $" Help link: {e.HelpLink}\n";
-
         Console.WriteLine(stringForShow);
     }
 }
+ExplorationExceptionMemberHelpLink();
 ```
 ```
 Current speed Nissan Leaf:55
@@ -423,7 +408,7 @@ HelpLink - властивість яка може містити певну URL-
 ### Data
 
 ```cs
-    class Car_v4
+    public class Car_v4
     {
         public const int MAXSPEED = 140;
         public string Name { get; set; } = "";
@@ -442,7 +427,6 @@ HelpLink - властивість яка може містити певну URL-
 
         public void Accelerate(int delta)
         {
-
             if (_carIsDead)
             {
                 Console.WriteLine($"{Name} is out of order ...");
@@ -470,18 +454,15 @@ HelpLink - властивість яка може містити певну URL-
     }
 ```
 ```cs
-ExplorationExceptionMemberData();
 void ExplorationExceptionMemberData()
 {
     Car_v4 car = new("Nissan Leaf", 35);
-
     try
     {
         for (int i = 0; i < 10; i++)
         {
             car.Accelerate(20);
         }
-
     }
     catch (Exception e)
     {
@@ -492,10 +473,10 @@ void ExplorationExceptionMemberData()
         {
             stringForShow += $"{item.Key} : {item.Value}\n";
         }
-       
         Console.WriteLine(stringForShow);
     }
 }
+ExplorationExceptionMemberData();
 ```
 ```
 Current speed Nissan Leaf:55
@@ -516,16 +497,13 @@ Data - містить об'єкт реалізує інтерфейс System.Col
 Не треба забувати шо виняток можна передбачити і обробити за допомогою іf
 
 ```cs
-UsingIf();
 void UsingIf()
 {
-
     while (true)
     {
         Console.Write("Enter whole number:");
         PrintIncrement(Console.ReadLine());
     }
-
 
     void PrintIncrement(string? enteredString)
     {
@@ -540,6 +518,7 @@ void UsingIf()
         }
     }
 }
+UsingIf();
 ```
 ```
 Enter whole number:1

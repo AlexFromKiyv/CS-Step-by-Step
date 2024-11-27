@@ -51,7 +51,7 @@ https://www.microsoft.com/en-us/sql-server/sql-server-downloads
 
 
 
-### Встановлення IDE SQL Server
+### Встановлення IDE SQL Server - Azure Data Studio
 
 Azure Data Studio — це нова IDE для використання з SQL Server. Вонон безкоштовне і кросплатформний, тому працюватиме на Windows, Mac або Linux. Його можна завантажити звідси:
 
@@ -70,7 +70,7 @@ https://docs.microsoft.com/en-us/sql/ssms/download-sql-server-management-studio-
 
 У діалоговому вікні «Connection Details» введіть .,5433 для значення «Server». Крапка вказує на поточний host, а 5433 — це порт, який ви вказали під час створення екземпляра SQL Server у контейнері Docker. Хост і порт повинні бути розділені комою. Введіть sa для імені користувача; пароль той самий, який ви ввели під час створення екземпляра SQL Server. Ім’я необов’язкове, але дозволяє швидко вибрати це підключення в наступних сеансах Azure Data Studio.
 
-### Підключення до SQL Server LocalDb
+### Підключення до SQL Server LocalDb в Azure Data Studio
 
 В Azure Data Studio натисніть «Create a connection».
 
@@ -90,7 +90,7 @@ https://docs.microsoft.com/en-us/sql/ssms/download-sql-server-management-studio-
 
 ## Відновлення резервної копії бази даних AutoLot
 
-Замість створення бази даних з нуля ви можете використовувати SSMS або Azure Data Studio, щоб відновити одну з наданих резервних копій, які містяться файла. Є дві резервні копії: одна з назвою AutoLotWindows.ba_ призначена для використання на машині Windows (LocalDb, Windows Server тощо), а друга з назвою AutoLotDocker.ba_ призначена для використання в контейнері Docker. Скопіюйте необхіду вам копію в відоме вам місце. Змініть розширення на з ba_ на bak. Вони доступні в папці репозиротії.
+Замість створення бази даних з нуля ви можете використовувати SSMS або Azure Data Studio, щоб відновити одну з наданих резервних копій, які містяться файла. Є дві резервні копії: одна з назвою AutoLotWindows.ba_ призначена для використання на машині Windows (LocalDb, Windows Server тощо), а друга з назвою AutoLotDocker.ba_ призначена для використання в контейнері Docker. Скопіюйте необхіду вам копію в відоме вам місце. Змініть розширення з ba_ на bak. Вони доступні в папці репозиротії.
 
 ### Копіювання файлу резервної копії у ваш контейнер
 

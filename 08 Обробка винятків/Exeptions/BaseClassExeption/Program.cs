@@ -1,19 +1,18 @@
 ﻿using BaseClassExeption;
 using System.Collections;
 
-//ExplorationTheOccurationOfAnException();
 void ExplorationTheOccurationOfAnException()
 {
     Car_v1 car = new("Nissan Leaf", 35);
 
-	for (int i = 0; i < 10; i++)
-	{
-		car.Accelerate(20);
-	}
+    for (int i = 0; i < 10; i++)
+    {
+        car.Accelerate(20);
+    }
 
 }
+//ExplorationTheOccurationOfAnException();
 
-//ExplorationThrow();
 void ExplorationThrow()
 {
     Car_v2 car = new("Nissan Leaf", 35);
@@ -23,8 +22,7 @@ void ExplorationThrow()
         car.Accelerate(20);
     }
 }
-
-//ExplorationTryCatch();
+//ExplorationThrow();
 void ExplorationTryCatch()
 {
     Car_v2 car = new("Nissan Leaf", 35);
@@ -40,20 +38,17 @@ void ExplorationTryCatch()
     }
     catch (Exception e)
     {
-        Console.WriteLine(  );
-
-        string stringForShow = "\n" +
-            $"Attention! There is a problem!\n\n" +
+        string stringForShow = "\n\n" +
+            $"Attention! Problem occured!\n\n" +
             $" Method: {e.TargetSite}\n" +
             $" Message: {e.Message}\n" +
             $" Source: {e.Source}\n";
-
         Console.WriteLine(stringForShow);
     }
     Console.WriteLine("---The end of try---");
 }
+//ExplorationTryCatch();
 
-//ExplorationExceptionMemberTargetSite();
 void ExplorationExceptionMemberTargetSite()
 {
     Car_v2 car = new("Nissan Leaf", 35);
@@ -68,107 +63,88 @@ void ExplorationExceptionMemberTargetSite()
     }
     catch (Exception e)
     {
-        Console.WriteLine();
-
-        string stringForShow = "\n" +
+        string stringForShow = "\n\n" +
             $" Member Name: {e.TargetSite}\n" +
             $" Class defining member: {e.TargetSite?.DeclaringType}\n" +
             $" Memeber Type: {e.TargetSite?.MemberType}\n";
-
         Console.WriteLine(stringForShow);
     }
 }
+//ExplorationExceptionMemberTargetSite();
 
-//ExplorationExceptionMemberStackTrace();
 void ExplorationExceptionMemberStackTrace()
 {
     Car_v2 car = new("Nissan Leaf", 35);
-
     try
     {
         for (int i = 0; i < 10; i++)
         {
             car.Accelerate(20);
         }
-
     }
     catch (Exception e)
     {
-        Console.WriteLine();
-
-        string stringForShow = "\n" +
+        string stringForShow = "\n\n" +
             $" Stack: {e.StackTrace}\n";
-
         Console.WriteLine(stringForShow);
     }
 }
+//ExplorationExceptionMemberStackTrace();
 
-
-//ExplorationExceptionMemberHelpLink();
 void ExplorationExceptionMemberHelpLink()
 {
     Car_v3 car = new("Nissan Leaf", 35);
-
     try
     {
         for (int i = 0; i < 10; i++)
         {
             car.Accelerate(20);
         }
-
     }
     catch (Exception e)
     {
-        Console.WriteLine();
-
-        string stringForShow = "\n" +
+        string stringForShow = "\n\n" +
             $" Help link: {e.HelpLink}\n";
-
         Console.WriteLine(stringForShow);
     }
 }
+//ExplorationExceptionMemberHelpLink();
 
-//ExplorationExceptionMemberData();
 void ExplorationExceptionMemberData()
 {
     Car_v4 car = new("Nissan Leaf", 35);
-
     try
     {
         for (int i = 0; i < 10; i++)
         {
             car.Accelerate(20);
         }
-
     }
     catch (Exception e)
     {
         Console.WriteLine();
 
-        string stringForShow = "\nAttention! There is a problem!\n\n";
+        string stringForShow = "\nProblem:\n";
         foreach (DictionaryEntry item in e.Data)
         {
             stringForShow += $"{item.Key} : {item.Value}\n";
         }
-       
         Console.WriteLine(stringForShow);
     }
 }
+//ExplorationExceptionMemberData();
 
-//UsingIf();
 void UsingIf()
 {
-
     while (true)
     {
         Console.Write("Enter whole number:");
         PrintIncrement(Console.ReadLine());
     }
 
-
     void PrintIncrement(string? enteredString)
     {
-        if(int.TryParse(enteredString,out int number))
+        if (int.TryParse(enteredString, out int number))
         {
             number++;
             Console.WriteLine(number);
@@ -179,3 +155,4 @@ void UsingIf()
         }
     }
 }
+UsingIf();

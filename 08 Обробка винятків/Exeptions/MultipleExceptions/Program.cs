@@ -1,7 +1,7 @@
 ﻿using MultipleExceptions;
 using MyClassLibrary;
 
-//ExplorationUncaughtException();
+
 void ExplorationUncaughtException()
 {
     Car_v1 car = new("Nissan Leaf", 75);
@@ -16,13 +16,12 @@ void ExplorationUncaughtException()
         Console.WriteLine($"Speed:\t{e.Speed}");
     }
 }
+//ExplorationUncaughtException();
 
-//ExplorationPairExceptions();
 void ExplorationPairExceptions()
 {
     //For ArgumentOutOfRangeException
     Console.WriteLine("\nCase 1\n");
-
     Car_v1 car = new("Nissan Leaf", 75);
     try
     {
@@ -42,9 +41,7 @@ void ExplorationPairExceptions()
 
     //For CarIsDead_v1_Exception
     Console.WriteLine("\nCase 2\n");
-
     car.CurrentSpeed = 35;
-
     try
     {
         for (int i = 0; i < 10; i++)
@@ -63,10 +60,11 @@ void ExplorationPairExceptions()
         Console.WriteLine($"Cause:\t{e.Cause}");
         Console.WriteLine($"Speed:\t{e.Speed}");
     }
-
 }
+//ExplorationPairExceptions();
 
-//ExplorationThreeExceptionsBad();
+
+
 void ExplorationThreeExceptionsBad()
 {
     Car_v1 car = new("Nissan Leaf", 35);
@@ -75,9 +73,7 @@ void ExplorationThreeExceptionsBad()
         for (int i = 0; i < 10; i++)
         {
             car.Accelerate(30);
-            
             int speed = 0;
-
             speed = car.CurrentSpeed / speed;
         }
     }
@@ -94,8 +90,10 @@ void ExplorationThreeExceptionsBad()
         Console.WriteLine($"Speed:\t{e.Speed}");
     }
 }
+//ExplorationThreeExceptionsBad();
 
-//ExplorationThreeExceptionsGood();
+
+
 void ExplorationThreeExceptionsGood()
 {
     Car_v1 car = new("Nissan Leaf", 35);
@@ -104,9 +102,7 @@ void ExplorationThreeExceptionsGood()
         for (int i = 0; i < 10; i++)
         {
             car.Accelerate(30);
-
             int speed = 0;
-
             speed = car.CurrentSpeed / speed;
         }
     }
@@ -124,18 +120,15 @@ void ExplorationThreeExceptionsGood()
     }
     catch (Exception e)
     {
-        Console.WriteLine();
-
-        string stringForShow = "\n" +
+        string stringForShow = "\n\n" +
             $"Attention! There is a problem!\n\n" +
             $" Message: {e.Message}\n" +
             $" Is System:{e is SystemException}\n" +
             e.StackTrace;
-
         Console.WriteLine(stringForShow);
     }
-
 }
+//ExplorationThreeExceptionsGood();
 
 void ExplorationCatchOrder()
 {
@@ -164,19 +157,15 @@ void ExplorationCatchOrder()
     }
 }
 
-//ExplorationGenericCatch();
+
 void ExplorationGenericCatch()
 {
     Car_v1 car = new("Nissan Leaf", 135);
-
     try
     {
         int speed = 0;
-
         speed = car.CurrentSpeed / speed;
-
         car.Accelerate(50);
- 
     }
     catch 
     {
@@ -184,8 +173,9 @@ void ExplorationGenericCatch()
     }
     Console.WriteLine("Work after try.");
 }
+//ExplorationGenericCatch();
 
-//ExplorationRethrowingException();
+
 void ExplorationRethrowingException()
 {
     Car_v1 car = new("Nissan Leaf", 130);
@@ -209,8 +199,8 @@ void ExplorationRethrowingException()
         Console.WriteLine(e.Message);
     }
 }
+//ExplorationRethrowingException();
 
-//ExplorationUnhandledInnerException();
 void ExplorationUnhandledInnerException()
 {
     Car_v1 car = new("Nissan Leaf", 130);
@@ -218,7 +208,6 @@ void ExplorationUnhandledInnerException()
     {
         car.Accelerate(11);
     }
-
     catch (CarIsDead_v1_Exception e)
     {
         FileStream fileStream = File.Open(@"D:\carError.txt", FileMode.Open);
@@ -228,8 +217,9 @@ void ExplorationUnhandledInnerException()
         Console.WriteLine($"Speed:\t{e.Speed}\n\n");
     }
 }
+//ExplorationUnhandledInnerException();
 
-//ExplorationAttemptHandledInnerException();
+
 void ExplorationAttemptHandledInnerException()
 {
     Car_v1 car = new("Nissan Leaf", 130);
@@ -237,7 +227,6 @@ void ExplorationAttemptHandledInnerException()
     {
         car.Accelerate(11);
     }
-
     catch (CarIsDead_v1_Exception e)
     {
         try
@@ -256,15 +245,11 @@ void ExplorationAttemptHandledInnerException()
         Console.WriteLine($"Inner Exeption is null:\t{e.InnerException is null}");
     }
 }
+//ExplorationAttemptHandledInnerException();
 
-
-
-//ExplorationWriteIntoInnerException();
 void ExplorationWriteIntoInnerException()
 {
- 
     Car_v1 car = new("Nissan Leaf", 130);
-
     try
     {
         MyAccelerate(11, car);
@@ -301,12 +286,10 @@ void ExplorationWriteIntoInnerException()
         }
     }
 }
+//ExplorationWriteIntoInnerException();
 
-
-//ExplorationFinally();
 void ExplorationFinally()
 {
-
     Car_v2 car = new("Nissan Leaf", 90, 140);
     car.RadioSwitch(true);
     try
@@ -332,22 +315,20 @@ void ExplorationFinally()
     {
         car.RadioSwitch(false);
     }        
-
 }
+//ExplorationFinally();
 
-//ExplorationCathWhen();
+
 void ExplorationCathWhen()
 {
-
     Car_v2 car = new("Nissan Leaf", 90, 140);
-    car.RadioSwitch(true);
     try
     {
         car.Accelerate(20);
         car.Accelerate(20);
         car.Accelerate(20);
     }
-    catch (CarIsDead_v2_Exception e) when(e.ErrorTimeStamp.DayOfWeek == DayOfWeek.Wednesday)
+    catch (CarIsDead_v2_Exception e) when (e.ErrorTimeStamp.DayOfWeek == DayOfWeek.Wednesday)
     {
         Console.WriteLine();
         Console.WriteLine($"Message:\t{e.Message}");
@@ -360,16 +341,13 @@ void ExplorationCathWhen()
     {
         Console.WriteLine(e.Message);
     }
-    finally
-    {
-        car.RadioSwitch(false);
-    }
-}
 
-//ExplorationCallStack();
+}
+//ExplorationCathWhen();
+
+
 void ExplorationCallStack()
 {
-
     Method_In_MyApp_1();
 
     void Method_In_MyApp_1()
@@ -384,8 +362,10 @@ void ExplorationCallStack()
         MyClass.PublicMethodInLibrary();
     }
 }
+//ExplorationCallStack();
 
-//ExplorationRethrowing1();
+
+
 void ExplorationRethrowing1()
 {
     Method_In_MyApp_1();
@@ -406,7 +386,6 @@ void ExplorationRethrowing1()
 
     void Method_In_MyApp_2()
     {
-
         Console.WriteLine("Method_In_MyApp_2");
         try
         {
@@ -419,8 +398,10 @@ void ExplorationRethrowing1()
         }
     }
 }
+//ExplorationRethrowing1();
 
-//ExplorationRethrowing2();
+
+
 void ExplorationRethrowing2()
 {
     Method_In_MyApp_1();
@@ -447,15 +428,21 @@ void ExplorationRethrowing2()
         {
             MyClass.PublicMethodInLibrary();
         }
-        catch (IOException ex)
+        //catch (IOException ex)
+        //{
+        //    // save log about exception
+        //    throw ex;
+        //}
+        catch
         {
             // save log about exception
-            throw ex;
+            throw;
         }
+
     }
 }
+//ExplorationRethrowing2();
 
-ExplorationRethrowing3();
 void ExplorationRethrowing3()
 {
     Method_In_MyApp_1();
@@ -492,3 +479,4 @@ void ExplorationRethrowing3()
         }
     }
 }
+//ExplorationRethrowing3();

@@ -2,18 +2,19 @@
 
 # Системні винятки.
 
-В бібліотеці базових класів є багато похідних класів від System.Exception на різні випадки. Наприклад в namespace System є ArgumentOutOfRangeException, IndexOutOfRangeException, StackOverflowException. Інші простори імен визначають винятки, які повязані з його спеціфікою. Наприклад, System.IO визначає винятки на основі вводу/виводу, System.Data визначає винятки, орієнтовані на базу даних, і так далі. 
-Винятки які генерує ситсема в процесі роботи називають системними. Таки винятки вважають невиправними або фатальними. Системні винятки походять від класу System.SystemException який є похідним від System.Exception.
-Цей клас потрібен для роботи середовища. Коли виникає системний виняток то самє сероедовище виконяння є ініціатором, а не код програми що виконується. Рішення YourOwnExceptions
+В бібліотеці базових класів є багато похідних класів від System.Exception на різні випадки. Наприклад в namespace System є ArgumentOutOfRangeException, IndexOutOfRangeException, StackOverflowException. Інші простори імен визначають винятки, які повязані з йх спеціфікою. Наприклад, System.IO визначає винятки на основі вводу/виводу, System.Data визначає винятки, орієнтовані на базу даних, і так далі. 
+Винятки які генерує система в процесі роботи називають системними. Таки винятки вважають невиправними або фатальними. Системні винятки походять від класу System.SystemException який є похідним від System.Exception.
+Цей клас потрібен для роботи середовища. Коли виникає системний виняток то самє середовище виконяння є ініціатором, а не код програми що виконується. Рішення YourOwnExceptions
 
+YourOwnExceptions\Program.cs
 ```cs
-ExplorationSystemExceptions();
 void ExplorationSystemExceptions()
 {
     NullReferenceException exception = new();
 
     Console.WriteLine( exception is SystemException);
 }
+ExplorationSystemExceptions();
 ```
 ```
 True
@@ -24,68 +25,67 @@ True
 
 ## Створення та перехоплення власного винятку. 
 
-Для створення виняткив для власного коду було створено окремий клас System.ApplicationException який походить від System.Exeption. Головна мета цього класа віділити системні винятки від ваших власних. 
+Для створення винятків для власного коду було створено окремий клас System.ApplicationException який походить від System.Exeption. Головна мета цього класа віділити системні винятки від ваших власних. 
 Хоча завжди можна створити загальний виняток за допомогою Exception, іноді користно створити строго типізовані винтки для конкрентого випадку які характеризують унікальну проблему.
-Припустимо треба створити виняток на випадок перевищеня швидкості. Classes_v1.cs
+Припустимо треба створити виняток на випадок перевищеня швидкості.
+YourOwnExceptions\Classes_v1.cs
 ```cs
-    class Car_v1
+namespace YourOwnExceptions;
+
+public class Car_v1
+{
+    public const int MAXSPEED = 140;
+    public string Name { get; set; } = "";
+    public int CurrentSpeed { get; set; }
+
+    private bool _carIsDead;
+
+    public Car_v1(string name, int currentSpeed)
     {
-        public const int MAXSPEED = 140;
-        public string Name { get; set; } = "";
-        public int CurrentSpeed { get; set; }
-
-        private bool _carIsDead;
-
-        public Car_v1(string name, int currentSpeed)
+        Name = name;
+        CurrentSpeed = currentSpeed;
+    }
+    public Car_v1()
+    {
+    }
+    public void Accelerate(int delta)
+    {
+        if (_carIsDead)
         {
-            Name = name;
-            CurrentSpeed = currentSpeed;
+            Console.WriteLine($"{Name} is out of order ...");
         }
-        public Car_v1()
+        else
         {
-        }
-
-        public void Accelerate(int delta)
-        {
-
-            if (_carIsDead)
+            CurrentSpeed += delta;
+            if (CurrentSpeed > MAXSPEED)
             {
-                Console.WriteLine($"{Name} is out of order ...");
+                int tempCurrentSpeed = CurrentSpeed;
+                CurrentSpeed = 0;
+                _carIsDead = true;
+                throw new CarIsDead_v1_Exception($"{Name} has overheated!", "Speed too high.", tempCurrentSpeed);
             }
-            else
-            {
-                CurrentSpeed += delta;
-                if (CurrentSpeed > MAXSPEED)
-                {
-                    int tempCurrentSpeed = CurrentSpeed;
-                    CurrentSpeed = 0;
-                    _carIsDead = true;
-                    throw new CarIsDead_v1_Exception($"{Name} has overheated!", "Speed too high.", tempCurrentSpeed);
-
-                }
-                Console.WriteLine($"Current speed {Name}:{CurrentSpeed}");
-            }
+            Console.WriteLine($"Current speed {Name}:{CurrentSpeed}");
         }
     }
+}
 
-    public class CarIsDead_v1_Exception : ApplicationException
+public class CarIsDead_v1_Exception : ApplicationException
+{
+    private string? _messageDetails;
+    public string? CauseOfError { get; }
+    public int Speed { get; }
+
+    public CarIsDead_v1_Exception()
     {
-        private string? _messageDetails;
-        public string? CauseOfError { get; }
-        public int Speed { get; }
-
-        public CarIsDead_v1_Exception(string? message, string? cause,int speed)
-        {
-            _messageDetails = message;
-            CauseOfError = cause;
-            Speed = speed;
-        }
-
-        public CarIsDead_v1_Exception()
-        {
-        }
-        public override string Message => $"Car error message:\t{_messageDetails}";
     }
+    public CarIsDead_v1_Exception(string? message, string? cause,int speed)
+    {
+        _messageDetails = message;
+        CauseOfError = cause;
+        Speed = speed;
+    }
+    public override string Message => $"Car error message:\t{_messageDetails}";
+}
 ```
 ```cs
 ExplorationCarIsDead_v1_Exception();
@@ -98,7 +98,6 @@ void ExplorationCarIsDead_v1_Exception()
         {
             car.Accelerate(20);
         }
-
     }
     catch (CarIsDead_v1_Exception e)
     {
@@ -121,10 +120,10 @@ Speed:  155
 ```
 За домовленністю назви класу закінчуються Exception. 
 Оскільки об'єкти такіх класів часто передаються поза збірки клас як правило роблять public.  
-Як і в будьякому класі в спеціальному класі винятку можна створити будь яку кількість члені, які можна потім використати в catsh. також можна первизначити віртуальні члени.
+Як і в будь-якому класі в спеціальному класі винятку можна створити будь яку кількість члені, які можна потім використати в catsh. також можна первизначити віртуальні члени.
 Тут клас підтримує приватне поле (_messageDetails) яке мітсить дані що до поточного винятку і яке можна встановити за допомогою конструктора. 
 Використання throw для спеціального винятку аналогічно Exception за різницею того що використовується інший конструктор. 
-На стороні методу де пробується виконання, блок catch потрібно вказати тип якій прехоплюеться і  використовувати розширені можливости цього типу.
+На стороні методу де випробується виконання, блок catch потрібно вказати тип якій прехоплюеться і  використовувати розширені можливости цього типу.
 
 ## Використовуваня базової реалізації для винятків.
 
@@ -173,18 +172,16 @@ Speed:  155
 
     public class CarIsDead_v2_Exception : ApplicationException
     {
+        public string? CauseOfError { get; }
+        public int Speed { get; }
         public CarIsDead_v2_Exception(string? cause, int speed, string message) :base(message)
         {
             CauseOfError = cause;
             Speed = speed;
         }
-        public string? CauseOfError { get; }
-        public int Speed { get; }
-
     }
 ```
 ```cs
-ExplorationCarIsDead_v2_Exception();
 void ExplorationCarIsDead_v2_Exception()
 {
     Car_v2 car = new("Nissan Leaf", 35);
@@ -203,6 +200,7 @@ void ExplorationCarIsDead_v2_Exception()
         Console.WriteLine($"Speed:\t{e.Speed}");
     }
 }
+ExplorationCarIsDead_v2_Exception();
 ```
 ```
 Current speed Nissan Leaf:55
@@ -304,7 +302,6 @@ Speed:  155
     }
 ```
 ```cs
-ExplorationCarIsDead_v3_Exception();
 void ExplorationCarIsDead_v3_Exception()
 {
     Car_v3 car = new("Nissan Leaf", 35);
@@ -323,6 +320,7 @@ void ExplorationCarIsDead_v3_Exception()
         Console.WriteLine($"Speed:\t{e.Speed}");
     }
 }
+ExplorationCarIsDead_v3_Exception();
 ```
 ```
 Current speed Nissan Leaf:55
@@ -343,14 +341,12 @@ Speed:  155
 Коли ви первіряєте параметри функцій можна використати вбудовані класи.
 
 ```cs
-UsingBuilInExceptions();
 void UsingBuilInExceptions()
 {
-
     // account = null
     try
     {
-        AddSum(null, 12);
+        DoSomething(null, 12);
     }
     catch (Exception e)
     {
@@ -360,14 +356,14 @@ void UsingBuilInExceptions()
     // sum < 0
     try
     {
-        AddSum("3234 2345", -10);
+        DoSomething("3234 2345", -10);
     }
     catch (Exception e)
     {
         Console.WriteLine(e.Message);
     }
 
-    void AddSum(string account, decimal sum)
+    void DoSomething(string? account, decimal sum)
     {
         if (account is null)
         {
@@ -380,11 +376,10 @@ void UsingBuilInExceptions()
         }
     }
 }
+UsingBuilInExceptions();
 ```
 ```
 Value cannot be null. (Parameter 'account')
 The sum must be greater than zero.
 ```
 Перш ніж створювати власний виняток спробуйте подивиться чи немає вбудованового. 
-
-
