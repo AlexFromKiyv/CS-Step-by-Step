@@ -85,7 +85,6 @@ public class CarIsDead_v1_Exception : ApplicationException
 
 ```
 ```cs
-ExplorationUncaughtException();
 void ExplorationUncaughtException()
 {
     Car_v1 car = new("Nissan Leaf", 75);
@@ -100,6 +99,7 @@ void ExplorationUncaughtException()
         Console.WriteLine($"Speed:\t{e.Speed}");
     }
 }
+ExplorationUncaughtException();
 ```
 ```
 Unhandled exception. System.ArgumentOutOfRangeException: Acceleration must be greater than zero. (Parameter 'delta')
@@ -107,7 +107,7 @@ Unhandled exception. System.ArgumentOutOfRangeException: Acceleration must be gr
    at Program.<<Main>$>g__Exploration|0_0() in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\Program.cs:line 11
    at Program.<Main>$(String[] args) in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\Program.cs:line 3
 ```
-Тут використали визначений систений клас ArgumentOutOfRangeException при передачі неправіилної зміни швидкості. Зауважте шо в цому класі є констуктор який приймає неправільний параметр а потім message. Використаня в цьому випадку nameof безпечний варіант отриманя назви парметру.
+Тут використали визначений систений клас ArgumentOutOfRangeException при передачі неправіилної зміни швидкості. Зауважте шо в цому класі є констуктор який приймає назву проблемного параметра а потім message. Використаня в цьому випадку nameof безпечний варіант отриманя назви парметру.
 В цьому випадку програма викидує виняток і закінчує роботу програми з помилкою. Блок catch можна повторити аби реагувати на різні винятки.
 
 ```cs
@@ -173,12 +173,11 @@ Speed:  155
 ```
 Тепер різні catch реагують на винятки яки ми викидаємо в класі. 
 
-## Бішле винятків чим очікується.
+## Білше винятків чим очікується.
 
 Але блок try може мати багату логіку. Тоді можуть відбутись інші випадки.
 
 ```cs
-ExplorationThreeExceptionsBad();
 void ExplorationThreeExceptionsBad()
 {
     Car_v1 car = new("Nissan Leaf", 35);
@@ -206,6 +205,7 @@ void ExplorationThreeExceptionsBad()
         Console.WriteLine($"Speed:\t{e.Speed}");
     }
 }
+ExplorationThreeExceptionsBad();
 ```
 ```
 Current speed Nissan Leaf:65
@@ -295,7 +295,7 @@ void ExplorationCatchOrder()
     }
 }
 ```
-В цьому випадку компілятор покаже помилку оскільки більш базовий виняток не дасть обробити більш конкретні випадки. Перший блок може обробити всі помилки похідні від Exception і які мають звязок "is-a". Таким чином ви отримаєте тилки message без додадкових даних по проблемі. Тобто чим базовіший виняток тим він повинен стояти нижче.
+В цьому випадку компілятор покаже помилку оскільки більш базовий виняток не дасть обробити більш конкретні випадки. Перший блок може обробити всі помилки похідні від Exception і які мають звязок "is-a". Таким чином ви отримаєте тілки message без додадкових даних по проблемі. Тобто чим базовіший виняток тим він повинен стояти нижче.
 Останій блок бажано робити інформативним з усіма можливими данними.
 
 ## Загальний оператор catch
@@ -378,7 +378,6 @@ void ExplorationUnhandledInnerException()
     {
         car.Accelerate(11);
     }
-
     catch (CarIsDead_v1_Exception e)
     {
         FileStream fileStream = File.Open(@"D:\carError.txt", FileMode.Open);
@@ -401,7 +400,7 @@ File name: 'D:\carError.txt'
    at Program.<<Main>$>g__ExplorationUnhandledInnerException|0_7() in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\Program.cs:line 223
    at Program.<Main>$(String[] args) in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\Program.cs:line 212
 ```
-Тут в блоці catch спроба відкрити неіснуючого файлу.(Доступ до типу FileStream забезпечують glodal using). Як видно з прикладу виняток не оброблюється. Краший варіант не накладати на блок catch забагато роботи, а виділити в окрему функцію. 
+Тут в блоці catch спроба відкрити неіснуючого файлу. Як видно з прикладу виняток не оброблюється. Краший варіант не накладати на блок catch забагато роботи, а виділити в окрему функцію. 
 
 Як поступити з винятком який виник при обробці винятку.
 
@@ -498,7 +497,7 @@ Speed too high.
 
 InnerException:Could not find file 'D:\carError.txt'.
 ```
-Помістити об'ект винятку в InnerException це кращий спосиб задокументувати шо відбувся виняток в обробці винятку. Зверніть увагу шо для цього використовувався відповідний конструктор. Після створення обї'кта винятку ми перекидаєм його в стек викликів. В цьому випадку програма буде оброблювати всі винятки коректо у випадку існувані чи не існування файла.
+Помістити об'ект винятку в InnerException це кращий спосиб задокументувати шо відбувся виняток в обробці винятку. Зверніть увагу шо для цього використовувався відповідний конструктор. Після створення об'єкта винятку ми перекидаєм його в стек викликів. В цьому випадку програма буде оброблювати всі винятки коректо у випадку існувані чи не існування файла.
 
 ## finally
 
@@ -865,16 +864,6 @@ Stack:   at Program.<<Main>$>g__Method_In_MyApp_2|0_21() in D:\MyWork\CS-Step-by
    at Program.<<Main>$>g__Method_In_MyApp_1|0_20() in D:\MyWork\CS-Step-by-Step\08 Обробка винятк?в\Exeptions\MultipleExceptions\Program.cs:line 433
 ```
 Тут перхоплено виняток наче проблема виникнула в цьому місці. Зазвичай це погана практика, оскільки ви втратили деяку потенційно корисну інформацію і може заплутати в вирішені проблеми. Але може бути корисною, якщо ви хочете навмисно видалити цю інформацію, яка містить конфіденційні дані.
-
-Аби перекинути всю фнформацію достатньо зробити блок:
-
-```cs
-        catch
-        {
-            // save log about exception
-            throw;
-        }
-```
 
 Обробку винятку можна покращити.
 

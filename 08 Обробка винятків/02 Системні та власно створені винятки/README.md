@@ -32,6 +32,24 @@ YourOwnExceptions\Classes_v1.cs
 ```cs
 namespace YourOwnExceptions;
 
+public class CarIsDead_v1_Exception : ApplicationException
+{
+    private string? _messageDetails;
+    public string? CauseOfError { get; }
+    public int Speed { get; }
+
+    public CarIsDead_v1_Exception()
+    {
+    }
+    public CarIsDead_v1_Exception(string? message, string? cause,int speed)
+    {
+        _messageDetails = message;
+        CauseOfError = cause;
+        Speed = speed;
+    }
+    public override string Message => $"Car error message:\t{_messageDetails}";
+}
+
 public class Car_v1
 {
     public const int MAXSPEED = 140;
@@ -68,27 +86,8 @@ public class Car_v1
         }
     }
 }
-
-public class CarIsDead_v1_Exception : ApplicationException
-{
-    private string? _messageDetails;
-    public string? CauseOfError { get; }
-    public int Speed { get; }
-
-    public CarIsDead_v1_Exception()
-    {
-    }
-    public CarIsDead_v1_Exception(string? message, string? cause,int speed)
-    {
-        _messageDetails = message;
-        CauseOfError = cause;
-        Speed = speed;
-    }
-    public override string Message => $"Car error message:\t{_messageDetails}";
-}
 ```
 ```cs
-ExplorationCarIsDead_v1_Exception();
 void ExplorationCarIsDead_v1_Exception()
 {
     Car_v1 car = new("Nissan Leaf", 35);
@@ -106,6 +105,7 @@ void ExplorationCarIsDead_v1_Exception()
         Console.WriteLine($"Speed:\t{e.Speed}");
     }
 }
+ExplorationCarIsDead_v1_Exception();
 ```
 ```
 Current speed Nissan Leaf:55
@@ -120,7 +120,7 @@ Speed:  155
 ```
 За домовленністю назви класу закінчуються Exception. 
 Оскільки об'єкти такіх класів часто передаються поза збірки клас як правило роблять public.  
-Як і в будь-якому класі в спеціальному класі винятку можна створити будь яку кількість члені, які можна потім використати в catsh. також можна первизначити віртуальні члени.
+Як і в будь-якому класі в спеціальному класі винятку можна створити будь яку кількість члені, які можна потім використати в catsh. Також можна первизначити віртуальні члени.
 Тут клас підтримує приватне поле (_messageDetails) яке мітсить дані що до поточного винятку і яке можна встановити за допомогою конструктора. 
 Використання throw для спеціального винятку аналогічно Exception за різницею того що використовується інший конструктор. 
 На стороні методу де випробується виконання, блок catch потрібно вказати тип якій прехоплюеться і  використовувати розширені можливости цього типу.
@@ -191,7 +191,6 @@ void ExplorationCarIsDead_v2_Exception()
         {
             car.Accelerate(20);
         }
-
     }
     catch (CarIsDead_v2_Exception e)
     {

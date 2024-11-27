@@ -6,6 +6,24 @@ using System.Threading.Tasks;
 
 namespace YourOwnExceptions;
 
+public class CarIsDead_v1_Exception : ApplicationException
+{
+    private string? _messageDetails;
+    public string? CauseOfError { get; }
+    public int Speed { get; }
+
+    public CarIsDead_v1_Exception()
+    {
+    }
+    public CarIsDead_v1_Exception(string? message, string? cause, int speed)
+    {
+        _messageDetails = message;
+        CauseOfError = cause;
+        Speed = speed;
+    }
+    public override string Message => $"Car error message:\t{_messageDetails}";
+}
+
 public class Car_v1
 {
     public const int MAXSPEED = 140;
@@ -13,7 +31,6 @@ public class Car_v1
     public int CurrentSpeed { get; set; }
 
     private bool _carIsDead;
-
     public Car_v1(string name, int currentSpeed)
     {
         Name = name;
@@ -43,20 +60,4 @@ public class Car_v1
     }
 }
 
-public class CarIsDead_v1_Exception : ApplicationException
-{
-    private string? _messageDetails;
-    public string? CauseOfError { get; }
-    public int Speed { get; }
 
-    public CarIsDead_v1_Exception()
-    {
-    }
-    public CarIsDead_v1_Exception(string? message, string? cause,int speed)
-    {
-        _messageDetails = message;
-        CauseOfError = cause;
-        Speed = speed;
-    }
-    public override string Message => $"Car error message:\t{_messageDetails}";
-}

@@ -92,8 +92,6 @@ void ExplorationThreeExceptionsBad()
 }
 //ExplorationThreeExceptionsBad();
 
-
-
 void ExplorationThreeExceptionsGood()
 {
     Car_v1 car = new("Nissan Leaf", 35);
@@ -286,7 +284,7 @@ void ExplorationWriteIntoInnerException()
         }
     }
 }
-//ExplorationWriteIntoInnerException();
+ExplorationWriteIntoInnerException();
 
 void ExplorationFinally()
 {
@@ -428,17 +426,11 @@ void ExplorationRethrowing2()
         {
             MyClass.PublicMethodInLibrary();
         }
-        //catch (IOException ex)
-        //{
-        //    // save log about exception
-        //    throw ex;
-        //}
-        catch
+        catch (IOException ex)
         {
             // save log about exception
-            throw;
+            throw ex;
         }
-
     }
 }
 //ExplorationRethrowing2();

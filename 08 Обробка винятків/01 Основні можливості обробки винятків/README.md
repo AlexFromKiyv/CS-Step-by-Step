@@ -5,7 +5,6 @@
 Bugs - помилка яку заклав програміст.
 User errors - дії користувача які не передбачив програміст.
 Exception - це ситуації які виникають в процесі роботи і вважаються неприйнятними для корректної роботи і які є можливість передбачити.
-
 Навіть коли програміст заклав помилку та непередбачив помилку користувача среда виконання генерує відповідний виняток. В бібліотеці базових класів визначені класи винятків FormatException, IndexOutOfRangeException, FileNotFoundException, ArgumentOutOfRangeException та інші.
 
 ## Роль обробки винятків в .Net
@@ -45,9 +44,7 @@ Exception - це ситуації які виникають в процесі р
         public virtual IDictionary Data { get; }
         public MethodBase? TargetSite { get; }
         public virtual string? HelpLink { get; set; }
-
         ...
-
     }
 ```
 Це основна частина визначення класу. Ці всі конструктори і методи використовуються далі.
@@ -262,14 +259,12 @@ Attention! Problem occured!
 void ExplorationExceptionMemberTargetSite()
 {
     Car_v2 car = new("Nissan Leaf", 35);
-
     try
     {
         for (int i = 0; i < 10; i++)
         {
             car.Accelerate(20);
         }
-
     }
     catch (Exception e)
     {
