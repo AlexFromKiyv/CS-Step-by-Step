@@ -4,6 +4,7 @@ using AutoLot.Dal.EfStructures;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AutoLot.Dal.EfStructures.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241201123126_AddDriverManyToMany")]
+    partial class AddDriverManyToMany
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -47,12 +50,6 @@ namespace AutoLot.Dal.EfStructures.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnName("PeriodStart");
 
-                    b.Property<byte[]>("TimeStamp")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
                     b.HasKey("CarId", "DriverId");
 
                     b.HasIndex("DriverId");
@@ -82,9 +79,18 @@ namespace AutoLot.Dal.EfStructures.Migrations
                     b.Property<int>("CustomerId")
                         .HasColumnType("int");
 
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
                     b.Property<byte[]>("TimeStamp")
                         .IsConcurrencyToken()
-                        .IsRequired()
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("rowversion");
 
@@ -92,7 +98,7 @@ namespace AutoLot.Dal.EfStructures.Migrations
 
                     b.HasIndex(new[] { "CustomerId" }, "IX_CreditRisks_CustomerId");
 
-                    b.ToTable("CreditRisks", "dbo");
+                    b.ToTable("CreditRisks");
                 });
 
             modelBuilder.Entity("AutoLot.Models.Entities.Customer", b =>
@@ -103,15 +109,24 @@ namespace AutoLot.Dal.EfStructures.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
                     b.Property<byte[]>("TimeStamp")
                         .IsConcurrencyToken()
-                        .IsRequired()
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("rowversion");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Customers", "dbo");
+                    b.ToTable("Customers");
                 });
 
             modelBuilder.Entity("AutoLot.Models.Entities.CustomerOrderView", b =>
@@ -154,12 +169,6 @@ namespace AutoLot.Dal.EfStructures.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<byte[]>("TimeStamp")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
                     b.HasKey("Id");
 
                     b.ToTable("Drivers");
@@ -178,36 +187,14 @@ namespace AutoLot.Dal.EfStructures.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<DateTime>("PeriodEnd")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("PeriodEnd");
-
-                    b.Property<DateTime>("PeriodStart")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("PeriodStart");
-
                     b.Property<byte[]>("TimeStamp")
                         .IsConcurrencyToken()
-                        .IsRequired()
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("rowversion");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Makes", "dbo");
-
-                    b.ToTable(tb => tb.IsTemporal(ttb =>
-                            {
-                                ttb.UseHistoryTable("MakesAudit");
-                                ttb
-                                    .HasPeriodStart("PeriodStart")
-                                    .HasColumnName("PeriodStart");
-                                ttb
-                                    .HasPeriodEnd("PeriodEnd")
-                                    .HasColumnName("PeriodEnd");
-                            }));
+                    b.ToTable("Makes");
                 });
 
             modelBuilder.Entity("AutoLot.Models.Entities.Order", b =>
@@ -224,176 +211,19 @@ namespace AutoLot.Dal.EfStructures.Migrations
                     b.Property<int>("CustomerId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("PeriodEnd")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("PeriodEnd");
-
-                    b.Property<DateTime>("PeriodStart")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("PeriodStart");
-
                     b.Property<byte[]>("TimeStamp")
                         .IsConcurrencyToken()
-                        .IsRequired()
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("rowversion");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CustomerId", "CarId")
-                        .IsUnique();
 
                     b.HasIndex(new[] { "CarId" }, "IX_Orders_CarId");
 
                     b.HasIndex(new[] { "CustomerId", "CarId" }, "IX_Orders_CustomerId_CarId")
                         .IsUnique();
 
-                    b.ToTable("Orders", "dbo");
-
-                    b.ToTable(tb => tb.IsTemporal(ttb =>
-                            {
-                                ttb.UseHistoryTable("OrdersAudit");
-                                ttb
-                                    .HasPeriodStart("PeriodStart")
-                                    .HasColumnName("PeriodStart");
-                                ttb
-                                    .HasPeriodEnd("PeriodEnd")
-                                    .HasColumnName("PeriodEnd");
-                            }));
-                });
-
-            modelBuilder.Entity("AutoLot.Models.Entities.Radio", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CarId")
-                        .HasColumnType("int")
-                        .HasColumnName("InventoryId");
-
-                    b.Property<bool>("HasSubWoofers")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("HasTweeters")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("PeriodEnd")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("PeriodEnd");
-
-                    b.Property<DateTime>("PeriodStart")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("PeriodStart");
-
-                    b.Property<string>("RadioId")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<byte[]>("TimeStamp")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex(new[] { "CarId" }, "IX_Radios_CarId")
-                        .IsUnique();
-
-                    b.ToTable("Radios", "dbo");
-
-                    b.ToTable(tb => tb.IsTemporal(ttb =>
-                            {
-                                ttb.UseHistoryTable("RadiosAudit");
-                                ttb
-                                    .HasPeriodStart("PeriodStart")
-                                    .HasColumnName("PeriodStart");
-                                ttb
-                                    .HasPeriodEnd("PeriodEnd")
-                                    .HasColumnName("PeriodEnd");
-                            }));
-                });
-
-            modelBuilder.Entity("AutoLot.Models.Entities.SeriLogEntry", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ActionName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ApplicationName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Exception")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("FilePath")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Level")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
-
-                    b.Property<int>("LineNumber")
-                        .HasColumnType("int");
-
-                    b.Property<string>("LogEvent")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("MachineName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("MemberName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("MessageTemplate")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Properties")
-                        .IsRequired()
-                        .HasColumnType("Xml");
-
-                    b.Property<string>("RequestPath")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("SourceContext")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("TimeStamp")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GetDate()");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("SeriLogs", "Logging");
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("Car", b =>
@@ -446,12 +276,6 @@ namespace AutoLot.Dal.EfStructures.Migrations
                     b.Property<decimal?>("Price")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<byte[]>("TimeStamp")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
                     b.HasKey("Id");
 
                     b.HasIndex(new[] { "MakeId" }, "IX_Inventory_MakeId");
@@ -493,87 +317,14 @@ namespace AutoLot.Dal.EfStructures.Migrations
 
             modelBuilder.Entity("AutoLot.Models.Entities.CreditRisk", b =>
                 {
-                    b.HasOne("AutoLot.Models.Entities.Customer", "CustomerNavigation")
+                    b.HasOne("AutoLot.Models.Entities.Customer", "Customer")
                         .WithMany("CreditRisks")
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_CreditRisks_Customers");
 
-                    b.OwnsOne("AutoLot.Models.Entities.Owned.Person", "PersonInformation", b1 =>
-                        {
-                            b1.Property<int>("CreditRiskId")
-                                .HasColumnType("int");
-
-                            b1.Property<string>("FirstName")
-                                .IsRequired()
-                                .HasMaxLength(50)
-                                .HasColumnType("nvarchar(50)")
-                                .HasColumnName("FirstName");
-
-                            b1.Property<string>("FullName")
-                                .IsRequired()
-                                .ValueGeneratedOnAddOrUpdate()
-                                .HasColumnType("nvarchar(max)")
-                                .HasColumnName("FullName")
-                                .HasComputedColumnSql("[LastName] + ', ' + [FirstName]");
-
-                            b1.Property<string>("LastName")
-                                .IsRequired()
-                                .HasMaxLength(50)
-                                .HasColumnType("nvarchar(50)")
-                                .HasColumnName("LastName");
-
-                            b1.HasKey("CreditRiskId");
-
-                            b1.ToTable("CreditRisks", "dbo");
-
-                            b1.WithOwner()
-                                .HasForeignKey("CreditRiskId");
-                        });
-
-                    b.Navigation("CustomerNavigation");
-
-                    b.Navigation("PersonInformation")
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("AutoLot.Models.Entities.Customer", b =>
-                {
-                    b.OwnsOne("AutoLot.Models.Entities.Owned.Person", "PersonInformation", b1 =>
-                        {
-                            b1.Property<int>("CustomerId")
-                                .HasColumnType("int");
-
-                            b1.Property<string>("FirstName")
-                                .IsRequired()
-                                .HasMaxLength(50)
-                                .HasColumnType("nvarchar(50)")
-                                .HasColumnName("FirstName");
-
-                            b1.Property<string>("FullName")
-                                .IsRequired()
-                                .ValueGeneratedOnAddOrUpdate()
-                                .HasColumnType("nvarchar(max)")
-                                .HasColumnName("FullName")
-                                .HasComputedColumnSql("[LastName] + ', ' + [FirstName]");
-
-                            b1.Property<string>("LastName")
-                                .IsRequired()
-                                .HasMaxLength(50)
-                                .HasColumnType("nvarchar(50)")
-                                .HasColumnName("LastName");
-
-                            b1.HasKey("CustomerId");
-
-                            b1.ToTable("Customers", "dbo");
-
-                            b1.WithOwner()
-                                .HasForeignKey("CustomerId");
-                        });
-
-                    b.Navigation("PersonInformation")
-                        .IsRequired();
+                    b.Navigation("Customer");
                 });
 
             modelBuilder.Entity("AutoLot.Models.Entities.Driver", b =>
@@ -622,7 +373,7 @@ namespace AutoLot.Dal.EfStructures.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_Orders_Inventory");
 
-                    b.HasOne("AutoLot.Models.Entities.Customer", "CustomerNavigation")
+                    b.HasOne("AutoLot.Models.Entities.Customer", "Customer")
                         .WithMany("Orders")
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -631,18 +382,7 @@ namespace AutoLot.Dal.EfStructures.Migrations
 
                     b.Navigation("CarNavigation");
 
-                    b.Navigation("CustomerNavigation");
-                });
-
-            modelBuilder.Entity("AutoLot.Models.Entities.Radio", b =>
-                {
-                    b.HasOne("Car", "CarNavigation")
-                        .WithOne("RadioNavigation")
-                        .HasForeignKey("AutoLot.Models.Entities.Radio", "CarId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CarNavigation");
+                    b.Navigation("Customer");
                 });
 
             modelBuilder.Entity("Car", b =>
@@ -678,9 +418,6 @@ namespace AutoLot.Dal.EfStructures.Migrations
                     b.Navigation("CarDrivers");
 
                     b.Navigation("Orders");
-
-                    b.Navigation("RadioNavigation")
-                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

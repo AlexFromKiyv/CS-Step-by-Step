@@ -2,28 +2,24 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using AutoLot.Models.Entities.Configuration;
 using Microsoft.EntityFrameworkCore;
 
 namespace AutoLot.Models.Entities;
 
+[Table("Orders",Schema ="dbo")]
 [Index("CarId", Name = "IX_Orders_CarId")]
 [Index("CustomerId", "CarId", Name = "IX_Orders_CustomerId_CarId", IsUnique = true)]
-public partial class Order
+[EntityTypeConfiguration(typeof(OrderConfiguration))]
+public partial class Order : BaseEntity
 {
-    [Key]
-    public int Id { get; set; }
-
     public int CustomerId { get; set; }
-
     public int CarId { get; set; }
+    [ForeignKey(nameof(CarId))]
+    [InverseProperty(nameof(Car.Orders))]
+    public virtual Car CarNavigation { get; set; } = null!;
 
-    public byte[]? TimeStamp { get; set; }
-
-    [ForeignKey("CarId")]
-    [InverseProperty("Orders")]
-    public virtual Inventory Car { get; set; } = null!;
-
-    [ForeignKey("CustomerId")]
-    [InverseProperty("Orders")]
-    public virtual Customer Customer { get; set; } = null!;
+    [ForeignKey(nameof(CustomerId))]
+    [InverseProperty(nameof(Customer.Orders))]
+    public virtual Customer CustomerNavigation { get; set; } = null!;
 }

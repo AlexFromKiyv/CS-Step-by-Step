@@ -2,26 +2,20 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using AutoLot.Models.Entities.Configuration;
 using Microsoft.EntityFrameworkCore;
 
 namespace AutoLot.Models.Entities;
 
-public partial class Customer
+[Table("Customers",Schema ="dbo")]
+[EntityTypeConfiguration(typeof(CustomerConfiguration))]
+public partial class Customer : BaseEntity
 {
-    [Key]
-    public int Id { get; set; }
+    public Person PersonInformation { get; set; } = new Person();
 
-    [StringLength(50)]
-    public string FirstName { get; set; } = null!;
+    [InverseProperty(nameof(CreditRisk.CustomerNavigation))]
+    public virtual IEnumerable<CreditRisk> CreditRisks { get; set; } = new List<CreditRisk>();
 
-    [StringLength(50)]
-    public string LastName { get; set; } = null!;
-
-    public byte[]? TimeStamp { get; set; }
-
-    [InverseProperty("Customer")]
-    public virtual ICollection<CreditRisk> CreditRisks { get; set; } = new List<CreditRisk>();
-
-    [InverseProperty("Customer")]
-    public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
+    [InverseProperty(nameof(Order.CustomerNavigation))]
+    public virtual IEnumerable<Order> Orders { get; set; } = new List<Order>();
 }

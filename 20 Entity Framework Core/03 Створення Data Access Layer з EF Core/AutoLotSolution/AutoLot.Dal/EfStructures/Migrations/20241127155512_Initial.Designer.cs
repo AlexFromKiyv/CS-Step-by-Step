@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AutoLot.Dal.EfStructures.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241125095129_Initial")]
+    [Migration("20241127155512_Initial")]
     partial class Initial
     {
         /// <inheritdoc />

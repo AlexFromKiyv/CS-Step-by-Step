@@ -2,27 +2,20 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using AutoLot.Models.Entities.Configuration;
 using Microsoft.EntityFrameworkCore;
 
 namespace AutoLot.Models.Entities;
 
+[Table("CreditRisks",Schema ="dbo")]
 [Index("CustomerId", Name = "IX_CreditRisks_CustomerId")]
-public partial class CreditRisk
+[EntityTypeConfiguration(typeof(CreditRiskConfiguration))]
+public partial class CreditRisk :BaseEntity
 {
-    [Key]
-    public int Id { get; set; }
-
-    [StringLength(50)]
-    public string FirstName { get; set; } = null!;
-
-    [StringLength(50)]
-    public string LastName { get; set; } = null!;
-
+    public Person PersonInformation { get; set; } = new Person();
     public int CustomerId { get; set; }
 
-    public byte[]? TimeStamp { get; set; }
-
     [ForeignKey("CustomerId")]
-    [InverseProperty("CreditRisks")]
-    public virtual Customer Customer { get; set; } = null!;
+    [InverseProperty(nameof(Customer.CreditRisks))]
+    public virtual Customer CustomerNavigation { get; set; } = null!;
 }

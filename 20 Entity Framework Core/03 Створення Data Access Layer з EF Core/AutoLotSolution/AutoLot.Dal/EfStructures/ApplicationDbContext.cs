@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using AutoLot.Models.Entities;
+using AutoLot.Models.Entities.Configuration;
 using Microsoft.EntityFrameworkCore;
 
 namespace AutoLot.Dal.EfStructures;
@@ -13,70 +14,34 @@ public partial class ApplicationDbContext : DbContext
     }
 
     public virtual DbSet<CreditRisk> CreditRisks { get; set; }
-
     public virtual DbSet<Customer> Customers { get; set; }
-
     public virtual DbSet<CustomerOrderView> CustomerOrderViews { get; set; }
-
-    public virtual DbSet<Inventory> Inventories { get; set; }
-
+    public virtual DbSet<Car> Cars { get; set; }
     public virtual DbSet<Make> Makes { get; set; }
-
     public virtual DbSet<Order> Orders { get; set; }
+    public virtual DbSet<Driver> Drivers { get; set; }
+    public virtual DbSet<CarDriver> CarsToDrivers { get; set; }
+    public virtual DbSet<Radio> Radios { get; set; }
+    public virtual DbSet<SeriLogEntry> SeriLogEntries { get; set; }
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<CreditRisk>(entity =>
-        {
-            entity.Property(e => e.TimeStamp)
-                .IsRowVersion()
-                .IsConcurrencyToken();
-
-            entity.HasOne(d => d.Customer).WithMany(p => p.CreditRisks).HasConstraintName("FK_CreditRisks_Customers");
-        });
-
-        modelBuilder.Entity<Customer>(entity =>
-        {
-            entity.Property(e => e.TimeStamp)
-                .IsRowVersion()
-                .IsConcurrencyToken();
-        });
 
         modelBuilder.Entity<CustomerOrderView>(entity =>
         {
             entity.ToView("CustomerOrderView");
         });
 
-        modelBuilder.Entity<Inventory>(entity =>
-        {
-            entity.Property(e => e.TimeStamp)
-                .IsRowVersion()
-                .IsConcurrencyToken();
-
-            entity.HasOne(d => d.Make).WithMany(p => p.Inventories)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Make_Inventory");
-        });
-
-        modelBuilder.Entity<Make>(entity =>
-        {
-            entity.Property(e => e.TimeStamp)
-                .IsRowVersion()
-                .IsConcurrencyToken();
-        });
-
-        modelBuilder.Entity<Order>(entity =>
-        {
-            entity.Property(e => e.TimeStamp)
-                .IsRowVersion()
-                .IsConcurrencyToken();
-
-            entity.HasOne(d => d.Car).WithMany(p => p.Orders)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Orders_Inventory");
-
-            entity.HasOne(d => d.Customer).WithMany(p => p.Orders).HasConstraintName("FK_Orders_Customers");
-        });
+        new CarConfiguration().Configure(modelBuilder.Entity<Car>());
+        new DriverConfiguration().Configure(modelBuilder.Entity<Driver>());
+        new CarDriverConfiguration().Configure(modelBuilder.Entity<CarDriver>());
+        new RadioConfiguration().Configure(modelBuilder.Entity<Radio>());
+        new CustomerConfiguration().Configure(modelBuilder.Entity<Customer>());
+        new MakeConfiguration().Configure(modelBuilder.Entity<Make>());
+        new CreditRiskConfiguration().Configure(modelBuilder.Entity<CreditRisk>());
+        new OrderConfiguration().Configure(modelBuilder.Entity<Order>());
+        new SeriLogEntryConfiguration().Configure(modelBuilder.Entity<SeriLogEntry>());
 
         OnModelCreatingPartial(modelBuilder);
     }

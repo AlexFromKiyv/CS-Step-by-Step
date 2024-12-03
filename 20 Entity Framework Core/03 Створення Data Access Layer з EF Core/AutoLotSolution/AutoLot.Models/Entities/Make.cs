@@ -2,20 +2,18 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using AutoLot.Models.Entities.Configuration;
 using Microsoft.EntityFrameworkCore;
 
 namespace AutoLot.Models.Entities;
-
-public partial class Make
+[Table("Makes",Schema ="dbo")]
+[EntityTypeConfiguration(typeof(MakeConfiguration))]
+public partial class Make :BaseEntity
 {
-    [Key]
-    public int Id { get; set; }
 
     [StringLength(50)]
     public string Name { get; set; } = null!;
 
-    public byte[]? TimeStamp { get; set; }
-
-    [InverseProperty("Make")]
-    public virtual ICollection<Inventory> Inventories { get; set; } = new List<Inventory>();
+    [InverseProperty(nameof(Car.MakeNavigation))]
+    public virtual IEnumerable<Car> Cars { get; set; } = new List<Car>();
 }

@@ -12,8 +12,8 @@ global using Microsoft.EntityFrameworkCore.Storage;
 global using Microsoft.Extensions.DependencyInjection;
 
 global using AutoLot.Dal.EfStructures;
+global using AutoLot.Dal.Exceptions;
 
 global using AutoLot.Models.Entities;
-
-
-
+global using AutoLot.Models.Entities.Base;
+global using AutoLot.Models.Entities.Configuration;
