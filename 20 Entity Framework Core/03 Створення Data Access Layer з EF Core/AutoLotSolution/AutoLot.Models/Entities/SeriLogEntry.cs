@@ -1,11 +1,4 @@
-﻿using AutoLot.Models.Entities.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace AutoLot.Models.Entities;
+﻿namespace AutoLot.Models.Entities;
 
 [Table("SeriLogs", Schema = "Logging")]
 [EntityTypeConfiguration(typeof(SeriLogEntryConfiguration))]

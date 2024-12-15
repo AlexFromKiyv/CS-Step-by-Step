@@ -1,31 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using AutoLot.Models.Entities.Configuration;
-using Microsoft.EntityFrameworkCore;
+﻿
+namespace AutoLot.Models.Entities;
 
-
-[Table("Inventory",Schema = "dbo")]
+[Table("Inventory")]
 [Index("MakeId", Name = "IX_Inventory_MakeId")]
 [EntityTypeConfiguration(typeof(CarConfiguration))]
 public partial class Car : BaseEntity
 {
-    [Required]
-    [DisplayName("Make")]
-    public int MakeId { get; set; }
-
     private bool? _isDrivable;
 
     [Required]
     [DisplayName("Is Drivable")]
-    public bool IsDrivable 
+    public bool IsDrivable
     {
-        get => _isDrivable ?? true; 
-        set => _isDrivable = value; 
+        get => _isDrivable ?? true;
+        set => _isDrivable = value;
     }
 
     [Required]
+    [DisplayName("Make")]
+    public int MakeId { get; set; }
+
     [StringLength(50)]
     public string Color { get; set; } = null!;
 
@@ -36,8 +30,7 @@ public partial class Car : BaseEntity
     [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
     public string Display { get; set; }
     public string? Price { get; set; }
-    public DateTime? DateBuild { get; set; }
-
+    public DateTime? DateBuilt { get; set; }
 
     [ForeignKey(nameof(MakeId))]
     [InverseProperty(nameof(Make.Cars))]
@@ -45,17 +38,14 @@ public partial class Car : BaseEntity
 
     [InverseProperty(nameof(Order.CarNavigation))]
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
-    
-    //many-to-many
+
     [InverseProperty(nameof(Driver.Cars))]
-    public virtual IEnumerable<Driver> Drivers { get; set; } = new List<Driver>();
+    public virtual ICollection<Driver> Drivers { get; set; } = new List<Driver>();
     [InverseProperty(nameof(CarDriver.CarNavigation))]
-    public IEnumerable<CarDriver> CarDrivers { get; set; } = new List<CarDriver>();
-    //many-to many
+    public virtual ICollection<CarDriver> CarDrivers { get; set; } = new List<CarDriver>();
 
     [InverseProperty(nameof(Radio.CarNavigation))]
-    public virtual Radio RadioNavigation { get; set; }
-
+    public virtual Radio RadioNavigation { get; set; } = null!;
 
     [NotMapped]
     public string MakeName => MakeNavigation?.Name ?? "Unknown";
@@ -64,4 +54,5 @@ public partial class Car : BaseEntity
     {
         return $"{PetName ?? "No name"} is a {Color} {MakeNavigation?.Name} with Id:{Id}";
     }
+
 }
