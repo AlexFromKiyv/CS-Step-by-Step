@@ -22,7 +22,8 @@ static void Run()
             $"8 Test_CustomerOrderViewModel()\n" +
             $"9 Test_DB_Functions()\n" +
             $"10 Test_CarRepo()\n" +
-            $"11 Test_InitializeData()\n"
+            $"11 Test_InitializeData()\n" +
+            $"12 Test_ClearAndSeedData()"
             );
         Console.Write("\tWhich method to run: ");
         int.TryParse(Console.ReadLine(), out int choice);
@@ -47,6 +48,7 @@ static void Run()
             case 9: Test_DB_Functions(); break;
             case 10: Test_CarRepo(); break;
             case 11: Test_InitializeData(); break;
+            case 12: Test_ClearAndSeedData(); break;
             default: break;
         }
         Console.Write("\n\tBack to menu");
@@ -298,4 +300,10 @@ static void Test_InitializeData()
     SampleDataInitializer.InitializeData(context);
 }
 
+static void Test_ClearAndSeedData()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    SampleDataInitializer.ClearAndSeedData(context);
+}
 

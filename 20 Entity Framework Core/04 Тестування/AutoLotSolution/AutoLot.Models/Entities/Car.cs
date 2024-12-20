@@ -4,6 +4,7 @@ namespace AutoLot.Models.Entities;
 [Table("Inventory")]
 [Index("MakeId", Name = "IX_Inventory_MakeId")]
 [EntityTypeConfiguration(typeof(CarConfiguration))]
+
 public partial class Car : BaseEntity
 {
     private bool? _isDrivable;

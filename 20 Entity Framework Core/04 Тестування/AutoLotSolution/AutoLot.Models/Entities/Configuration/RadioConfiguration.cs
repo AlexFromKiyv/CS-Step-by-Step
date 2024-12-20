@@ -18,7 +18,7 @@ public class RadioConfiguration : IEntityTypeConfiguration<Radio>
             .HasForeignKey<Radio>(r => r.CarId);
         builder.ToTable(tb => tb.IsTemporal(t =>
         {
-            t.UseHistoryTable("RadiosAudit");
+            t.UseHistoryTable("RadiosAudit","dbo");
         }));
     }
 }

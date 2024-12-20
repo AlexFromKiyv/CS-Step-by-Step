@@ -21,7 +21,7 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
 
         builder.ToTable(b => b.IsTemporal(t =>
         {
-            t.UseHistoryTable("OrdersAudit");
+            t.UseHistoryTable("OrdersAudit","dbo");
         }));
     }
 }
