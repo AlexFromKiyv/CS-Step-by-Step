@@ -31,7 +31,7 @@ public class CarConfiguration : IEntityTypeConfiguration<Car>
         
         builder.ToTable(b => b.IsTemporal(t =>
         {
-            t.UseHistoryTable("InventoryAudit");
+            t.UseHistoryTable("InventoryAudit","dbo");
         }));
 
         builder

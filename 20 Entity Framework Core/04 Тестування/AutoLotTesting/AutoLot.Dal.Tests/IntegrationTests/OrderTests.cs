@@ -20,4 +20,26 @@ public class OrderTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixtu
         _repo.Dispose();
         base.Dispose();
     }
+
+    [Fact]
+    public void ShouldGetAllOrdersExceptFiltered()
+    {
+        var query = Context.Orders;
+        OutputHelper.WriteLine(query.ToQueryString());
+
+        var orders = query.ToList();
+        Assert.NotEmpty(orders);
+        Assert.Equal(4, orders.Count);
+    }
+
+    [Fact]
+    public void ShouldGetAllOrders()
+    {
+        var query = Context.Orders.IgnoreQueryFilters();
+        OutputHelper.WriteLine(query.ToQueryString());
+
+        var orders = query.ToList();
+        Assert.NotEmpty(orders);
+        Assert.Equal(5, orders.Count);
+    }
 }

@@ -2995,10 +2995,53 @@ static void Run()
     {
             //...
             $"11 Test_InitializeData()\n" +
+            $"12 Test_InitializeData()\n"
             //...
             case 11: Test_InitializeData(); break;
+            case 12: Test_ClearAndSeedData(); break;
             //...
     }        
 }
 ```
+Тест методу Test_ClearAndSeedData() не проходить з винятком повязаним з недоступністю файлів. Аби рішити цю проблему теба в проект SimpleTest додадти пакет 
+
+Microsoft.EntityFrameworkCore.Design
+
+Потім закоментувати рядок 
+
+```xml
+      <!--<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>-->
+```
+Після виправленя цієї помилки з'явится інша яка вказує що часові таблиці не вказані як таблиці з схемою і назвою таблиці.
+Для вирішеня поеблеми треба додати визначення схеми для тимчасових таблиць усіх сутностей. 
+
+CarConfigurations.cs
+```cs
+            t.UseHistoryTable("InventoryAudit","dbo");
+```
+CarDriverConfiguration.cs
+```cs
+            t.UseHistoryTable("InventoryToDriversAudit","dbo");
+```
+MakeConfiguration.cs
+```cs
+            t.UseHistoryTable("MakesAudit","dbo");
+```
+OrderConfiguration.cs
+```cs
+            t.UseHistoryTable("OrdersAudit","dbo");
+```
+RadioConfiguration.cs
+```cs
+            t.UseHistoryTable("RadiosAudit","dbo");
+```
+
+Створмо нову міграцію і застосуємо.
+
+```console
+dotnet ef migrations add ChangeTemporalTableAddSchema
+dotnet ef database update
+```
+Після ціх змін тест виконається.
+
 Код ініціалізації буде детально опрацьований у наступному розділі.
