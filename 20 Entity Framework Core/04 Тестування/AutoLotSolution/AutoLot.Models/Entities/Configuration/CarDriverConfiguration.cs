@@ -14,7 +14,7 @@ public class CarDriverConfiguration : IEntityTypeConfiguration<CarDriver>
 
         builder.ToTable(b => b.IsTemporal(t =>
         {
-            t.UseHistoryTable("InventoryToDriversAudit","dbo");
+            t.UseHistoryTable("InventoryToDriversAudit", "dbo");
         }));
     }
 }

@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace AutoLot.Dal.Tests.IntegrationTests;
+﻿namespace AutoLot.Dal.Tests.IntegrationTests;
 
 [Collection("Integration Tests")]
-public class CustomerTests(ITestOutputHelper outputHelper) : BaseTest(outputHelper), IClassFixture<EnsureAutoLotDatabaseTestFixture>
+public class CustomerTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixture>
 {
+    public CustomerTests(ITestOutputHelper outputHelper) : base(outputHelper)
+    {
+    }
+
     [Fact]
     public void SouldGetAllOfTheCustomers()
     {
@@ -17,7 +15,6 @@ public class CustomerTests(ITestOutputHelper outputHelper) : BaseTest(outputHelp
         var customers = query.ToList();
         Assert.Equal(5, customers.Count);
     }
-
 
     [Fact]
     public void ShouldGetCustomersWithLastNameStartWithW()
@@ -41,8 +38,8 @@ public class CustomerTests(ITestOutputHelper outputHelper) : BaseTest(outputHelp
         IQueryable<Customer> query = Context.Customers
             //.Where(c => c.PersonInformation.LastName.StartsWith("W"))
             //.Where(c => c.PersonInformation.FirstName.StartsWith("M"));
-            .Where(x => x.PersonInformation.LastName.StartsWith("W") &&
-                           x.PersonInformation.FirstName.StartsWith("M"));
+              .Where(c => c.PersonInformation.LastName.StartsWith("W") &&
+                     c.PersonInformation.FirstName.StartsWith("M"));
         OutputHelper.WriteLine(query.ToQueryString());
         List<Customer> customers = query.ToList();
 
@@ -69,17 +66,17 @@ public class CustomerTests(ITestOutputHelper outputHelper) : BaseTest(outputHelp
         {
             Person? person = customer.PersonInformation;
             Assert.True(
-                    person.LastName.StartsWith("W",StringComparison.OrdinalIgnoreCase) 
-                 || person.LastName.StartsWith("H",StringComparison.OrdinalIgnoreCase)
+                    person.LastName.StartsWith("W", StringComparison.OrdinalIgnoreCase)
+                 || person.LastName.StartsWith("H", StringComparison.OrdinalIgnoreCase)
                 );
         }
     }
-
+   
     [Fact]
     public void ShouldGetCustomersWithLastNameStartWithWOrLastNameStartWithHWithEFFunction()
     {
         IQueryable<Customer> query = Context.Customers
-            .Where(c => EF.Functions.Like(c.PersonInformation.LastName,"W%")
+            .Where(c => EF.Functions.Like(c.PersonInformation.LastName, "W%")
             || EF.Functions.Like(c.PersonInformation.LastName, "H%"));
         OutputHelper.WriteLine(query.ToQueryString());
         List<Customer> customers = query.ToList();
@@ -92,7 +89,7 @@ public class CustomerTests(ITestOutputHelper outputHelper) : BaseTest(outputHelp
         var query = Context.Customers
             .OrderBy(c => c.PersonInformation.LastName)
             .ThenByDescending(c => c.PersonInformation.FirstName);
-        OutputHelper.WriteLine(query.ToQueryString()+"\n");
+        OutputHelper.WriteLine(query.ToQueryString() + "\n");
 
         var customers = query.ToList();
 
@@ -103,11 +100,11 @@ public class CustomerTests(ITestOutputHelper outputHelper) : BaseTest(outputHelp
                 $"{customer.PersonInformation.FirstName}");
         }
 
-        for (int i = 0; i < customers.Count-1; i++)
+        for (int i = 0; i < customers.Count - 1; i++)
         {
-            Compare(customers[i].PersonInformation, customers[i+1].PersonInformation);
+            Compare(customers[i].PersonInformation, customers[i + 1].PersonInformation);
         }
-        
+
         static void Compare(Person person1, Person person2)
         {
             var compareResult = string.Compare(person1.LastName, person2.LastName,
@@ -167,8 +164,8 @@ public class CustomerTests(ITestOutputHelper outputHelper) : BaseTest(outputHelp
     public void GetFirstMatchingRecordNameOrder()
     {
         var customer = Context.Customers
-            .OrderBy(c=>c.PersonInformation.LastName)
-            .ThenBy(c=>c.PersonInformation.FirstName)
+            .OrderBy(c => c.PersonInformation.LastName)
+            .ThenBy(c => c.PersonInformation.FirstName)
             .First();
         OutputHelper.WriteLine($"{customer.Id}");
         Assert.Equal(1, customer.Id);
@@ -178,7 +175,7 @@ public class CustomerTests(ITestOutputHelper outputHelper) : BaseTest(outputHelp
     public void FirstShouldThrowExceptionIfNoneMatch()
     {
         //Filters based on Id. Throws due to no match
-        Assert.Throws<InvalidOperationException>(() => Context.Customers.First(c => c.Id == 10)); 
+        Assert.Throws<InvalidOperationException>(() => Context.Customers.First(c => c.Id == 10));
     }
 
     [Fact]
@@ -205,7 +202,6 @@ public class CustomerTests(ITestOutputHelper outputHelper) : BaseTest(outputHelp
         Assert.Throws<InvalidOperationException>(() => Context.Customers.Last());
     }
 
-    [Fact]
     public void GetOneMatchingRecordWithSingle()
     {
         var customer = Context.Customers.Single(x => x.Id == 1);
@@ -243,5 +239,3 @@ public class CustomerTests(ITestOutputHelper outputHelper) : BaseTest(outputHelp
     }
 
 }
-
-

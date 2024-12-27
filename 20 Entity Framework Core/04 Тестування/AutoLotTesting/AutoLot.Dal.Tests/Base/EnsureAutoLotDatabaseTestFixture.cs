@@ -10,7 +10,6 @@ public sealed class EnsureAutoLotDatabaseTestFixture : IDisposable
         SampleDataInitializer.ClearAndSeedData(context);
         context.Dispose();
     }
-
     public void Dispose()
     {
     }

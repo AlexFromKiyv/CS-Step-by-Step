@@ -32,7 +32,7 @@
     <ProjectReference Include="..\..\AutoLotSolution\AutoLot.Dal\AutoLot.Dal.csproj" />
     <ProjectReference Include="..\..\AutoLotSolution\AutoLot.Models\AutoLot.Models.csproj" />
   </ItemGroup>
-
+  
   <ItemGroup>
     <None Update="appsettings.testing.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

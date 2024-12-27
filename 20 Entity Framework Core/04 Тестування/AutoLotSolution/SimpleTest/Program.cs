@@ -23,7 +23,7 @@ static void Run()
             $"9 Test_DB_Functions()\n" +
             $"10 Test_CarRepo()\n" +
             $"11 Test_InitializeData()\n" +
-            $"12 Test_ClearAndSeedData()"
+            $"12 Test_ClearAndSeedData()\n"
             );
         Console.Write("\tWhich method to run: ");
         int.TryParse(Console.ReadLine(), out int choice);
@@ -300,10 +300,10 @@ static void Test_InitializeData()
     SampleDataInitializer.InitializeData(context);
 }
 
+
 static void Test_ClearAndSeedData()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
     SampleDataInitializer.ClearAndSeedData(context);
 }
-

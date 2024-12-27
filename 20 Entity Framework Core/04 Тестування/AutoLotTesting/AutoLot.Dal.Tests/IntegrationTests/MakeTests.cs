@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace AutoLot.Dal.Tests.IntegrationTests;
+﻿namespace AutoLot.Dal.Tests.IntegrationTests;
 
 [Collection("Integration Tests")]
 public class MakeTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixture>
@@ -20,7 +14,6 @@ public class MakeTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixtur
         _repo.Dispose();
         base.Dispose();
     }
-
 
     [Fact]
     public void ShouldGetAllMakesAndCarsThatAreYellow()
@@ -60,7 +53,7 @@ public class MakeTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixtur
     public void ShouldGetAllCarsForAMakeExplicitlyWithQueryFilters(int makeId, int carCount)
     {
         Make? make = Context.Makes.Single(m => m.Id == makeId);
-        IQueryable <Car> query = Context.Entry(make).Collection(m => m.Cars).Query();
+        IQueryable<Car> query = Context.Entry(make).Collection(m => m.Cars).Query();
         OutputHelper.WriteLine(query.ToQueryString());
         query.Load();
         Assert.Equal(carCount, make.Cars.Count);
@@ -100,5 +93,7 @@ public class MakeTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixtur
         Assert.Equal("NewMake", list[1].Entity.Name);
         Assert.Equal(list[0].PeriodEnd, list[1].PeriodStart);
     }
+
+
 
 }

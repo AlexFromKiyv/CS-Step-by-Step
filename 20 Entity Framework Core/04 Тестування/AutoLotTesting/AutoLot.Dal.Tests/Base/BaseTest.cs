@@ -8,18 +8,17 @@ public abstract class BaseTest : IDisposable
     protected readonly ApplicationDbContext Context;
 
     protected readonly ITestOutputHelper OutputHelper;
-
     protected BaseTest(ITestOutputHelper outputHelper)
     {
         Configuration = TestHelpers.GetConfiguration;
         Context = TestHelpers.GetContext(Configuration);
         OutputHelper = outputHelper;
     }
-
     public virtual void Dispose()
     {
         Context.Dispose();
     }
+
     protected void ExecuteInATransaction(Action actionToExecute)
     {
         var strategy = Context.Database.CreateExecutionStrategy();
@@ -43,6 +42,3 @@ public abstract class BaseTest : IDisposable
         });
     }
 }
-
-
-

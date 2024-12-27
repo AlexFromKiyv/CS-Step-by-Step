@@ -28,7 +28,7 @@ public class CarConfiguration : IEntityTypeConfiguration<Car>
         .HasComputedColumnSql("[PetName] + ' (' + [Color] + ')'", stored: true);
 
         builder.Property(p => p.Price).HasConversion(new StringToNumberConverter<decimal>());
-
+        
         builder.ToTable(b => b.IsTemporal(t =>
         {
             t.UseHistoryTable("InventoryAudit","dbo");

@@ -12,7 +12,7 @@ public class MakeConfiguration : IEntityTypeConfiguration<Make>
     {
         builder.ToTable(tb => tb.IsTemporal(t =>
         {
-            t.UseHistoryTable("MakesAudit","dbo");
+            t.UseHistoryTable("MakesAudit", "dbo");
         }));
     }
 }

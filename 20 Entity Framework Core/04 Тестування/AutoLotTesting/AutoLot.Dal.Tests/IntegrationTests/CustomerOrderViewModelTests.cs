@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace AutoLot.Dal.Tests.IntegrationTests;
 
 [Collection("Integration Tests")]
@@ -20,7 +15,6 @@ public class CustomerOrderViewModelTests : BaseTest, IClassFixture<EnsureAutoLot
         _repo.Dispose();
         base.Dispose();
     }
-
     [Fact]
     public void ShouldGetAllViewModels()
     {
@@ -28,7 +22,7 @@ public class CustomerOrderViewModelTests : BaseTest, IClassFixture<EnsureAutoLot
         OutputHelper.WriteLine(query.ToQueryString());
         var list = query.ToList();
         Assert.NotEmpty(list);
-        Assert.Equal(5,list.Count);
+        Assert.Equal(5, list.Count);
     }
 
 }

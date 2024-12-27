@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AutoLot.Dal.EfStructures.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241220081253_ChangeTemporalTableAddSchema")]
+    [Migration("20241226092358_ChangeTemporalTableAddSchema")]
     partial class ChangeTemporalTableAddSchema
     {
         /// <inheritdoc />

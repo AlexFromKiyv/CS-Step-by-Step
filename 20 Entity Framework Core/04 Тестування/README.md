@@ -1,10 +1,10 @@
 # Тестування
 
-Тепер, коли у вас є готовий рівень доступу до даних AutoLot, настав час провести його тест-драйв. Тестування інтеграції є невід’ємною частиною розробки програмного забезпечення та є чудовим способом переконатися, що ваш код доступу до даних поводиться як ви очікували. У цьому розділі ми будемо використовувати xUnit, тестову структуру для .NET Core.
+Тепер, коли у вас є готовий рівень доступу до даних AutoLot, настав час провести його тест-драйв. Тестування інтеграції є невід’ємною частиною розробки програмного забезпечення та є чудовим способом переконатися, що ваш код доступу до даних поводиться як ви очікували. У цьому розділі ми будемо використовувати xUnit, тестовий фреймворк для .NET Core.
 
 ## Створення проекту тестування
 
-Хоча ми зробили проект з декількома тестами вони мало чого охоплюють. Щоб створювати клієнтську програму для тестування завершеного рівня доступу до даних AutoLot, ми збираємося використовувати автоматизовані тести інтеграції. Тести продемонструють створення, читання, оновлення та видалення викликів бази даних. Це дозволяє нам досліджувати код без накладних витрат на створення іншої програми. Кожен із тестів у цьому розділі виконає запит (створити, прочитати, оновити або видалити), а потім матиме один або кілька операторів Assert для підтвердження того, що результат відповідає очікуванням.
+Хоча ми зробили проект з декількома тестами вони охоплюють не все. Щоб створювати клієнтську програму для тестування завершеного рівня доступу до даних AutoLot, ми збираємося використовувати автоматизовані тести інтеграції. Тести продемонструють створення, читання, оновлення та видалення викликів бази даних. Це дозволяє нам досліджувати код без накладних витрат на створення іншої програми. Кожен із тестів у цьому розділі виконає запит (створити, прочитати, оновити або видалити), а потім матиме один або кілька операторів Assert для підтвердження того, що результат відповідає очікуванням.
 
 Модульні тести призначені для перевірки окремої одиниці коду. Те, що ми будемо робити протягом цього розділу, — це технічно створювати інтеграційні тести, оскільки ми тестуємо код C# і EF Core на всьому шляху до бази даних і назад.
 
@@ -25,14 +25,6 @@ dotnet add AutoLot.Dal.Tests package Microsoft.EntityFrameworkCore.Design
 dotnet add AutoLot.Dal.Tests package Microsoft.EntityFrameworkCore.SqlServer
 dotnet add AutoLot.Dal.Tests package Microsoft.Extensions.Configuration.Json
 ```
-У тестах використовуватиметься код ініціалізації даних, який очищає тимчасові дані, тому таке ж налаштування файлу проекту необхідно внести щодо пакета Microsoft.EntityFrameworkCore.Design. Оновіть пакет, щоб видалити (або закоментувати) тег IncludeAssets:
-
-```xml
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
-      <!--<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>-->
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-```
 Версії пакетів Microsoft.NET.Test.Sdk і coverlet.collector, які постачаються разом із шаблоном проекту xUnit, зазвичай відстають від поточних доступних версій. Щоб оновити їх, скористайтеся диспетчером пакетів NuGet у Visual Studio, щоб оновити всі пакети NuGet, або використовуйте CLI. Щоб оновити їх за допомогою CLI, потім додайте їх знову, оскільки додавання пакетів із командного рядка завжди отримуватиме останню версію без попереднього випуску. Ось команди:
 
 ```console
@@ -48,6 +40,18 @@ dotnet sln add ..\AutoLotSolution\AutoLot.Models
 dotnet add AutoLot.Dal.Tests reference ..\AutoLotSolution\AutoLot.Dal
 dotnet add AutoLot.Dal.Tests reference ..\AutoLotSolution\AutoLot.Models
 ```
+Відкриємо рішення в VS.
+
+У тестах використовуватиметься код ініціалізації даних, який очищає часові таблиці, тому таке ж налаштування файлу проекту необхідно внести щодо пакета Microsoft.EntityFrameworkCore.Design. Оновіть пакет, щоб видалити (або закоментувати) тег IncludeAssets:
+
+```xml
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
+      <!--<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>-->
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+```
+
+
 Для перевірки (або використання) методів і класів у проекті AutoLot.Dal, позначених як внутрішні, внутрішні елементи потрібно зробити видимими для проекту AutoLot.Dal.Tests.
 Відкрийте файл AutoLot.Dal.csproj і додайте наступне:
 
@@ -240,6 +244,8 @@ public abstract class BaseTest : IDisposable
 Інтерфейс ITestOutputHelper дозволяє записувати вміст у вікно виводу тесту. У разі використання шаблону IDisposable із тестовими приладами xUnit екземпляр для цього інтерфейсу можна вставити в конструктор. Додайте захищену змінну лише для читання, щоб утримувати примірник і оновлювати конструктор:
 
 ```cs
+    protected readonly ITestOutputHelper OutputHelper;
+
     protected BaseTest(ITestOutputHelper outputHelper)
     {
         Configuration = TestHelpers.GetConfiguration;
@@ -287,6 +293,7 @@ public abstract class BaseTest : IDisposable
 Додайте новий клас під назвою EnsureAutoLotDatabaseTestFixture.cs до каталогу Base та реалізуйте IDisposable. Зробіть клас public і sealed і додайте наступні оператори використання: 
 
 ```cs
+
 namespace AutoLot.Dal.Tests.Base;
 
 public sealed class EnsureAutoLotDatabaseTestFixture : IDisposable
@@ -448,56 +455,11 @@ public class OrderTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixtu
 
 Тип колекції DbSet<T> реалізує (серед інших інтерфейсів) IQueryable<T>. Це дозволяє використовувати команди C# LINQ для створення запитів на отримання даних із бази даних. Хоча всі оператори C# LINQ доступні для використання з типом колекції DbSet<T>, деякі оператори LINQ можуть не підтримуватися постачальником бази даних, а додаткові оператори LINQ додаються EF Core. Непідтримувані оператори LINQ, які не можна перекласти на мову запитів постачальника бази даних, створять виняткову ситуацію під час виконання. Деякі оператори LINQ, які не підлягають перекладу, виконуватимуться на стороні клієнта, якщо вони є останніми операторами в ланцюжку LINQ; однак інші (наприклад, оновлення методу Take(), який працює з діапазонами) все одно видаватиме помилку, якщо запит спочатку не буде виконано за допомогою ToList() або подібної конструкції.
 
-Там, де доступний ToQueryString(), тести в наступному розділі встановлюють це значення для змінної (qs) і виводять результати тесту за допомогою ITestOutputHelper, щоб ви могли перевірити запит під час виконання тестів.
+Там, де доступний ToQueryString(), тести в наступному розділі виводять результати тесту за допомогою ITestOutputHelper, щоб ви могли перевірити запит під час виконання тестів.
 
 ### Отримання всіх записів
 
 Щоб отримати всі записи для таблиці, просто використовуйте властивість DbSet<T> безпосередньо без будь-яких операторів LINQ. Додайте такий факт до класу CustomerTests.cs:
-
-```cs
-    [Fact]
-    public void SouldGetAllOfTheCustomers()
-    {
-        var query = Context.Customers;
-        var customers = query.ToList();
-        Assert.Equal(5, customers.Count);
-    }
-```
-
-При запуску теста виникне помилка яка вкаже що не спрацьовує метод ClearData класу SampleDataInitializer.
-
-Для вирішеня поеблеми треба додати визначення схеми для тимчасових таблиць усіх сутностей. 
-
-CarConfigurations.cs
-```cs
-            t.UseHistoryTable("InventoryAudit","dbo");
-```
-CarDriverConfiguration.cs
-```cs
-            t.UseHistoryTable("InventoryToDriversAudit","dbo");
-```
-MakeConfiguration.cs
-```cs
-            t.UseHistoryTable("MakesAudit","dbo");
-```
-OrderConfiguration.cs
-```cs
-            t.UseHistoryTable("OrdersAudit","dbo");
-```
-RadioConfiguration.cs
-```cs
-            t.UseHistoryTable("RadiosAudit","dbo");
-```
-
-Створмо нову міграцію і застосуємо.
-
-```console
-dotnet ef migrations add ChangeTemporalTableAddSchema
-dotnet ef database update
-```
-Після ціх змін тест виконається.
-
-Є можливість подивитись який запит був виконано. Змінемо метод.
 
 ```cs
     [Fact]
@@ -789,7 +751,6 @@ public void ShouldSortByFirstNameThenLastNameUsingReverse()
 Наступний тест демонструє отримання першого запису на основі порядку «last name, first name»:
 
 ```cs
-
     [Fact]
     public void GetFirstMatchingRecordNameOrder()
     {
@@ -814,7 +775,7 @@ public void ShouldSortByFirstNameThenLastNameUsingReverse()
 ```
 Assert.Throws() — це особливий тип оператора assert. Він очікує виняток із викинутого коду у виразі. Якщо виняток не генерується, твердження не виконується.
 
-Під час використання FirstOrDefault() замість винятку результатом є null запис, якщо дані не повертаються. Цей тест показує створення змінної виразу
+Під час використання FirstOrDefault() замість винятку результатом є null , якщо дані не повертаються. Цей тест показує створення змінної виразу
 
 ```cs
     [Fact]
@@ -1088,7 +1049,7 @@ ORDER BY [i].[Id], [m].[Id], [s].[Id], [s].[Id1]
 ```cs
 
     [Fact]
-    public void ShouldGetCarsOnOrderWithCustomerIgnoreFilters()
+    public void ShouldGetCarsOnOrderWithCustomerIgnoreQueryFilters()
     {
         IIncludableQueryable<Car, Customer?> query = Context.Cars
             .IgnoreQueryFilters()
@@ -1381,7 +1342,6 @@ WHERE [i].[IsDrivable] = CAST(1 AS bit) AND [i].[MakeId] = @__p_0
         Assert.Equal("Make", list[0].Entity.Name);
         Assert.Equal("NewMake", list[1].Entity.Name);
         Assert.Equal(list[0].PeriodEnd, list[1].PeriodStart);
-               
     }
 ```
 Тест створює новий запис Make і додає його до бази даних. Після призупинення операції на секунду ім’я оновлюється, а зміни зберігаються. Після ще однієї паузи запис видаляється. Потім тест використовує MakeRepo, щоб отримати всю історію для запису Make. Підтверджує наявність двох записів в історії. Переконується, що PeriodEnd першого запису точно відповідає PeriodStart другого запису.
@@ -1504,6 +1464,7 @@ SELECT COUNT(*) FROM [dbo].[Inventory] AS [i]
         var count = Context.Cars.Count(c => c.MakeId == makeId);
         Assert.Equal(expectedCount, count);
     }
+
     [Theory]
     [InlineData(1, 1)]
     [InlineData(2, 1)]
@@ -1865,10 +1826,12 @@ WHERE [Id] = @p1 AND [TimeStamp] = @p2;
       void RunTheTest()
       {
           var car = Context.Cars.First();
+
           //Update the database outside of the context
           FormattableString sql = 
               $"Update dbo.Inventory set Color='Pink' where Id = {car.Id}";
           Context.Database.ExecuteSqlInterpolated(sql);
+
           //update the car record in the change tracker
           car.Color = "Yellow";
           var ex = Assert.Throws<CustomConcurrencyException>(() => Context.SaveChanges());

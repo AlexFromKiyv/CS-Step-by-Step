@@ -7,7 +7,6 @@ public class SampleTests
     {
         Assert.Equal(5, 2 + 3);
     }
-
     [Theory]
     [InlineData(2, 3, 5)]
     [InlineData(1, -1, 0)]

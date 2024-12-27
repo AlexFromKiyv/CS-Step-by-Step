@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace AutoLot.Dal.Tests.IntegrationTests;
+﻿namespace AutoLot.Dal.Tests.IntegrationTests;
 
 [Collection("Integration Tests")]
 public class OrderTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixture>
@@ -42,4 +36,5 @@ public class OrderTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixtu
         Assert.NotEmpty(orders);
         Assert.Equal(5, orders.Count);
     }
+
 }
