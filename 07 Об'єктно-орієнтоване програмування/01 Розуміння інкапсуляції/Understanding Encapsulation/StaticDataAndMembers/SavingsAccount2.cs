@@ -18,7 +18,6 @@ class SavingsAccount2
     }
     public SavingsAccount2(decimal currentBalance)
     {
-
         this.currentBalance = currentBalance;
     }
     public static double GetInterestRate() => currеntInterestRate;

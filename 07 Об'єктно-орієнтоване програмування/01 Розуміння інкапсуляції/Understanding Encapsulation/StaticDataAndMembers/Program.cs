@@ -64,4 +64,13 @@ static void UsingAStaticClass()
     // Compiler error! Can't create instance of static classes!
     //TimeUtilClass u = new TimeUtilClass();
 }
-UsingAStaticClass();
+//UsingAStaticClass();
+
+static void UsingStaticProperty()
+{
+    Console.WriteLine($"Interest Rate is:{SavingsAccount3.CurrentInterestRate}");
+    SavingsAccount3.CurrentInterestRate = 0.05;
+    SavingsAccount3 account = new(10000);
+    Console.WriteLine($"Interest Rate is:{SavingsAccount3.CurrentInterestRate}"  );
+}
+UsingStaticProperty();

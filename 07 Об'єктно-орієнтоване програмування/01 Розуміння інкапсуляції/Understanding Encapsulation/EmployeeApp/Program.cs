@@ -1,5 +1,4 @@
-﻿
-using EmployeeApp;
+﻿using EmployeeApp;
 
 static void Attempt1()
 {
@@ -45,3 +44,25 @@ void UsingProperties1()
     joe.DisplayStatus();
 }
 //UsingProperties1();
+
+void PatternMatchingWithProperty()
+{
+    Employee5 employee = new(23, "Marvin", 1000, 35,
+        "111 - 11 - 1111", EmployeePayTypeEnum.Salaried);
+    employee.DisplayStatus();
+    employee.GiveBonus(100);
+    employee.DisplayStatus();
+}
+//PatternMatchingWithProperty();
+
+void UsingPartialClass()
+{
+    Employee6 employee = new(23, "Marvin", 1000, 35,
+        "111 - 11 - 1111", EmployeePayTypeEnum.Salaried);
+    employee.DisplayStatus();
+    employee.GiveBonus(100);
+    employee.DisplayStatus();
+}
+//UsingPartialClass();
+
+

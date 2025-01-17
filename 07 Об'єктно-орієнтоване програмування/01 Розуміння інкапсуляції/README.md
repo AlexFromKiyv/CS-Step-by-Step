@@ -1425,7 +1425,7 @@ public int Age
 ```
 Обидва синтаксиси компілюються до одного IL, тому який синтаксис ви використовуєте, ви вирішуєте повністю.
 
-### Використання властивостей у визначенні класу
+## Використання властивостей у визначенні класу
 
 Властивості, зокрема set ​​частина властивості, є звичайними місцями для упаковки бізнес-правил вашого класу.
 Наразі клас Employee має властивість Name, яка гарантує, що ім’я містить не більше 15 символів. Решта властивостей (ID, Pay і Age) також можна оновити за будь-якою відповідною логікою. Але також розглянемо, що конструктор класу зазвичай робить внутрішньо. Наразі ваш головний конструктор не перевіряє вхідні рядкові дані на дійсний діапазон, тому ви можете оновити цей член таким чином:
@@ -1515,4 +1515,1420 @@ class Employee4
 }
 ```
 
-### 
+## Властивості лише для читання 
+
+Під час інкапсуляції даних ви можете налаштувати властивість лише для читання. Щоб зробити це, просто опустіть блок set. Наприклад, припустімо, що у вас є нова властивість під назвою SocialSecurityNumber, яка інкапсулює приватну рядкову змінну під назвою _SSN. Якщо ви хочете зробити цю властивість лише для читання, ви можете написати це:
+
+```cs
+   // Field data
+   // ... 
+   private string _SSN;
+
+   public string SSN
+   {
+        get { return _SSN; }
+   }
+
+```
+
+Властивості, які мають лише геттер, також можна спростити за допомогою елементів тіла виразу. Наступний рядок еквівалентний попередньому блоку коду:
+
+```cs
+    public string SSN => _SSN;
+```
+Тепер припустімо, що ваш конструктор класу має новий параметр, який дозволяє абоненту встановити SSN об’єкта. Оскільки властивість SocialSecurityNumber доступна лише для читання, ви не можете встановити таке значення:
+
+```cs
+public Employee4(int id, string name, float pay, int age, string ssn)
+{
+    Id = id;
+    Name = name;
+    Pay = pay;
+    Age = age;
+    // OOPS! This is no longer possible if the property is read only.
+    SSN = ssn;
+}
+```
+Вашим єдиним вибором із властивостями лише для читання буде використання основної змінної-члена _SSN у логіці конструктора таким чином:
+
+```cs
+    public Employee4(int id, string name, float pay, int age, string ssn)
+    {
+          //...
+          _SSN = ssn;
+    }
+```
+
+## Властивості лише для запису
+
+Якщо ви хочете налаштувати свою властивість як властивість лише для запису, опустіть блок get, наприклад:
+
+```cs
+public int Id { set => _id = value; }
+```
+
+### Поєднання приватних і публічних методів Get/Set у властивостях
+
+Під час визначення властивостей рівень доступу для методів get і set може бути різним. Переглядаючи номер соціального страхування, якщо мета полягає в тому, щоб запобігти зміні номера поза класом, тоді оголосите метод get як загальнодоступний, а метод set як приватний, ось так:
+
+```cs
+public string SocialSecurityNumber
+{
+  get => _SSN;
+  private set => _SSN = value;
+}
+```
+Зауважте, що це змінює властивість з лише для читання на читання-запис. Різниця полягає в тому, що запис приховано від будь-чого за межами визначального класу.
+
+## Повторний перегляд статичного ключового слова: визначення статичних властивостей
+
+Раніше в цьому розділі ви досліджували роль ключового слова static. Тепер, коли ви розумієте використання синтаксису властивостей C#, ви можете формалізувати статичні властивості. У проекті StaticDataAndMembers, створеному раніше в цьому розділі, ваш клас SavingsAccount мав два загальнодоступних статичних методу для отримання та встановлення процентної ставки. Однак було б більш стандартним загорнути цю точку даних у статичну властивість. Ось приклад (зверніть увагу на використання ключового слова static):
+
+```cs
+class SavingsAccount3
+{
+    public static double currеntInterestRate;
+    public decimal currentBalance;
+    public static double CurrentInterestRate
+    {
+        get => currеntInterestRate;
+        set => currеntInterestRate = value;
+    }
+    static SavingsAccount3()
+    {
+        currеntInterestRate = 0.04;
+    }
+    public SavingsAccount3(decimal currentBalance)
+    {
+        this.currentBalance = currentBalance;
+    }
+}
+```
+Якщо ви хочете використовувати цю властивість замість попередніх статичних методів, ви можете оновити свій код таким чином:
+
+```cs
+static void UsingStaticProperty()
+{
+    Console.WriteLine($"Interest Rate is:{SavingsAccount3.CurrentInterestRate}");
+    SavingsAccount3.CurrentInterestRate = 0.05;
+    SavingsAccount3 account = new(10000);
+    Console.WriteLine($"Interest Rate is:{SavingsAccount3.CurrentInterestRate}"  );
+}
+UsingStaticProperty();
+```
+```
+Interest Rate is:0,04
+Interest Rate is:0,05
+```
+
+## Шаблон зіставлення із шаблонами властивостей
+
+Щоб налаштувати приклад, додайте новий файл (EmployeePayTypeEnum.cs) до проекту EmployeeApp для переліку типів оплати праці таким чином:
+
+```cs
+public enum EmployeePayTypeEnum
+{
+    Hourly,
+    Salaried,
+    Commission
+}
+```
+
+Оновіть клас Employee властивістю для типу оплати та ініціалізуйте його з конструктора. Відповідні зміни коду наведено тут:
+
+```cs
+class Employee5
+{
+    // Field data
+
+    //...
+
+    private EmployeePayTypeEnum _payType;
+
+    //Properties
+
+    //...
+
+    public EmployeePayTypeEnum PayType
+    {
+        get => _payType;
+        set => _payType = value;
+    }
+
+    //Constructors
+    public Employee5(int id, string name, float pay, int age, string ssn,
+        EmployeePayTypeEnum payType)
+    {
+        Id = id;
+        Name = name;
+        Pay = pay;
+        Age = age;
+        // OOPS! This is no longer possible if the property is read only.
+        //SSN = ssn;
+        _SSN = ssn;
+        PayType = payType;
+    }
+
+    public Employee5(int id, string name, float pay) :
+        this(id, name, pay, 0, "",EmployeePayTypeEnum.Salaried )
+    { }
+
+}
+```
+Тепер, коли всі елементи готові, метод GiveBonus() можна оновити відповідно до типу оплати працівника. Commissioned (Замовлені працівники) отримують 10 відсотків премії, hourly (погодині) отримують еквівалент 40 годин пропорційної премії, а salaried (наймані) отримують зазначену суму. Оновлений метод GiveBonus() наведено тут:
+
+```cs
+    public void GiveBonus(float amount)
+    {
+        Pay = this switch
+        {
+            { PayType: EmployeePayTypeEnum.Commission } => Pay += 0.10F * amount,
+            { PayType: EmployeePayTypeEnum.Hourly } => Pay += 40F * amount / 2080F,
+            { PayType: EmployeePayTypeEnum.Salaried} => Pay += amount,
+            _ => Pay += 0
+        };
+    }
+```
+Як і в інших операторах switch, які використовують зіставлення шаблонів, або має бути оператор різноманітного вибору, або оператор switch повинен викликати виняток, якщо жоден із операторів case не зустрічається. 
+Щоб перевірити це, додайте такий код:
+
+```cs
+void PatternMatchingWithProperty()
+{
+    Employee5 employee = new(23, "Marvin", 1000, 35,
+        "111 - 11 - 1111", EmployeePayTypeEnum.Salaried);
+    employee.DisplayStatus();
+    employee.GiveBonus(100);
+    employee.DisplayStatus();
+}
+PatternMatchingWithProperty();
+```
+```
+23      Marvin  35      1000
+23      Marvin  35      1100
+```
+
+Шаблон зіставлення перевіряє вирази в який фігурують властивості об'єкта і повертає відповідни результат. У шаблоні можна використовувати більше однієї властивості. 
+
+Припустімо, ви хочете переконатися, що кожен із співробітників, які отримують премію, старше 18 років. Ви можете оновити метод до такого:
+
+```cs
+    public void GiveBonus(float amount)
+    {
+        Pay = this switch
+        {
+            { Age: >= 18, PayType: EmployeePayTypeEnum.Commission } 
+            => Pay += 0.10F * amount,
+            { Age: >= 18, PayType: EmployeePayTypeEnum.Hourly }
+            => Pay += 40F * amount / 2080F,
+            { Age: >= 18, PayType: EmployeePayTypeEnum.Salaried}
+            => Pay += amount,
+            _ => Pay += 0
+        };
+    }
+```
+
+Шаблони властивостей можна вкладати, щоб переходити вниз по ланцюжку властивостей. Щоб продемонструвати це, додайте загальнодоступну властивість для HireDate, наприклад:
+
+```cs
+    // Field data  
+    private DateTime _hireDate;   
+
+    // Properties
+
+   public DateTime HireDate
+   {
+       get => _hireDate;
+       set => _hireDate = value;
+   }
+```
+Далі оновіть switch оператор, щоб переконатися, що рік найму кожного працівника був після 2020 року, щоб мати право на бонус:
+
+```cs
+    public void GiveBonus(float amount)
+    {
+        Pay = this switch
+        {
+            { Age: >= 18, PayType: EmployeePayTypeEnum.Commission, HireDate: { Year: > 2020} } 
+            => Pay += 0.10F * amount,
+            { Age: >= 18, PayType: EmployeePayTypeEnum.Hourly, HireDate: { Year: > 2020 } }
+            => Pay += 40F * amount / 2080F,
+            { Age: >= 18, PayType: EmployeePayTypeEnum.Salaried, HireDate: { Year: > 2020 } }
+            => Pay += amount,
+            _ => Pay += 0
+        };
+    }
+
+```
+Розширені шаблони властивостей можна використовувати замість вкладених нижче властивостей. Це оновлення очищає попередній приклад, як показано тут:
+
+```cs
+    public void GiveBonus(float amount)
+    {
+        Pay = this switch
+        {
+            { Age: >= 18, PayType: EmployeePayTypeEnum.Commission, HireDate.Year : > 2020 } 
+            => Pay += 0.10F * amount,
+            { Age: >= 18, PayType: EmployeePayTypeEnum.Hourly, HireDate.Year: > 2020 }
+            => Pay += 40F * amount / 2080F,
+            { Age: >= 18, PayType: EmployeePayTypeEnum.Salaried, HireDate.Year: > 2020 }
+            => Pay += amount,
+            _ => Pay += 0
+        };
+    }
+```
+
+## Розуміння автоматичних властивостей
+
+Коли ви створюєте властивості для інкапсуляції своїх даних, часто виявляється, що set межа має код для виконання бізнес-правил вашої програми. Однак у деяких випадках вам може не знадобитися жодна логіка реалізації, крім простого отримання та встановлення значення. Це означає, що ви можете отримати багато коду, який виглядатиме так:
+
+```cs
+// An Employee Car type using standard property
+// syntax.
+class Car
+{
+   private string carName = '';
+   public string PetName
+   {
+     get { return carName; }
+     set { carName = value; }
+   }
+}
+```
+У цих випадках визначення приватних резервних полів і простих визначень властивостей кілька разів може стати досить багатослівним. Наприклад, якщо ви моделюєте клас, якому потрібні дев’ять приватних точок даних поля, ви в кінцевому підсумку створюєте дев’ять пов’язаних властивостей, які є не більш ніж тонкими оболонками для служб інкапсуляції.
+
+Щоб прискористи процес надання простої інкапсуляції даних полів, ви можете використовувати автоматичний синтаксис властивостей. Як випливає з назви, ця функція перевантажить компілятору роботу з визначення приватного резервного поля та відповідного члена властивості C# за допомогою нового синтаксису.
+
+Для ілюстрації створіть новий проект консольної програми під назвою AutoProps і додайте новий файл класу під назвою Car.cs. Тепер розглянемо цю переробку класу Car, яка використовує цей синтаксис для швидкого створення трьох властивостей:
+
+Visual Studio та Visual Studio Code надають фрагмент коду prop. Якщо ви введете prop у визначенні класу та двічі натиснете клавішу Tab, IDE згенерує початковий код для нової автоматичної властивості. Потім ви можете використовувати клавішу Tab для циклічного перегляду кожної частини визначення, щоб заповнити деталі. Спробуйте!
+
+```cs
+namespace AutoProps;
+
+class Car
+{
+    // Automatic properties! No need to define backing fields.
+    public string PetName { get; set; } = null!;
+    public int Speed { get; set; }
+    public string Color { get; set; } = null!;
+}
+```
+Визначаючи автоматичні властивості, ви просто вказуєте модифікатор доступу, базовий тип даних, назву властивості та порожні області отримання/набору. Під час компіляції вашому типу буде надано автоматично згенероване приватне резервне поле та відповідну реалізацію логіки get/set. Ім’я автоматично створеного приватного резервного поля не відображається у вашій базі коду C#. Єдиний спосіб побачити це — скористатися таким інструментом, як ildasm.exe.
+
+Можна визначити «автоматичну властивість лише для читання», опустивши set область. Автоматичні властивості лише для читання можна встановити лише в конструкторі. Однак неможливо визначити властивість лише для запису. Для закріплення врахуйте наступне:
+
+```cs
+// Read-only property? This is OK!
+public int MyReadOnlyProp { get; }
+// Write only property? Error!
+public int MyWriteOnlyProp { set; }
+```
+
+### Взаємодія з автоматичними властивостями
+
+Оскільки компілятор визначатиме приватне резервне поле під час компіляції (і враховуючи, що ці поля недоступні безпосередньо в коді C#), автоматичні властивості, що визначають клас, завжди потребуватимуть використовувати синтаксис властивостей, щоб отримати та встановити базове значення. Це важливо відзначити, оскільки багато програмістів безпосередньо використовують приватні поля у визначенні класу, що неможливо в цьому випадку. Наприклад, якби клас Car надавав метод DisplayStats(), йому потрібно було б реалізувати цей метод за допомогою імені властивості.
+
+```cs
+class Car
+{
+    public string PetName { get; set; } = null!;
+    public int Speed { get; set; }
+    public string Color { get; set; } = null!;
+
+    public void DisplayStats()
+    {
+        Console.WriteLine($"Car Name: {PetName}" );
+        Console.WriteLine($"Speed: {Speed}");
+        Console.WriteLine($"Color: {Color}");
+    }
+}
+```
+Коли ви використовуєте об’єкт, визначений за допомогою автоматичних властивостей, ви зможете призначати та отримувати значення за допомогою очікуваного синтаксису властивості.
+
+```cs
+void UsingAutoProperties()
+{
+    Car car = new Car();
+    car.PetName = "Framk";
+    car.Speed = 55;
+    car.Color = "Red";
+
+    Console.WriteLine($"Your car is named {car.PetName}? That\'s odd...");
+    car.DisplayStats();
+}
+UsingAutoProperties();
+```
+```
+Your car is named Framk? That's odd...
+Car Name: Framk
+Speed: 55
+Color: Red
+```
+
+### Автоматичні властивості та значення за замовчуванням
+
+Коли ви використовуєте автоматичні властивості для інкапсуляції числових або логічних даних, ви можете використовувати автоматично згенеровані властивості типу безпосередньо у своїй базі коду, оскільки прихованим резервним полям буде призначено безпечне значення за замовчуванням (false для булевих і 0 для числових даних). Однак майте на увазі, що якщо ви використовуєте автоматичний синтаксис властивостей для обгортання іншої змінної класу, для типу прихованого приватного посилання також буде встановлено значення за замовчуванням null (що може виявитися проблематичним, якщо ви не будете обережні).
+
+Давайте вставимо у ваш поточний проект новий файл класу під назвою Garage.cs, який використовує дві автоматичні властивості.
+
+```cs
+namespace AutoProps;
+
+class Garage
+{
+    // The hidden backing field is set to zero!
+    public float Temperature { get; set; }
+    // The hidden Car backing field is set to null!
+    public Car MyCar { get; set; }
+
+}
+```
+Враховуючи значення C# за замовчуванням для даних полів, ви могли б роздрукувати значення Temperature як є (оскільки йому автоматично присвоюється значення 0), але якщо ви безпосередньо викликаєте MyAuto, ви отримаєте «виняток нульового посилання» на під час виконання, оскільки змінну члена Car, що використовується у фоновому режимі, не було призначено новому об’єкту.
+
+```cs
+void AutomaticPropertiesAndDefaultValues()
+{
+    Garage garage = new();
+    // OK, prints default value of zero.
+    Console.WriteLine(garage.Temperature);
+
+    // Runtime error! Backing field is currently null!
+    Console.WriteLine(garage.MyCar.PetName);
+}
+AutomaticPropertiesAndDefaultValues();
+```
+```
+0
+Unhandled exception. System.NullReferenceException: Object reference not set to an instance of an object.
+...
+```
+
+Щоб вирішити цю проблему, ви можете оновити конструктори класів, щоб гарантувати, що об’єкт оживе безпечним способом. Ось приклад:
+
+```cs
+class Garage
+{
+    public float Temperature { get; set; }
+    public Car MyCar { get; set; }
+
+    public Garage()
+    {
+        MyCar = new Car();
+    }
+    public Garage(float temperature, Car myCar)
+    {
+        Temperature = temperature;
+        MyCar = myCar;
+    }
+}
+```
+```
+0
+
+```
+Завдяки цій модифікації тепер ви можете розмістити об’єкт Car у об’єкті Garag таким чином:
+
+```cs
+void AutomaticPropertiesAndDefaultValues()
+{
+    Garage garage = new();
+    Console.WriteLine(garage.Temperature);
+    Console.WriteLine(garage.MyCar.PetName);
+
+    Car car = new() { PetName = "Lasivka" };
+    garage.MyCar = car;
+    Console.WriteLine(garage.MyCar.PetName);
+    Console.WriteLine(garage.MyCar.Color);
+    Console.WriteLine(garage.MyCar.Speed);
+}
+AutomaticPropertiesAndDefaultValues();
+```
+```
+0
+
+Lasivka
+
+0
+```
+
+### Ініціалізація автоматичних властивостей
+
+Існує підхід, який може спростити те, як автоматична властивість отримує початкове призначення значення.
+Нагадаємо, що з початку цієї глави полю даних класу можна безпосередньо присвоїти початкове значення після оголошення.
+```cs
+class Car
+{
+  private int numberOfDoors = 2;
+}
+```
+Подібним чином C# дозволяє призначити початкове значення базовому резервному полю, створеному компілятором. Це позбавляє вас від клопоту додавання операторів коду в конструктори класів, щоб гарантувати, що дані властивостей оживуть, як задумано. Ось оновлена ​​версія класу Garage, яка ініціалізує автоматичні властивості відповідно до значень. Зауважте, що вам більше не потрібно додавати логіку до конструктора класу за замовчуванням, щоб робити безпечні призначення.У цій ітерації ви безпосередньо призначаєте новий об’єкт Car властивості MyAuto.
+
+```cs
+class Garage1
+{
+    public float Temperature { get; set; } = 18;
+    public Car MyCar { get; set; } = new Car();
+
+    public Garage1() {}
+    public Garage1(float temperature, Car myCar)
+    {
+        Temperature = temperature;
+        MyCar = myCar;
+    }
+}
+```
+Як ви можете погодитися, автоматичні властивості є приємною особливістю мови програмування C#, оскільки ви можете визначити ряд властивостей для класу за допомогою спрощеного синтаксису. Майте на увазі, що якщо ви створюєте властивість, для якої потрібен додатковий код, окрім отримання та встановлення основного приватного поля (наприклад, логіка перевірки даних, запис у журнал подій, зв’язок із базою даних тощо), вам потрібно буде визначити «full» тип властивості .NET Core вручну. Ctrl+"." > Convert to full property 
+
+```cs
+    private float temperature = 18;
+    public float Temperature { get => temperature; set => temperature = value; }
+```
+
+Автоматичні властивості C# ніколи не роблять більше, ніж забезпечують просту інкапсуляцію основної частини (генерованих компілятором) приватних даних.
+
+## Розуміння ініціалізації об'єктів
+
+Як показано в цій главі, конструктор дозволяє вказувати початкові значення під час створення нового об’єкта. У зв’язку з цим властивості дозволяють отримувати та встановлювати базові дані безпечним способом. Коли ви працюєте з класами інших людей, включно з класами, які містяться в бібліотеці базових класів .NET Core, нерідко виявляється, що немає жодного конструктора, який би дозволив вам установити всі базові дані стану. Враховуючи цей момент, програміст зазвичай змушений вибрати найкращий можливий конструктор, після чого програміст робить призначення, використовуючи декілька наданих властивостей. 
+
+### Синтаксис ініціалізації об'єкта
+
+Щоб спростити процес заповнення даних та запуску об’єкта, C# пропонує синтаксис ініціалізатора об’єкта. Використовуючи цю техніку, можна створити нову змінну об’єкта та призначити низку властивостей та/або відкритих полів у кількох рядках коду. Синтаксично ініціалізатор об’єкта складається зі списку заданих значень, розділених комами, укладених маркерами { і }. Кожен член у списку ініціалізації відповідає імені загальнодоступного поля або загальнодоступної властивості об’єкта, що ініціалізується.
+
+Щоб побачити цей синтаксис у дії, створіть новий проект консольної програми під назвою ObjectInitializers. Тепер розглянемо простий клас під назвою Point, створений за допомогою автоматичних властивостей (що не є обов’язковим для синтаксису ініціалізації об’єкта, але допомагає вам написати стислий код).
+
+```cs
+namespace ObjectInitializers;
+
+class Point
+{
+    public int X { get; set; }
+    public int Y { get; set; }
+
+    public Point(int x, int y)
+    {
+        X = x;
+        Y = y;
+    }
+
+    public Point()
+    {
+    }
+
+    public void DisplayState()
+    {
+        Console.WriteLine($"[{X},{Y}]");
+    }
+}
+```
+Тепер розглянемо, як можна створювати об’єкти Point за допомогою будь-якого з наведених нижче підходів:
+
+```cs
+using ObjectInitializers;
+
+void CreateObjects()
+{
+    // Make a Point by setting each property manually.
+    Point point1 = new Point();
+    point1.X = 10;
+    point1.Y = 10;
+    point1.DisplayState();
+
+    // Or make a Point via a custom constructor.
+    Point point2 = new Point(20,20);
+    point2.DisplayState();
+
+    // Or make a Point using object init syntax.
+    Point point3 = new Point() { X = 30, Y = 30 };
+    point3.DisplayState();
+}
+CreateObjects();
+```
+```
+[10,10]
+[20,20]
+[30,30]
+```
+
+Остання змінна Point не використовує спеціальний конструктор (як можна було б робити традиційно), а скоріше встановлює значення загальнодоступних властивостей X і Y. За лаштунками викликається конструктор типу за замовчуванням, після чого встановлюються значення вказаних властивостей. З цією метою синтаксис ініціалізації об’єкта – це лише скорочена нотація для синтаксису, який використовується для створення змінної класу за допомогою конструктора за замовчуванням і встановлення властивості даних стану за властивістю. З цією метою синтаксис ініціалізації об’єкта – це лише скорочена нотація для синтаксису, який використовується для створення змінної класу за допомогою конструктора за замовчуванням і встановлення властивості даних стану за властивістю.
+
+Важливо пам’ятати, що процес ініціалізації об’єкта неявно використовує частину set властивостей. Якщо параметр властивості позначено як приватний, цей синтаксис не можна використовувати.
+
+### Використання set лише для ініціалізації
+
+Частина set може бути тільки для ініціалізація. Це дозволяє установити значення властивості під час ініціалізації, але після завершення будівництва об’єкта властивість стає доступною лише для читання.Ці типи властивостей називають незмінними.
+
+```cs
+class Point1
+{
+    public int X { get; init; }
+    public int Y { get; init; }
+
+    public Point1(int x, int y)
+    {
+        X = x;
+        Y = y;
+    }
+
+    public Point1()
+    {
+    }
+
+    public void DisplayState()
+    {
+        Console.WriteLine($"[{X},{Y}]");
+    }
+}
+```
+Використовуйте наступний код, щоб взяти цей новий клас для тест-драйву:
+```cs
+void UsingInitOnlySetters()
+{
+    Point1 point = new(10,10);
+    point.DisplayState();
+    //The next two lines will not compile
+    point.X = 10;
+
+}
+UsingInitOnlySetters();
+```
+```
+[10,10]
+```
+Різниця полягає в тому, що значення для X або Y не можна змінити після створення класу.
+
+### Виклик спеціальних конструкторів із синтаксисом ініціалізації
+
+Ініціалізувати об'єкт можна наступним чином. 
+
+```cs
+    // Here, the default constructor is called implicitly.
+    Point1 point = new Point1 { X = 10, Y = 10 };
+```
+В коді ми ініціалізували тип шляхом неявного виклику конструктора за замовчуванням для типу.
+
+Якщо ви хочете бути зрозумілими щодо цього, допустимо явно викликати конструктор за замовчуванням наступним чином:
+```cs
+    // Here, the default constructor is called explicitly.
+    Point1 point2 = new Point1() { X = 20, Y = 20 };
+```
+
+Майте на увазі, що коли ви створюєте тип за допомогою синтаксису ініціалізації, ви можете викликати будь-який конструктор, визначений класом.Ваш тип Point наразі визначає конструктор із двома аргументами для встановлення позиції (x, y). Таким чином, наступне оголошення Point призводить до значення X 40 і значення Y 40, незважаючи на те, що аргументи конструктора вказали значення 30 і 30:
+
+```cs
+void CallingCustomConstructorsWithInitializationSyntax()
+{
+
+    //...
+
+    Point1 point3 = new Point1(30, 30) { X = 40, Y = 40 };
+    point3.DisplayState();
+}
+CallingCustomConstructorsWithInitializationSyntax();
+```
+```
+[40,40]
+```
+Враховуючи поточне визначення вашого типу Point, виклик спеціального конструктора під час використання синтаксису ініціалізації не дуже корисний (і більш ніж багатослівний). Проте, якщо ваш тип Point надає новий конструктор, який дозволяє абоненту встановлювати колір (через спеціальний перелік під назвою PointColor), комбінація спеціальних конструкторів і синтаксису ініціалізації об’єкта стає зрозумілою.
+
+Додайте новий клас до свого проекту та додайте такий код, щоб створити enum для кольору:
+```cs
+namespace ObjectInitializers;
+enum PointColorEnum
+{
+    LightBlue,
+    BloodRed,
+    Gold
+}
+```
+
+```cs
+class Point2
+{
+    public int X { get; set; }
+    public int Y { get; set; }
+    public PointColorEnum Color { get; set; }
+
+    public Point2(int x, int y)
+    {
+        X = x;
+        Y = y;
+    }
+    public Point2(PointColorEnum color)
+    {
+        Color = color;
+    }
+    public Point2() : this(PointColorEnum.BloodRed)
+    {
+    }
+    public void DisplayState()
+    {
+        Console.WriteLine($"[{X},{Y},{Color}]");
+    }
+}
+```
+За допомогою цього нового конструктора тепер ви можете створити Gold точку (розташовану на 50, 50) наступним чином:
+
+```cs
+    Point2 point4 = new Point2(PointColorEnum.Gold) { X = 50, Y = 50 };
+    point4.DisplayState();
+```
+```
+[50,50,Gold]
+```
+
+### Ініціалізація даних за допомогою синтаксису ініціалізації
+
+Як коротко згадувалося раніше в цій главі (і повністю розглянуто в наступній), відношення «has-a» дозволяє вам створювати нові класи, визначаючи змінні-члени існуючих класів. Наприклад, припустімо, що зараз у вас є клас Rectangle, який використовує тип Point для представлення своїх лівих верхніх/правих нижніх координат. Оскільки автоматичні властивості встановлюють значення null для всіх полів змінних класу, ви реалізуєте цей новий клас за допомогою «традиційного» синтаксису властивостей.
+
+```cs
+class Rectangle
+{
+    private Point2 topLeft = new();
+    private Point2 bottomRight = new();
+
+    public Point2 TopLeft 
+    {
+        get => topLeft; 
+        set => topLeft = value; 
+    }
+    public Point2 BottomRight 
+    { 
+        get => bottomRight; 
+        set => bottomRight = value; 
+    }
+
+    public void DisplayState()
+    {
+        Console.WriteLine($"[[{topLeft.X},{topLeft.Y},{topLeft.Color}] " +
+            $"[{bottomRight.X},{bottomRight.Y},{bottomRight.Color}]]");
+    }
+}
+```
+Використовуючи синтаксис ініціалізації об’єкта, ви можете створити нову змінну Rectangle і встановити внутрішні точки наступним чином
+
+```cs
+void InitializingDataWithInitializationSyntax()
+{
+    Rectangle rectangle = new Rectangle
+    {
+        TopLeft = new Point2 { X = 10, Y = 10 },
+        BottomRight = new Point2 { X = 200, Y = 200 }
+    };
+
+    rectangle.DisplayState();
+}
+InitializingDataWithInitializationSyntax();
+```
+```
+[[10,10,BloodRed] [200,200,BloodRed]]
+```
+
+## Робота з константами та read-only полями даних
+
+Іноді вам потрібна властивість, яку ви взагалі не хочете змінювати, також відома як незмінна, або з моменту її компіляції, або після встановлення під час створення. Ми вже досліджували один приклад із сеттерами лише для ініціалізації. Тепер ми розглянемо константи та поля лише для читання.
+
+### Розуміння таких полів даних як константи
+
+C# пропонує ключове слово const для визначення постійних даних, які ніколи не можуть змінитися після початкового призначення. Це може бути корисним, коли ви визначаєте набір відомих значень для використання у своїх програмах, які логічно пов’язані з даним класом або структурою.
+
+Припустімо, що ви створюєте допоміжний клас під назвою MyMathClass, якому потрібно визначити значення для числа пі (для простоти ви припустите, що воно дорівнює 3,14). Почніть із створення нового проекту консольної програми під назвою ConstData та додайте файл під назвою MyMathClass.cs. Враховуючи, що ви не хочете дозволяти іншим розробникам змінювати це значення в коді, pi можна моделювати за допомогою такої константи:
+
+```cs
+namespace ConstData;
+
+class MyMathClass
+{
+    public const double PI = 3.14;
+}
+```
+Оновіть код у файлі Program.cs відповідно до цього:
+
+```cs
+using ConstData;
+
+void UsingConstant()
+{
+    Console.WriteLine($"The value of PI is:{MyMathClass.PI}");
+    // Error! Can't change a constant!
+    // MyMathClass.PI = 3.1444;
+}
+UsingConstant();
+```
+Зверніть увагу, що ви посилаєтеся на константні дані, визначені MyMathClass, використовуючи префікс імені класу (тобто MyMathClass.PI). Це пояснюється тим, що постійні поля класу є неявно статичними. Однак дозволено визначати локальну змінну константу та отримувати доступ до неї в межах методу або властивості.
+
+```cs
+static void LocalConstStringVariable()
+{
+    // A local constant data point can be directly accessed.
+    const string fixedStr = "Fixed string Data";
+    Console.WriteLine(fixedStr);
+    // Error!
+    // fixedStr = 'This will not work!';
+}
+LocalConstStringVariable();
+```
+Незалежно від того, де ви визначаєте постійну частину даних, завжди пам’ятайте про те, що початкове значення, присвоєне константі, має бути вказане під час визначення константи.
+
+Призначення значення PI у конструкторі класу, як показано в наступному коді, створює помилку компіляції:
+
+```cs
+class MyMathClass
+{
+   // Try to set PI in constructor?
+   public const double PI;
+   public MyMathClass()
+   {
+     // Not possible- must assign at time of declaration.
+     PI = 3.14;
+   }
+}
+```
+Причина цього обмеження полягає в тому, що значення констант має бути відоме під час компіляції. Конструктори (або будь-які інші методи), як відомо, викликаються під час виконання.
+
+### Константні інтерпольовані рядки
+
+Константні рядкові значення можуть використовувати інтерполяцію рядків у своїх операторах присвоєння, якщо всі компоненти, які використовуються, також є константними рядками.
+
+```cs
+void ConstInterpolationString()
+{
+    const string string1 = "Merry";
+    const string string2 = "Christmas";
+    const string result = $"{string1} {string2}";
+    Console.WriteLine(result);
+}
+ConstInterpolationString();
+```
+
+### Розуміння полів лише для читання
+
+З постійними даними тісно пов’язане поняття даних поля лише для читання (які не слід плутати з властивістю лише для читання). Як і константу, поле лише для читання не можна змінити після початкового призначення, інакше ви отримаєте помилку під час компіляції. Однак, на відміну від константи, значення, призначене полю лише для читання, може бути визначено під час виконання, і, отже, може бути законно призначено в межах конструктора, але ніде більше. Це може бути корисним, якщо ви не знаєте значення поля до часу виконання, можливо тому, що вам потрібно прочитати зовнішній файл, щоб отримати значення, але ви хочете переконатися, що значення не зміниться після цього моменту. Для ілюстрації припустимо наступне оновлення MyMathClass:
+
+```cs
+class MyMathClass
+{
+    //public const double PI = 3.14;
+
+    public readonly double PI = 3.14;
+
+    public MyMathClass()
+    {
+        PI = 3.14;
+    }
+
+    // Error!
+   public void ChangePI()
+   { PI = 3.14444;}
+}
+```
+Знову ж таки, будь-яка спроба зробити призначення для поля, позначеного тільки для читання, за межами області конструктора призводить до помилки компілятора.
+
+### Розуміння статичних полів лише для читання
+
+На відміну від констант, поля лише для читання не є неявно статичними. Таким чином, якщо ви хочете представити PI на рівні класу, ви повинні явно використовувати ключове слово static. Якщо ви знаєте значення статичного поля лише для читання під час компіляції, початкове призначення виглядає подібно до призначення константи (однак у цьому випадку було б простіше просто використати ключове слово const спочатку, оскільки ви призначають поле даних під час оголошення).
+
+```cs
+class MyMathClass
+{
+   public static readonly double PI = 3.14;
+}
+```
+Однак, якщо значення статичного поля лише для читання невідоме до часу виконання, ви повинні використовувати статичний конструктор, як описано раніше в цій главі.
+
+```cs
+class MyMathClass
+{
+   public static readonly double PI;
+   static MyMathClass()
+   { PI = 3.14; }
+}
+```
+# Розуміння часткових класів
+
+Під час роботи з класами важливо розуміти роль часткового ключового слова C#. Ключове слово partial дозволяє розділити один клас на кілька файлів коду. Коли ви створюєте базові класи Entity Framework Core із бази даних, усі створені класи створюються як часткові класи. Таким чином, будь-який код, який ви написали для доповнення цих файлів, не перезаписується, припускаючи, що ваш код знаходиться в окремих файлах класів, позначених ключовим словом partial. Інша причина полягає в тому, що, можливо, ваш клас з часом перетворився на щось складне для керування, і як проміжний крок до рефакторингу цього класу ви можете розділити його на частини. 
+У C# ви можете розділити один клас на кілька файлів коду, щоб ізолювати шаблонний код від більш корисних (і складних) членів. Щоб проілюструвати, де часткові класи можуть бути корисними, відкрийте проект EmployeeApp, який ви створили раніше в цій главі, а потім відкрийте файл Employee останньої версії для редагування. Як ви пам'ятаєте, цей єдиний файл містить код усіх аспектів класу.
+
+```cs
+class Employee
+{
+   // Field Data
+   // Properties
+   // Constructors
+   // Methods
+}
+```
+Використовуючи часткові класи, ви можете перемістити (наприклад) властивості, конструктори та дані полів у новий файл із назвою Employee.Core.cs (ім’я файлу не має значення).
+Першим кроком є ​​додавання часткового ключового слова до поточного визначення класу та вирізання коду, який буде розміщено в новому файлі.
+
+```cs
+partial class Employee6
+{
+    // Field data
+    private string _name = null!;
+    private string _SSN = null!;
+
+    // Properties
+    public int Id { get; set; }
+    public string Name
+    {
+        get => _name;
+        set
+        {
+            if (value.Length > 15)
+            {
+                Console.WriteLine("Error! Name length exceeds 15 characters!");
+            }
+            else
+            {
+                _name = value;
+            }
+        }
+    }
+    public float Pay { get; set; }
+    public int Age { get; set; }
+    public string SSN => _SSN;
+    public EmployeePayTypeEnum PayType {  get; set; }
+
+    //Constructors
+    public Employee6(int id, string name, float pay, int age, string ssn,
+        EmployeePayTypeEnum payType)
+    {
+        Id = id;
+        Name = name;
+        Pay = pay;
+        Age = age;
+        _SSN = ssn;
+        PayType = payType;
+    }
+    public Employee6(int id, string name, float pay) :
+        this(id, name, pay, 0, "", EmployeePayTypeEnum.Salaried)
+    { }
+    public Employee6() { }
+}
+```
+
+Далі, якщо ви вставили новий файл класу у свій проект, ви можете методи до нового файлу за допомогою простої операції вирізання та вставлення. Крім того, ви повинні додати ключове слово partial до цього аспекту визначення класу. Ось приклад:
+
+```cs
+partial class Employee6
+{
+    // Mathods
+    public void GiveBonus(float amount)
+    {
+        Pay = this switch
+        {
+            { Age: >= 18, PayType: EmployeePayTypeEnum.Commission }
+            => Pay += 0.10F * amount,
+            { Age: >= 18, PayType: EmployeePayTypeEnum.Hourly }
+            => Pay += 40F * amount / 2080F,
+            { Age: >= 18, PayType: EmployeePayTypeEnum.Salaried }
+            => Pay += amount,
+            _ => Pay += 0
+        };
+    }
+
+    public void DisplayStatus()
+    {
+        Console.WriteLine($"{Id}\t{Name}\t{Age}\t{Pay}");
+    }
+}
+```
+Пам’ятайте, що кожен із часткових класів має бути позначений ключовим словом partial!
+
+Після компіляції зміненого проекту ви не побачите жодної різниці.
+```cs
+void UsingPartialClass()
+{
+    Employee6 employee = new(23, "Marvin", 1000, 35,
+        "111 - 11 - 1111", EmployeePayTypeEnum.Salaried);
+    employee.DisplayStatus();
+    employee.GiveBonus(100);
+    employee.DisplayStatus();
+}
+UsingPartialClass();
+```
+```
+23      Marvin  35      1000
+23      Marvin  35      1100
+```
+Вся ідея часткового класу реалізується лише під час проектування. Після компіляції програми в збірці залишається лише єдиний уніфікований клас. Єдина вимога під час визначення partial типів полягає в тому, щоб ім’я типу (у цьому випадку Employee6) було ідентичним і визначене в одному просторі імен .NET Core.
+
+Згадайте з обговорення операторів верхнього рівня, будь-які методи в операторах верхнього рівня повинні бути локальною функцією. Інструкції верхнього рівня неявно визначені в частковому класі Program, що дозволяє створити інший частковий клас Program для зберігання регулярних методів.
+
+Створіть нову консольну програму під назвою FunWithPartials і додайте новий файл класу під назвою Program.Partial.cs. Оновіть код до такого:
+
+```cs
+public partial class Program
+{
+    public static string GetUpper(string str) =>  str.ToUpper();
+}
+
+```
+Зверніть увагу шо не потрібно вказувати namespace.
+
+Тепер ви можете викликати цей метод зі своїх операторів верхнього рівня у файлі Program.cs, наприклад:
+
+```cs
+Console.WriteLine(GetUpper("Hi girls"));
+```
+```
+HI GIRLS
+```
+
+# Записи (Records)
+
+Типи Records є спеціальним reference типом, який забезпечує синтезовані методи рівності за допомогою семантики значень і інкапсуляції даних. Типи record можна створювати з незмінними або стандартними властивостями. Щоб почати експериментувати із записами, створіть нову консольну програму під назвою WorkWithRecords. Розглянемо наступний клас автомобіля, модифікований на основі прикладів, наведених раніше в цьому розділі:
+
+```cs
+namespace WorkWithRecords;
+
+class Car
+{
+    public string Make { get; set; } = null!;
+    public string Model { get; set; } = null!;
+    public string Color { get; set; } = null!;
+
+    public Car()
+    {
+    }
+
+    public Car(string make, string model, string color)
+    {
+        Make = make;
+        Model = model;
+        Color = color;
+    }
+}
+```
+Як ви вже добре знаєте, після створення екземпляра цього класу ви можете змінити будь-які властивості під час виконання.Якщо властивості для попереднього класу Car мають бути незмінними, ви можете змінити його визначення властивостей, щоб використовувати сетери лише для ініціалізації:
+
+```cs
+    public string Make { get; init; } = null!;
+    public string Model { get; init; } = null!;
+    public string Color { get; init; } = null!;
+```
+Щоб застосувати цей новий клас, наведений нижче код створює два екземпляри класу Car: один через ініціалізацію об’єкта, а інший – через настроюваний конструктор.
+
+```cs
+using WorkWithRecords;
+
+void UsingClassCar()
+{
+    //Use object initialization
+    Car car1 = new Car
+    {
+        Make = "Honda",
+        Model = "Pilot",
+        Color = "Blue"
+    };
+    DisplayCarState(car1);
+
+    //Use the custom constructor
+    Car car2 = new Car("Honda", "Pilot", "Blue");
+    DisplayCarState(car2);
+
+    Console.WriteLine($"Cars are the same? {car1.Equals(car2)}");
+    Console.WriteLine($"Cars are the same reference? {ReferenceEquals(car1,car2)}");
+
+    //Compile error if property is changed
+    //car1.Color = "Red";
+
+    void DisplayCarState(Car car)
+    {
+        Console.WriteLine($"{car.Make} {car.Model} {car.Color}");
+    }
+
+}
+UsingClassCar();
+```
+```
+Honda Pilot Blue
+Honda Pilot Blue
+Cars are the same? False
+Cars are the same reference? False
+```
+Як і очікувалося, обидва методи створення об’єкта працюють, властивості відображаються, а спроба змінити властивість після створення викликає помилку компіляції.
+
+## Незмінні типи record зі стандартним синтаксисом властивостей
+
+Створення незмінного типу record Car за допомогою стандартного синтаксису властивостей подібне до створення класів із незмінними властивостями. Щоб побачити це в дії, додайте новий файл під назвою (CarRecord.cs) до свого проекту та додайте такий код:
+
+```cs
+record CarRecord
+{
+    public string Make { get; init; } = null!;
+    public string Model { get; init; } = null!;
+    public string Color { get; init; } = null!;
+
+    public CarRecord()
+    {
+    }
+
+    public CarRecord(string make, string model, string color)
+    {
+        Make = make;
+        Model = model;
+        Color = color;
+    }
+}
+```
+Типи записів дозволяють використовувати ключове слово class, щоб допомогти відрізнити їх від структур запису, але ключове слово є необов’язковим. Тому record class та record означають те саме.
+
+Ви можете підтвердити, що поведінка така ж, як і клас Car з налаштуваннями лише ініціалізації, запустивши такий код у Program.cs:
+
+```cs
+void UsingCarRecord()
+{
+    //Use object initialization
+    CarRecord carRecord1 = new CarRecord
+    {
+        Make = "Honda",
+        Model = "Pilot",
+        Color = "Blue"
+    };
+    DisplayCarRecordState(carRecord1);
+
+    //Use the custom constructor
+    CarRecord carRecord2 = new CarRecord("Honda", "Pilot", "Blue");
+    DisplayCarRecordState(carRecord2);
+
+    Console.WriteLine();
+
+    Console.WriteLine(carRecord1.ToString());
+    Console.WriteLine(carRecord2.ToString());
+ 
+    void DisplayCarRecordState(CarRecord carRecord)
+    {
+        Console.WriteLine($"{carRecord.Make} {carRecord.Model} {carRecord.Color}");
+    }
+}
+UsingCarRecord();
+```
+```
+Honda Pilot Blue
+Honda Pilot Blue
+
+CarRecord { Make = Honda, Model = Pilot, Color = Blue }
+CarRecord { Make = Honda, Model = Pilot, Color = Blue }
+```
+
+Хоча ми не розглядали рівність (наступний розділ) або спадкування (наступна глава) із записами, цей перший погляд на записи не здається великою перевагою. Поточний приклад Car включає весь код, який ми звикли очікувати.З однією помітною відмінністю у виводі: метод ToString() створено для типів записів, як показано в цьому прикладі виведення:
+```cs
+CarRecord { Make = Honda, Model = Pilot, Color = Blue }
+CarRecord { Make = Honda, Model = Pilot, Color = Blue }
+```
+
+## Незмінні типи record із позиційним синтаксисом
+
+Розглянемо це оновлене (і значно скорочене) визначення для Car record:
+CarRecord1.cs
+```cs
+record CarRecord1(string Make, string Model, string Color);
+```
+Цей синтаксис називається типом позиційного record. Конструктор визначає властивості запису, а весь інший код видалено.
+
+```cs
+void UsingCarRecord1()
+{
+    //Don't work
+    //CarRecord1 carRecord1 = new CarRecord1
+    //{
+    //    Make = "Honda",
+    //    Model = "Pilot",
+    //    Color = "Blue"
+    //};
+
+    //Use the internal constructor
+    CarRecord1 carRecord1 = new CarRecord1("Honda", "Pilot", "Blue");
+    Console.WriteLine(carRecord1.ToString());
+}
+UsingCarRecord1();
+
+```
+```
+CarRecord1 { Make = Honda, Model = Pilot, Color = Blue }
+```
+
+Під час використання цього синтаксису враховуються три міркування: по-перше, ви не можете використовувати ініціалізацію об’єктів типів записів за допомогою синтаксису компактного визначення, по-друге, запис має бути створено з властивостями у правильній позиції, і по-третє, що регістр властивостей у конструкторі безпосередньо транслюється на регістр властивостей типу запису.
+
+Переглянувши скорочений список IL, ми можемо підтвердити, що марки, модель і колір є властивостями лише для ініціалізації в записі автомобіля. Зверніть увагу, що для кожного з параметрів, переданих у конструктор, є резервні поля, і кожен має модифікатори private та initonly.
+
+```
+.class private auto ansi beforefieldinit FunWithRecords.CarRecord
+  extends [System.Runtime]System.Object
+  implements class [System.Runtime]System.IEquatable`1<class FunWithRecords.CarRecord>
+{
+  .field private initonly string '<Make>k__BackingField'
+  .field private initonly string '<Model>k__BackingField'
+  .field private initonly string '<Color>k__BackingField'
+...
+}
+```
+При використанні позиційного синтаксису типи записів надають первинний конструктор, який відповідає позиційним параметрам в декларації запису.
+
+## Деконструкція типів record 
+
+Типи записів із використанням позиційних параметрів також надають метод Deconstruct() із вихідним параметром для кожного позиційного параметра в декларації. Наступний код створює новий запис за допомогою наданого конструктора, а потім деконструює властивості в окремі змінні:
+
+```cs
+void DecondtructRecord()
+{
+    CarRecord1 carRecord1 = new CarRecord1("Honda", "Pilot", "Blue");
+    carRecord1.Deconstruct(out string make, out string model, out string color);
+
+    Console.WriteLine(make+"\t"+model+"\t"+color);
+}
+DecondtructRecord();
+```
+```
+Honda   Pilot   Blue
+```
+Зауважте, що хоча загальнодоступні властивості запису відповідають регістру декларації, вихідні змінні в методі Deconstruct() мають відповідати лише положенню параметрів. 
+
+Синтаксис кортежу також можна використовувати під час деконструкції записів. Зверніть увагу на таке доповнення до прикладу:
+
+```cs
+    var (p1, p2, p3) = carRecord1;
+    Console.WriteLine(p1 + "\t" + p2 + "\t" + p3);
+```
+
+## Змінні типи записів
+
+C# також підтримує змінні типи записів за допомогою стандартних set (не тільки ініціалізації).
+
+```cs
+namespace WorkWithRecords;
+
+record CarRecord2
+{
+    public string Make { get; set; }
+    public string Model { get; set; }
+    public string Color { get; set; }
+    public CarRecord2() { }
+    public CarRecord2(string make, string model, string color)
+    {
+        Make = make;
+        Model = model;
+        Color = color;
+    }
+}
+
+```
+Хоча цей синтаксис підтримується, типи записів призначені для використання в незмінних моделях даних.
+
+## Рівність значень із типами record
+
+У прикладі класу Car два екземпляри Car були створені з однаковими даними. Можна подумати, що ці два класи однакові, оскільки наступний рядок коду перевіряє:
+
+```cs
+    Console.WriteLine($"Cars are the same? {car1.Equals(car2)}");
+```
+Однак вони не рівні. Пам’ятайте, що типи record є спеціальним типом класу, а класи є reference типами. Щоб два типи посилань були рівними, вони мають вказувати на той самий об’єкт у пам’яті. Як подальший тест перевіряеться, чи два об’єкти Car вказують на той самий об’єкт:
+
+```cs
+    Console.WriteLine($"Cars are the same reference? {ReferenceEquals(car1,car2)}");
+```
+Запуск програми дає цей (скорочений) результат:
+
+```
+Cars are the same? False
+Cars are the same reference? False
+```
+Типи записів поводяться інакше. Типи записів неявно замінюють Equals, == та !=, і два типи записів вважаються рівними, якщо вони містять однакові значення та є одним типом, як якщо б екземпляри були типами значень.
+
+```cs
+void ValueEqualityWithRecord()
+{
+    CarRecord carRecord1 = new CarRecord("Honda", "Pilot", "Blue");
+    CarRecord carRecord2 = new CarRecord("Honda", "Pilot", "Blue");
+
+    Console.WriteLine($"CarRecords are the same? {carRecord1.Equals(carRecord2)}");
+    Console.WriteLine($"CarRecords are the same reference? " +
+        $"{ReferenceEquals(carRecord1,carRecord2)}");
+    Console.WriteLine($"CarRecords are the same?{carRecord1 == carRecord2}");
+    Console.WriteLine($"CarRecords are not the same?{carRecord1 != carRecord2}");
+}
+ValueEqualityWithRecord();
+```
+```
+CarRecords are the same? True
+CarRecords are the same reference? False
+CarRecords are the same?True
+CarRecords are not the same?False
+```
+Зверніть увагу, що вони вважаються рівними, навіть якщо змінні вказують на дві різні змінні в пам’яті.
+
+## Копіювання типів записів за допомогою виразів
+
+Для типів record призначення екземпляра новій змінній створює вказівник на те саме посилання, що є такою ж поведінкою як і для класу. Наступний код демонструє це:
+
+```cs
+void CopyingRecordUsingWithExpressions()
+{
+    CarRecord carRecord1 = new CarRecord("Honda", "Pilot", "Blue");
+    CarRecord carRecord2 = carRecord1;
+
+    Console.WriteLine($"CarRecords are the same? {carRecord1.Equals(carRecord2)}");
+    Console.WriteLine($"CarRecords are the same reference? " +
+        $"{ReferenceEquals(carRecord1, carRecord2)}");
+}
+CopyingRecordUsingWithExpressions();
+```
+```
+CarRecords are the same? True
+CarRecords are the same reference? True
+```
+Щоб створити справжню копію запису з однією або декількома зміненими властивостями (що називаються недеструктивною мутацією), ви можете використовувати вирази with. У конструкції with будь-які властивості, які потрібно оновити, вказуються з новими значеннями, а будь-які властивості, яких немає в списку, копіюються неглибоко.
+
+```cs
+    CarRecord carRecord3 = carRecord1 with { Model = "Odyssey" };
+    Console.WriteLine(carRecord3);
+    Console.WriteLine($"CarRecords are the same? {carRecord1.Equals(carRecord3)}");
+    Console.WriteLine($"CarRecords are the same reference? " +
+        $"{ReferenceEquals(carRecord1, carRecord3)}");
+```
+```
+CarRecord { Make = Honda, Model = Odyssey, Color = Blue }
+CarRecords are the same? False
+CarRecords are the same reference? False
+```
+Код створює новий екземпляр типу CarRecord, копіюючи значення Make та Color екземпляра myCarRecord і встановлюючи в Model новий рядок.  Використовуючи вирази with, ви можете легко перенести складні типи записів у нові екземпляри типів записів із оновленими значеннями властивостей.
+
+## Структури запису
+
+Структури запису є еквівалентом типів записів. Структури записів також можуть використовувати позиційні параметри або стандартний синтаксис властивостей і забезпечувати рівність значень, неруйнівну мутацію та вбудоване форматування відображення. Щоб почати експериментувати із записами, створіть нову консольну програму під назвою WorkWithRecordStructs. Однією з головних відмінностей між структурами запису та записами є те, що структура запису є змінюванною(mutable) за замовчуванням. Щоб зробити структуру запису незмінною, ви повинні використовувати модифікатор readonly.
+
+## Змінні структури записів
+
+Щоб створити структуру запису, давайте повернемося до нашої знайомої структури Point. Нижче показано, як створити два різні типи структур запису, один з яких використовує позиційний синтаксис, а інший — стандартні властивості:
+
+```cs
+namespace WorkWithRecordStructs;
+
+public record struct Point(double X,double Y, double Z);
+
+public record struct Point1
+{
+    public double X { get; set; }
+    public double Y { get; set; }
+    public double Z { get; set; }
+
+    public Point1()  
+    {
+    }
+
+    public Point1(double x, double y, double z)
+    {
+        X = x;
+        Y = y;
+        Z = z;
+    }
+}
+```
+Наступний код демонструє мінливість двох типів структур запису, а також покращений метод ToString().
+```
+using WorkWithRecordStructs;
+
+void UsingMutableRecordStruct()
+{
+    Point point1 = new(0, 1, 1);
+    Console.WriteLine(point1);
+    point1.X = 1; 
+    Console.WriteLine(point1);
+
+    Console.WriteLine();
+
+    Point1 point2 = new(0, 2, 2);
+    Console.WriteLine(point2);
+    point2.X = 2;
+    Console.WriteLine(point2);
+
+}
+UsingMutableRecordStruct();
+```
+```
+Point { X = 0, Y = 1, Z = 1 }
+Point { X = 1, Y = 1, Z = 1 }
+
+Point1 { X = 0, Y = 2, Z = 2 }
+Point1 { X = 2, Y = 2, Z = 2 }
+
+```
+
+## Незмінні структури запису
+
+Попередні два приклади структури записів можна зробити незмінними, додавши ключове слово readonly:
+
+```cs
+public readonly record struct Point2(double X, double Y, double Z);
+
+public readonly record struct Point3
+{
+    public double X { get; init; } 
+    public double Y { get; init; }
+    public double Z { get; init; }
+
+    public Point3()
+    {
+    }
+
+    public Point3(double x, double y, double z)
+    {
+        X = x;
+        Y = y;
+        Z = z;
+    }
+}
+```
+Ви можете підтвердити, що вони тепер незмінні (забезпечуються компілятором) за допомогою такого коду:
+
+```cs
+void UsingImmutableRecordStruct()
+{
+    Point2 point1 = new(0, 1, 1);
+    Console.WriteLine(point1);
+    //Compiler Error:
+    //point1.X = 1;
+
+    Console.WriteLine();
+
+    Point3 point2 = new(0, 2, 2);
+    Console.WriteLine(point2);
+    //Compiler Error:
+    //point2.X = 2;
+}
+UsingImmutableRecordStruct();
+```
+```
+Point2 { X = 0, Y = 1, Z = 1 }
+
+Point3 { X = 0, Y = 2, Z = 2 }
+```
+
+## Деконструкція структур запису
+
+Як і типи записів, структури записів, які використовують позиційний синтаксис, також надають метод Deconstruct(). Поведінка така ж, як змінні та незмінні структури записів. Наступний код створює новий запис за допомогою наданого конструктора, а потім деконструює властивості в окремі змінні:
+```cs
+void DeconstructingRecordStructs()
+{
+    Point point1 = new(1, 1, 1);
+    var (x1, y1, z1) = point1;
+    Console.WriteLine($"{x1} {y1} {z1}");
+
+    Point2 point2 = new(2, 2, 2);
+
+    point2.Deconstruct(out double x2, out double y2, out double z2);
+    Console.WriteLine($"{x2} {y2} {z2}");
+}
+DeconstructingRecordStructs();
+```
+```
+1 1 1
+2 2 2
+```
+
+# Підсумки
+
+Метою цієї глави було познайомити вас із роллю типу класу C# і типу запису. Як ви бачили, класи можуть приймати будь-яку кількість конструкторів, які дозволяють користувачеві об’єкта встановити стан об’єкта після створення. У цій главі також проілюстровано кілька методів проектування класів (і відповідні ключові слова). Ключове слово this можна використовувати для отримання доступу до поточного об’єкта. Ключове слово static дозволяє визначати поля та члени, зв’язані на рівні класу (а не об’єкта). Ключове слово const, модифікатор лише для читання та налаштування лише для ініціалізації дозволяють визначити точку даних, яка ніколи не може змінюватися після початкового призначення чи створення об’єкта. Типи записів — це особливий тип класу, який є незмінним (за замовчуванням) і поводиться як типи значень під час порівняння типу запису з іншим екземпляром того самого типу запису. Структури записів — це типи значень, які є змінними (за замовчуванням) і забезпечують такі ж можливості рівності та зміни, як і типи записів.
+Основна частина цього розділу присвячена деталям першої основи ООП: інкапсуляції. Ви дізналися про модифікатори доступу C# та роль властивостей типу, синтаксис ініціалізації об’єкта та часткові класи. З цим позаду ви можете перейти до наступного розділу, де ви навчитеся створювати сімейство пов’язаних класів за допомогою успадкування та поліморфізму.

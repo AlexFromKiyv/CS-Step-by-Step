@@ -13,6 +13,7 @@ class Employee4
     private string _name = null!;
     private float _pay;
     private int _age;
+    private string _SSN = null!;
 
     //Properties
     public int Id { get => _id; set => _id = value; }
@@ -33,21 +34,26 @@ class Employee4
     }
     public float Pay { get => _pay; set => _pay = value; }
     public int Age { get => _age; set => _age = value; }
+    public string SSN => _SSN;
+
 
     //Constructors
-    public Employee4(int id, string name, float pay, int age)
+    public Employee4(int id, string name, float pay, int age, string ssn)
     {
         Id = id;
         Name = name;
         Pay = pay;
         Age = age;
+        // OOPS! This is no longer possible if the property is read only.
+        //SSN = ssn;
+        _SSN = ssn;
     }
 
-    public Employee4(int id, string name, float pay) : this(id,name,pay,default)
+    public Employee4(int id, string name, float pay) : 
+        this(id, name, pay,0,"")
     {}
 
-    public Employee4()
-    {}
+    public Employee4() {}
 
     // Mathods
     public void GiveBonus(float amount)
