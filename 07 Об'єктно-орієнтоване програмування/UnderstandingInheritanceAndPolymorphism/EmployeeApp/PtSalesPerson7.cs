@@ -8,9 +8,10 @@ namespace EmployeeApp;
 
 sealed class PtSalesPerson7 : SalesPerson7
 {
-    //...
-    public override void GiveBonus(float amount)
-    {
-        base.GiveBonus(amount);
-    }
+    //// Compiler error! Can't override this method
+    //// in the PTSalesPerson class, as it was sealed.
+    //public override void GiveBonus(float amount)
+    //{
+    //    base.GiveBonus(amount);
+    //}
 }
