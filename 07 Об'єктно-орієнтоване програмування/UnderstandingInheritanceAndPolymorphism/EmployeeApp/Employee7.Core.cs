@@ -1,6 +1,5 @@
 ﻿namespace EmployeeApp;
-
-partial class Employee7
+abstract partial class Employee7
 {
     // Field data
     protected string name = null!;
