@@ -1,0 +1,52 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35728.132
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleGC", "SimpleGC\SimpleGC.csproj", "{DF8E6277-D3A9-4631-B1DA-A7CD03A7270D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleFinalize", "SimpleFinalize\SimpleFinalize.csproj", "{9963AE6A-BB6A-4DD8-A32B-FC08D10D92A6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleDispose", "SimpleDispose\SimpleDispose.csproj", "{6902957A-0A9A-4A56-95A0-32444C766BFD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinalizableDisposableClass", "FinalizableDisposableClass\FinalizableDisposableClass.csproj", "{E99019A3-DF8E-461A-97CF-A707ED5BBC17}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DisposalPattern", "DisposalPattern\DisposalPattern.csproj", "{B3A2AABA-4BCF-440C-9E28-39C01BB4AF66}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LazyObjectInstantiation", "LazyObjectInstantiation\LazyObjectInstantiation.csproj", "{5E452206-F2FD-4FA0-93DC-4A5189206CCE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DF8E6277-D3A9-4631-B1DA-A7CD03A7270D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF8E6277-D3A9-4631-B1DA-A7CD03A7270D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF8E6277-D3A9-4631-B1DA-A7CD03A7270D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF8E6277-D3A9-4631-B1DA-A7CD03A7270D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9963AE6A-BB6A-4DD8-A32B-FC08D10D92A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9963AE6A-BB6A-4DD8-A32B-FC08D10D92A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9963AE6A-BB6A-4DD8-A32B-FC08D10D92A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9963AE6A-BB6A-4DD8-A32B-FC08D10D92A6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6902957A-0A9A-4A56-95A0-32444C766BFD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6902957A-0A9A-4A56-95A0-32444C766BFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6902957A-0A9A-4A56-95A0-32444C766BFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6902957A-0A9A-4A56-95A0-32444C766BFD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E99019A3-DF8E-461A-97CF-A707ED5BBC17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E99019A3-DF8E-461A-97CF-A707ED5BBC17}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E99019A3-DF8E-461A-97CF-A707ED5BBC17}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E99019A3-DF8E-461A-97CF-A707ED5BBC17}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B3A2AABA-4BCF-440C-9E28-39C01BB4AF66}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3A2AABA-4BCF-440C-9E28-39C01BB4AF66}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3A2AABA-4BCF-440C-9E28-39C01BB4AF66}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3A2AABA-4BCF-440C-9E28-39C01BB4AF66}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5E452206-F2FD-4FA0-93DC-4A5189206CCE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E452206-F2FD-4FA0-93DC-4A5189206CCE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E452206-F2FD-4FA0-93DC-4A5189206CCE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E452206-F2FD-4FA0-93DC-4A5189206CCE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
