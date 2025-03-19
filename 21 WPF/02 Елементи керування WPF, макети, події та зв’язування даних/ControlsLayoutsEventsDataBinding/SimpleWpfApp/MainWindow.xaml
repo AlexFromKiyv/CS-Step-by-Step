@@ -1,0 +1,29 @@
+﻿<Window x:Class="SimpleWpfApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SimpleWpfApp"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="285" Width="325">
+
+    <!-- Error! Two direct child elements of the <Window>! -->
+    <!--
+    <Label x:Name="lblInstruction" Height="27" Width="328" Content="Enter Information" /> 
+    -->
+    <!--This button is in the center of the window at all times-->
+    <!--
+    <Button x:Name="btnOk"  Height="100" Width="80" Content="Ok"/>-->
+    <Canvas>
+        <Button x:Name="btnCanvas" Content="Canvas" Canvas.Left="23" Canvas.Top="19" Click="btnCanvas_Click"/>
+        <Button x:Name="btnWrapPanel" Content="WrapPanel" Canvas.Left="25" Canvas.Top="56" Click="btnWrapPanel_Click"/>
+        <Button x:Name="btnStackPanel" Content="StackPanel" Canvas.Left="26" Canvas.Top="90" Click="btnStackPanel_Click" />
+        <Button x:Name="btnGrid" Content="Grid" Canvas.Left="26" Canvas.Top="125" HorizontalAlignment="Center" VerticalAlignment="Top" Click="btnGrid_Click"/>
+        <Button x:Name="btnGridSplitter" Content="GridSplitter" Canvas.Left="26" Canvas.Top="164" Click="btnGridSplitter_Click"/>
+        <Button x:Name="btnDockPanel" Content="DockPanel" Canvas.Left="26" Canvas.Top="199" HorizontalAlignment="Center" VerticalAlignment="Top" Click="btnDockPanel_Click"/>
+        <Button x:Name="btnScrollViewer"  Content="ScrollViewer" Canvas.Left="123" Canvas.Top="19" Click="btnScrollViewer_Click"/>
+
+    </Canvas>
+
+
+</Window>
