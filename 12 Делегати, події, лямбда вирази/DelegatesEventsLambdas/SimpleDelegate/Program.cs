@@ -1,7 +1,7 @@
 ﻿
 using SimpleDelegate;
 
-void UsingDelegate()
+static void UsingDelegate()
 {
     // Create a BinaryOp delegate object that
     // 'points to' SimpleMath.Add().
@@ -14,7 +14,29 @@ void UsingDelegate()
     // Compile Error
     //BinaryOp sQ = new BinaryOp(SimpleMath.SquareNumber);
 }
-UsingDelegate();
+//UsingDelegate();
+
+static void DisplayDelegateInfo(Delegate delObj)
+{
+    // Print the names of each member in the
+    // delegate's invocation list.
+    foreach (Delegate @delegate in delObj.GetInvocationList())
+    {
+        Console.WriteLine($"Method Name: {@delegate.Method}");
+        Console.WriteLine($"Type Name: {@delegate.Target}");
+    }
+}
+static void InvestigatingADelegateObject()
+{
+    BinaryOp bOp = new(SimpleMath.Add);
+    DisplayDelegateInfo(bOp);
+
+    SimpleMath simpleMath = new();
+    BinaryOp bop1 = new(simpleMath.otherAdd);
+    DisplayDelegateInfo(bop1);
+}
+InvestigatingADelegateObject();
+
 
 
 // Additional type definitions must be placed at the end of the
@@ -23,3 +45,4 @@ UsingDelegate();
 // This delegate can point to any method,
 // taking two integers and returning an integer.
 public delegate int BinaryOp(int x, int y);
+
