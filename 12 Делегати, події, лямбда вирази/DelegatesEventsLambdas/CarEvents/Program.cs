@@ -1,7 +1,6 @@
 ﻿
 using CarEvents;
-using System;
-using System.Diagnostics.Tracing;
+
 
 //Methods
 static void CarAboutToBlow(string message)
@@ -71,6 +70,8 @@ static void UsingCarEventArgs()
 }
 //UsingCarEventArgs();
 
+
+
 static void Car1_AboutToBlow(object sender, CarEventArgs eventArgs)
 {
     // Just to be safe, perform a
@@ -102,7 +103,7 @@ static void UsingEventHandler()
         car.Accelerate(20);
     }
 }
-UsingEventHandler();
+//UsingEventHandler();
 
 static void Car2_AboutToBlow(object? sender, CarEventArgs e)
 {
@@ -118,3 +119,20 @@ static void Car2_Exploded(object? sender, CarEventArgs e)
         Console.WriteLine(e.message.ToUpper());
     }
 }
+
+static void UsingLambda()
+{
+    Car2 car = new("SlugBug", 100, 10);
+
+    car.AboutToBlow += (_,e) => Console.WriteLine(e.message);
+
+    car.Exploded += (sender,e)=> 
+    Console.WriteLine($"{e.message.ToUpper()}\t{((Car2)sender!)?.CurrentSpeed}");
+
+    Console.WriteLine("***** Speeding up *****");
+    for (int i = 0; i < 6; i++)
+    {
+        car.Accelerate(20);
+    }
+}
+UsingLambda();
