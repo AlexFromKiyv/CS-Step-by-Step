@@ -34,21 +34,10 @@ static void AccessingLocalVariables()
 
     Car car = new("SlugBug", 100, 10);
 
-    car.AboutToBlow += delegate
-    {
-        //aboutToBlowCounter++;
-        Console.WriteLine("Eek! Going too fast!");
-    };
-
     car.AboutToBlow += delegate (object sender, CarEventArgs e)
     {
         aboutToBlowCounter++;
         Console.WriteLine($"Message from Car{e.message}");
-    }!;
-
-    car.Exploded += delegate (object sender, CarEventArgs e)
-    {
-        Console.WriteLine(e.message.ToUpper());
     }!;
 
     Console.WriteLine("***** Speeding up *****");
@@ -57,7 +46,7 @@ static void AccessingLocalVariables()
         car.Accelerate(20);
     }
 
-    Console.WriteLine($"AboutToBlow event was fired {aboutToBlowCounter} times.");
+    Console.WriteLine($"\nAboutToBlow event was fired {aboutToBlowCounter} times.");
 }
 //AccessingLocalVariables();
 
@@ -94,4 +83,4 @@ static void UsingStatic()
 //UsingStatic();
 
 Func<int, int> constant = delegate (int _) { return 42; };
-Console.WriteLine(constant(4));
+//Console.WriteLine(constant(4));

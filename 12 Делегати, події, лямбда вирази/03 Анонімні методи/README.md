@@ -135,8 +135,10 @@ SORRY, THIS CAR IS DEAD...
 
 ```cs
 SomeType t = new SomeType();
+
 t.SomeEvent += delegate (optionallySpecifiedDelegateArgs)
 { /* statements */ };
+
 ```
 Під час обробки першої події AboutToBlow у попередньому зразку коду зауважте, що ви не вказуєте аргументи, передані делегатом. Строго кажучи, вам не потрібно отримувати вхідні аргументи, надіслані певною подією. Однак, якщо ви хочете використовувати можливі вхідні аргументи, вам потрібно буде вказати параметри, прототиповані типом делегату (як показано у другій обробці подій AboutToBlow і Exploded). Ось приклад:
 
@@ -165,21 +167,10 @@ static void AccessingLocalVariables()
 
     Car car = new("SlugBug", 100, 10);
 
-    car.AboutToBlow += delegate
-    {
-        aboutToBlowCounter++;
-        Console.WriteLine("Eek! Going too fast!");
-    };
-
     car.AboutToBlow += delegate (object sender, CarEventArgs e)
     {
         aboutToBlowCounter++;
         Console.WriteLine($"Message from Car{e.message}");
-    }!;
-
-    car.Exploded += delegate (object sender, CarEventArgs e)
-    {
-        Console.WriteLine(e.message.ToUpper());
     }!;
 
     Console.WriteLine("***** Speeding up *****");
@@ -188,9 +179,10 @@ static void AccessingLocalVariables()
         car.Accelerate(20);
     }
 
-    Console.WriteLine($"AboutToBlow event was fired {aboutToBlowCounter} times.");
+    Console.WriteLine($"\nAboutToBlow event was fired {aboutToBlowCounter} times.");
 }
 AccessingLocalVariables();
+
 ```
 ```
 ***** Speeding up *****
@@ -198,18 +190,16 @@ CurrentSpeed = 30
 CurrentSpeed = 50
 CurrentSpeed = 70
 CurrentSpeed = 90
-Eek! Going too fast!
 Message from CarCareful buddy! Gonna blow!
-Eek! Going too fast!
 Message from CarCareful buddy! Gonna blow!
-SORRY, THIS CAR IS DEAD...
-AboutToBlow event was fired 4 times.
+
+AboutToBlow event was fired 2 times.
 ```
-Після запуску цього оновленого коду ви побачите остаточний звіт Console.WriteLine() про те, що подія AboutToBlow була викликана двічі. Зрозуміло що можна виправити ситуацію залишивши інкремент тільки в одному обробнику.
+Після запуску цього оновленого коду ви побачите остаточний звіт Console.WriteLine() про те, що подія AboutToBlow була викликана двічі. 
 
 ## Використання static з анонімними методами
 
-Попередній приклад продемонстрував анонімні методи, які взаємодіють зі змінними, оголошеними поза межами самого методу. Хоча це може бути те, що потрібно, це порушує інкапсуляцію та може викликати небажані побічні ефекти у вашій програмі. Хоча це може бути те, що ви збираєтеся, це порушує інкапсуляцію та може викликати небажані побічні ефекти у вашій програмі. Згадайте, що локальні функції можна ізолювати від коду, що містить, встановивши їх як статичні, як у наступному прикладі:
+Попередній приклад продемонстрував анонімні методи, які взаємодіють зі змінними, оголошеними поза межами самого методу. Хоча це може бути те, що потрібно, це порушує інкапсуляцію та може викликати небажані побічні ефекти у вашій програмі. Згадайте, що локальні функції можна ізолювати від коду, що містить, встановивши їх як статичні, як у наступному прикладі:
 
 ```cs
 static int AddWrapperWithStatic(int x, int y)

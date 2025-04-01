@@ -109,7 +109,7 @@ static void Car2_AboutToBlow(object? sender, CarEventArgs e)
 {
     if (sender is Car2 car)
     {
-        Console.WriteLine($"Critical Message from {car.PetName} :{e.message}");
+        Console.WriteLine($"Critical Message from {car.PetName} : {e.message}");
     }
 }
 static void Car2_Exploded(object? sender, CarEventArgs e)
@@ -135,4 +135,4 @@ static void UsingLambda()
         car.Accelerate(20);
     }
 }
-UsingLambda();
+//UsingLambda();

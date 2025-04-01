@@ -42,7 +42,7 @@ static void LambdaExpressionSyntax()
     List<int> ints = [20, 1, 4, 8, 9, 44];
 
     // Now, use a C# lambda expression.
-    List<int> evenNumbers = ints.FindAll(i => (i % 2) == 0);
+    List<int> evenNumbers = ints.FindAll( i => (i % 2) == 0 );
 
     foreach (var number in evenNumbers)
     {
@@ -113,11 +113,9 @@ void OtherLambdа()
         return true;
     };
 
-    DoWork(3,3);
+    Console.WriteLine(DoWork(3,3));
     Console.WriteLine($"Outer variable now = {outerVariable}");
 }
 //OtherLambdа();
-
-
 
 public delegate string VerySimpleDelegate();

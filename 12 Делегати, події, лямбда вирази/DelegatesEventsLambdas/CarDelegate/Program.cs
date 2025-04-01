@@ -51,4 +51,4 @@ static void DelegatesAsEventEnablers1()
         car.Accelerate(20);
     }
 }
-DelegatesAsEventEnablers1();
+//DelegatesAsEventEnablers1();

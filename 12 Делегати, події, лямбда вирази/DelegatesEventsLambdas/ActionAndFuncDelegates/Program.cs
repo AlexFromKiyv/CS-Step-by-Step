@@ -33,9 +33,9 @@ static void UsingActionDelegate()
 static void UsingFuncDelegate()
 {
     Func<int, int, int> funcSumInt = Add;
-    Console.WriteLine(funcSumInt(1,1));
+    Console.WriteLine( funcSumInt(1, 1) );
 
     Func<int, int, string> funcSumString = SumToString;
-    Console.WriteLine(funcSumString(1, 2) is String);
+    Console.WriteLine( funcSumString(1, 2) is String);
 }
 UsingFuncDelegate();
