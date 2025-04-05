@@ -1,0 +1,51 @@
+﻿<Window x:Class="WpfControlsAndAPIs.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WpfControlsAndAPIs"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <TabControl Name='MyTabControl' HorizontalAlignment='Stretch' VerticalAlignment='Stretch'>
+            <TabItem Header="Ink API">
+                <StackPanel Background='#FFE5E5E5'>
+                    <ToolBar Name='InkToolBar' Height='60'>
+                        <Border Margin='0,2,0,2.4' Width='280' VerticalAlignment='Center'>
+                            <WrapPanel>
+                                <RadioButton x:Name='inkRadio' Margin='5,10' Content='Ink Mode!' IsChecked='True' />
+                                <RadioButton x:Name='eraseRadio' Margin='5,10' Content='Erase Mode!' />
+                                <RadioButton x:Name='selectRadio' Margin='5,10' Content='Select Mode!' />
+                            </WrapPanel>
+                        </Border>
+                        <Separator/>
+                        <ComboBox x:Name='comboColors' Width='175' Margin='10,0,0,0'>
+                            <ComboBoxItem Content='Red'/>
+                            <ComboBoxItem Content='Green'/>
+                            <ComboBoxItem Content='Blue'/>
+                        </ComboBox>
+                        <Separator/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width='Auto'/>
+                                <ColumnDefinition Width='Auto'/>
+                                <ColumnDefinition Width='Auto'/>
+                            </Grid.ColumnDefinitions>
+                            <Button Grid.Column='0' x:Name='btnSave' Margin='10,10' Width='70' Content='Save Data'/>
+                            <Button Grid.Column='1' x:Name='btnLoad' Margin='10,10' Width='70' Content='Load Data'/>
+                            <Button Grid.Column='2' x:Name='btnClear' Margin='10,10' Width='70' Content='Clear'/>
+                        </Grid>
+                    </ToolBar>
+                    <InkCanvas x:Name='MyInkCanvas' Background='#FFB6F4F1' />
+                </StackPanel>
+            </TabItem>
+            <TabItem Header="Data Binding">
+                <Grid Background="#FFE5E5E5"/>
+            </TabItem>
+            <TabItem HorizontalAlignment="Center" Height="20" Header="DataGrid" VerticalAlignment="Top" Width="70" Margin="0,-1,0,0">
+                <Grid Background="#FFE5E5E5"/>
+            </TabItem>
+        </TabControl>
+
+    </Grid>
+</Window>

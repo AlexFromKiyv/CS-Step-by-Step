@@ -9,14 +9,25 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
-         <!--A button with custom content--><!-- 
-        <Button XamlSpecificStuff:Name="button1" Height='100' Width='100'>
+         <!--A button with custom content--> 
+        <!--<Button XamlSpecificStuff:Name="button1" Height='100' Width='100'>
             <Ellipse Fill='Green' Height='50' Width='50'/>
         </Button>-->
 
-        <!-- Configure the look and feel of a Button --><!--
-        <Button Height="50" Width="100" Content="OK!"
+        <!-- Configure the look and feel of a Button -->
+        <!--<Button Height="50" Width="100" Content="OK!"
             FontSize="20" Background="Green" Foreground="Yellow"/>-->
+
+        <!--<Canvas Height='200' Width='200' Background='LightBlue'>
+            <Ellipse Canvas.Top='40' Canvas.Left='40' Height='20' Width='20' Fill='DarkBlue'/>
+        </Canvas>-->
+
+        <!-- Error! Set Background property on Canvas via attached property? -->
+        <!--<Canvas Height='200' Width='200'>
+            <Ellipse Canvas.Background='LightBlue'
+           Canvas.Top='40' Canvas.Left='90'
+           Height='20' Width='20' Fill='DarkBlue'/>
+        </Canvas>-->
 
         <!--<Button Height='50' Width='100' Content='OK!'
         FontSize='20' Foreground='Yellow'>
@@ -27,17 +38,20 @@
                 </LinearGradientBrush>
             </Button.Background>
         </Button>-->
+        
+        
+        
 
         <StackPanel>
-            <!-- The Static markup extension lets us obtain a value
-         from a static member of a class -->
+             <!--The Static markup extension lets us obtain a value
+         from a static member of a class--> 
             <Label Content ="{x:Static CorLib:Environment.OSVersion}"/>
             <Label Content ="{x:Static CorLib:Environment.ProcessorCount}"/>
-            <!-- The Type markup extension is a XAML version of
-         the C# typeof operator -->
+             <!--The Type markup extension is a XAML version of
+         the C# typeof operator--> 
             <Label Content ="{x:Type Button}" />
             <Label Content ="{x:Type CorLib:Boolean}" />
-            <!-- Fill a ListBox with an array of strings! -->
+             <!--Fill a ListBox with an array of strings!--> 
             <ListBox Width='200' Height='50'>
                 <ListBox.ItemsSource>
                     <x:Array Type="CorLib:String">

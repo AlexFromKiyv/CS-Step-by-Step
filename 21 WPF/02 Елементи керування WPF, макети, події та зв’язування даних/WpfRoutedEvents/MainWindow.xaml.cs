@@ -16,23 +16,30 @@ namespace WpfRoutedEvents;
 /// </summary>
 public partial class MainWindow : Window
 {
+    string _mouseActivity = string.Empty;
     public MainWindow()
     {
         InitializeComponent();
     }
-
     private void BtnClickMe_Clicked(object sender, RoutedEventArgs e)
     {
-        MessageBox.Show("Clicked the button");
+        AddEventInfo(sender, e);
+        MessageBox.Show(_mouseActivity, "Your Event Info");
+        // Clear string for next round.
+        _mouseActivity = string.Empty;
     }
-
     private void outerEllipse_MouseDown(object sender, MouseButtonEventArgs e)
     {
-
+        AddEventInfo(sender, e);
     }
-
     private void outerEllipse_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
+        AddEventInfo(sender, e);
+    }
+    private void AddEventInfo(object sender, RoutedEventArgs e)
+    {
+        _mouseActivity += string.Format(
+            $"{sender} sent a {e.RoutedEvent.RoutingStrategy} event named {e.RoutedEvent.Name}\n");
 
     }
 }
