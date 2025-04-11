@@ -1,9 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35919.96 d17.13
+VisualStudioVersion = 17.13.35919.96
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfControlsAndAPIs", "WpfControlsAndAPIs\WpfControlsAndAPIs.csproj", "{61EDF260-2425-4EF8-8637-34D2985B43B1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoLot.Dal", "..\..\..\20 Entity Framework Core\03 Створення Data Access Layer з EF Core\AutoLotSolution\AutoLot.Dal\AutoLot.Dal.csproj", "{F61780C2-E8B1-0EE9-49E1-5A2907352855}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoLot.Models", "..\..\..\20 Entity Framework Core\03 Створення Data Access Layer з EF Core\AutoLotSolution\AutoLot.Models\AutoLot.Models.csproj", "{D33D80E8-7379-9823-DE7F-F0C9B3F8206B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{61EDF260-2425-4EF8-8637-34D2985B43B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{61EDF260-2425-4EF8-8637-34D2985B43B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{61EDF260-2425-4EF8-8637-34D2985B43B1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F61780C2-E8B1-0EE9-49E1-5A2907352855}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F61780C2-E8B1-0EE9-49E1-5A2907352855}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F61780C2-E8B1-0EE9-49E1-5A2907352855}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F61780C2-E8B1-0EE9-49E1-5A2907352855}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D33D80E8-7379-9823-DE7F-F0C9B3F8206B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D33D80E8-7379-9823-DE7F-F0C9B3F8206B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D33D80E8-7379-9823-DE7F-F0C9B3F8206B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D33D80E8-7379-9823-DE7F-F0C9B3F8206B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

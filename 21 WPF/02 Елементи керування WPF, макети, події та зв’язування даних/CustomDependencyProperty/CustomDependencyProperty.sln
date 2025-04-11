@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35919.96 d17.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomDependencyProperty", "CustomDependencyProperty\CustomDependencyProperty.csproj", "{46A649DF-8466-446C-BBC4-00FD6EE5472C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{46A649DF-8466-446C-BBC4-00FD6EE5472C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{46A649DF-8466-446C-BBC4-00FD6EE5472C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{46A649DF-8466-446C-BBC4-00FD6EE5472C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{46A649DF-8466-446C-BBC4-00FD6EE5472C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E3B426E4-DB19-4CC6-8F29-E7CC077B5A7C}
+	EndGlobalSection
+EndGlobal
