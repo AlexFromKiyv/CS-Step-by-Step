@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35931.197
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ObjectResourcesApp", "ObjectResourcesApp\ObjectResourcesApp.csproj", "{471D5F7A-39A5-46A6-8F2C-D38B2335079E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyBrushesLibrary", "MyBrushesLibrary\MyBrushesLibrary.csproj", "{1130B740-9112-40FF-AF88-0945A5458D8D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{471D5F7A-39A5-46A6-8F2C-D38B2335079E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{471D5F7A-39A5-46A6-8F2C-D38B2335079E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{471D5F7A-39A5-46A6-8F2C-D38B2335079E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{471D5F7A-39A5-46A6-8F2C-D38B2335079E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1130B740-9112-40FF-AF88-0945A5458D8D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1130B740-9112-40FF-AF88-0945A5458D8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1130B740-9112-40FF-AF88-0945A5458D8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1130B740-9112-40FF-AF88-0945A5458D8D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D48070DC-2006-4C11-8610-011627B05FBA}
+	EndGlobalSection
+EndGlobal
