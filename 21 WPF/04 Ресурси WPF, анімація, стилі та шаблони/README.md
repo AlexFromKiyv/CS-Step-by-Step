@@ -826,3 +826,377 @@ dblAnim.RepeatBehavior=new RepeatBehavior(TimeSpan.FromSeconds(30));
         }
 ```
 
+## Логічні дерева, візуальні дерева та шаблони за замовчуванням
+
+Тепер, коли ви розумієте стилі та ресурси, є ще кілька підготовчих тем для вивчення, перш ніж почати вчитися створювати спеціальні елементи керування. Зокрема, вам потрібно навчитися відрізняти логічне дерево, візуальне дерево та шаблон за замовчуванням. Коли ви вводите XAML ваша розмітка є логічним виглядом документа XAML. Крім того, якщо ви створюєте код C#, який додає нові елементи до елемента керування макетом, ви вставляєте нові елементи в логічне дерево. По суті, логічне подання представляє, як ваш вміст буде розміщено в різних менеджерах макета для головного вікна (або іншого кореневого елемента, такого як Page або NavigationWindow).
+Однак за кожним логічним деревом стоїть набагато більш докладне представлення, яке називається візуальним деревом, яке використовується внутрішньо WPF для правильного відображення елементів на екрані.У будь-якому візуальному дереві буде повна інформація про шаблони та стилі, які використовуються для відтворення кожного об’єкта, включаючи будь-які необхідні малюнки, фігури, візуальні елементи та анімацію.
+Корисно розуміти різницю між логічним і візуальним деревами, тому що, коли ви створюєте власний шаблон елемента керування, ви по суті замінюєте все або частину типового візуального дерева елемента керування та вставляєте власне. Таким чином, якщо ви бажаєте, щоб елемент керування Button відображався у вигляді зірки, ви можете визначити новий шаблон зірки та підключити його до візуального дерева кнопки. Логічно Button все ще має тип Button і підтримує властивості, методи та події, як очікувалося. Але візуально він набув зовсім іншого вигляду.Цей факт сам по собі робить WPF надзвичайно корисним API, враховуючи, що інші набори інструментів вимагатимуть створення нового класу для створення кнопки у формі зірки. З WPF вам просто потрібно визначити нову розмітку.
+
+    Елементи керування WPF часто описують як безвиглядні. Це стосується того факту, що зовнішній вигляд елемента керування WPF повністю не залежить (та настроюється) від його поведінки. 
+
+## Програмна перевірка логічного дерева
+
+Хоча аналіз логічного дерева вікна під час виконання не є надзвичайно поширеною діяльністю програмування WPF, варто згадати, що простір імен System.Windows визначає клас під назвою LogicalTreeHelper, який дозволяє вам перевіряти структуру логічного дерева під час виконання.
+Щоб проілюструвати зв’язок між логічними деревами, візуальними деревами та шаблонами керування, створіть нову програму WPF під назвою TreesAndTemplatesApp.
+Замініть Grid такою розміткою, яка містить два елементи керування Button і велике текстове поле лише для читання з увімкненими смугами прокрутки. 
+Переконайтеся, що ви використовуєте IDE для обробки події Click кожної кнопки. Наступний XAML добре підійде:
+
+```xml
+    <DockPanel LastChildFill="True">
+        <Border Height="50" DockPanel.Dock="Top" BorderBrush="Blue">
+            <StackPanel Orientation="Horizontal">
+                <Button x:Name="btnShowLogicalTree" Content="Logical Tree of Window"
+            Margin="4" BorderBrush="Blue" Height="40" Click="btnShowLogicalTree_Click"/>
+                <Button x:Name="btnShowVisualTree" Content="Visual Tree of Window"
+            BorderBrush="Blue" Height="40" Click="btnShowVisualTree_Click"/>
+            </StackPanel>
+        </Border>
+        <TextBox x:Name="txtDisplayArea" Margin="10" Background="AliceBlue" IsReadOnly="True"
+         BorderBrush="Red" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" />
+    </DockPanel>
+```
+
+У файлі коду C# визначте рядкову змінну-член під назвою _dataToShow. Тепер у обробнику Click для об’єкта btnShowLogicalTree викличте допоміжну функцію, яка викликає сама себе рекурсивно, щоб заповнити рядкову змінну логічним деревом вікна. Для цього викличете статичний метод GetChildren() LogicalTreeHelper. Ось код:
+
+```cs
+        private void btnShowLogicalTree_Click(object sender, RoutedEventArgs e)
+        {
+            _dataToShow = "";
+            BuildLogicalTree(0, this);
+            txtDisplayArea.Text = _dataToShow;
+        }
+
+        void BuildLogicalTree(int depth, object obj)
+        {
+            // Add the type name to the dataToShow member variable.
+            _dataToShow += new string(' ', depth) + obj.GetType().Name + "\n";
+            // If an item is not a DependencyObject, skip it.
+            if (!(obj is DependencyObject))
+                return;
+            // Make a recursive call for each logical child.
+            foreach (var child in LogicalTreeHelper.GetChildren((DependencyObject)obj))
+            {
+                BuildLogicalTree(depth + 5, child);
+            }
+        }
+```
+
+Якщо ви запустите свою програму та натиснете цю першу кнопку, ви побачите надрукований дерево в текстовій області, який є майже точною копією оригінального XAML
+
+## Програмна перевірка візуального дерева
+
+Візуальне дерево Window також можна перевірити під час виконання за допомогою класу VisualTreeHelper System.Windows.Media. Ось реалізація Click другого елемента керування Button (btnShowVisualTree), який виконує аналогічну рекурсивну логіку для створення текстового представлення візуального дерева:
+
+```cs
+        private void btnShowVisualTree_Click(object sender, RoutedEventArgs e)
+        {
+            _dataToShow = "";
+            BuildVisualTree(0, this);
+            txtDisplayArea.Text = _dataToShow;
+        }
+
+        void BuildVisualTree(int depth, DependencyObject obj)
+        {
+            // Add the type name to the dataToShow member variable.
+            _dataToShow += new string(' ', depth) + obj.GetType().Name + "\n";
+            // Make a recursive call for each visual child.
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(obj); i++)
+            {
+                BuildVisualTree(depth + 1, VisualTreeHelper.GetChild(obj, i));
+            }
+        }
+
+```
+Як ви можете бачити, візуальне дерево надає кілька агентів візуалізації нижчого рівня, таких як ContentPresenter, AdornerDecorator, TextBoxLineDrawingVisual і так далі.
+
+## Програмна перевірка шаблону за замовчуванням елемента керування
+
+Нагадаємо, що WPF використовує візуальне дерево для розуміння того, як відображати вікно та всі його елементи. Кожен елемент керування WPF зберігає власний набір команд рендерингу в шаблоні за замовчуванням. Програмно кажучи, будь-який шаблон можна представити як екземпляр класу ControlTemplate. Також ви можете отримати шаблон елемента керування за замовчуванням, використовуючи властивість Template з влучною назвою, ось так:
+
+```cs
+// Get the default template of the Button.
+Button myBtn=new Button();
+ControlTemplate template=myBtn.Template;
+```
+Аналогічно, ви можете створити новий об'єкт ControlTemplate у коді та підставити його до властивості Template елемента керування наступним чином:
+
+```cs
+// Plug in a new template for the button to use.
+Button myBtn=new Button();
+ControlTemplate customTemplate=new ControlTemplate();
+// Assume this method adds all the code for a star template.
+MakeStarTemplate(customTemplate);
+myBtn.Template=customTemplate;
+```
+
+Хоча ви можете створити новий шаблон у коді, набагато частіше це роблять у XAML. Однак, перш ніж ви почнете створювати власні шаблони, давайте завершимо поточний приклад і додамо можливість перегляду шаблону за замовчуванням елемента керування WPF під час виконання. Це може бути корисним способом переглянути загальний склад шаблону.
+Оновіть розмітку вашого вікна новим елементом керування StackPanel, закріпленим ліворуч від головного елемента DockPanel, визначеного ось так (розміщеного безпосередньо перед елементом TextBox):
+
+```cs
+        <Border DockPanel.Dock="Left" Margin="10" BorderBrush="DarkGreen"
+                BorderThickness="4" Width="358">
+            <StackPanel>
+                <Label Content="Enter Full Name of WPF Control" Width="340" FontWeight="DemiBold" />
+                <TextBox x:Name="txtFullName" Width="340" BorderBrush="Green"
+                         Background="BlanchedAlmond" Height="22"
+                         Text="System.Windows.Controls.TextBox" />
+                <Button x:Name="btnTemplate" Content="See Template" BorderBrush="Green"
+                        Height="40" Width="100" Margin="5"
+                        Click="btnTemplate_Click" HorizontalAlignment="Left" />
+                <Border BorderBrush="DarkGreen" BorderThickness="2" Height="260"
+                        Width="301" Margin="10" Background="LightGreen" >
+                    <StackPanel x:Name="stackTemplatePanel" />
+                </Border>
+            </StackPanel>
+        </Border>
+```
+У верхньому лівому текстовому полі можна ввести повне ім'я елемента керування WPF, розташованого у збірці PresentationFramework.dll. Після завантаження бібліотеки ви динамічно створите екземпляр об'єкта та відобразите його у великому квадраті внизу ліворуч. Зрештою, шаблон елемента керування за замовчуванням буде відображено в правому текстовому полі. Спочатку додайте нову змінну-член до вашого класу C# типу Control, ось так:
+
+```cs
+        private Control? _ctrlToExamine = null;
+```
+Ось решта коду, для якого вам потрібно буде імпортувати простори імен System.Reflection, System.Xml та System.Windows.Markup:
+
+```cs
+        private void btnTemplate_Click(object sender, RoutedEventArgs e)
+        {
+            _dataToShow = "";
+            ShowTemplate();
+            txtDisplayArea.Text = _dataToShow;
+        }
+
+        private void ShowTemplate()
+        {
+            // Remove the control that is currently in the preview area.
+            if (_ctrlToExamine != null)
+                stackTemplatePanel.Children.Remove(_ctrlToExamine);
+            try
+            {
+                // Load PresentationFramework, and create an instance of the
+                // specified control. Give it a size for display purposes, then add to the
+                // empty StackPanel.
+                Assembly asm = Assembly.Load("PresentationFramework, Version=4.0.0.0," +
+                  "Culture=neutral, PublicKeyToken=31bf3856ad364e35");
+                _ctrlToExamine = (Control)asm.CreateInstance(txtFullName.Text);
+                _ctrlToExamine.Height = 200;
+                _ctrlToExamine.Width = 200;
+                _ctrlToExamine.Margin = new Thickness(5);
+                stackTemplatePanel.Children.Add(_ctrlToExamine);
+                // Define some XML settings to preserve indentation.
+                var xmlSettings = new XmlWriterSettings { Indent = true };
+                // Create a StringBuilder to hold the XAML.
+                var strBuilder = new StringBuilder();
+                // Create an XmlWriter based on our settings.
+                var xWriter = XmlWriter.Create(strBuilder, xmlSettings);
+                // Now save the XAML into the XmlWriter object based on the ControlTemplate.
+                XamlWriter.Save(_ctrlToExamine.Template, xWriter);
+                // Display XAML in the text box.
+                _dataToShow = strBuilder.ToString();
+            }
+            catch (Exception ex)
+            {
+                _dataToShow = ex.Message;
+            }
+        }
+```
+Основна частина роботи полягає лише в налаштуванні скомпільованого ресурсу BAML для його відображення в рядок XAML. В вікні вводу можна ввести System.Windows.Controls.DatePicker і подивитись шаблон за замовчуванням.
+Ви маєте краще розуміти, як працюють разом логічні дерева, візуальні дерева та шаблони елементів керування за замовчуванням. Тепер ви можете присвятити решту цього розділу вивченню того, як створювати власні шаблони та елементи керування користувача.
+
+## Створення шаблону елемента керування за допомогою фреймворку тригерів
+
+Коли ви створюєте власний шаблон для елемента керування, ви можете зробити це лише за допомогою коду C#. Використовуючи цей підхід, ви додасте дані до об'єкта ControlTemplate, а потім призначите їх властивості Template елемента керування. Однак, здебільшого ви визначатимете зовнішній вигляд та функціональність ControlTemplate за допомогою XAML та додаватимете фрагменти коду (або, можливо, досить багато коду) для керування поведінкою під час виконання.
+У решті цього розділу ви розглянете, як створювати власні шаблони за допомогою Visual Studio. По дорозі ви дізнаєтеся про фреймворк тригерів WPF та Visual State Manager (VSM), а також побачите, як використовувати анімацію для додавання візуальних підказок для кінцевого користувача. Використання лише Visual Studio для створення складних шаблонів може передбачати значний обсяг набору тексту та певну важку роботу. Звичайно, шаблони виробничого рівня виграють від використання Blend для Visual Studio, (тепер) безкоштовного супутнього застосунку, що встановлюється разом із Visual Studio.
+Для початку створіть нову WPF-застосунок з назвою ButtonTemplate. Для цього проєкту вас більше цікавить механіка створення та використання шаблонів, тому замініть Grid наступною розміткою:
+
+```cs
+        <StackPanel Orientation="Horizontal">
+            <Button x:Name="myButton" Width="100" Height="100" Click="myButton_Click"/>
+        </StackPanel>
+```
+
+В обробнику події Click просто відобразіть вікно повідомлення (через MessageBox.Show()), щоб показати повідомлення, яке підтверджує клацання елемента керування.Пам’ятайте, що під час створення власних шаблонів поведінка елемента керування залишається незмінною, але зовнішній вигляд може відрізнятися. Наразі ця кнопка (Button) відтворюється з використанням шаблону за замовчуванням, який, як показано в попередньому прикладі, є ресурсом BAML у заданій збірці WPF. Коли ви хочете визначити власний шаблон, ви фактично замінюєте це візуальне дерево за замовчуванням власним творінням.
+Для початку оновіть визначення елемента <Button>, щоб указати новий шаблон за допомогою синтаксису property-element. Цей шаблон надасть елементу керування круглого вигляду.
+
+```xml
+            <Button x:Name="myButton" Width="100" Height="100" Click="myButton_Click">
+                <Button.Template>
+                    <ControlTemplate>
+                        <Grid x:Name="controlLayout">
+                            <Ellipse x:Name="buttonSurface" Fill="LightBlue"/>
+                            <Label x:Name="buttonCaption"
+        VerticalAlignment="Center"
+        HorizontalAlignment="Center"
+        FontWeight="Bold" FontSize="20" Content="OK!"/>
+                        </Grid>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
+
+```
+Тут ви визначили шаблон, який складається з іменованого елемента керування Grid, що містить іменований Ellipse та Label. Оскільки ваша сітка не має визначених рядків або стовпців, кожен дочірній елемент розміщується поверх попереднього елемента керування, що центрує вміст. Якщо ви зараз запустите свою програму, то помітите, що подія Click спрацює лише тоді, коли курсор миші знаходиться в межах еліпсу! Це чудова особливість архітектури шаблонів WPF: вам не потрібно перераховувати перевірку на потрапляння, перевірку меж або будь-які інші низькорівневі деталі. Отже, якщо ваш шаблон використовував об'єкт Polygon для відображення якоїсь незвичайної геометрії, ви можете бути впевнені, що деталі тестування натискання миші залежать від форми елемента керування, а не від більшого прямокутника, що його обмежує.
+
+## Шаблони як ресурси
+
+Наразі ваш шаблон вбудовано в певний елемент керування Button, що обмежує повторне використання. В ідеалі, вам слід розмістити свій шаблон у словнику ресурсів, щоб ви могли повторно використовувати шаблон круглої кнопки між проектами, або, принаймні, перемістити його в контейнер ресурсів програми для повторного використання в цьому проекті. Давайте перенесемо локальний ресурс Button на рівень програми, вирізавши визначення шаблону з Button та вставивши його в тег Application.Resources у файлі App.xaml. Додайте Key та TargetType наступним чином:
+
+```xml
+    <Application.Resources>
+        <ControlTemplate x:Key="RoundButtonTemplate" TargetType="{x:Type Button}">
+            <Grid x:Name="controlLayout">
+                <Ellipse x:Name="buttonSurface" Fill="LightBlue"/>
+                <Label x:Name="buttonCaption" VerticalAlignment="Center" HorizontalAlignment="Center"
+             FontWeight="Bold" FontSize="20" Content="OK!"/>
+            </Grid>
+        </ControlTemplate>
+    </Application.Resources>
+```
+Оновіть розмітку кнопки наступним чином:
+
+```xml
+            <Button x:Name="myButton" Width="100" Height="100" Click="myButton_Click" 
+                    Template="{StaticResource RoundButtonTemplate}">
+            </Button>
+```
+Тепер, оскільки цей ресурс доступний для всієї програми, ви можете визначити будь-яку кількість круглих кнопок, просто застосувавши шаблон. Створіть два додаткові елементи керування Button, які використовуватимуть цей шаблон для тестування (для цих нових елементів не потрібно обробляти подію Click).
+
+## Використання візуальних підказок за допомогою тригерів
+ 
+Коли ви визначаєте власний шаблон, візуальні підказки шаблону за замовчуванням також видаляються. Наприклад, шаблон кнопки за замовчуванням містить розмітку, яка повідомляє елементу керування, як виглядати під час певних подій інтерфейсу користувача, таких як отримання фокусу, клацання мишею, увімкнення (або вимкнення) тощо. Користувачі досить звикли до таких візуальних підказок, оскільки вони надають елементу керування певну тактильну реакцію.
+Однак ваш шаблон RoundButtonTemplate не визначає жодної такої розмітки, тому вигляд елемента керування однаковий незалежно від активності миші. В ідеалі, ваш елемент керування повинен виглядати дещо інакше після натискання (можливо, через зміну кольору або тінь), щоб користувач знав, що візуальний стан змінився.
+Це можна зробити за допомогою тригерів, як ви вже дізналися. Для простих операцій тригери чудово працюють. Існують додаткові способи зробити це, які  але більше інформації доступно за адресоюпошуковим запитом "docs microsoft wpf themes how-to-create-apply-template".
+Наприклад, оновіть свій шаблон RoundButtonTemplate наступною розміткою, яка додасть два тригери. Перший змінює колір елемента керування на синій, а колір переднього плану на жовтий, коли миша знаходиться над поверхнею. Другий зменшує розмір сітки (і, отже, всіх дочірніх елементів), коли елемент керування натискається мишею.
+
+```xml
+        <ControlTemplate x:Key="RoundButtonTemplate" TargetType="Button" >
+            <Grid x:Name="controlLayout">
+                <Ellipse x:Name="buttonSurface" Fill="LightBlue" />
+                <Label x:Name="buttonCaption" Content="OK!"
+      FontSize="20" FontWeight="Bold"
+      HorizontalAlignment="Center"
+      VerticalAlignment="Center" />
+            </Grid>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter TargetName="buttonSurface" Property="Fill"
+          Value="Blue"/>
+                    <Setter TargetName="buttonCaption"
+          Property="Foreground" Value="Yellow"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter TargetName="controlLayout"
+           Property="RenderTransformOrigin" Value="0.5,0.5"/>
+                    <Setter TargetName="controlLayout"
+          Property="RenderTransform">
+                        <Setter.Value>
+                            <ScaleTransform ScaleX="0.8" ScaleY="0.8"/>
+                        </Setter.Value>
+                    </Setter>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+```
+
+## Роль розширення розмітки {TemplateBinding}
+
+Проблема з шаблоном елемента керування полягає в тому, що кожна кнопка виглядає та має однаковий вигляд. Оновлення розмітки до наступного не має жодного ефекту:
+
+```xml
+            <Button x:Name="myButton" Width="100" Height="100"
+  Background="Red" Content="Howdy!" Click="myButton_Click"
+  Template="{StaticResource RoundButtonTemplate}" />
+            <Button x:Name="myButton2" Width="100" Height="100"
+  Background="LightGreen" Content="Cancel!" Template="{StaticResource RoundButtonTemplate}" />
+            <Button x:Name="myButton3" Width="100" Height="100"
+  Background="Yellow" Content="Format" Template="{StaticResource RoundButtonTemplate}" />
+
+```
+Це пояснюється тим, що властивості елемента керування за замовчуванням (такі як BackGround та Content) перевизначені в шаблоні. Щоб увімкнути їх, їх потрібно зіставити з відповідними властивостями в шаблоні. Ви можете вирішити ці проблеми, використовуючи розширення розмітки {TemplateBinding} під час створення шаблону. Це дозволяє вам фіксувати налаштування властивостей, визначені елементом керування за допомогою вашого шаблону, та використовувати їх для встановлення значень у самому шаблоні. Ось перероблена версія RoundButtonTemplate, яка тепер використовує це розширення розмітки для зіставлення властивості Background об'єкта Button з властивістю Fill об'єкта Ellipse; вона також гарантує, що вміст об'єкта Button дійсно передається до властивості Content об'єкта Label:
+
+```xml
+                <Ellipse x:Name="buttonSurface" Fill="{TemplateBinding Background}"/>
+                <Label x:Name="buttonCaption" Content="{TemplateBinding Content}"
+  FontSize="20" FontWeight="Bold" HorizontalAlignment="Center"
+  VerticalAlignment="Center" />
+```
+Завдяки цьому оновленню ви тепер можете створювати кнопки різних кольорів та текстових значень.
+
+## Роль ContentPresenter
+
+Під час розробки шаблону ви використовували Label для відображення текстового значення елемента керування. Як і Button, Label підтримує властивість Content. Тому, враховуючи використання {TemplateBinding}, ви можете визначити Button, який містить складний вміст, окрім простого рядка. Однак, що робити, якщо вам потрібно передати складний контент до елемента шаблону, який не має властивості Content? Якщо потрібно визначити узагальнену область відображення вмісту в шаблоні, можна використовувати клас ContentPresenter замість певного типу елемента керування (Label або TextBlock). У цьому прикладі цього робити не потрібно; проте ось проста розмітка, яка ілюструє, як можна створити власний шаблон, який використовує ContentPresenter для відображення значення властивості Content елемента керування за допомогою шаблону:
+
+```xml
+<!-- This button template will display whatever is set to the Content of the hosting button. -->
+<ControlTemplate x:Key='NewRoundButtonTemplate' TargetType='Button'>
+  <Grid>
+    <Ellipse Fill='{TemplateBinding Background}'/>
+    <ContentPresenter HorizontalAlignment='Center' VerticalAlignment='Center'/>
+  </Grid>
+</ControlTemplate>
+```
+
+## Включення шаблонів до стилів
+
+Наразі ваш шаблон просто визначає базовий вигляд та функціональність елемента керування Button. Однак процес встановлення основних властивостей елемента керування (вміст, розмір шрифту, товщина шрифту тощо) є відповідальністю самої кнопки.
+
+```xml
+<!-- Currently the Button must set basic property values, not the template. -->
+<Button x:Name='myButton' Foreground='Black' FontSize='20'
+  FontWeight='Bold'
+  Template='{StaticResource RoundButtonTemplate}'
+  Click='myButton_Click'/>
+```
+Якщо хочете, ви можете встановити ці значення в шаблоні. Таким чином, ви можете ефективно створити зовнішній вигляд та функціональність за замовчуванням. Як ви вже, можливо, зрозуміли, це завдання для стилів WPF. Під час створення стилю (щоб врахувати основні налаштування властивостей), ви можете визначити шаблон у стилі! Ось оновлений ресурс вашої програми в ресурсах програми в App.xaml, якому було змінено ключ RoundButtonStyle:
+
+```xml
+        <Style x:Key ="RoundButtonStyle" TargetType ="Button">
+            <Setter Property ="Foreground" Value ="Black"/>
+            <Setter Property ="FontSize" Value ="14"/>
+            <Setter Property ="FontWeight" Value ="Bold"/>
+            <Setter Property="Width" Value="100"/>
+            <Setter Property="Height" Value="100"/>
+            <!-- Here is the template! -->
+            <Setter Property ="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType ="Button">
+                        <Grid x:Name="controlLayout">
+                            <Ellipse x:Name="buttonSurface" Fill="{TemplateBinding Background}"/>
+                            <Label x:Name="buttonCaption" Content ="{TemplateBinding Content}"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property = "IsMouseOver" Value = "True">
+                                <Setter TargetName = "buttonSurface" Property = "Fill" Value = "Blue"/>
+                                <Setter TargetName = "buttonCaption" Property = "Foreground" Value = "Yellow"/>
+                            </Trigger>
+                            <Trigger Property = "IsPressed" Value="True">
+                                <Setter TargetName="controlLayout"
+                                        Property="RenderTransformOrigin" Value="0.5,0.5"/>
+                                <Setter TargetName="controlLayout" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <ScaleTransform ScaleX="0.8" ScaleY="0.8"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+```
+Завдяки цьому оновленню ви тепер можете створювати елементи керування кнопками, встановивши властивість Style наступним чином:
+
+```xml
+        <StackPanel Orientation="Horizontal">
+            <Button x:Name="myButton" Background="Red" Content="Howdy!"
+        Click="myButton_Click" Style="{StaticResource RoundButtonStyle}"/>
+```
+Хоча візуалізація та поведінка кнопки ідентичні, перевага вкладення шаблонів у стилях полягає в тому, що ви можете надати готовий набір значень для спільних властивостей.
+На цьому ви завершуєте огляд використання Visual Studio та платформи тригерів для створення власних шаблонів для елемента керування. Хоча про API Windows Presentation Foundation ще є набагато більше, ніж було розглянуто тут, ви маєте бути в міцній позиції для подальшого вивчення.
+
+# Підсумки
+
+У першій частині цієї глави було розглянуто систему керування ресурсами WPF. Ви почали з розгляду роботи з бінарними ресурсами, а потім розглянули роль об'єктних ресурсів. Як ви дізналися, об'єктні ресурси – це іменовані блоби XAML, які можна зберігати в різних місцях для повторного використання контенту. 
+Далі ви дізналися про анімації фреймворка WPF. Тут ви мали можливість створити деякі анімації за допомогою коду C#, а також за допомогою XAML. Ви дізналися, що якщо ви визначаєте анімацію в розмітці, то використовуєте елементи <Storyboard> та тригери для керування виконанням.
+Потім ви розглянули механізм у стилі WPF, який активно використовує графіку, об'єктні ресурси та анімацію.
+Ви розглянули зв'язок між логічним деревом та візуальним деревом.
+Логічне дерево — це, по суті, однозначна відповідність розмітки, яку ви створюєте для опису кореневого елемента WPF. За цим логічним деревом стоїть набагато глибше візуальне дерево, яке містить детальні інструкції з рендерингу.Потім було розглянуто роль шаблону за замовчуванням. Пам’ятайте, що під час створення власних шаблонів ви фактично видаляєте все (або частину) візуального дерева елемента керування та замінюєте його власною власною реалізацією.
