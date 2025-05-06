@@ -1,272 +1,131 @@
-## Перезавантаження операторів.
+# Перезавантаження операторів.
 
-C# має набір операторів які просто визначаються маркерами +, -, * (та інші), для виконання основних функцій з внутрішніми типами. Наприклад можна сладати числа або строки. Кожен тип передбачає свою поведінку. Числа складаються, рядки зчеплюються.
-Коли мова йде про ваші типи ви можете перезавантажити оператори, але не всі.
+C#, як і будь-яка мова програмування, має стандартний набір токенів, які використовуються для виконання основних операцій з внутрішніми типами. Наприклад, ви знаєте, що оператор + можна застосувати до двох цілих чисел, щоб отримати більше ціле число.
 
-+, -, !, ~, ++, --, true, false : ці унарні оператори можна перзавантажити. Якшо треба презавантажити false або true язик вимагає перезавантаженя обох.
-
-+, -, *, /, %, &, |, ^, <<, >> : ці бінарні оператори можна перзавантажити.
-
-==,!=, <, >, <=, >= : ці бінарні оператори можна перзавантажити, але парами.
-
-[] : не перезавантажуеться бо це може зрогбити індексатор.
-
-() : не перезавантажуеться бо це може зрогбити спеціальні метоли перетворення.
-
-+=, -=, *=, /=, %=, &=, |=, ^=, <<=, >>= : скорочені оператори не презавантажуються однак вони спрацьовують коли ви перезавантажуєье відповідний бінарний метод.
-
-## Перезавантаження бінарних операторів.
-
-Оператор + для двох точок може означати нову точку з суммою координат. 
 ```cs
-    class Point
-    {
-        public int X { get; set; }
-        public int Y { get; set; }
-        public Point(int x, int y)
-        {
-            X = x;
-            Y = y;
-        }
-        public override string? ToString() => $"[{X},{Y}]";
-    }
+    // The + operator with ints.
+    int a = 100;
+    int b = 240;
+    int c = a + b;
+    Console.WriteLine(c);
+
 ```
-```cs
-    class Point_v1 : Point
-    {
-        public Point_v1(int x, int y) : base(x, y)
-        {
-        }
-
-        public static Point_v1 operator + (Point_v1 point1, Point_v1 point2) =>
-            new Point_v1(point1.X + point2.X, point1.Y + point2.Y);
-        public static Point_v1 operator - (Point_v1 point1, Point_v1 point2) =>
-            new Point_v1(point1.X - point2.X, point1.Y - point2.Y);
-
-    }
 ```
-
-Аби компілятор розумів як реагувати на оператори в бінарниx операціях де операнди об'єкти класу треба визначити ці оператори за допомогою operator. Таке визначення повино бути static.
-
-При визначені operator логіка може бути різною.
-```cs
-    class Point_v2 : Point
-    {
-        public Point_v2(int x, int y) : base(x, y)
-        {
-        }
-
-        public static Point_v2 operator + (Point_v2 point1, int change) =>
-            new Point_v2(point1.X + change, point1.Y + change);
-        public static Point_v2 operator - (Point_v2 point1, int change) =>
-            new Point_v2(point1.X - change, point1.Y - change);
-    }
+340
 ```
-Треба зауважити шо коли ви хочете аби оператор працював з різними порядками операндів треба реалізовувати всі можливі варіанти. Компілятор сам не визначить протилежні розміщеня операндів для оператора. 
-```cs
-    class Point_v3 : Point
-    {
-        
-        public Point_v3(int x, int y) : base(x, y)
-        {
-        }
-        public static Point_v3 operator +(Point_v3 point1, int change) =>
-            new Point_v3(point1.X + change, point1.Y + change);
-        public static Point_v3 operator +( int change, Point_v3 point1) =>
-            new Point_v3(change + point1.X , change + point1.Y );
-    }
-```
+Знову ж таки, це не якась важлива новина, але чи звертали ви коли-небудь увагу на те, як той самий оператор + можна застосувати до більшості внутрішніх типів даних C#? Наприклад, розглянемо цей код:
 
-Тепер можна їх використати так само як і для чисел.
 ```cs
-void UseOverlodingOperatorAdditionSubtraction()
+    // + operator with strings.
+    string s1 = "Hi";
+    string s2 = " girl";
+    string s3 = s1 + s2;
+    Console.WriteLine(s3);
+```
+```
+Hi girl
+```
+Оператор + функціонує певним чином залежно від наданих типів даних (у цьому випадку рядків або цілих чисел). Коли оператор + застосовується до числових типів, результатом є підсумовування операндів. Однак, коли оператор + застосовується до рядкових типів, результатом є об'єднання рядків.
+Мова C# надає вам можливість створювати власні класи та структури, які також унікально реагують на той самий набір базових токенів (таких як оператор +). Хоча не кожен можливий оператор C# можна перевантажити, багато з них можна, як показано в таблиці
+|Оператор|Можливість перезавантажити |
+|--------|---------------------------|
+|+, -, !, ~, ++, --, true, false|Ці унарні оператори можна перевантажувати. C# вимагає, щоб якщо перевантажено значення true або false, обидва значення мають бути перевантажені.|
+|+, -, *, /, %, &, |, ^, <<, >>|Ці бінарні оператори можуть бути перевантажені.|
+|==,!=, <, >, <=, >=|Ці оператори порівняння можна перевантажувати. C# вимагає, щоб оператори типу «подібні» (тобто < та >, <= та >=, == та !=) перевантажувалися разом.|
+|[]|Оператор [] не можна перевантажувати. Однак, як ви бачили раніше в цьому розділі, конструкція індексатора забезпечує таку ж функціональність.|
+|()|Оператор () не можна перевантажувати. Однак, як ви побачите далі в цьому розділі, користувацькі методи перетворення забезпечують таку саму функціональність.|
+|+=, -=, *=, /=, %=, &=, |=, ^=, <<=, >>=|Скорочені оператори присвоєння не можна перевантажувати; проте ви отримуєте їх безкоштовно, коли перевантажуєте відповідний бінарний оператор.|
+
+## Перевантаження бінарних операторів
+
+Щоб проілюструвати процес перевантаження бінарних операторів, припустимо, що наступний простий клас Point визначено в новому проекті консольної програми з назвою OperatorOverloading:
+
+```cs
+// Just a simple, everyday C# class.
+public class Point
 {
-    Point_v1 point = new(1, 1);
-    Point_v1 point1 = new(2, 2);
-    
-    Console.WriteLine(point+point1);
-
-    Console.WriteLine(point1-point);
-
-    Console.WriteLine(point-point1+point1+point+new Point_v1(10,10));
-
-    Point_v2 point2 = new(20, 20);
-
-    Console.WriteLine(point2 + 100 - 12 + 27);
-
-    //Operator '+' cannot...
-    //Console.WriteLine(100 + point2);
-
-    Point_v3 point3 = new(30, 30);
-
-    Console.WriteLine( point3 + 3);
-    Console.WriteLine( 3 + point3 );
-}
-
-UseOverlodingOperatorAdditionSubtraction();
-```
-```
-[3,3]
-[1,1]
-[12,12]
-[135,135]
-[33,33]
-[33,33]
-```
-
-## Оператори типу += , -=.
-
-Якщо в класі реалізовани бінарні оперетори ці оперетори також працюють.
-
-```cs
-void UseShorthandOperator()
-{
-    Point_v1 point1 = new(1, 1);
-    Point_v1 point2 = new(2, 2);
-
-    point1 += point2;
-
-    Console.WriteLine(point1);
-
-}
-
-UseShorthandOperator();
-```
-```
-[3,3]
-```
-
-## Унарні оператори.
-
-Можна перезавантажити опертори типу ++. Таке перезавантаження також повинно бути static. В цому випадку ви передаете один параметр того ж типу.
-```cs
-    class Point_v4 : Point
+    public int X { get; set; }
+    public int Y { get; set; }
+    public Point(int xPos, int yPos)
     {
-        public Point_v4(int x, int y) : base(x, y)
-        {
-        }
-
-        public static Point_v4 operator ++(Point_v4 point) =>
-            new Point_v4(point.X+1, point.Y+1);
-        public static Point_v4 operator --(Point_v4 point) =>
-            new Point_v4(point.X - 1, point.Y - 1);
+        X = xPos;
+        Y = yPos;
     }
-```
-```cs
-void UseIncrement()
-{
-    Point_v4 point = new(1, 1);
-
-    point++;
-
-    Console.WriteLine(point);
+    public override string ToString()
+      => $"[{X},{Y}]";
 }
-
-UseIncrement();
 ```
-```
-[2,2]
-```
-Не забувайте що вирази ++x та x++ змінюють значення в пам'яті по різному.
-
-## Перезавантаження Equals
-
-Метод Equal успадковується з System.Оbject порівнює посилання на об'єкт. Якшо ви вирішили перевизначити цей метод на основі значень стану то логічно перезавантажити відповідні оператори ==, !=.
+Тепер, логічно кажучи, має сенс «додавати» точки (Points). Наприклад, якщо ви додали дві змінні типу Point, ви повинні отримати нову змінну Point, яка є сумою значень X та Y. Звичайно, також може бути корисним відняти одну змінну Point від іншої.
+Однак, у вашому Point зараз ви отримуватимете помилки під час компіляції, оскільки тип Point не знає, як реагувати на оператор + або -. Щоб забезпечити унікальну реакцію власного типу на внутрішні оператори, C# надає ключове слово operator, яке можна використовувати лише разом із ключовим словом static. Коли ви перевантажуєте бінарний оператор (наприклад, + та -), найчастіше ви передаватимете два аргументи того ж типу, що й визначальний клас (у цьому прикладі Point), як показано в наступному оновленні коду:
 
 ```cs
-   class Point_v5 : Point
-    {
-        public Point_v5(int x, int y) : base(x, y)
-        {
-        }
-
-        public override bool Equals(object? obj)
-        {
-            return (obj?.ToString() == this.ToString());
-        }
-
-        public override int GetHashCode() => GetHashCode();
-
-        public static bool operator ==(Point_v5 point1, Point_v5 point2)
-        {
-            return point1.Equals(point2);
-        }
-
-        public static bool operator !=(Point_v5 point1, Point_v5 point2)
-        {
-            return !point1.Equals(point2);
-        }
-    }
-```
-```cs
-void UseEqualityOperators()
+// A more intelligent Point type.
+public class Point
 {
-    Point_v5 point1 = new(1, 1);
-    Point_v5 point2 = new(1, 1);
-    Point_v5 point3 = new(2, 3);
+    //...
 
-    Console.WriteLine(point1 == point2);
-    Console.WriteLine(point1 == point3);
+    // Overloaded operator +.
+    public static Point operator +(Point p1, Point p2)
+      => new Point(p1.X + p2.X, p1.Y + p2.Y);
+    // Overloaded operator -.
+    public static Point operator -(Point p1, Point p2)
+      => new Point(p1.X - p2.X, p1.Y - p2.Y);
 }
-
-UseEqualityOperators();
 ```
-```
-True
-False
-```
-Трохи виразніше і простіше порівнювати об'єкти опертором == ніж визивати Equals.
+Логіка оператора + полягає в тому, щоб просто повернути новий об'єкт Point на основі підсумовування полів вхідних параметрів Point.
 
-## Перезавантаження операторів порівняння.
-
-Для порівняння об'єктів класа в ньому можна реалізувати інтерфейс IComparable. На додаток можна перезавантажити опреатори > , < і подібні.
+Логіка оператора + полягає в тому, щоб просто повернути новий об'єкт Point на основі підсумовування полів вхідних параметрів Point. Таким чином, коли ви пишете pt1 + pt2, під капотом ви можете уявити собі наступний прихований виклик статичного методів операторів :
+```cs
+// Pseudo-code: Point p3 = Point.operator+ (p1, p2)
+Point p3 = p1 + p2;
+// Pseudo-code: Point p4 = Point.operator- (p1, p2)
+Point p4 = p1 - p2;
+```
+З цим оновленням ваша програма тепер компілюється, і ви можете додавати та віднімати об'єкти Point, як показано в наступному виводі:
 
 ```cs
-    class Point_v6 : Point, IComparable
-    {
-        public Point_v6(int x, int y) : base(x, y)
-        {
-        }
-
-        public int CompareTo(object? obj)
-        {
-            if (obj is not Point_v6)
-            {
-                throw new ArgumentException();
-            }
-
-            Point_v6 other = (Point_v6)obj;
-
-            double distance = Math.Sqrt(X) + Math.Sqrt(Y);
-            double distanceObj = Math.Sqrt(other.X) + Math.Sqrt(other.Y);
-
-            return distance.CompareTo(distanceObj);
-        }
-
-        public static bool operator <(Point_v6 point1, Point_v6 point2) =>
-            point1.CompareTo(point2) < 0;
-        public static bool operator >(Point_v6 point1, Point_v6 point2) =>
-            point1.CompareTo(point2) > 0;
-        public static bool operator <=(Point_v6 point1, Point_v6 point2) =>
-            point1.CompareTo(point2) <= 0;
-        public static bool operator >=(Point_v6 point1, Point_v6 point2) =>
-            point1.CompareTo(point2) >= 0;
-    }
-```
-```cs
-void UseComparisonOperators()
+static void UsingPointWithOperators()
 {
-    Point_v6 point1 = new(1, 1);
-    Point_v6 point2 = new(1, 2);
-
-    Console.WriteLine(point1 <= point2);
+    // Make two points.
+    Point ptOne = new Point(100, 100);
+    Point ptTwo = new Point(40, 40);
+    Console.WriteLine($"ptOne = {ptOne}");
+    Console.WriteLine($"ptTwo = {ptTwo}");
+    // Add the points to make a bigger point?
+    Console.WriteLine($"ptOne + ptTwo: {ptOne + ptTwo}");
+    // Subtract the points to make a smaller point?
+    Console.WriteLine($"ptOne - ptTwo: {ptOne - ptTwo}");
 }
+UsingPointWithOperators();
+```
+```
+ptOne = [100,100]
+ptTwo = [40,40]
+ptOne + ptTwo: [140,140]
+ptOne - ptTwo: [60,60]
+```
+Під час перевантаження бінарного оператора не потрібно передавати два параметри одного типу. Якщо це має сенс, один з аргументів може відрізнятися. Наприклад, ось перевантажений оператор +, який дозволяє викликаючій особі отримати новий об'єкт Point на основі числового коригування:
 
-UseComparisonOperators();
+```cs
+public class Point
+{
+    //...
+    public static Point operator +(Point p1, int change)
+    => new Point(p1.X + change, p1.Y + change);
+    public static Point operator +(int change, Point p1)
+      => new Point(p1.X + change, p1.Y + change);
+}
 ```
-```
-True
-```
-Вимагається, шо якщо ви перезамантажили оперетор > то ви мусите перезавантажити і < також. При перезавантажені операторів є сенс використовувати вже реалізовану логіку методу CompareTo.
+Зверніть увагу, що вам потрібні обидві версії методу, якщо ви хочете, щоб аргументи передавалися в будь-якому порядку (тобто ви не можете просто визначити один із методів і очікувати, що компілятор автоматично підтримуватиме інший). Тепер ви можете використовувати ці нові версії оператора + наступним чином:
 
-Як бачите мова дозволяє створювати в типи перезавантажені оператори які зможуть вам спротити подальше їхне використання. Але треба розуміти шо перезавантаженя оператору має мати сенс. Не для всіх типів має сенс презаванажувати оператори. Наприклад немає сенсу перезавантажувати оператор множеня для типу транспортних засобів. Перезавантаженя опереторів бульше підходить для атомарних об'єктів векторів, фігур, набори. Якшо зрозуміти перезавантаженя складно не треба його робити. 
+```cs
+    Point point = new Point(100, 100);
+    Console.WriteLine($"point = {point}");
+    Console.WriteLine($"point + 10 = {point+10}");
+    Console.WriteLine($"10 + point = {10+point}");
+```
+```
+point = [100,100]
+point + 10 = [110,110]
+10 + point = [110,110]
+```
