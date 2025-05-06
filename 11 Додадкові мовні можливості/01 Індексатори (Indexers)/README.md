@@ -1,199 +1,202 @@
 # Індексатори (Indexers)
 
-У массиві доступ до елементів дуже простий.
+Створимо проект Console App Indexers.
+
+Ви, безумовно, знайомі з процесом доступу до окремих елементів, що містяться в простому масиві, за допомогою оператора індексування ([]). Ось приклад:
+
 ```cs
-void WorkWithArray()
+static void UsingArray()
 {
-    string[] girls = { "Vera", "Olga", "Viktory" };
-
-    girls[1] = "Ira";
-
-    Console.WriteLine(girls[2]); 
+    string[] args = Environment.GetCommandLineArgs();
+    // Loop over incoming command-line arguments
+    // using index operator.
+    for (int i = 0; i < args.Length; i++)
+    {
+        Console.WriteLine($"Args: {args[i]}");
+    }
     Console.WriteLine();
 
-    for (int i = 0; i < girls.Length; i++)
+    // Declare an array of local integers.
+    int[] myInts = { 10, 9, 100, 432, 9874 };
+    // Use the index operator to access each element.
+    for (int j = 0; j < myInts.Length; j++)
     {
-        Console.WriteLine($"{i}. {girls[i]}");
+        Console.WriteLine($"Index {j}  = {myInts[j]}");
     }
-
-    //Index was outside the bounds of the array.
-    //girls[4] = "Nikita";
 }
-
-WorkWithArray();
+UsingArray();
 ```
 ```
-Viktory
+Args: D:\...\Indexers\Indexers\bin\Debug\net9.0\Indexers.dll
 
-0. Vera
-1. Ira
-2. Viktory
-
+Index 0  = 10
+Index 1  = 9
+Index 2  = 100
+Index 3  = 432
+Index 4  = 9874
 ```
-Треба зауважити шо в С# массиви передбачають певну незмінну кількість елементів. На протилежність від інших мов програмування не можливо додати елемент з індексом якого не було при створені масиву.
+Мова C# надає можливість розробляти власні класи та структури, які можна індексувати так само, як стандартний масив, шляхом визначення методу індексатора. Ця функція найбільш корисна під час створення користувацьких класів колекцій (універсальних або неуніверсальних).
 
-## Створення.
+Як налаштувати клас PersonCollection (або будь-який інший користувацький клас чи структуру) для підтримки цієї функціональності?
 
-За для того аби можно було за допомогою індеска маніпулювати елементами в складних типах треба визначити метод індексатора. Особливо це корисно коли створюеться ваша, спеціальна коллекція.
-Визначення індексатора схоже на визначення властивості.
-
+Додамо до проекту клас:
 ```cs
-    class Person
-    {
-        public string Name { get; set; } 
-        public Person(string name = "")
-        {
-            Name = name;
-        }
-        public override string? ToString()
-        {
-            return $"{Name}\t"+base.ToString();
-        }
-    }
+namespace Indexers;
 
-
-    class PersonCollection_v1
-    {
-        private Person[] arrayOfPerson = new Person[100];
-        public int Count => arrayOfPerson.Length;
-
-        //Indexer
-        public Person this[int index] 
-        { 
-            get => arrayOfPerson[index];
-            set => arrayOfPerson[index] = value;
-        }
-    }
-```
-```cs
-void UseSimpleIndexer()
+public class Person
 {
-    PersonCollection_v1 people = new();
+    public string FirstName { get; set; } = string.Empty;
+    public string LastName { get; set; } = string.Empty;
+    public int Age { get; set; }
 
-    people[0] = new Person("John");
-    people[0] = new Person("John");
-    people[1] = new Person("Sara");
-
-    people[2] = people[1];
-    people[1] = new Person("Tony");
-
-    for (int i = 0; i < 5; i++)
+    public Person(string firstName, string lastName, int age)
     {
-        Console.WriteLine(people[i]);
+        FirstName = firstName;
+        LastName = lastName;
+        Age = age;
     }
 
-    //people[101] = new Person("");
+    public override string? ToString()
+    {
+        return $"{FirstName}\t{LastName}\t{Age}";
+    }
 }
-
-UseSimpleIndexer();
 ```
-```
-John    Indexers.Person
-Tony    Indexers.Person
-Sara    Indexers.Person
+Індексатор представлений як дещо змінене визначення властивості C#. У найпростішому вигляді індексатор створюється за допомогою синтаксису this[]. Ось клас PersonCollection:
 
-
-
-```
-Коли ваш клас колекції має індексатор цей клас краще інтегрується з бібліотеками базових класів .Net . 
-Але такий класс колекції складно назвати добрим оскільки кожного разу створюється массив new Person[100];
-Пам'ятайте синтаксис масиву передбачає шо індекси масиву визначаються при його створені і додавання елемент з новим індексом викликає виняток. В деяких мовах програмування масиви можуть розширюватись динамічно.
-Використовувати неузагальнений клас аби створювати колекцію з індексаторм не дуже зручно і еффективно. 
-
-## Узагальнені колекції мають індексатор.
-
-Краше використовувати узагальнені коллекції. Фунціональність індексатора з цілими індексами вбудована в них.
 ```cs
-void UseGenericTypeIndexer()
+namespace Indexers;
+
+public class PersonCollection 
 {
-    List<Person> people = new()
+    private ArrayList arrayOfPerson = new();
+    public Person this[int index]
     {
-        new("Tony"),
-        new("Sara"),
-        new("Sherlock"),
-    };
-
-
-    people[2] = people[0];
-
-    people[0] = new Person("Jhon");
-
-    for (int i = 0; i < people.Count; i++)
-    {
-        Console.WriteLine(people[i]);
+        get => (Person)arrayOfPerson[index];
+        set => arrayOfPerson.Insert(index,value);
     }
 
-    // It don't insert item.
-    //people[3] = new("Someone");
+    public int Count => arrayOfPerson.Count;
 }
-
-UseGenericTypeIndexer();
 ```
-```
-Jhon    Indexers.Person
-Sara    Indexers.Person
-Tony    Indexers.Person
+Тоді ви можете використовувати індексатор таким чином таким чином :
 
-```
-
-## Рядкові індекси.
-
-Індексатор може мати індекси рядкового типу.
 ```cs
-class PersonCollectionWithStringIndex : IEnumerable
-    {
-        private Dictionary<string, Person> dictionaryOfPerson = new();
-
-        public Person this[string index]
-        {
-            get => dictionaryOfPerson[index];
-            set => dictionaryOfPerson[index] = value;
-        }
-
-        public int Count => dictionaryOfPerson.Count;
-        public void Clear()
-        {
-            dictionaryOfPerson.Clear();
-        }
-        IEnumerator IEnumerable.GetEnumerator() => dictionaryOfPerson.GetEnumerator();
-    }
-```
-```cs
-void UseStringIndexer()
+static void UsingPersonCollection()
 {
-    PersonCollectionWithStringIndex personage = new();
+    PersonCollection myPeople = new PersonCollection();
+    // Add objects with indexer syntax.
+    myPeople[0] = new Person ("Homer", "Simpson", 40);
+    myPeople[1] = new Person("Marge", "Simpson", 38);
+    myPeople[2] = new Person("Lisa", "Simpson", 9);
+    myPeople[3] = new Person("Bart", "Simpson", 7);
+    myPeople[4] = new Person("Maggie", "Simpson", 2);
 
-    personage["John"] = new("John Connor");
-    personage["Terminator"] = new("T-800");
-    personage["IronMan"] = new("Tony Stark");
-
-    Console.WriteLine(personage["Terminator"]);
-    Console.WriteLine();
-
-    personage["Terminator"] = new("T-1000");
-
-    foreach (KeyValuePair<string, Person> item in personage)
+    // Now obtain and display each item using indexer.
+    for (int i = 0; i < myPeople.Count; i++)
     {
-        Console.WriteLine($"Index:{item.Key}\tItem:{item.Value}");
+        Console.WriteLine(myPeople[i]);
     }
 }
-
-UseStringIndexer();
+UsingPersonCollection();
 ```
 ```
-T-800   Indexers.Person
-
-Index:John      Item:John Connor        Indexers.Person
-Index:Terminator        Item:T-1000     Indexers.Person
-Index:IronMan   Item:Tony Stark Indexers.Person
+Homer   Simpson 40
+Marge   Simpson 38
+Lisa    Simpson 9
+Bart    Simpson 7
+Maggie  Simpson 2
 ```
-В цьому прикладі викорисовується можливості Dictionary<TKey, TValue> по доступу через індекс. В цьому варіанті є можливість вставки та оновлення елементів в колекцію не зважаючи на розміру та значення індексу. 
+Як бачите, індексатори дозволяють маніпулювати внутрішньою колекцією подоб'єктів так само, як і стандартним масивом.
 
-## Перезавантаження індексаторів.
+Розглянемо індексатор:
 
-В класі або структурі можна мати декілька індексаторів з різними параметрами. Таким чином можна реалізувати доступ ло елементів як через числові так і через рядкові індекси. 
+```cs
+    public Person this[int index]
+    {
+        get => (Person)arrayOfPerson[index];
+        set => arrayOfPerson.Insert(index,value);
+    }
+```
 
-Приклад індексатора з ADO.NET.
+Окрім використання ключового слова this з дужками, індексатор виглядає так само, як і будь-яке інше оголошення властивості C#. Наприклад, роль області видимості get полягає в поверненні правильного об'єкта викликаючій функції. Тут ви робите це, делегуючи запит індексатору об'єкта ArrayList, оскільки цей клас також підтримує індексатор. Область видимості set контролює додавання нових об'єктів Person; це досягається шляхом виклику методу Insert() об'єкта ArrayList.
+Індексатори – це ще одна форма синтаксичного цукру, враховуючи, що цю функціональність також можна реалізувати за допомогою «звичайних» публічних методів, таких як AddPerson() або GetPerson(). Тим не менш, коли ви підтримуєте методи індексування для ваших типів користувацьких колекцій, вони добре інтегруються в структуру бібліотек базових класів .NET. Хоча створення методів індексатора є досить поширеною практикою під час створення власних колекцій, пам’ятайте, що універсальні типи надають вам цю функціональність «з коробки». Розглянемо наступний метод, який використовує узагальнений List<T> об'єктів Person. Зверніть увагу, що ви можете просто використовувати індексатор List<T> безпосередньо. Ось приклад:
+
+```cs
+static void UseGenericListOfPeople()
+{
+    List<Person> myPeople = new List<Person>();
+    myPeople.Add(new Person("Lisa", "Simpson", 9));
+    myPeople.Add(new Person("Bart", "Simpson", 7));
+
+    // Change first person with indexer.
+    myPeople[0] = new Person("Maggie", "Simpson", 2);
+
+    // Now obtain and display each item using indexer.
+    for (int i = 0; i < myPeople.Count; i++)
+    {
+        Console.WriteLine(myPeople[i]);
+    }
+}
+UseGenericListOfPeople();
+```
+```
+Maggie  Simpson 2
+Bart    Simpson 7
+```
+
+## Індексування даних за допомогою рядкових значень
+
+Поточний клас PersonCollection визначив індексатор, який дозволяв викликаючому коду ідентифікувати піделементи за допомогою числового значення. Однак, зрозумійте, що це не є вимогою до методу індексатора. Припустимо, ви бажаєте розмістити об'єкти Person за допомогою System.Collections.Generic.Dictionary\<TKey, TValue\>, а не ArrayList. Враховуючи, що типи словника дозволяють доступ до типів, що містяться в них, за допомогою ключа (наприклад, імені особи), ви можете визначити індексатор наступним чином:
+
+```cs
+public class PersonCollectionStringIndexer : IEnumerable
+{
+    private Dictionary<string, Person> people = new Dictionary<string, Person>();
+
+    // This indexer returns a person based on a string index.
+    public Person this[string name]
+    {
+        get => (Person)people[name];
+        set => people[name] = value;
+    }
+
+    public int Count => people.Count;
+
+    public IEnumerator GetEnumerator() => people.GetEnumerator();
+}
+```
+
+Тепер викликаючий код зможе взаємодіяти з об'єктами Person, що містяться в ньому, як показано тут.
+
+```cs
+static void UsingPersonCollectionStringIndexer()
+{
+    PersonCollectionStringIndexer people = new();
+    people["Homer"] = new Person("Homer", "Simpson", 40);
+    people["Marge"] = new Person("Marge", "Simpson", 38);
+
+    Console.WriteLine(people["Homer"]);
+
+    foreach (var person in people)
+    {
+        Console.WriteLine(person);
+    }
+
+}
+UsingPersonCollectionStringIndexer();
+```
+```
+Homer   Simpson 40
+[Homer, Homer   Simpson 40]
+[Marge, Marge   Simpson 38]
+```
+Знову ж таки, якби ви використовували узагальнений тип Dictionary\<TKey, TValue\> безпосередньо, ви б отримали функціональність методу індексатора з коробки, без створення власного, неузагальненого класу, що підтримує індексатор рядків. Тим не менш, пам'ятайте, що тип даних будь-якого індексатора буде базуватися на тому, як підтримуючий тип колекції дозволяє викликаючій службі отримувати піделементи.
+
+## Перевантаження методів індексатора
+
+Методи індексатора можуть бути перевантажені в одному класі або структурі. Таким чином, якщо є сенс дозволити викликаючому коду отримувати доступ до піделементів за допомогою числового індексу або рядкового значення, ви можете визначити кілька індексаторів для одного типу. Наприклад, в ADO.NET (нативний API доступу до бази даних .NET), клас DataSet підтримує властивість з назвою Tables, яка повертає вам строго типізований тип DataTableCollection. Як виявляється, DataTableCollection визначає три індексатори для отримання та встановлення об'єктів DataTable — один за порядковим номером, а інші за зручним рядковим монікером та необов'язковим простором імен, як показано тут:
+
 ```cs
 public sealed class DataTableCollection : InternalDataCollectionBase
 {
@@ -204,86 +207,70 @@ public sealed class DataTableCollection : InternalDataCollectionBase
   public DataTable this[string name, string tableNamespace] { get; }
 }
 ```
-Тут об'єкт можна отриматни за порядковим номером таблиці або назві таблиці.
-В бібліотеках базових класів зазвичай типи підтримують індексатори. Тому навіть якщо ваш проект не потребує індексатора багато типив мають їх. 
+Типи в бібліотеках базових класів зазвичай підтримують методи індексування. Тож майте на увазі, що навіть якщо ваш поточний проект не вимагає створення власних індексаторів для ваших класів та структур, багато типів вже підтримують цей синтаксис.
 
-## Багатовимірні індексатори.
+## Індексатори з кількома вимірами
 
-Так само як масиви можкть бути двовимірні, множину об'єктів можна розмітити в матриці.
+Ви також можете створити метод індексатора, який приймає кілька параметрів. Припустимо, у вас є власна колекція, яка зберігає піделементи у двовимірному масиві. Якщо це так, ви можете визначити метод індексатора наступним чином:
 
 ```cs
 public class SomeContainer
 {
-  private int[,] myMatrix = new int[10, 10];
+  private int[,] my2DintArray = new int[10, 10];
   public int this[int row, int column]
-  {  /* get or set value */  }
+  {  /* get or set value from 2D array */  }
 }
 ```
-В ADO.Net багатовимірний індексатор використовується для отриманя даних з таблиці.
+Знову ж таки, якщо ви не створюєте високо стилізований власний клас колекцій, вам не буде особливої ​​потреби створювати багатовимірний індексатор. Тим не менш, ADO.NET знову демонструє, наскільки корисною може бути ця конструкція. ADO.NET DataTable — це, по суті, набір рядків і стовпців, подібно до аркуша міліметрового паперу або загальної структури електронної таблиці Microsoft Excel.
+Наведений нижче код ілюструє, як вручну створити в пам'яті DataTable, що містить три стовпці (для імені, прізвища та віку кожного запису). Зверніть увагу, як після додавання одного рядка до DataTable ви використовуєте багатовимірний індексатор для деталізації кожного стовпця першого (і єдиного) рядка.
+
 ```cs
 static void MultiIndexerWithDataTable()
 {
-  // Make a simple DataTable with 3 columns.
-  DataTable myTable = new DataTable();
-  myTable.Columns.Add(new DataColumn('FirstName'));
-  myTable.Columns.Add(new DataColumn('LastName'));
-  myTable.Columns.Add(new DataColumn('Age'));
-  // Now add a row to the table.
-  myTable.Rows.Add('Mel', 'Appleby', 60);
-  // Use multidimension indexer to get details of first row.
-  Console.WriteLine('First Name: {0}', myTable.Rows[0][0]);
-  Console.WriteLine('Last Name: {0}', myTable.Rows[0][1]);
-  Console.WriteLine('Age : {0}', myTable.Rows[0][2]);
+    // Make a simple DataTable with 3 columns.
+    DataTable myTable = new DataTable();
+    myTable.Columns.Add(new DataColumn("FirstName"));
+    myTable.Columns.Add(new DataColumn("LastName"));
+    myTable.Columns.Add(new DataColumn("Age"));
+    // Now add a row to the table.
+    myTable.Rows.Add("Mel", "Appleby", 60);
+    // Use multidimension indexer to get details of first row.
+    Console.WriteLine($"First Name: {myTable.Rows[0][0]}");
+    Console.WriteLine($"Last Name: {myTable.Rows[0][1]}");
+    Console.WriteLine($"Age : {myTable.Rows[0][2]}");
 }
+MultiIndexerWithDataTable();
 ```
-Багатовимірні індексатори створюються якщо вних є потреба і як видно їх використання досить просте. Тому індексатор і реалізован.
+```
+First Name: Mel
+Last Name: Appleby
+Age : 60
+```
+Головна суть цього прикладу полягає в тому, що методи індексатора можуть підтримувати кілька вимірів і, за умови правильного використання, можуть спростити спосіб взаємодії з подоб'єктами, що містяться в користувацьких колекціях.
 
-## Індексатори в інтерфейсах.
+## Визначення індексаторів для типів інтерфейсів
 
-Функціональність індексаторів можна описати в інтерфейсах для подальшої імплементації.
+Визначення індексаторів для типів інтерфейсів
+
+Індексатори можна визначити для заданого типу інтерфейсу .NET, щоб дозволити підтримуючим типам забезпечити власну реалізацію. Ось простий приклад інтерфейсу, який визначає протокол для отримання рядкових об'єктів за допомогою числового індексатора:
 
 ```cs
-    public interface IStringContainer
-    {
-        string this[int index] { get; set; }
-    }
-
-    class SomeStrings : IStringContainer
-    {
-        private List<string> myString = new();
-
-        public SomeStrings(List<string> myString)
-        {
-            this.myString = myString;
-        }
-        public int Count => myString.Count;
-        public string this[int index]
-        {
-            get => myString[index];
-            set => myString[index] = value;
-        }
-    }
-```
-```cs
-void UseIndexerInterface()
+public interface IStringContainer
 {
-    List<string> strings = new() { "in", "in front", "next to", "under", "on" };
-
-    SomeStrings words = new(strings);
-
-    for (int i = 0; i < words.Count; i++)
-    {
-        Console.WriteLine(words[i]);
-    }
+  string this[int index] { get; set; }
 }
+```
+З цим визначенням інтерфейсу будь-який клас або структура, що реалізує цей інтерфейс, тепер повинні підтримувати індексатор читання-запису, який маніпулює піделементами за допомогою числового значення. Ось часткова реалізація такого класу:
 
-UseIndexerInterface();
+```cs
+class SomeClass : IStringContainer
+{
+  private List<string> myStrings = new List<string>();
+  public string this[int index]
+  {
+    get => myStrings[index];
+    set => myStrings.Insert(index, value);
+  }
+}
 ```
-```
-in
-in front
-next to
-under
-on
-```
-В данному випадку інтерфейс це протокол який вказує яким повинен бути індексатор.
+Класи які мають індексатори не обов'язково повини мати в собі коллекцію. Вони можуть реалізовувати необхідну логіку в залежності від стану об'єкта.

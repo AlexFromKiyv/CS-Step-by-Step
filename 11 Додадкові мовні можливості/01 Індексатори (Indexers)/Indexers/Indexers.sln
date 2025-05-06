@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.6.33829.357
+VisualStudioVersion = 17.13.35931.197 d17.13
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Indexers", "Indexers\Indexers.csproj", "{B2CAA030-8E0E-4CF1-938A-4CCD9F2AB2E4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Indexers", "Indexers\Indexers.csproj", "{CABEBEB6-3A34-46EE-B487-6D2EC5200867}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,15 +11,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{B2CAA030-8E0E-4CF1-938A-4CCD9F2AB2E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B2CAA030-8E0E-4CF1-938A-4CCD9F2AB2E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B2CAA030-8E0E-4CF1-938A-4CCD9F2AB2E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B2CAA030-8E0E-4CF1-938A-4CCD9F2AB2E4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CABEBEB6-3A34-46EE-B487-6D2EC5200867}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CABEBEB6-3A34-46EE-B487-6D2EC5200867}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CABEBEB6-3A34-46EE-B487-6D2EC5200867}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CABEBEB6-3A34-46EE-B487-6D2EC5200867}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {81CF2D9E-BA3D-4BD9-A9D9-87939E52F6A0}
+		SolutionGuid = {BBDF3484-F075-46CC-B508-1D08F8F74BDD}
 	EndGlobalSection
 EndGlobal

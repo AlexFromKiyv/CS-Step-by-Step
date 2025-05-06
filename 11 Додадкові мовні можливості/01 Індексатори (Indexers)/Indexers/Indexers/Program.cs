@@ -1,103 +1,92 @@
-﻿using Indexers;
+﻿
+using Indexers;
+using System.Data;
 
-void WorkWithArray()
+static void UsingArray()
 {
-    string[] girls = { "Vera", "Olga", "Viktory" };
-
-    girls[1] = "Ira";
-
-    Console.WriteLine(girls[2]); 
+    string[] args = Environment.GetCommandLineArgs();
+    // Loop over incoming command-line arguments
+    // using index operator.
+    for (int i = 0; i < args.Length; i++)
+    {
+        Console.WriteLine($"Args: {args[i]}");
+    }
     Console.WriteLine();
 
-    for (int i = 0; i < girls.Length; i++)
+    // Declare an array of local integers.
+    int[] myInts = { 10, 9, 100, 432, 9874 };
+    // Use the index operator to access each element.
+    for (int j = 0; j < myInts.Length; j++)
     {
-        Console.WriteLine($"{i}. {girls[i]}");
+        Console.WriteLine($"Index {j}  = {myInts[j]}");
     }
-
-    //Unhandled exception. System.IndexOutOfRangeException
-    //girls[4] = "Nikita";
 }
+//UsingArray();
 
-//WorkWithArray();
 
-
-void UseSimpleIndexer()
+static void UsingPersonCollection()
 {
-    PersonCollection_v1 people = new();
+    PersonCollection myPeople = new PersonCollection();
+    // Add objects with indexer syntax.
+    myPeople[0] = new Person ("Homer", "Simpson", 40);
+    myPeople[1] = new Person("Marge", "Simpson", 38);
+    myPeople[2] = new Person("Lisa", "Simpson", 9);
+    myPeople[3] = new Person("Bart", "Simpson", 7);
+    myPeople[4] = new Person("Maggie", "Simpson", 2);
 
-    people[0] = new Person("John");
-    people[0] = new Person("John");
-    people[1] = new Person("Sara");
-
-    people[2] = people[1];
-    people[1] = new Person("Tony");
-
-    for (int i = 0; i < 5; i++)
+    // Now obtain and display each item using indexer.
+    for (int i = 0; i < myPeople.Count; i++)
     {
-        Console.WriteLine(people[i]);
+        Console.WriteLine(myPeople[i]);
     }
-    //Unhandled exception. System.IndexOutOfRangeException
-    //people[101] = new Person("");
 }
+//UsingPersonCollection();
 
-//UseSimpleIndexer();
-
-void UseGenericTypeIndexer()
+static void UsingGenericListOfPeople()
 {
-    List<Person> people = new()
+    List<Person> myPeople = new List<Person>();
+    myPeople.Add(new Person("Lisa", "Simpson", 9));
+    myPeople.Add(new Person("Bart", "Simpson", 7));
+
+    // Change first person with indexer.
+    myPeople[0] = new Person("Maggie", "Simpson", 2);
+
+    // Now obtain and display each item using indexer.
+    for (int i = 0; i < myPeople.Count; i++)
     {
-        new("Tony"),
-        new("Sara"),
-        new("Sherlock"),
-    };
-
-
-    people[2] = people[0];
-
-    people[0] = new Person("Jhon");
-
-    for (int i = 0; i < people.Count; i++)
-    {
-        Console.WriteLine(people[i]);
+        Console.WriteLine(myPeople[i]);
     }
-
-    //Unhandled exception. System.IndexOutOfRangeException
-    //people[3] = new("Someone");
 }
+//UsingGenericListOfPeople();
 
-//UseGenericTypeIndexer();
-
-void UseStringIndexer()
+static void UsingPersonCollectionStringIndexer()
 {
-    PersonCollectionWithStringIndex personage = new();
+    PersonCollectionStringIndexer people = new();
+    people["Homer"] = new Person("Homer", "Simpson", 40);
+    people["Marge"] = new Person("Marge", "Simpson", 38);
 
-    personage["John"] = new("John Connor");
-    personage["Terminator"] = new("T-800");
-    personage["IronMan"] = new("Tony Stark");
+    Console.WriteLine(people["Homer"]);
 
-    Console.WriteLine(personage["Terminator"]);
-    Console.WriteLine();
-
-    personage["Terminator"] = new("T-1000");
-
-    foreach (KeyValuePair<string, Person> item in personage)
+    foreach (var person in people)
     {
-        Console.WriteLine($"Index:{item.Key}\tItem:{item.Value}");
+        Console.WriteLine(person);
     }
+
 }
+//UsingPersonCollectionStringIndexer();
 
-//UseStringIndexer();
-
-void UseIndexerInterface()
+static void MultiIndexerWithDataTable()
 {
-    List<string> strings = new() { "in", "in front", "next to", "under", "on" };
-
-    SomeStrings words = new(strings);
-
-    for (int i = 0; i < words.Count; i++)
-    {
-        Console.WriteLine(words[i]);
-    }
+    // Make a simple DataTable with 3 columns.
+    DataTable myTable = new DataTable();
+    myTable.Columns.Add(new DataColumn("FirstName"));
+    myTable.Columns.Add(new DataColumn("LastName"));
+    myTable.Columns.Add(new DataColumn("Age"));
+    // Now add a row to the table.
+    myTable.Rows.Add("Mel", "Appleby", 60);
+    // Use multidimension indexer to get details of first row.
+    Console.WriteLine($"First Name: {myTable.Rows[0][0]}");
+    Console.WriteLine($"Last Name: {myTable.Rows[0][1]}");
+    Console.WriteLine($"Age : {myTable.Rows[0][2]}");
 }
-
-UseIndexerInterface();
+MultiIndexerWithDataTable();
