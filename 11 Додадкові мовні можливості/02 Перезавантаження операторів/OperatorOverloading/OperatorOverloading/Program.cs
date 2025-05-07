@@ -37,5 +37,34 @@ static void UsingPointWithOperators()
 
     Console.WriteLine();
 
+    Point point1 = new Point(10, 10);
+    point += point1;
+    Console.WriteLine(point);
+
+    point1 -= point;
+    Console.WriteLine(point1);
+
+    Console.WriteLine();
+
+    point = new(0, 0);
+    point++; Console.WriteLine(point);
+    point--; Console.WriteLine(point);
+    ++point; Console.WriteLine(point);
+    --point; Console.WriteLine(point);
+
+    Console.WriteLine();
+
+    point = new(0, 0);
+    point1 = new(1, 1);
+    Console.WriteLine(point == point1);
+    Console.WriteLine(point != point1);
+
+    Console.WriteLine();
+
+    point = new(1, 1);
+    point1 = new(2, 2);
+    Console.WriteLine(point > point1);
+    Console.WriteLine(point < point1);
+
 }
 UsingPointWithOperators();
