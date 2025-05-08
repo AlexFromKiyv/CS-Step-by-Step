@@ -5,38 +5,31 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ExtensionMethods
+namespace ExtensionMethods;
+
+static class MyExtensions
 {
-    public static class MyExtensions
+    // This method allows any object to display the assembly
+    // it is defined in.
+    public static void DisplayDefiningAssembly(this object obj)
     {
-        public static void DisplayDefiningAssembly(this object obj)
-        {
-            Console.WriteLine($"\n" +
-                $"{obj.GetType()} " +
-                $"lives here: " +
-                $"{Assembly.GetAssembly(obj.GetType())?.GetName().Name}");
-        } 
+        Console.WriteLine("{0} lives here: => {1}\n",
+          obj.GetType().Name,
+          Assembly.GetAssembly(obj.GetType()).GetName().Name);
+    }
 
-        public static int ReverseDigits(this int i)
-        {
-            char[] chars = i.ToString().ToCharArray();
-
-            Array.Reverse(chars);
-
-            string newStringGigit = new string(chars);
-
-            return int.Parse(newStringGigit);
-        }
-
-        public static string ReverseChars(this string s)
-        {
-            char[] chars = s.ToCharArray();
-
-            Array.Reverse(chars);
-
-            string newString = new string(chars);
-
-            return newString;
-        }
+    // This method allows any integer to reverse its digits.
+    // For example, 56 would return 65.
+    public static int ReverseDigits(this int i)
+    {
+        // Translate int into a string, and then
+        // get all the characters.
+        char[] digits = i.ToString().ToCharArray();
+        // Now reverse items in the array.
+        Array.Reverse(digits);
+        // Put back into string.
+        string newDigits = new string(digits);
+        // Finally, return the modified string back as an int.
+        return int.Parse(newDigits);
     }
 }

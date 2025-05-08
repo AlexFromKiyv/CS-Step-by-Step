@@ -1,218 +1,233 @@
 # Методи розширення
 
-Методи розширення дозволяють збільшити функціональні можливості класа або структури не роблячи прямих змін в орігінальному визначені типу.Цеможе бути корисним в декількох випадках. 
-Коли клас знаходиться в реальній роботі і стає зрозуміло шо потрібно додавати нові члени. Коли ви змінюєте клас на пряму ви ризикуєте порушити зворотню сумістність з базовими класами оскільки вони можуть бути скопільовані не з останім визначенням класу.
-Одним из способів забезпечення зворотньої сумісності є створення похідного класую Однак тепер є два класи для підтримки.
-Якшо у вас є стркутура або запечатаний клас і ви хочите зробити шоб у нього були поліморфна поведінка для вашої системи. Оскілки це можно зробити тільки додавши члени знову виникає ризик порушеня сумісності.
-Використовуючи методи розширення можна модіфікуваим тип без підкалсу та без безпосередньої його зміни.
-Нова функціональність пропонується лише в поточному проекті.
+Концепція методів розширення дозволяє додавати нові методи або властивості до класу чи структури, не змінюючи початковий тип безпосередньо. Отже, де це може бути корисним? Розглянемо такі можливості.
+По-перше, скажімо, у вас є клас, який перебуває у production. З часом стає зрозуміло, що цей клас повинен підтримувати кілька нових членів. Якщо ви змінюєте поточне визначення класу безпосередньо, ви ризикуєте порушити зворотну сумісність зі старими базами коду, які його використовують, оскільки вони могли бути не скомпільовані з найновішою та найкращою версією визначення класу. Один із способів забезпечити зворотну сумісність – створити новий похідний клас з існуючого батьківського класу; однак, тепер у вас є два класи для обслуговування. Як усім відомо, підтримка коду — це найменш приваблива частина посадових обов'язків інженера-програміста.
+Тепер розглянемо таку ситуацію. Припустимо, у вас є структура (або, можливо, запечатаний клас) і ви хочете додати нові члени, щоб вона поводилася поліморфно у вашій системі. Оскільки структури та запечатані класи не можна розширювати, ваш єдиний вибір — додати члени до типу, знову ж таки ризикуючи порушити зворотну сумісність!
+Використовуючи методи розширення, ви можете змінювати типи без створення підкласів та без безпосередньої зміни типу. Загвоздка полягає в тому, що нова функціональність пропонується типу, лише якщо на методи розширення було зроблено посилання для використання у вашому поточному проєкті.
 
-## Визначення.
+## Визначення методів розширення
 
-Накладаються обмеження на методи розширеня шо вони повині бути визначені у статичному класі і бути статичними оскільки працюють на рівні типу. 
+Перше обмеження під час визначення методів розширення полягає в тому, що вони повинні бути визначені в межах статичного класу; отже, кожен метод розширення має бути оголошений з ключовим словом static. Другий момент полягає в тому, що всі методи розширення позначаються як такі за допомогою ключового слова this як модифікатора першого (і тільки першого) параметра відповідного методу. Параметр «this кваліфікований» представляє елемент, що розширюється.
+Для ілюстрації створіть новий проект консольної програми з назвою ExtensionMethods. Тепер припустимо, що ви створюєте клас з назвою MyExtensions, який визначає два методи розширення. Перший метод дозволяє будь-якому об'єкту використовувати новий метод з назвою DisplayDefiningAssembly(), який використовує типи з простору імен System.Reflection для відображення назви збірки, що містить відповідний тип.
 
-MyExtensions.cs
+    Ви розглянете API рефлексії в іншому розділі. Якщо ви новачок у цій темі, просто зрозумійте, що рефлексія дозволяє вам виявляти структуру збірок, типів та членів типів під час виконання.
+
+Другий метод розширення, названий ReverseDigits(), дозволяє будь-якому цілочисельному числу отримати нову версію самого себе, де значення перетворюється цифра за цифрою. Наприклад, якщо ціле число зі значенням 1234 викликається методом ReverseDigits(), повернене ціле число встановлюється на значення 4321. Розглянемо таку реалізацію класу (імпортуйте простір імен System.Reflection):
+
 ```cs
-    public static class MyExtensions
-    {
-        public static void DisplayDefiningAssembly(this object obj)
-        {
-            Console.WriteLine($"\n" +
-                $"{obj.GetType()} " +
-                $"lives here: " +
-                $"{Assembly.GetAssembly(obj.GetType())?.GetName().Name}");
-        } 
+using System.Reflection;
 
-        public static int ReverseDigits(this int i)
-        {
-            char[] chars = i.ToString().ToCharArray();
+namespace ExtensionMethods;
 
-            Array.Reverse(chars);
-
-            string newStringGigit = new string(chars);
-
-            return int.Parse(newStringGigit);
-        }
-
-        public static string ReverseChars(this string s)
-        {
-            char[] chars = s.ToCharArray();
-
-            Array.Reverse(chars);
-
-            string newString = new string(chars);
-
-            return newString;
-        }
-    }
-```
-```cs
-void InvokeExtentionMethod()
+static class MyExtensions
 {
-    int myInt = 123;
+    // This method allows any object to display the assembly
+    // it is defined in.
+    public static void DisplayDefiningAssembly(this object obj)
+    {
+        Console.WriteLine("{0} lives here: => {1}\n",
+          obj.GetType().Name,
+          Assembly.GetAssembly(obj.GetType()).GetName().Name);
+    }
+
+    // This method allows any integer to reverse its digits.
+    // For example, 56 would return 65.
+    public static int ReverseDigits(this int i)
+    {
+        // Translate int into a string, and then
+        // get all the characters.
+        char[] digits = i.ToString().ToCharArray();
+        // Now reverse items in the array.
+        Array.Reverse(digits);
+        // Put back into string.
+        string newDigits = new string(digits);
+        // Finally, return the modified string back as an int.
+        return int.Parse(newDigits);
+    }
+}
+```
+Зверніть увагу, як перший параметр кожного методу розширення було кваліфіковано ключовим словом this перед визначенням типу параметра. Завжди перший параметр методу розширення представляє тип, який розширюється. Оскільки DisplayDefiningAssembly() було прототиповано для розширення System.Object, кожен тип тепер має цей новий член, оскільки Object є батьківським для всіх типів на платформі .NET. Однак, ReverseDigits() був прототипований для розширення лише цілочисельних типів; тому, якщо будь-що, крім цілого числа, спробує викликати цей метод, ви отримаєте помилку під час компіляції.
+
+    Зрозумійте, що даний метод розширення може мати кілька параметрів, але лише перший параметр можна кваліфікувати за допомогою цього параметра. Додаткові параметри будуть розглядатися як звичайні вхідні параметри для використання методом.
+
+## Виклик методів розширення
+
+Тепер, коли у вас є ці методи розширення, розглянемо наступний приклад коду, який застосовує метод розширення до різних типів у бібліотеках базових класів:
+
+```cs
+static void InvokingExtensionMethods()
+{
+    // The int has assumed a new identity!
+    int myInt = 12345678;
     myInt.DisplayDefiningAssembly();
 
-    Console.WriteLine(myInt.ReverseDigits());
+    // So has the DataSet!
+    System.Data.DataSet d = new System.Data.DataSet();
+    d.DisplayDefiningAssembly();
 
-    string? myString = "Hi girl";
-
-    myString.DisplayDefiningAssembly();
-
-    Console.WriteLine(myString.ReverseChars());
-
-    // myString.ReverseDigits(); have no for string
-
-    System.Data.DataSet ds = new();
-    ds.DisplayDefiningAssembly();
+    // Use new integer functionality.
+    Console.WriteLine("Value of myInt: {myInt}");
+    Console.WriteLine($"Reversed digits of myInt: {myInt.ReverseDigits()}");
 }
-
-InvokeExtentionMethod()
+InvokingExtensionMethods();
 ```
 ```
+Int32 lives here: => System.Private.CoreLib
 
-System.Int32 lives here: System.Private.CoreLib
-321
+DataSet lives here: => System.Data.Common
 
-System.String lives here: System.Private.CoreLib
-lrig iH
-
-System.Data.DataSet lives here: System.Data.Common
-
+Value of myInt: {myInt}
+Reversed digits of myInt: 87654321
 ```
-this представляє елемент який розширюється. Це ключове слово слугує модіфікаторм для першого (і тілки першого ) параметра методу.
-Перший метод використовувати для будь якого об'єкту. Він відображає назву збірки шо містить відповідний тип. Оскільки object є батьком для всіх типів то цей метод з'явится для будьякої змінної.
-Другий метод дозволяє для будь якого int перевернути цифри.Зверніть увагу як this визначено як модіфікатор перед типом параметра. Перший параметр представляє тип що розширюється. 
-Метод розширення може мати декілька параметрів але лише перший визначає тип до якого він буде використаний.
 
-Коли ви маєте визначені методи розширеня вони визначені в просторі імен. Коли ви імпортуєте цей простір імен (using ...) вам стоють доступні методи розширення. Це треба робити явно для файлів коду які використовують методи. Може здатися що методи розширеня глобальні але вони обмежени простором імен в якому визначені. 
-Розширення структур має такий самий синтаксис.
+## Імпорт методів розширення
 
-## Методи розширення для інтерфейсів.
+Коли ви визначаєте клас, що містить методи розширення, він, безсумнівно, буде визначено в просторі імен. Якщо цей простір імен відрізняється від простору імен, що використовує методи розширення, вам потрібно буде використати очікуване ключове слово C# using. Коли ви це зробите, ваш файл коду матиме доступ до всіх методів розширення для типу, що розширюється. Це важливо пам'ятати, оскільки якщо ви явно не імпортуєте правильний простір імен, методи розширення будуть недоступні для цього файлу коду C#.
+Фактично, хоча на перший погляд може здаватися, що методи розширення мають глобальний характер, насправді вони обмежені просторами імен, які їх визначають, або просторами імен, які їх імпортують. Нагадаємо, що ви обгорнули клас MyExtensions у простір імен з назвою ExtensionMethods наступним чином:
 
-AnnoyingExtensions.cs
 ```cs
-    static class AnnoyingExtensions
+namespace ExtensionMethods;
+
+static class MyExtensions
+{
+    //...
+}    
+```
+Щоб використовувати методи розширення в класі, вам потрібно явно імпортувати простір імен ExtensionMethods, як ми це зробили в операторах верхнього рівня, що використовуються для розгляду прикладів.
+
+```cs
+using ExtensionMethods;
+```
+
+## Розширення типів, що реалізують певні інтерфейси
+
+На цьому етапі ви побачили, як розширювати класи (і, опосередковано, структури, що дотримуються того самого синтаксису) новою функціональністю за допомогою методів розширення. Також можна визначити метод розширення, який може розширювати лише клас або структуру, що реалізує інтерфейс. Наприклад, ви можете сказати щось на кшталт: «Якщо клас або структура реалізує IEnumerable<T>, то цей тип отримує такі нові члени». Звичайно, можна вимагати, щоб тип підтримував будь-який інтерфейс, включаючи ваші власні інтерфейси. 
+Для ілюстрації додайте новий проект консольної програми з назвою InterfaceExtensions. Мета тут — додати новий метод до будь-якого типу, що реалізує IEnumerable, який включатиме будь-який масив та багато неузагальнених класів колекцій (нагадаємо, що узагальнений інтерфейс IEnumerable<T> розширює неузагальнений інтерфейс IEnumerable). Додайте наступний клас до вашого нового проекту:
+
+```cs
+namespace InterfaceExtensions;
+
+static class AnnoyingExtensions
+{
+    public static void PrintDataAndBeep(this System.Collections.IEnumerable collection)
     {
-        public static void Print(this System.Collections.IEnumerable iterator)
+        foreach (var item in collection)
         {
-            foreach (var item in iterator) 
-            {
-                Console.WriteLine(item);
-                Console.Beep();
-            }
+            Console.WriteLine(item);
+            Console.Beep();
         }
     }
-```
-```cs
-void ExtentionForInterface()
-{
-    string[] strings = { "Hi", "girl", "!", "How", "are", "you", "?" };
-
-    strings.Print();
-
-    List<int> ints = new() { 1, 2, 3, };
-
-    ints.Print();
 }
-
-ExtentionForInterface();
 ```
-```
-Hi
-girl
-!
-How
-are
-you
-?
-1
-2
-3
+Враховуючи, що метод PrintDataAndBeep() може використовуватися будь-яким класом або структурою, що реалізує IEnumerable, ви можете перевірити це за допомогою наступного коду:
 
-```
-Якшо існує інтерфейс то для цього інтерфейсу можна додати методи розширення. Елементи класу який реалізовує інтерфейс зможуть використовувати ці методи. Тобто коли клас реалізовує інтерфейс вин також отримує додадкові члени.
-
-Методи розширення відіграють ключову роль для LINQ API. Найбільш пошире розширення  інтерфейсу IEnumerable<T>.
-
-## GetEnumerator як метод розширення.
-
-Аби клас стрврював контейнер який буде перебирати колекцію за допомогою foreach можна в ному реалізувати метод  GetEnumerator. Для типу можна також зробити такий метод розширення.
-Types.cs
 ```cs
-internal class Car
-{
-    public string Name { get; set; } = "";
-    public int CurrentSpeed { get; set; }
 
-    public Car(string name, int currentSpeed)
+using InterfaceExtensions;
+
+static void ExtendingTypesImplementingSpecificInterfaces()
+{
+    // System.Array implements IEnumerable!
+    string[] data =
+      { "Wow", "this", "is", "sort", "of", "annoying",
+      "but", "in", "a", "weird", "way", "fun!"};
+    data.PrintDataAndBeep();
+
+    Console.WriteLine();
+    
+    // List<T> implements IEnumerable!
+    List<int> myInts = new List<int>() { 10, 15, 20 };
+    myInts.PrintDataAndBeep();
+}
+ExtendingTypesImplementingSpecificInterfaces();
+```
+```
+Wow
+this
+is
+sort
+of
+annoying
+but
+in
+a
+weird
+way
+fun!
+
+10
+15
+20
+```
+Пам’ятайте, що ця мовна функція може бути корисною, коли ви хочете розширити функціональність типу, але не хочете створювати підкласи (або не можете створювати підкласи, якщо тип запечатаний) для цілей поліморфізму. Як ви побачите пізніше, методи розширення відіграють ключову роль для LINQ API. Фактично, ви побачите, що в API LINQ одним із найпоширеніших елементів, що розширюються, є клас або структура, що реалізує узагальнену версію IEnumerable.
+
+## Підтримка методу розширення GetEnumerator
+
+Метод foreach перевіряє методи розширення класу та, якщо знайдено метод GetEnumerator(), використовує цей метод для отримання IEnumerator для цього класу. Щоб побачити це в дії, додайте нову проект з назвою ForEachWithExtensionMethods. Додайте класи.
+
+```cs
+class Car
+{
+    // Car properties.
+    public int CurrentSpeed { get; set; } = 0;
+    public string PetName { get; set; } = "";
+
+    // Constructors.
+    public Car() { }
+
+    public Car(string petName, int currentSpeed)
     {
-        Name = name;
+        PetName = petName;
         CurrentSpeed = currentSpeed;
     }
-    public Car()
-    {
-    }
-
-    public override string? ToString() => $"{Name} {CurrentSpeed}"; 
-
-}
-
-class Garage
-{
-    public Car[] Cars { get; set; }
-
-    public Garage(Car[] cars)
-    {
-        Cars = cars;
-    }
-}
-
-static class GarageExtentions
-{
-    // Extention method
-    public static IEnumerator GetEnumerator(this Garage garage)
-        => garage.Cars.GetEnumerator();
-
-    public static void ToDisplay(this Car car)
-    {
-        Console.WriteLine(car);
-    }
 }
 ```
 ```cs
-void GetEnumeratorAsExtention()
+class Garage
 {
-    Car[] cars = 
-    {
-        new("VW Beetle",30),
-        new("VW Golf",40),
-        new("VW Passat",35)
-    };
+    public Car[] CarsInGarage { get; set; }
 
-    Garage garage = new(cars);
-
-    foreach (Car item in garage)
+    // Fill with some Car objects upon startup.
+    public Garage()
     {
-        item.ToDisplay();
+        CarsInGarage = new Car[4];
+        CarsInGarage[0] = new Car("Rusty", 30);
+        CarsInGarage[1] = new Car("Clunker", 55);
+        CarsInGarage[2] = new Car("Zippy", 30);
+        CarsInGarage[3] = new Car("Fred", 30);
     }
-
 }
+```
+Зверніть увагу, що клас Garage не реалізує IEnumerable, а також не має методу GetEnumerator(). Метод GetEnumerator() додається через клас GarageExtensions, як показано тут:
 
-GetEnumeratorAsExtention();
+```cs
+static class GarageExtensions
+{
+    public static IEnumerator GetEnumerator(this Garage g) 
+        => g.CarsInGarage.GetEnumerator();
+}
+```
+
+Таким чином з класом Garage можна виконати наступне:
+
+```cs
+static void UsingGatage()
+{
+    Garage carLot = new Garage();
+
+    // Hand over each car in the collection?
+    foreach (Car c in carLot)
+    {
+        Console.WriteLine($"{c.PetName} is going {c.CurrentSpeed} MPH");
+    }
+}
+UsingGatage();
 ```
 ```
-VW Beetle 30
-VW Golf 40
-VW Passat 35
+Rusty is going 30 MPH
+Clunker is going 55 MPH
+Zippy is going 30 MPH
+Fred is going 30 MPH
 ```
-Клас Garage не реалізовує IEnumerable та немає методу GetEnumerator. Таким чином можно не змінюючи клас можна використовувати його для перебору елементів.
-Також в прикладі додано метод розширення для відображення об'єкта Car. 
-
-
-
-
-
-
-
 
 

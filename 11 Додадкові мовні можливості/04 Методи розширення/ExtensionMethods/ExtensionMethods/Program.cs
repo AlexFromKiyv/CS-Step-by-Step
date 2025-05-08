@@ -1,56 +1,18 @@
-﻿using ExtensionMethods;
-using System.Runtime.InteropServices;
+﻿
+using ExtensionMethods;
 
-void InvokeExtentionMethod()
+static void InvokingExtensionMethods()
 {
-    int myInt = 123;
+    // The int has assumed a new identity!
+    int myInt = 12345678;
     myInt.DisplayDefiningAssembly();
 
-    Console.WriteLine(myInt.ReverseDigits());
+    // So has the DataSet!
+    System.Data.DataSet d = new System.Data.DataSet();
+    d.DisplayDefiningAssembly();
 
-    string? myString = "Hi girl";
-
-    myString.DisplayDefiningAssembly();
-
-    Console.WriteLine(myString.ReverseChars());
-
-    // myString.ReverseDigits(); have no for string
-
-    System.Data.DataSet ds = new();
-    ds.DisplayDefiningAssembly();
+    // Use new integer functionality.
+    Console.WriteLine("Value of myInt: {myInt}");
+    Console.WriteLine($"Reversed digits of myInt: {myInt.ReverseDigits()}");
 }
-
-//InvokeExtentionMethod();
-
-void ExtentionForInterface()
-{
-    string[] strings = { "Hi", "girl", "!", "How", "are", "you", "?" };
-
-    strings.Print();
-
-    List<int> ints = new() { 1, 2, 3, };
-
-    ints.Print();
-}
-
-//ExtentionForInterface();
-
-void GetEnumeratorAsExtention()
-{
-    Car[] cars = 
-    {
-        new("VW Beetle",30),
-        new("VW Golf",40),
-        new("VW Passat",35)
-    };
-
-    Garage garage = new(cars);
-
-    foreach (Car item in garage)
-    {
-        item.ToDisplay();
-    }
-
-}
-
-GetEnumeratorAsExtention();
+InvokingExtensionMethods();
