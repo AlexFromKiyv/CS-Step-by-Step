@@ -1,81 +1,107 @@
 ﻿
-using System.Drawing;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.Xml.Schema;
-
-void DefiningAnonymousType()
+static void BuildAnonymousType(string make, string color, int speed)
 {
-    var girl = new { Name = "Alice", Age = 25 };
-    Console.WriteLine(girl+"\n"+ girl.GetType()+"\n\n");
+    // Build anonymous type using incoming args.
+    var car = new { Make = make, Color = color, Speed = speed };
 
-
-    Console.WriteLine(GetCar("VW", "Käfer", 1938));
-
-    static string GetCar(string manufacturer, string model, int year)
-    {
-        var car = new { Manufacturer = manufacturer, Model = model, Year = year };
-        Console.Write(car+"\n"+ car.GetType()+"\n\n"); 
-
-        string carString = JsonSerializer.Serialize(car);
-        return carString;
-    }
+    // Note you can now use this type to get the property data!
+    Console.WriteLine($"You have a {car.Color} {car.Make} going {car.Speed} MPH");
+    Console.WriteLine();
+    // Anonymous types have custom implementations of each virtual
+    // method of System.Object. For example:
+    Console.WriteLine($"ToString() == {car.ToString()}");
 }
 
+static void DefiningAnonymousType()
+{
+
+    BuildAnonymousType("Ford", "Red", 20);
+
+    // Make an anonymous type representing a car.
+    var myCar = new { Color = "Bright Pink", Make = "Saab", CurrentSpeed = 55 };
+    // Now show the color and make.
+    Console.WriteLine($"My car is a {myCar.Color} {myCar.Make}.");
+
+}
 //DefiningAnonymousType();
 
-
-void ReflectObjectContent(object @object)
+static void ReflectOverAnonymousType(object obj)
 {
-    Type type = @object.GetType();
-
-    Console.WriteLine($"\nObject is instance of {type.Name}");
-    Console.WriteLine($"Base class of {type.Name} is {type.BaseType}");
-    Console.WriteLine($"object.ToString() == {@object}");
-    Console.WriteLine($"@object.GetHashCode() == {@object.GetHashCode()}");
-}
-
-void ExplorationAnonimusTypes()
-{
-    var girl = new { Name = "Julia", Age = 35 };
-
-    ReflectObjectContent(girl);
-
-    // girl.Name = "Olga"; It isn't works. it is readonly
-}
-
-//ExplorationAnonimusTypes();
-
-void MethodEqualsIntoAnonymousType()
-{
-    var girl1 = new { Name = "Olga", Age = 35 };
-    var girl2 = new { Name = "Olga", Age = 35 };
-
-    ReflectObjectContent(girl1);
-    ReflectObjectContent(girl2);
-
+    Console.WriteLine($"obj is an instance of: {obj.GetType().Name}");
+    Console.WriteLine($"Base class of {obj.GetType().Name} is {obj.GetType().BaseType}");
+    Console.WriteLine($"obj.ToString() == {obj.ToString()}");
+    Console.WriteLine($"obj.GetHashCode() == {obj.GetHashCode()}");
     Console.WriteLine();
-
-    Console.WriteLine($"girl1.Equals(girl2): {girl1.Equals(girl2)} ");
-    Console.WriteLine($"girl1 == girl2: {girl1 == girl2}");
-
 }
-//MethodEqualsIntoAnonymousType();
 
-void MoreSophisticatedAnonymousType()
+static void ReflectCar()
 {
-    var purshaseItem = new
+    // Make an anonymous type representing a car.
+    var myCar = new
     {
-        TimeBought = DateTime.Now,
-        ItemBought = new
-        {
-            Manufacturer = "VW",
-            Model = "ID4",
-            Color = "Grey"
-        },
-        Price = 34.000M
+        Color = "Bright Pink",
+        Make = "Saab",
+        CurrentSpeed = 55
     };
 
-    ReflectObjectContent(purshaseItem);
+    ReflectOverAnonymousType(myCar);
 }
-MoreSophisticatedAnonymousType();
+//ReflectCar();
+
+static void EqualityTest()
+{
+    // Make 2 anonymous classes with identical name/value pairs.
+    var firstCar = new { Color = "Bright Pink", Make = "Saab", CurrentSpeed = 55 };
+    var secondCar = new { Color = "Bright Pink", Make = "Saab", CurrentSpeed = 55 };
+
+    // Are they considered equal when using Equals()?
+    if (firstCar.Equals(secondCar))
+    {
+        Console.WriteLine("Same anonymous object!");
+    }
+    else
+    {
+        Console.WriteLine("Not the same anonymous object!");
+    }
+
+    // Are they considered equal when using ==?
+    if (firstCar == secondCar)
+    {
+        Console.WriteLine("Same anonymous object!");
+    }
+    else
+    {
+        Console.WriteLine("Not the same anonymous object!");
+    }
+
+    // Are these objects the same underlying type?
+    if (firstCar.GetType().Name == secondCar.GetType().Name)
+    {
+        Console.WriteLine("We are both the same type!");
+    }
+    else
+    {
+        Console.WriteLine("We are different types!");
+    }
+
+    // Show all the details.
+    Console.WriteLine();
+    ReflectOverAnonymousType(firstCar);
+    ReflectOverAnonymousType(secondCar);
+}
+//EqualityTest();
+
+static void AnonymousTypesContainingAnonymousTypes()
+{
+    // Make an anonymous type that is composed of another.
+    var purchaseItem = new
+    {
+        TimeBought = DateTime.Now,
+        ItemBought = new { Color = "Red", Make = "Saab", CurrentSpeed = 55 },
+        Price = 34.000
+    };
+
+    ReflectOverAnonymousType(purchaseItem);
+    ReflectOverAnonymousType(purchaseItem.ItemBought);
+}
+AnonymousTypesContainingAnonymousTypes();
