@@ -1,0 +1,61 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35931.197
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreadStats", "ThreadStats\ThreadStats.csproj", "{F9236119-2E51-436F-BA72-8C0849C61FF1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleMultiThreadApp", "SimpleMultiThreadApp\SimpleMultiThreadApp.csproj", "{832E4D98-2A87-481A-B74D-A3C9FCCA0D17}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AddWithThreads", "AddWithThreads\AddWithThreads.csproj", "{38199130-51AE-4F42-8C75-2AC6B6649692}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BackgroundThreads", "BackgroundThreads\BackgroundThreads.csproj", "{7EF7274E-BFDB-49CD-8D2E-88FDFC15C205}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MultiThreadedPrinting", "MultiThreadedPrinting\MultiThreadedPrinting.csproj", "{B46AB1AC-02D0-42A9-BB2E-F1C6F53E8DE7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TimerApp", "TimerApp\TimerApp.csproj", "{C62D5CA3-91B7-4B19-B068-4F13855D1D88}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreadPoolApp", "ThreadPoolApp\ThreadPoolApp.csproj", "{52EEE339-5515-4E69-A4D3-B2C7ED0F0F85}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F9236119-2E51-436F-BA72-8C0849C61FF1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9236119-2E51-436F-BA72-8C0849C61FF1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F9236119-2E51-436F-BA72-8C0849C61FF1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F9236119-2E51-436F-BA72-8C0849C61FF1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{832E4D98-2A87-481A-B74D-A3C9FCCA0D17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{832E4D98-2A87-481A-B74D-A3C9FCCA0D17}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{832E4D98-2A87-481A-B74D-A3C9FCCA0D17}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{832E4D98-2A87-481A-B74D-A3C9FCCA0D17}.Release|Any CPU.Build.0 = Release|Any CPU
+		{38199130-51AE-4F42-8C75-2AC6B6649692}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{38199130-51AE-4F42-8C75-2AC6B6649692}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{38199130-51AE-4F42-8C75-2AC6B6649692}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{38199130-51AE-4F42-8C75-2AC6B6649692}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7EF7274E-BFDB-49CD-8D2E-88FDFC15C205}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7EF7274E-BFDB-49CD-8D2E-88FDFC15C205}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7EF7274E-BFDB-49CD-8D2E-88FDFC15C205}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7EF7274E-BFDB-49CD-8D2E-88FDFC15C205}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B46AB1AC-02D0-42A9-BB2E-F1C6F53E8DE7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B46AB1AC-02D0-42A9-BB2E-F1C6F53E8DE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B46AB1AC-02D0-42A9-BB2E-F1C6F53E8DE7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B46AB1AC-02D0-42A9-BB2E-F1C6F53E8DE7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C62D5CA3-91B7-4B19-B068-4F13855D1D88}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C62D5CA3-91B7-4B19-B068-4F13855D1D88}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C62D5CA3-91B7-4B19-B068-4F13855D1D88}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C62D5CA3-91B7-4B19-B068-4F13855D1D88}.Release|Any CPU.Build.0 = Release|Any CPU
+		{52EEE339-5515-4E69-A4D3-B2C7ED0F0F85}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{52EEE339-5515-4E69-A4D3-B2C7ED0F0F85}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{52EEE339-5515-4E69-A4D3-B2C7ED0F0F85}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{52EEE339-5515-4E69-A4D3-B2C7ED0F0F85}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {80046498-DC74-486D-A4F5-5840BF9B6291}
+	EndGlobalSection
+EndGlobal
