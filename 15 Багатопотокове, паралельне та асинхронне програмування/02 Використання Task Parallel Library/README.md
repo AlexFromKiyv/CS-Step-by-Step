@@ -1,17 +1,17 @@
 # Використання Task Parallel Library
 
-Крім використання простору імен System.Threading для стоврення багатопотокових програм існує інший підхід, використовуючи бібліотеку паралельного програмування під назвою Task Parallel Library (TPL). Використовуючи типи  з System.Threading.Tasks, можна створювати детальний, маштабований паралельний код без необхідності працювати безпосередньо з потоками.
-Однак це не означає, що ви не використовуватимете типи System.Threading, коли використовуєте TPL. Обидва набори інструментів розробки можуть працювати разом цілком природно. Це особливо вірно в тому, що простір імен System.Threading все ще надає більшість основних можливостей синхронізації, які ви досліджували раніше (Monitor, Interlocked тощо). Однак ви, швидше за все, виявите, що віддасте перевагу роботі з TPL, а не з оригінальним простором імен System.Threading, враховуючи, що той самий набір завдань можна виконувати більш простим способом.
+На цьому етапі ви розглянули об'єкти простору імен System.Threading, які дозволяють створювати багатопотокове програмне забезпечення. Більш новий підхід до розробки багатопотокових застосунків полягає у використанні бібліотеки паралельного програмування під назвою Task Parallel Library (TPL). Використовуючи типи System.Threading.Tasks, ви можете створювати гарно розділений на частини, масштабований паралельний код без необхідності працювати безпосередньо з потоками або пулом потоків.
+Однак це не означає, що ви не використовуватимете типи System.Threading, коли використовуватимете TPL. Обидва набори інструментів для потокової обробки можуть працювати разом цілком природно. Це особливо актуально, оскільки простір імен System.Threading все ще надає більшість примітивів синхронізації, які ви розглядали раніше (Monitor, Interlocked тощо). Однак, ви, ймовірно, виявите, що надасте перевагу роботі з TPL, а не з оригінальним простором імен System.Threading, враховуючи, що той самий набір завдань можна виконувати простіше.
 
-## Простір імен System.Threading.Tasks
+## Простір імен System.Threading.Tasks 
 
-У сукупності типи System.Threading.Tasks називають бібліотекою паралельних завдань. TPL автоматично динамічно розподілятиме робоче навантаження вашої програми між доступними ЦП, використовуючи пул потоків виконання. TPL обробляє розподіл роботи, планування потоків, керування станом та інші деталі низького рівня. Результатом є те, що ви можете максимізувати продуктивність своїх програм .NET Core, захищаючись від багатьох складнощів безпосередньої роботи з потоками.
+Разом типи System.Threading.Tasks називаються бібліотекою паралельного виконання завдань Task Parallel Library (TPL). TPL автоматично розподілятиме робоче навантаження вашої програми між доступними процесорами динамічно, використовуючи пул потоків середовища виконання. TPL обробляє розподіл роботи, планування потоків, керування станом та інші низькорівневі деталі. В результаті ви можете максимізувати продуктивність своїх .NET Core-застосунків, одночасно захищаючись від багатьох складнощів безпосередньої роботи з потоками.
 
-## Класс Task.
+# Класс Task
 
 В основі TPL лежить концепція завдань, які представняють собою окреме довге навантаження. Для завдань існує клас Task з простору імен System.Threading.Tasks. Цей клас використовується для асінхроного запуску окремого навантаження в одному з потоків із пулу. Також завдання можна виконати і синхроно.
 
-## Створення і запуск завдання.
+## Створення і запуск завдання
 
 Завдання можно створити і запустити декількома способами:
 
@@ -19,12 +19,12 @@ UsingTask\Programm.cs
 ```cs
 void RunTasks()
 {
-    Task task1 = new Task(() => { Console.WriteLine($"Task 1 on {Thread.CurrentThread.ManagedThreadId}");});
+    Task task1 = new Task(() => Console.WriteLine($"Task 1 in thread: {Thread.CurrentThread.ManagedThreadId}"));
     task1.Start();
 
-    Task task2 = Task.Factory.StartNew(() => { Console.WriteLine($"Task 2 on {Thread.CurrentThread.ManagedThreadId}"); ; ;});
+    Task task2 = Task.Factory.StartNew(() => Console.WriteLine($"Task 2 in thread: {Thread.CurrentThread.ManagedThreadId}"));
 
-    Task task3 = Task.Run(() => { Console.WriteLine($"Task 3 on {Thread.CurrentThread.ManagedThreadId} "); });
+    Task task3 = Task.Run(() => Console.WriteLine($"Task 3 in thread: {Thread.CurrentThread.ManagedThreadId}"));
 
     task1.Wait();
     task2.Wait();
@@ -32,45 +32,16 @@ void RunTasks()
 
 }
 RunTasks();
-
-``` 
-```
-Task 1 on 6
-Task 3 on 8
-Task 2 on 7
-```    
-Якшо не використовувати метод Wait завдання основного потоку закінчитися бистріше аніж виконається завдання окремих потоків. 
-Цей метод блокує поток в якому викликається завданя поки вона не виконається 
-
-UsingTask\Programm.cs
-```cs
-void UsingWait()
-{
-    Console.WriteLine("Main thread.");
-    
-    Task task = new(()=>
-    {
-        Console.WriteLine("Start Task.");
-        Thread.Sleep(1000);
-        Console.WriteLine("End Task.");
-
-    });
-    task.Start();
-    task.Wait();
-
-    Console.WriteLine("End main thread."  );
-}
-UsingWait();
 ```
 ```
-Main thread.
-Start Task.
-End Task.
-End main thread.
+Task 2 in thread: 7
+Task 3 in thread: 8
+Task 1 in thread: 6
 ```
+Як бачите конструктор типу Task приймає тип делегата Action без параметрів. Якшо не використовувати метод Wait завдання основного потоку закінчитися бистріше аніж виконається завдання окремих потоків. Цей метод блокує поток в якому викликається завданя поки вона не виконається
+
 Класс Task має певні властивості.
 
-UsingTask\Programm.cs
 ```cs
 void PropertyOfTask()
 {
@@ -78,8 +49,8 @@ void PropertyOfTask()
 
     Task task = new(() =>
     {
-        Console.WriteLine($"Id: {Task.CurrentId}");
-        Thread.Sleep(1000);
+        Console.WriteLine($"Task Id: {Task.CurrentId}");
+        //Thread.Sleep(2000);
     });
     task.Start();
 
@@ -94,23 +65,21 @@ void PropertyOfTask()
     Console.WriteLine("End main thread.");
 }
 PropertyOfTask();
-
 ```
 ```
 Main thread.
 Id: 1
+Task Id: 1
 IsCompleted: False
-Id: 1
 IsFaulted: False
 IsCanceled: False
-Status: Running
+Status: RanToCompletion
 End main thread.
-
 ```
-
 ## Внутрішні завдання
 
 Одне завдання може мати внутрішне завдання.
+
 ```cs
 void InnerTask()
 {
@@ -125,25 +94,27 @@ void InnerTask()
             Thread.Sleep(1000);
             Console.WriteLine("Inner task finished.");
         });
-        //inner.Wait();
+        inner.Wait();
         Console.WriteLine("Outer task finished.");
     });
     outer.Wait();
     Console.WriteLine("End main");
 }
 InnerTask();
+
 ```
 ```
 Start main
 Outer task starting.
+Inner task starting.
+Inner task finished.
 Outer task finished.
 End main
 ```
-Задачі виконуються незалежно одна від одної. Як видно з прикладу зовнішне завдання може закінчитись не дочекавшись виконання внутрішнього.
+Задачі виконуються незалежно одна від одної. Як видно з прикладу зовнішне завдання може закінчитись не дочекавшись виконання внутрішнього. Це можно попбачити закоментувавши inner.Wait().
 
 Можна вказати внутрішньому завданню що вона є частиною зовнішнього.
 
-UsingTask\Programm.cs
 ```cs
 void InnerTaskAsPartOuter()
 {
@@ -157,7 +128,7 @@ void InnerTaskAsPartOuter()
             Console.WriteLine("Inner task starting.");
             Thread.Sleep(1000);
             Console.WriteLine("Inner task finished.");
-        },TaskCreationOptions.AttachedToParent);
+        }, TaskCreationOptions.AttachedToParent);
         //inner.Wait();
         Console.WriteLine("Outer task finished.");
     });
@@ -180,7 +151,6 @@ End main
 
 Якшо маємо масив завдань можемо їх запустити і вказати основному потоку шо треба дочекатись аби всі завдання закінчились.
 
-UsingTask\Programm.cs
 ```cs
 void ArrayOfTasks()
 {
@@ -218,32 +188,30 @@ ArrayOfTasks();
 ```
 ```
 Task 3 started.
-Task 1 started.
 Task 2 started.
+Task 1 started.
 Task 2 finished.
 Task 3 finished.
 Task 1 finished.
 ```
-В синхронному виклику навантаженя потребувало б в три рази більше часу.
-Крім того існує метод Task.WaitAny який затримує основний потік докі не закінчить виконання будь якє завдання. 
+В синхронному виклику навантаженя потребувало б в три рази більше часу. Крім того існує метод Task.WaitAny який затримує основний потік докі не закінчить виконання будь якє завдання.
 
-## Повернення результату виконаного завдання.
+## Повернення результату виконаного завдання
 
 Об'єкт Task може повертати результат виконання завдання.
 
-UsingTask\Programm.cs
 ```cs
 void ObtainingTheResultOfTheTask()
 {
-    Console.Write($"Thread:{Thread.CurrentThread.ManagedThreadId} Enter number :");
-    
-    int.TryParse(Console.ReadLine(),out int x);
+    Console.Write($"Thread:{Thread.CurrentThread.ManagedThreadId}\nEnter number :");
+
+    int.TryParse(Console.ReadLine(), out int x);
 
     Task<int> squareTask = new(() =>
     {
         Console.WriteLine($"Thread:{Thread.CurrentThread.ManagedThreadId}");
-        Thread.Sleep(3000);
-        return x*x;
+        Thread.Sleep(2000);
+        return x * x;
     });
 
     squareTask.Start();
@@ -255,17 +223,17 @@ void ObtainingTheResultOfTheTask()
 ObtainingTheResultOfTheTask();
 ```
 ```
-Thread:1 Enter number :10
+Thread:1
+Enter number :5
 Thread:6
-Result:100
+Result:25
 ```
-Для того щоб завдання повернула результат його треба типізувати типом який хочемо отримати. При звернені до власитвості task.Result поточний потік призупиняється і чекає виконання завданя в якому буде визначено результат. 
+Для того щоб завдання повернула результат його треба типізувати типом який хочемо отримати. При звернені до власитвості task.Result поточний потік призупиняється і чекає виконання завданя в якому буде визначено результат.
 
 ## Завдання на продовження.
 
 Завдання може бути виконанне після виконання іншого. Воно може отримати від іншого завдання результату.
 
-UsingTask\Programm.cs
 ```cs
 void ContinuationTask()
 {
@@ -294,7 +262,6 @@ Previous Task Id:1
 
 Завданна на продовження може оримати результат від попередьнього завдання.
 
-UsingTask\Programm.cs
 ```cs
 void ContinuationTaskWithValue()
 {
@@ -302,7 +269,7 @@ void ContinuationTaskWithValue()
 
     Task<int> squareTask = new(() =>
     {
-        Console.WriteLine($"Task {Task.CurrentId} says: I'm starting"  );
+        Console.WriteLine($"Task {Task.CurrentId} says: I'm starting");
         Thread.Sleep(t);
         return t;
     });
@@ -317,9 +284,8 @@ void ContinuationTaskWithValue()
     {
         Console.WriteLine($"Task {Task.CurrentId} says: I waited {result} ");
     }
- }
+}
 ContinuationTaskWithValue();
-
 ```
 ```
 Task 1 says: I'm starting
@@ -327,7 +293,6 @@ Task 2 says: I waited 5000
 ```
 Маючи таку можливість можна побудувати ланцюг завдань.
 
-UsingTask\Programm.cs
 ```cs
 void ChainOfTask()
 {
@@ -352,58 +317,10 @@ Current Task:2  Previous Task:1
 Current Task:3  Previous Task:2
 ```
 
-## Класу Parallel.
+## Скасування завдань.
 
-Важливим класом TPL є System.Threading.Tasks.Parallel.
+Іноді виникає потреба скасувати виконання дуже довгого завдання. В просторі імен System.Threading визначена стуктура CancellationToken яка поширює сповіщення про те, що операції мають бути скасовані.
 
-Найпростіше запустити завдання паралельно можна за допомогою методу Invoke.
-
-UsingParalell\Program.cs
-```cs
-void SimpleUsingInvoke()
-{
-    Parallel.Invoke(
-        () => {
-            Console.WriteLine($"Task:{Task.CurrentId}");
-            Thread.Sleep(1000);
-            Console.WriteLine("Hi");
-
-        },        
-        ()=>SayWithDelay("girl",3000),
-        
-        SayGoodbay       
-        );
-
-    void SayGoodbay()
-    {
-        SayWithDelay("Goodbay", 5000);
-    }
-    
-    void SayWithDelay(string phrase, int delay) 
-    {
-        Console.WriteLine($"Task:{Task.CurrentId}");
-        Thread.Sleep(delay);
-        Console.WriteLine(phrase);
-    }
-
-}
-SimpleUsingInvoke();
-```
-```
-Task:3
-Task:2
-Task:1
-Hi
-girl
-Goodbay
-```
-В якості параметру метод Invoce отримує params Action[]. Таким чином ми можемо пердати методи яки середовище буде виконувати паралельно.
-
-## Скасування паралельних завдань.
-
-Іноді виникає потреба скасувати виконання дуже довгого завдання. В просторі імен System.Threading визначена стуктура CancellationToken яка поширює сповіщення про те, що операції мають бути скасовані. 
-
-UsingParalell\Program.cs
 ```cs
 void CancellationWitoutThrow()
 {
@@ -437,6 +354,7 @@ void CancellationWitoutThrow()
     Console.ReadLine();
 }
 CancellationWitoutThrow();
+
 ```
 ```
 0
@@ -450,10 +368,9 @@ Task status:Running
 Task canceled
 
 ```
-Для обробки скасування спочатку створюється об'єкт CancellationTokenSource який керує та відсилає повідомлення про скасування. В конструктор завдання надсилаеться властивість цього об'єкта CancellationTokenSource.Token. Коли поза завданням викликаеться метод CancellationTokenSource.Cancel() відсилаеться повідомленя про скасування і властивість в стуктурі cancellationToken.IsCancellationRequested примає значення true. В процесі проходження циклу можна перевірити чи не будо відмінено завдання. 
+Для обробки скасування спочатку створюється об'єкт CancellationTokenSource який керує та відсилає повідомлення про скасування. В конструктор завдання надсилаеться властивість цього об'єкта CancellationTokenSource.Token. Коли поза завданням викликаеться метод CancellationTokenSource.Cancel() відсилаеться повідомленя про скасування і властивість в стуктурі cancellationToken.IsCancellationRequested примає значення true. В процесі проходження циклу можна перевірити чи не будо відмінено завдання.
 
 Виконати скасування циклу можно викинувши Exception.
-UsingParalell\Program.cs
 ```cs
 void CancellationWithThrow()
 {
@@ -493,10 +410,7 @@ void CancellationWithThrow()
                 Console.WriteLine(ex.Message);
         }
     }
-
-
     Console.WriteLine($"Task status:{task.Status}");
-   
 }
 CancellationWithThrow();
 ```
@@ -510,31 +424,95 @@ CancellationWithThrow();
 Task canceled
 Task status:Canceled
 ```
-В цьому варіанті замість return викидається винаток cancellationToken.ThrowIfCancellationRequested().
+
+# Роль класу Parallel.
+
+Ключовим класом TPL є System.Threading.Tasks.Parallel. 
+
+## Просте використання класу Parallel
+
+Найпростіше запустити завдання паралельно можна за допомогою методу Invoke.
+
+```cs
+void SimpleUsingInvoke()
+{
+    Parallel.Invoke(
+        () => Work(3000),
+        () => Work(3000),
+        () => Work(3000),
+        () => Console.WriteLine("Hi")
+        );
+    
+    void Work(int delay)
+    {
+        int? id = Task.CurrentId;
+        Console.WriteLine($"Task:{id} start");
+        Thread.Sleep(delay);
+        Console.WriteLine($"Task:{id} finish");
+    }
+}
+SimpleUsingInvoke();
+```
+```
+Task:2 start
+Task:1 start
+Hi
+Task:3 start
+Task:2 finish
+Task:1 finish
+Task:3 finish
+```
+В якості параметру метод Invoke отримує params Action[]. Таким чином ми можемо передати методи яки середовище буде виконувати паралельно. Сінхронно те саме виконується в трічи довше.
+
+```cs
+void SimpleUsingInvoke()
+{
+    //...
+    
+    Work(3000);
+    Work(3000);
+    Work(3000);
+    Console.WriteLine("Hi");
+    
+    //...
+}
+SimpleUsingInvoke();
+```
+```
+Task: start
+Task: finish
+Task: start
+Task: finish
+Task: start
+Task: finish
+Hi
+```
 
 
 ## Parallel.For() та Parallel.ForEach()
 
-Крім методу Invoce клас Paralell містить методи які дозволяють перебирати колекцію даних (зокрема, об'єкт що реалізовує IEnumerable<T>) в паралельний спосіб. Це робиться за допомогою двох основних статичних методів, Parallel.For() та Parallel.ForEach(), кожен з яких визначає численні презавантажені версії. 
-Ці методи дозволяють створювати тіло набору операторів коду,які оброблятимуться в паралельним способом. За концепцією, ці оператори мають таку саму логіку яку б ви написали в звичайній конструкції переблору(for , foreach). Корсить в тому що клас Parallel витягуватиме потокі з пулу потоків(і куруватимеме паралелізмом) від вашого імені.
-Обидва методи вимагають вказати IEnumerable або  IEnumerable<T> сумісний контейнер, якій містить дані, які потрібно обробити в параллельній манері. Це може бути простий масив, неузагальнена колекція(наприклад ArrayList), узагальнена коллекція(наприклад List<T>) або результат запиту LINQ.
-Крім того, вам потрібно буде використовувати делегати Func<T> або Action<T> щоб указати цільовий метод, який буде викликано для обробки даних. 
-Згадайте, що Func<T> представляє метод, який може мати задане повертане значення та різну кількість аргументів. Делегат Action<T> схожий на Func<T>, оскільки він дозволяє вказувати на метод, який приймає певну кількість параметрів. Однак Action<T> визначає метод, який може повертати лише void. Хоча ви можете викликати методи Parallel.For() і Parallel.ForEach() і передати строго типізований об’єкт делегату Func<T> або Action<T>, ви можете спростити своє програмування, використовуючи відповідний анонімний метод C# або лямбда-вираз.
+Крім методу Invoce клас Paralell містить методи, що дозволяють вам виконувати ітерацію по колекції даних (зокрема, об'єкту, що реалізує IEnumerable\<T\>) паралельним чином, головним чином за допомогою двох основних статичних методів, Parallel.For() та Parallel.ForEach(), кожен з яких визначає численні перевантажені версії.
+Ці методи дозволяють вам створювати набір операторів коду, які будуть оброблятися паралельно. За концепцією, ці оператори є такою ж логікою, яку ви б написали у звичайній конструкції циклу (через ключове слово for або foreach C#). Перевага полягає в тому, що клас Parallel вибиратиме потоки з пулу потоків (і керуватиме паралельністю) від вашого імені.
+Обидва методи вимагають вказати контейнер, сумісний з IEnumerable або IEnumerable<T>, який містить дані, необхідні для паралельної обробки. Контейнер може бути простим масивом, неузагальненою колекцією (наприклад, ArrayList), узагальненою колекцією (наприклад, List\<T\>) або результатами запиту LINQ.
+Крім того, вам потрібно буде використовувати делегати System.Func\<T\> та System.Action\<T\>, щоб вказати цільовий метод, який буде викликано для обробки даних. Нагадаємо, що Func\<T\> представляє метод, який може мати задане повернене значення та різноманітну кількість аргументів. Делегат Action\<T\> подібний до Func\<T\> тим, що він дозволяє вказувати на метод, що приймає певну кількість параметрів. Однак Action\<T\> визначає метод, який може повертати лише значення void.
+Хоча ви можете викликати методи Parallel.For() та Parallel.ForEach() та передати об'єкт делегату Func\<T\> або Action\<T\> зі строгою типізацією, ви можете спростити своє програмування, використовуючи відповідний анонімний метод C# або лямбда-вираз.
 
-## Паралелізм даних із класом Paralell
+## Паралелізм даних з класом Parallel
 
-Корсиний спосіб використати TPL - виконати паралелізм даних. Простіше кажучи, цей термін відноситься до завдання прохождення елементв масиву або колекції паралельним способом за допомогою методу Parallel.For() або Parallel.ForEach(). Припустімо, що потрібно виконати деякі трудомісткі операції введення-виведення файлів. Зокрема, вам потрібно завантажити велику кількість файлів *.jpg у пам’ять, перевернути їх догори дном і зберегти змінені дані зображення в новому місці.
-У цьому прикладі ви побачите, як виконати те саме загальне завдання за допомогою графічного інтерфейсу користувача, тож ви зможете вивчити використання «анонімних делегатів», щоб дозволити вторинним потокам оновлювати основний потік інтерфейсу користувача (він же потік інтерфейсу користувача). 
-Коли ви створюєте програму з багатопоточним графічним інтерфейсом користувача (GUI), вторинні потоки ніколи не зможуть отримати прямий доступ до елементів керування інтерфейсу користувача. Причина в тому, що елементи керування (кнопки, текстові поля, мітки, індикатори виконання тощо) мають спорідненість потоку з потоком, який їх створив.
-У наступному прикладі проілюстровано один із способів надання вторинним потокам доступу до елементів інтерфейсу користувача потокобезпечним способом (хоча простіше зробити за допомогою async і await).
+Перший спосіб використання TPL – це паралельне оброблення даних. Простіше кажучи, цей термін стосується завдання паралельного перебору масиву або колекції за допомогою методу Parallel.For() або Parallel.ForEach(). Припустимо, вам потрібно виконати деякі трудомісткі операції вводу/виводу файлів. Зокрема, вам потрібно завантажити велику кількість файлів *.jpg у пам'ять, перевернути їх догори дном і зберегти змінені дані зображення в новому місці.
+У цьому прикладі ви побачите, як виконати те саме загальне завдання за допомогою графічного інтерфейсу користувача, тож ви можете розглянути використання «анонімних делегатів», щоб дозволити вторинним потокам оновлювати основний потік інтерфейсу користувача (тобто потік інтерфейсу користувача).
 
-Створемо проект типу WPF Application з назвою DataParallelismWithForEach і назвою рішення DataParallelismWithForEach.
+    Під час створення багатопотокової програми з графічним інтерфейсом користувача (GUI), вторинні потоки ніколи не можуть безпосередньо отримувати доступ до елементів керування інтерфейсом користувача. Причина полягає в тому, що елементи керування (кнопки, текстові поля, підписи, індикатори виконання тощо) мають спорідненість з потоком, який їх створив. У наступному прикладі я проілюструю один зі способів дозволити вторинним потокам отримувати доступ до елементів інтерфейсу користувача потокобезпечним способом. Ви побачите спрощений підхід, розглянувши ключові слова C# async та await.
 
-Для тестування в католог D:\Pitures скопіюємо декілька будь-яких зображень з розширенням *.jpg.
+Для ілюстрації створіть нову програму Windows Presentation Foundation (шаблон скорочено називається WPF Application) з назвою DataParallelismWithForEach. 
+Для цього прикладу потрібен додатковий пакет NuGet (System.Drawing.Common). Щоб додати його до свого проєкту, введіть наступний рядок (все в одному рядку) у командному рядку (у тому ж каталозі, що й файл вашого рішення) або в консолі диспетчера пакетів у Visual Studio:
 
-Змінемо файл MainWindow.xalm
-
+```console
+dotnet add DataParallelismWithForEach package System.Drawing.Common
 ```
+Замініть XAML наступним кодом
+
+```xml
 <Window x:Class="DataParallelismWithForEach.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -542,7 +520,7 @@ Task status:Canceled
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DataParallelismWithForEach"
         mc:Ignorable="d"
-        Title="Using Paralell Class" Height="400" Width="800">
+        Title="MainWindow" Height="450" Width="800">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -559,92 +537,101 @@ Task status:Canceled
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <Button Name="cmdCancel" Grid.Column="0" Margin="65,0,665,0" Click="cmdCancel_Click" Height="20" VerticalAlignment="Center" Grid.ColumnSpan="2">
+            <Button Name="cmdCancel" Grid.Row="0" Grid.Column="0" Margin="10,10,0,10" Click="cmdCancel_Click">
                 Cancel
             </Button>
-            <Button Name="cmdProcessWitoutParallel" Grid.Row="0" Grid.Column="1" Margin="410,10,225,10"
-                    Click="cmdProcessWitoutParallel_Click">
-                Process without Parallel
-            </Button>
-            <Button Name="cmdProcessWithParallel" Grid.Row="0" Grid.Column="1" Margin="596,10,67,10"
-                    Click="cmdProcessWithParallel_Click">
-                Process with Paralell
+            <Button Name="cmdProcess" Grid.Row="0" Grid.Column="2" Margin="0,10,10,10"
+                    Click="cmdProcess_Click">
+                Click to Flip Your Images!
             </Button>
         </Grid>
     </Grid>
+    
 </Window>
 
 ```
-В даному випадку графічний інтерфейс складається з багаторядкового текстового поля(TextBox) та кнопок. Призначеня текстової області - дозволити користувачу вводити текст,поки в фоновому режимі обродляються фотографії. Таким чином ілюструється неблокуючий характер паралельного завдання.
+Не хвилюйтеся про те, що означає розмітка або як вона працює; ви витратите багато часу на роботу з WPF пізніше. Графічний інтерфейс програми складається з багаторядкового текстового поля (TextBox) та однієї кнопки (з назвою cmdProcess). Призначення текстової області — дозволити вам вводити дані під час виконання роботи у фоновому режимі, що ілюструє неблокувальний характер паралельного завдання.
 
-Для цього прикладу потрібен додатковий пакет NuGet (System.Drawing.Common). Він встановлюється командою:
+Відкрийте файл MainWindow.xaml.cs (двічі клацніть його у Visual Studio — можливо, вам доведеться розгорнути стрілку за допомогою MainWindow.xaml) і додайте наступні оператори using у початок файлу:
 
-dotnet add DataParallelismWithForEach package System.Drawing.Common
-
-Або 
-
-Tools > NuGet Package Manager > Manage NuGet Packages for Solution > В рядку пошуку System.Drawing.Common > Install
-
-Змінимо файл MainWindow.xalm.сs (можливо треба розгорнути стрілку файлу MainWindow.xalm). 
-В верхній частині треба додати оператори using.
 ```cs
 using System.Drawing;
 using System.IO;
 ```
-Видаліть using System.Windows.Shapes;
-
-На кнопці cmdProcessWitoutParallel зробимо подвійний клік і забінимо шаблон обробки події.
+Додайте обробники подій.
 
 ```cs
-        private void cmdProcessWithoutParalell_Click(object sender, RoutedEventArgs e)
+        private void cmdCancel_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void cmdProcess_Click(object sender, RoutedEventArgs e)
         {
             Title = $"Starting...";
             var watch = Stopwatch.StartNew();
-            ProcessFilesWithoutParalell(@"D:\Pictures", @$"D:\ModifiedPictures");
+            ProcessFiles();
             watch.Stop();
-            Title = $"Processing complite. Time: {watch.ElapsedMilliseconds}";
+            Title = $"Processing Complete. Time:{watch.ElapsedMilliseconds}";
         }
 
-        private void ProcessFilesWithoutParalell(string pictureDirectory, string outputDirectory)
+```
+Додайте обробник зображень. Відповідно в папці D:\Temp\Pictures
+
+```cs
+        private void ProcessFiles()
         {
-            //Recreate directory 
+            var basePath = @"D:\Temp";
+            var pictureDirectory = System.IO.Path.Combine(basePath, "Pictures");
+            var outputDirectory = System.IO.Path.Combine(basePath, "ModifiedPictures");
+
+            //Clear out any existing files
             if (Directory.Exists(outputDirectory))
             {
                 Directory.Delete(outputDirectory, true);
             }
             Directory.CreateDirectory(outputDirectory);
 
-            //Process
-            string[] files = Directory.GetFiles(pictureDirectory,"*.jpg",SearchOption.AllDirectories);
-
-            foreach (var currentFile in files)
+            // Process the image data in a blocking manner.
+            string[] files = Directory.GetFiles(pictureDirectory,"*.jpg", SearchOption.AllDirectories);
+            foreach (string currentFile in files)
             {
-                string filename = Path.GetFileName(currentFile);
-                Title = $"Processing {filename} on thread: {Environment.CurrentManagedThreadId}";
+                string filename = System.IO.Path.GetFileName(currentFile);
+                // Print out the ID of the thread processing the current image.
+                Title = $"Processing on thread {Environment.CurrentManagedThreadId} {filename} ";
 
-                using Bitmap bitmap = new(currentFile);
-                bitmap.RotateFlip(RotateFlipType.Rotate180FlipNone);
-                bitmap.Save(Path.Combine(outputDirectory, filename));
+                using (Bitmap bitmap = new Bitmap(currentFile))
+                {
+                    bitmap.RotateFlip(RotateFlipType.Rotate180FlipNone);
+                    bitmap.Save(System.IO.Path.Combine(outputDirectory, filename));
+                }
             }
         }
-```
-Зверніть увагу, що метод ProcessFilesWithoutParalell() обертатиме кожен файл *.jpg у вказаному каталозі. Наразі вся робота відбувається над основним потоком виконуваного файлу. При натискані кнопки починається процес обробки і можна побачити що все відбувається в основному потоці програми з ID 1. При виконані процесу ми не можемо змінити дані TextBox покі всі зображення не будуть оброблені. Таким чином робота програми "зависає". 
 
-Щоб обробити файли на якомога більшій кількості потоків, ви можете переписати поточний цикл foreach на Parallel.ForEach(). 
-Пам'ятайте, що цей метод багато разів перевантажувався; однак у найпростішій формі ви повинні вказати IEnumerable<T>-сумісний об’єкт, який містить елементи для обробки (це буде масив рядків файлів) і делегат Action<T>, який вказує на метод, який виконуватиме роботу.
+```
+Відповідно в папці D:\Temp\Pictures повині бити тестові зображення. Зверніть увагу, що метод ProcessFiles() буде обертати кожен файл *.jpg у вказаному каталозі. Наразі вся робота виконується в основному потоці виконуваного файлу. Таким чином, коли натискається кнопка обробки файлів, програма зависає (точніше не можна вводити текст в текстовому полі). Крім того, підпис вікна також повідомлятиме, що файл обробляє той самий основний потік, оскільки у нас є лише один потік виконання.
+Щоб обробити файли на якомога більшій кількості процесорів, ви можете переписати поточний цикл foreach для використання Parallel.ForEach(). Цей метод неодноразово перевантажувався; однак, у найпростішій формі, необхідно вказати об'єкт, сумісний з IEnumerable<T>, який містить елементи для обробки (це буде масив рядків files), та делегат Action<T>, який вказує на метод, що виконуватиме цю роботу.
+Ось відповідне оновлення, яке використовує лямбда-оператор C# замість літерального об’єкта делегату Action<T>.
 
 ```cs
-        private void cmdProcessWithForEach_Click(object sender, RoutedEventArgs e)
+        private void cmdProcess_Click(object sender, RoutedEventArgs e)
         {
             Title = $"Starting...";
             var watch = Stopwatch.StartNew();
-            ProcessFilesWithForEach(@"D:\Pictures", @$"D:\ModifiedPictures");
+            //ProcessFiles();
+            ProcessFilesParallel();
             watch.Stop();
-            Title = $"Processing complite. Time: {watch.ElapsedMilliseconds}";
+            Title = $"Processing Complete. Time: {watch.ElapsedMilliseconds}";
         }
 
-        private void ProcessFilesWithForEach(string pictureDirectory, string outputDirectory)
+
+    
+        private void ProcessFilesParallel()
         {
+            var basePath = @"D:\Temp";
+            var pictureDirectory = System.IO.Path.Combine(basePath, "Pictures");
+            var outputDirectory = System.IO.Path.Combine(basePath, "ModifiedPictures");
+
             //Recreate directory 
             if (Directory.Exists(outputDirectory))
             {
@@ -657,38 +644,48 @@ using System.IO;
 
             Parallel.ForEach(files, currentFile =>
             {
-                string filename = Path.GetFileName(currentFile);
-                //This code statement is now a problem 
+                string filename = System.IO.Path.GetFileName(currentFile);
+                //This code statement is now a problem
                 //Title = $"Processing {filename} on thread: {Environment.CurrentManagedThreadId}";
-                Debug.WriteLine($"Processing {filename} on thread: {Environment.CurrentManagedThreadId}");
+                Debug.WriteLine($"Processing on thread: {Environment.CurrentManagedThreadId} file: {filename} ");
 
                 using Bitmap bitmap = new(currentFile);
                 bitmap.RotateFlip(RotateFlipType.Rotate180FlipNone);
-                bitmap.Save(Path.Combine(outputDirectory, filename));
+                bitmap.Save(System.IO.Path.Combine(outputDirectory, filename));
             });
         }
+    }
 ```
-В якості аргументів методу ForEach виступає масив рядків який є IEnumerable, та лямда вираз який теж саме що і об'єкт делегату Action<>. Якшо програму запустити а режимі налагодженя то в віконці Debuger можна побачити, що оброба зображень ведеться в різних потоках. Також можна побачити шо час обробкі меньший попередьного варіанта це виводиться в заголовку програми.(можна зрівняти кількість операторів поставиши коментар на одній строчці). Але поки під час обробки зображень не можно одночасно міняти текстове поле.
-
-### Доступ до елементів інтерфейсу користувача у вторинних потоках.
-
-Як ви бачете в варіанті коли використовується ForEach закоментовано сторка якв зміню заголовок головного вікна. 
-```cs
-    //This code statement is now a problem 
-    //Title = $"Processing {filename} on thread: {Environment.CurrentManagedThreadId}";
 ```
-Eлементи керування GUI мають «спорідненість потоку» з потоком, який їх створив. Якщо вторинні потоки намагаються отримати доступ до елемента керування, який вони безпосередньо не створювали, це спричинить виняток під час виконання. В нашому випадку якшо не закоментувати строку програма може закінчити свою роботу "аварійно". 
+Processing on thread: 10 file: 9. Пустыня.jpg 
+Processing on thread: 5 file: 20. Карандаши.jpg 
+Processing on thread: 8 file: 15. Облака.jpg 
+Processing on thread: 9 file: 3. Леопард.jpg 
+Processing on thread: 1 file: 1. Черный кот с рыбкой.jpg 
+Processing on thread: 1 file: 10. Цветы.jpg 
+Processing on thread: 9 file: 4. Кот с наушниками.jpg 
+Processing on thread: 8 file: 16. Город.jpg 
+Processing on thread: 10 file: 12. Вода.jpg 
+Processing on thread: 15 file: 14. Листва.jpg 
+Processing on thread: 5 file: 21. Горы.jpg 
+Processing on thread: 1 file: 11. Закат.jpg 
+
+```
+
+Зверніть увагу, що ви зараз коментуєте рядок коду, який відображає ідентифікатор потоку, що виконує поточний файл зображення.  Тепер, якщо ви запустите програму, TPL справді розподілить робоче навантаження на кілька потоків з пулу потоків, використовуючи якомога більше процесорів. Однак, оскільки заголовок завжди оновлюється з основного потоку, код оновлення заголовка більше не відображає поточний потік, і ви нічого не побачите, якщо введете текст у текстове поле, доки всі зображення не будуть оброблені! Причина полягає в тому, що основний потік інтерфейсу користувача все ще заблокований, очікуючи, поки всі інші потоки завершать свою роботу.
+
+## Клас Task
 
 Клас Task дозволяє легко викликати метод у вторинному потоці та може використовуватися як проста альтернатива використанню асинхронних делегатів.
 
 Додамо кнопку і обробник
 
-```
-            <Button x:Name="cmdProcessWithTaskFactory" Grid.Column="1" Content="Process with TaskFactory" HorizontalAlignment="Left" Margin="564,0,0,0" VerticalAlignment="Center" Width="144" 
+```xml
+            <Button x:Name="cmdProcessWithTaskFactory" Grid.Column="1" Content="Process with TaskFactory" HorizontalAlignment="Left" Margin="441,0,0,0" VerticalAlignment="Center" Width="144" 
                     Click="ProcessWithTaskFactory_Click"/>
 ```
-```cs
 
+```cs
         private void ProcessWithTaskFactory_Click(object sender, RoutedEventArgs e)
         {
             Task.Factory.StartNew(ProcessFilesWithForEachAndTask);
@@ -696,12 +693,12 @@ Eлементи керування GUI мають «спорідненість �
             //Task.Factory.StartNew(() => ProcessFilesWithForEachAndTask());
         }
 
-```
-```cs
+
         private void ProcessFilesWithForEachAndTask()
         {
-            string pictureDirectory = @"D:\Pictures";
-            string outputDirectory = @"D:\ModifiedPictures";
+            var basePath = @"D:\Temp";
+            var pictureDirectory = System.IO.Path.Combine(basePath, "Pictures");
+            var outputDirectory = System.IO.Path.Combine(basePath, "ModifiedPictures");
 
             //Recreate directory 
             if (Directory.Exists(outputDirectory))
@@ -712,11 +709,13 @@ Eлементи керування GUI мають «спорідненість �
 
             //Process
             string[] files = Directory.GetFiles(pictureDirectory, "*.jpg", SearchOption.AllDirectories);
+            Dispatcher?.Invoke(() => { Title = "Starting..."; });
+            var watch = Stopwatch.StartNew();
 
             Parallel.ForEach(files, currentFile =>
             {
-                string filename = Path.GetFileName(currentFile);
-                
+                string filename = System.IO.Path.GetFileName(currentFile);
+
                 //For title
                 int threadId = Environment.CurrentManagedThreadId;
                 Dispatcher?.Invoke(() =>
@@ -726,58 +725,59 @@ Eлементи керування GUI мають «спорідненість �
 
                 using Bitmap bitmap = new(currentFile);
                 bitmap.RotateFlip(RotateFlipType.Rotate180FlipNone);
-                bitmap.Save(Path.Combine(outputDirectory, filename));
+                bitmap.Save(System.IO.Path.Combine(outputDirectory, filename));
             });
+
             //For title
-            Dispatcher?.Invoke(() => { Title = "Process complete"; });
+            watch.Stop();
+            Dispatcher?.Invoke(() => { Title = $"Processing Complete. Time: {watch.ElapsedMilliseconds}"; });
         }
 ```
+Властивість Factory класу Task повертає об'єкт TaskFactory. Коли ви викликаєте його метод StartNew(), ви передаєте делегат Action<T> (тут прихований за допомогою відповідного лямбда-виразу), який вказує на метод, який потрібно викликати асинхронно. З цим оновленням ви побачите, що заголовок вікна показуватиме, який потік з пулу потоків обробляє певний файл, а ще краще те, що текстова область зможе отримувати вхідні дані, оскільки потік інтерфейсу користувача більше не блокується. Об'єкт Dispatcher є екземпляром батьківського класу WPF. Він дозволяє визвати метод що оновить інтерфейс користувача. 
+Таким чином основний потік виконується без зупинок і асінхронно в вторинному виконується обробка файлів.
 
-Клас Task репрезентує асінхроні операції. Його властивість Factory повертає об'єкт TaskFactory, який дозволяє створювати і кофігурувати об'єкти Task або Task<TResult>.
-Коли визивається метод StartNew пердається об'єкт делегату Action<T> або відповідний лямбда-вираз, який вказує на метод який треба виконати в асінхроній манері.
-Об'єкт Dispatcher є екземпляром батьківського класу WPF. Він дозволяє визвати метод що оновить інтерфейс користувача. Тепер можно бачити процес обробки зображень та змінювати текстове поле одночасно.
+## Обробка запиту на скасування
 
-## Обробка запиту на сказуваня обробки.
-
-Якщо зображень для обробки буде дуже багато, може виникнути бажаня закінчити процес не дочекавчись його завершення. Тобто треба дозволити користувачу преравти процес обробки зображень при виконаниі циклу за допомогою кнопки Cencel.  Методи Parallel.For() та Parallel.ForEach() підтримують скасування за допомогою маркерів(token) скасування. Коли ви викликаєте методи Parallel, можна передати об'єкт ParalellOptions, який в свою чергу містить об'єкт CancellationTokenSource.
-
-С початку додамо приватну зміну-член класу MainWindow.
+Одне з удосконалень, яке ви можете внести до поточного прикладу, — це надати користувачеві спосіб зупинити обробку даних зображення за допомогою другої кнопки «Cancel». Методи Parallel.For() та Parallel.ForEach() підтримують скасування за допомогою токенів скасування. Коли ви викликаєте методи в Parallel, ви можете передати об'єкт ParallelOptions, який, у свою чергу, містить об'єкт CancellationTokenSource.
+Спочатку визначте таку нову приватну змінну-член у вашому класі, похідному від Form, типу CancellationTokenSource з назвою _cancelToken:
 
 ```cs
     public partial class MainWindow : Window
     {
         private CancellationTokenSource _cancellationTokenSource;
     ...
-    }    
+    } 
 ```
-Додамо кнопку і обробники натисканя для доданої, а також для кнопки Cancel.
+Оновіть подію Click кнопки Cancel наступним кодом:
+
+```cs
+        private void cmdCancel_Click(object sender, RoutedEventArgs e)
+        {
+            // This will be used to tell all the worker threads to stop!
+            _cancellationTokenSource.Cancel(); 
+        }
 ```
-            <Button x:Name="cmdProcessWithCancellation" Grid.Column="1" Content="Process with Cancellation" HorizontalAlignment="Left" Margin="586,0,0,0" VerticalAlignment="Center" Width="142" 
+
+Додамо кнопку і обробники натисканя для доданої з можливістю сказування.
+
+```xml
+<Button x:Name="cmdProcessWithCancellation" Grid.Column="1" Content="Process with Cancellation" HorizontalAlignment="Left" Margin="286,0,0,0" VerticalAlignment="Center" Width="142" 
                 Click="ProcessWithCancellation_Click"/>
 ```
+
 ```cs
         private void ProcessWithCancellation_Click(object sender, RoutedEventArgs e)
         {
             Task.Factory.StartNew(ProcessFilesWithCancellation);
         }
-        private void cmdCancel_Click(object sender, RoutedEventArgs e)
-        {
-            // This will be used to tell all the worker threads to stop!
-            _cancellationTokenSource?.Cancel();
-        }
-```
-```cs
+
         private void ProcessFilesWithCancellation()
         {
             _cancellationTokenSource = new();
 
-            string pictureDirectory = @"D:\Pictures";
-            string outputDirectory = @"D:\ModifiedPictures";
-
-            // Use ParallelOptions instance to store the CancellationToken.
-            ParallelOptions parallelOptions = new ParallelOptions();
-            parallelOptions.CancellationToken = _cancellationTokenSource.Token;
-            parallelOptions.MaxDegreeOfParallelism = Environment.ProcessorCount;
+            var basePath = @"D:\Temp";
+            var pictureDirectory = System.IO.Path.Combine(basePath, "Pictures");
+            var outputDirectory = System.IO.Path.Combine(basePath, "ModifiedPictures");
 
             //Recreate directory 
             if (Directory.Exists(outputDirectory))
@@ -786,97 +786,118 @@ Eлементи керування GUI мають «спорідненість �
             }
             Directory.CreateDirectory(outputDirectory);
 
+            // Use ParallelOptions instance to store the CancellationToken.
+            ParallelOptions parallelOptions = new ParallelOptions();
+            parallelOptions.CancellationToken = _cancellationTokenSource.Token;
+            parallelOptions.MaxDegreeOfParallelism = Environment.ProcessorCount;
+
             //Process
             string[] files = Directory.GetFiles(pictureDirectory, "*.jpg", SearchOption.AllDirectories);
+            Dispatcher?.Invoke(() => { Title = "Starting..."; });
+            var watch = Stopwatch.StartNew();
 
             try
             {
                 Parallel.ForEach(files, parallelOptions, currentFile =>
                 {
                     parallelOptions.CancellationToken.ThrowIfCancellationRequested();
-                    
-                        string filename = Path.GetFileName(currentFile);
-                        int threadId = Environment.CurrentManagedThreadId;
 
-                        Dispatcher?.Invoke(() =>
-                        {
-                            Title = $"Processing. Thread:{threadId}   File:{filename}";
-                        });
+                    string filename = System.IO.Path.GetFileName(currentFile);
+                    int threadId = Environment.CurrentManagedThreadId;
 
-                        using Bitmap bitmap = new(currentFile);
-                        bitmap.RotateFlip(RotateFlipType.Rotate180FlipNone);
-                        bitmap.Save(Path.Combine(outputDirectory, filename));
-                    
+                    Dispatcher?.Invoke(() =>
+                    {
+                        Title = $"Processing. Thread:{threadId}   File:{filename}";
+                    });
+
+                    using Bitmap bitmap = new(currentFile);
+                    bitmap.RotateFlip(RotateFlipType.Rotate180FlipNone);
+                    bitmap.Save(System.IO.Path.Combine(outputDirectory, filename));
+
                 });
-                Dispatcher?.Invoke(() => { Title = "Process complete"; });
+                //For title
+                watch.Stop();
+                Dispatcher?.Invoke(() => { Title = $"Processing Complete. Time: {watch.ElapsedMilliseconds}"; });
+
             }
-            catch(OperationCanceledException ex)
+            catch (OperationCanceledException ex)
             {
                 Dispatcher?.Invoke(() => { Title = $"Process canceled! {ex.Message}"; });
-            } 
+            }
         }
+
 ```
-Зауважте, що метод обробки починається із налаштування об’єкта ParallelOptions, встановлюючи властивість CancellationToken на використання маркера CancellationTokenSource. Також зауважте, що коли викликається метод Parallel.ForEach(), передається об’єкт ParallelOptions як другий параметр.
-В середині циклу перевіряється чи не нвзначено в токені скасування. Якшо так викидається виняток і всі потоку зупиняються. Потім виняток перехоплюється і виводиться напис на заголовок.
 
+Зверніть увагу, що ви починаєте метод з налаштування об'єкта ParallelOptions, встановлюючи властивість CancellationToken для використання токена CancellationTokenSource. Також зверніть увагу, що під час виклику методу Parallel.ForEach() ви передаєте об'єкт ParallelOptions як другий параметр. У рамках логіки циклу ви викликаєте ThrowIfCancellationRequested() для токена, що гарантує, що якщо користувач натисне кнопку «Cancel », усі потоки зупиняться, і ви отримаєте сповіщення через виняток середовища виконання. Коли ви виявляєте помилку OperationCanceledException, ви встановлюєте текст головного вікна в повідомлення про помилку.
 
-## Паралелізм Task за допомогою класу Parallel.
+## Паралелізм завдань за допомогою класу Parallel
 
-Окрім пралелізму даних, TPL можна використовувати для легкого запуску будь-якої кількості асінхроних завдань за допомогою методу Parallel.Invoke(). Цей підхід є трохи більш простим, ніж використання членів із System.Threading; однак, якщо вам потрібен більший контроль над тим, як виконуються завдання, ви можете відмовитися від використання Parallel.Invoke() і використовувати безпосередньо клас Task, як це було в попередньому прикладі.
-Спробуємо отримати загальнодоступну електрону книгу, а потім паралельно виконати набір тривалих завдань.
+Окрім паралелізму даних, TPL також можна використовувати для легкого запуску будь-якої кількості асинхронних завдань за допомогою методу Parallel.Invoke(). Цей підхід трохи простіший, ніж використання членів з System.Threading; однак, якщо вам потрібен більший контроль над способом виконання завдань, ви можете відмовитися від використання Parallel.Invoke() та використовувати клас Task безпосередньо, як ви зробили в попередньому прикладі.
+Щоб проілюструвати паралелізм завдань, створіть нову консольну програму під назвою MyEBookReader. Додайте оператори using в Program.cs:
 
-StudyTPL\MyEBookReader\Program.cs
 ```cs
-void DownloadBookAndGetStatistic()
+using System.Net;
+using System.Text;
+```
+Тут ви отримаєте загальнодоступну електронну книгу з проекту Gutenberg (www.gutenberg.org), а потім паралельно виконайте низку тривалих завдань.
+Книга завантажується за допомогою методу GetBook(), як показано тут:
+
+```cs
+string _theEBook = "";
+GetBook();
+Console.WriteLine("Downloading book...");
+
+
+void GetBook()
 {
-    string _textEbook = string.Empty;
-    Console.WriteLine("Downloding book ... ");
-    GetBook();
-    Console.ReadLine();
-
-
-    void GetBook()
+    //NOTE: The WebClient is obsolete. 
+    //We will revisit this example using HttpClient when we discuss async/await
+    using WebClient wc = new WebClient();
+    wc.DownloadStringCompleted += (s, eArgs) =>
     {
-        using WebClient webClient = new WebClient();
-        webClient.DownloadStringCompleted += (s, eArgs) =>
-        {
-            _textEbook = eArgs.Result;
-            Console.WriteLine("Download complete.");
-            GetStats();
-        };
-        webClient.DownloadStringAsync(new Uri("http://www.gutenberg.org/files/98/98-0.txt"));
-    }
+        _theEBook = eArgs.Result;
+        Console.WriteLine("Download complete.");
+        GetStats();
+    };
 
-    void GetStats()
+    // The Project Gutenberg EBook of A Tale of Two Cities, by Charles Dickens
+    // You might have to run it twice if you’ve never visited the site before, since the first
+    // time you visit there is a message box that pops up, and breaks this code.
+    wc.DownloadStringAsync(new Uri("http://www.gutenberg.org/files/98/98-0.txt"));
+}
+```
+Клас WebClient є членом System.Net. Цей клас надає методи для надсилання даних до ресурсу та отримання даних з нього, ідентифікованого за допомогою URI. Багато з цих методів мають асинхронну версію, таку як DownloadStringAsync(). Цей метод автоматично запустить новий потік з пулу потоків .NET Core Runtime. Коли  WebClient завершить отримання даних, він викличе подію DownloadStringCompleted, яку ви обробляєте тут за допомогою лямбда-виразу C#. Якщо викликати синхронну версію цього методу (DownloadString()), повідомлення «Downloading book...» не відображатиметься, доки завантаження не завершиться.
+
+    WebClient застарів і був замінений на HttpClient. Ми повернемося до цього прикладу, використовуючи клас HttpClient, у розділі «Асинхронні виклики з Async/Await» цього розділу.
+
+Далі реалізовано метод GetStats() для вилучення окремих слів, що містяться у змінній theEBook, а потім передачі масиву рядків кільком допоміжним функціям для обробки наступним чином:
+
+```cs
+void GetStats()
+{
+    // Get the words from the ebook.
+    string[] words = _theEBook.Split(new char[]
+      { ' ', '\u000A', ',', '.', ';', ':', '-', '?', '/' },
+      StringSplitOptions.RemoveEmptyEntries);
+    // Now, find the ten most common words.
+    string[] tenMostCommon = FindTenMostCommon(words);
+    // Get the longest word.
+    string longestWord = FindLongestWord(words);
+    
+    // Now that all tasks are complete, build a string to show all stats.
+    StringBuilder bookStats = new StringBuilder("Ten Most Common Words are:\n");
+    foreach (string s in tenMostCommon)
     {
-        string[] words = _textEbook.Split(new char[] { ' ', '\u000A', ',', '.', ';', ':', '-', '?', '/' },StringSplitOptions.RemoveEmptyEntries);
-
-
-        string[] tenMostCommon = [];
-        string longestWord = string.Empty;
-
-        // Witout Parallel
-        //tenMostCommon = FindTenMostCommon(words);
-        //longestWord = FindLongestWord(words);
-
-        Parallel.Invoke(
-            () => { tenMostCommon = FindTenMostCommon(words); },
-            () => { longestWord = FindLongestWord(words); }
-            );
-
-        StringBuilder stringBuilder = new StringBuilder("Ten most common words are:\n");
-
-        foreach (var word in tenMostCommon)
-        {
-            stringBuilder.AppendLine(word);
-        }
-
-        stringBuilder.AppendLine($"Longest word is: {longestWord}");
-
-        Console.WriteLine(stringBuilder.ToString(),"Book info");
-        Console.WriteLine("Work done.");
+        bookStats.AppendLine(s);
     }
+    bookStats.AppendFormat($"Longest word is: {longestWord}");
+    bookStats.AppendLine();
+    Console.WriteLine(bookStats.ToString(), "Book info");
+}
+```
+Метод FindTenMostCommon() використовує запит LINQ для отримання списку рядкових об'єктів, які найчастіше зустрічаються в масиві рядків, тоді як FindLongestWord() знаходить, власне, найдовше слово.
 
+```cs
     string[] FindTenMostCommon(string[] words)
     {
         Console.WriteLine($"Method FindTenMostCommon in Thread:{Thread.CurrentThread.ManagedThreadId}");
@@ -897,15 +918,71 @@ void DownloadBookAndGetStatistic()
                     select word;
         return query.FirstOrDefault()!;
     }
+```
+Якщо ви запустите цей проект, виконання всіх завдань може зайняти значний час, залежно від кількості процесорів вашого комп'ютера та загальної швидкості процесора. Зрештою, ви повинні побачити результат, показаний тут:
 
+```
+Downloading book...
+Download complete.
+Method FindTenMostCommon in Thread:10
+Method FindLongestWord in Thread:10
+Ten Most Common Words are:
+Defarge
+himself
+Manette
+through
+nothing
+business
+another
+looking
+prisoner
+Cruncher
+Stryver
+CHAPTER
+without
+Monsieur
+Monseigneur
+Tellson's
+Charles
+returned
+husband
+Gutenberg
+Longest word is: undistinguishable
+```
+Ви можете забезпечити використання застосунком усіх доступних процесорів на хост-машині, паралельно викликаючи методи FindTenMostCommon() та FindLongestWord(). Для цього змініть метод GetStats() наступним чином:
+
+```cs
+void GetStatsWithParalell()
+{
+    string[] words = _theEBook.Split(new char[] { ' ', '\u000A', ',', '.', ';', ':', '-', '?', '/' }, StringSplitOptions.RemoveEmptyEntries);
+    string[] tenMostCommon = [];
+    string longestWord = string.Empty;
+
+    Parallel.Invoke(
+            () => { tenMostCommon = FindTenMostCommon(words); },
+            () => { longestWord = FindLongestWord(words); }
+            );
+
+    StringBuilder stringBuilder = new StringBuilder("Ten most common words are:\n");
+
+    foreach (var word in tenMostCommon)
+    {
+        stringBuilder.AppendLine(word);
+    }
+
+    stringBuilder.AppendLine($"Longest word is: {longestWord}");
+
+    Console.WriteLine(stringBuilder.ToString(), "Book info");
+    Console.WriteLine("Work done.");
 }
-DownloadBookAndGetStatistic();
 ```
+Метод Parallel.Invoke() очікує масив параметрів делегатів Action<>, які ви надали опосередковано за допомогою лямбда-виразів. Знову ж таки, хоча вихід ідентичний, перевага полягає в тому, що TPL тепер використовуватиме всі можливі процесори на машині для паралельного виклику кожного методу, якщо це можливо.
+
 ```
-Downloding book ...
+Downloading book...
 Download complete.
 Method FindLongestWord in Thread:6
-Method FindTenMostCommon in Thread:9
+Method FindTenMostCommon in Thread:8
 Ten most common words are:
 Defarge
 himself
@@ -930,70 +1007,42 @@ Gutenberg
 Longest word is: undistinguishable
 
 Work done.
-
 ```
-Клас WebClient є членом System.Net. Він застарілий клас і використовується для прикладу. Цей клас надає методи для надсилання даних і отримання даних з ресурсу, визначеного URI. Багато з цих методів мають асинхронну версію, наприклад DownloadStringAsync(). Цей метод автоматично створить новий потік із пулу потоків .NET Core Runtime. 
-В прикладі додадно обробник події на закінченя завантаженя у вигляді лямда виразу. 
-Якщо викликаєи синхронну версію цього методу (DownloadString()), повідомлення «Download complete.» не відображатиметься, доки не завершиться завантаження. 
-Виклик обробників масиву слів можна виконати використвани метод Invoкe класу Parallel. Метод очікує масиву з об'єктами типу делегат Action<> або лямбда-виразів. Перевага полягає в тому, що TPL тепер використовуватиме всі можливі процесори на машині для виклику кожного методу паралельно, якщо це можливо. 
 
+# Паралельні запити LINQ (PLINQ)
 
-## Паралельні запити LINQ (PLINQ)
-
-Є інший спосіб, яким ви можете включити паралельні завдання у свої програми. Можна використати набір методів розширення, які дозволяють створювати запити LINQ, який виконуватиме робочі навантаження паралельно.Відповідно, запити LINQ, розроблені для паралельного виконання, називаються запитами PLINQ. Подібно до паралельного коду, створеного за допомогою класу Parallel, у PLINQ є можливість ігнорувати ваш запит на паралельну обробку колекції, якщо це необхідно.
-Під час виконання PLINQ аналізує загальну структуру запиту, і якщо розпаралелювання виграє від запиту, він виконуватиметься одночасно.Однак, якщо розпаралелювання запиту погіршить продуктивність, PLINQ просто виконує запит послідовно.Якщо PLINQ має вибір між потенційно дорогим паралельним алгоритмом або недорогим послідовним алгоритмом, він вибирає послідовний алгоритм за замовчуванням.
+TPL пропонує ще один спосіб інтеграції паралельних завдань у ваші програми .NET Core. Ви можете використовувати набір методів розширення, які дозволяють створювати запити LINQ, що виконуватимуть своє робоче навантаження паралельно (якщо це можливо). Відповідно, запити LINQ, розроблені для паралельного виконання, називаються запитами PLINQ.
+Як і паралельний код, створений за допомогою класу Parallel, PLINQ має можливість ігнорувати ваш запит на паралельну обробку колекції, якщо це необхідно. Фреймворк PLINQ був оптимізований багатьма способами, включаючи визначення того, чи справді запит виконуватиметься швидше синхронно.
+Під час виконання PLINQ аналізує загальну структуру запиту, і якщо запит ймовірно виграє від паралелізації, він виконуватиметься паралельно. Однак, якщо паралелізація запиту негативно впливає на продуктивність, PLINQ просто виконує запит послідовно. Якщо PLINQ має вибір між потенційно дорогим паралельним алгоритмом або недорогим послідовним алгоритмом, він за замовчуванням вибирає послідовний алгоритм.
 Необхідні методи розширення знаходяться в класі ParallelEnumerable простору імен System.Linq.
-Деякі корисні розширення PLINQ.
 
-    AsParallel() : Вказує, що решту запиту слід розпаралелювати, якщо це можливо
+Вибрані члени класу ParallelEnumerable
 
-    WithCancellation() : Вказує, що PLINQ має періодично відстежувати стан наданого маркера скасування та скасовувати виконання, якщо це запитується
+|Член|Значення|
+|AsParallel()|Вказує, що решту запиту слід розпаралелити, якщо це можливо|
+|WithCancellation()|Вказує, що PLINQ має періодично контролювати стан наданого токена скасування та скасовувати виконання, якщо це запитується.|
+|WithDegreeOfParallelism()|Визначає максимальну кількість процесорів, які PLINQ має використовувати для паралелізації запиту|
+|ForAll()|Дозволяє обробляти результати паралельно без попереднього злиття назад із потоком споживача, як це було б у випадку перерахування результату LINQ за допомогою ключового слова foreach|
 
-    WithDegreeOfParallelism() : Визначає максимальну кількість процесорів, які PLINQ має використовувати для розпаралелювання запиту
+Щоб побачити PLINQ у дії, створіть консольний застосунок з назвою PLINQDataProcessing. Коли розпочнеться обробка, програма запустить нове завдання (Task), яке виконає запит LINQ, що досліджує великий масив цілих чисел, шукаючи лише ті елементи, де x % 3 == 0 є істинним. Ось непаралельна версія запиту:
 
-    ForAll() : Дозволяє паралельно обробляти результати без попереднього злиття з потоком споживача, як у випадку перерахування результату LINQ за допомогою ключового слова foreach
-
-Спробуємо створити запит з використанням звичайної так і паралельної роботи.
-
-StiudyTPL\PLINQDataProcessing\Program.cs
 ```cs
+
 void UsingPLINQ()
 {
     Console.WriteLine("Processing");
     Task.Factory.StartNew(ProcessingIntData);
-    Task.Factory.StartNew(ProcessingIntDataWithPLINQ);
     Console.ReadLine();
 
 
     void ProcessingIntData()
     {
         // Get a very large array of integers.
-        int[] ints = Enumerable.Range( 0, 50_000_000 ).ToArray();
-        // Find the numbers where num % 3 == 0 is true, returned
-        // in descending order.
-
-        var query = from number in ints
-                    where number%3 == 0
-                    orderby number descending
-                    select number;
-
-        var watch = Stopwatch.StartNew();
-        
-        int[] modThreeIsZero = query.ToArray();
-  
-        watch.Stop();
-        Console.WriteLine($"Time:{watch.ElapsedMilliseconds}");
-        Console.WriteLine($"\tAmount:{modThreeIsZero.Count()}");
-    }
-
-    void ProcessingIntDataWithPLINQ()
-    {
-        // Get a very large array of integers.
         int[] ints = Enumerable.Range(0, 50_000_000).ToArray();
         // Find the numbers where num % 3 == 0 is true, returned
         // in descending order.
 
-        var query = from number in ints.AsParallel()
+        var query = from number in ints
                     where number % 3 == 0
                     orderby number descending
                     select number;
@@ -1003,33 +1052,79 @@ void UsingPLINQ()
         int[] modThreeIsZero = query.ToArray();
 
         watch.Stop();
-        Console.WriteLine($"With Paralell\nTime:{watch.ElapsedMilliseconds}");
-        Console.WriteLine($"\tAmount:{modThreeIsZero.Count()}");
+        Console.WriteLine($"Time:{watch.ElapsedMilliseconds}");
+        Console.WriteLine($"Found {modThreeIsZero.Count()} numbers that match query!");
     }
+
 }
 UsingPLINQ();
+```
+```
+Processing
+Time:4203
+Found 16666667 numbers that match query!
+```
 
+## Підключення до запиту PLINQ
+
+Якщо ви хочете повідомити TPL про необхідність паралельного виконання цього запиту (якщо можливо), вам потрібно буде використовувати метод розширення AsParallel() наступним чином:
+
+```cs
+void ProcessingIntDataWithPLINQ()
+{
+
+    //...
+
+    var query = from number in ints.AsParallel()
+                where number % 3 == 0
+                orderby number descending
+                select number;
+
+    //...
+
+}
 ```
 ```
 Processing
 With Paralell
-Time:3395
-        Amount:16666667
-Time:5114
-        Amount:16666667
+Time:3195
+Found 16666667 numbers that match query!
 ```
-При виконані запускаються два завдання які відрізняються запитом який досліджує великий масив. Включивши виклик AsParallel(), TPL намагатиметься передати навантаження на будь-який доступний ЦП. Зверніть увагу що якщо навантаженя невеликі то затрати на те, шоб зробити обробку паралельною, займають більше часу ніж звичайна обробка. Це можна побачит зменьшивши об'єм масиву.
+Зверніть увагу, що загальний формат запиту LINQ ідентичний тому, що ви бачили в попередніх розділах. Однак, якщо включити виклик AsParallel(), TPL спробує передати робоче навантаження будь-якому доступному процесору.
 
-### Скасування виконання запиту PLINQ.
+## Скасування запиту PLINQ
 
-Також можна використовувати об’єкт CancellationTokenSource, щоб повідомити запиту PLINQ припинити обробку за правильних умов (як правило, через втручання користувача).
+Також можна використовувати об'єкт CancellationTokenSource, щоб повідомити запит PLINQ про необхідність зупинити обробку за певних умов (зазвичай через втручання користувача). Оголосіть об'єкт CancellationTokenSource на рівні класу з назвою _cancelToken та оновіть метод операторів верхнього рівня, щоб він приймав вхідні дані від користувача. Ось відповідне оновлення коду:
+
 ```cs
+void UsingPLINQWithCancellation()
+{
+    CancellationTokenSource _cancelToken = new CancellationTokenSource();
+  
+    do
+    {
+        Console.WriteLine("Start any key to start processing");
+        Console.ReadKey();
+        Console.WriteLine("Processing");
+        Task.Factory.StartNew(ProcessingIntDataWithPLINQAndCancellation);
+        Console.Write("Enter Q to quit: ");
+        string? answer = Console.ReadLine();
+        // Does user want to quit?
+        if (answer != null && answer.Equals("Q",StringComparison.OrdinalIgnoreCase))
+        {
+            _cancelToken.Cancel();
+            break;
+        }
+    }
+    while (true);
+    Console.ReadLine();
+
     void ProcessingIntDataWithPLINQAndCancellation()
     {
 
         int[] ints = Enumerable.Range(0, 50_000_000).ToArray();
 
-        var query = from number in ints.AsParallel().WithCancellation(_cancellationTokenSource.Token)
+        var query = from number in ints.AsParallel().WithCancellation(_cancelToken.Token)
                     where number % 3 == 0
                     orderby number descending
                     select number;
@@ -1044,34 +1139,47 @@ Time:5114
             Console.WriteLine($"\nWith Paralell\nTime:{watch.ElapsedMilliseconds}");
             Console.WriteLine($"\tAmount:{modThreeIsZero.Count()}");
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
         }
     }
 }
-CancellationPLINQ();
+UsingPLINQWithCancellation();
 ```
 ```
-Processing ...
-To cancel press Q:
+Start any key to start processing
+Processing
+Enter Q to quit:
 With Paralell
-Time:3427
+Time:2154
         Amount:16666667
 
-```
-```
-Processing ...
-To cancel press Q:q
+Start any key to start processing
+Processing
+Enter Q to quit:
+With Paralell
+Time:1770
+        Amount:16666667
+
+Start any key to start processing
+Processing
+Enter Q to quit: q
 The query has been canceled via the token supplied to WithCancellation.
 ```
-На рівні де створюєьбся завданя повинен бути доступний об'єкт CancellationTokenSource. На цьомуж рівні відбуваеться опитування користувача на необхіжність скасування.
-При створенні запиту ми вказуємо що він повинен стежити за вхідним запитом на скасування. Церобиться в ланцюгу виклику об'єктів розширення. Маркер передається в метод WithCancellation.
+Тут запит PLINQ повідомлено про те, що він повинен стежити за вхідним запитом на скасування, шляхом об'єднання методу розширення WithCancellation() та передачі токена. Крім того, вам потрібно буде обгорнути цей запит PLINQ у відповідну область try/catch та обробити можливий виняток.
+
+Під час виконання цього процесу потрібно швидко натиснути Q та Enter, щоб побачити повідомлення від токена скасування. На моїй машині розробки у мене було менше секунди, щоб завершити роботу, перш ніж вона завершилася самостійно. Ви можете додати виклик Thread.Sleep(), щоб спростити скасування процесу:
 
 ```cs
-        var query = from number in ints.AsParallel().WithCancellation(_cancellationTokenSource.Token)
-                    where number % 3 == 0
-                    orderby number descending
-                    select number;
+        try
+        {
+            var watch = Stopwatch.StartNew();
+            Thread.Sleep(1000);
+            int[] modThreeIsZero = query.ToArray();
+
+            watch.Stop();
+            Console.WriteLine($"\nWith Paralell\nTime:{watch.ElapsedMilliseconds}");
+            Console.WriteLine($"\tAmount:{modThreeIsZero.Count()}");
+        }
 ```
-При відміні виникає виняток який треба обробити. Як показує приклад відмінити обробку можна за період часу який показує обробник без скасування.
