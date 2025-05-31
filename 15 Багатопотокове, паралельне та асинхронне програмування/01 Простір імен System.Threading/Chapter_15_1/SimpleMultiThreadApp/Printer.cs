@@ -12,7 +12,8 @@ public class Printer
     public void PrintNumbers()
     {
         // Display Thread info.
-        Console.WriteLine($"{Thread.CurrentThread.Name} is executing PrintNumbers()");
+        string threadInfo = $"{Thread.CurrentThread.Name}(id:{Thread.CurrentThread.ManagedThreadId})";
+        Console.WriteLine($"{threadInfo} is executing PrintNumbers()");
         
         // Print out numbers.
         Console.Write("Your numbers: ");

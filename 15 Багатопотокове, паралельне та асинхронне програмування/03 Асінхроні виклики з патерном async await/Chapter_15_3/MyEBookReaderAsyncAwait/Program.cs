@@ -12,7 +12,6 @@ async Task DownloadBookWihtAsyncAwaitAndGetStatisticAsync()
     {
         HttpClient httpClient = new();
         _theEbook = await httpClient.GetStringAsync("http://www.gutenberg.org/files/98/98-0.txt");
-        //await Console.Out.WriteLineAsync("Download complite");
         GetStats();
     }
 

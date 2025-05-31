@@ -1,141 +1,104 @@
-# Асінхроні виклики з патерном async await.
+# Асінхроні виклики з патерном async/await.
 
 Хоча TPL, PLINQ та тип делегата можуть певною мірою спростити справи (особливо порівняно з іншими платформами та мовами), розробникам все ще потрібно знати тонкощі різних передових методів.
 Мова програмування C# має два ключові слова, які ще більше спрощують процес створення асинхронного коду. На відміну від усіх прикладів у цьому розділі, коли ви використовуєте ключові слова async та await, компілятор генеруватиме від вашого імені значну кількість коду для потоків, використовуючи численні члени просторів імен System.Threading та System.Threading.Tasks.
 
-## Перший погляд на ключові слова async та await
+## Перший погляд на ключові слова async та await у C#
 
 Ключове слово async у C# використовується для визначення того, що метод, лямбда-вираз або анонімний метод повинні викликатися автоматично асинхронно. Просто позначивши метод модифікатором async, середовище виконання .NET Core створить новий потік виконання для обробки поточного завдання. Крім того, коли ви викликаєте асинхронний метод, ключове слово await автоматично призупиняє поточний потік від будь-якої подальшої активності, доки завдання не буде завершено, залишаючи викликаючий потік вільним для продовження.
-Для ілюстрації створіть консольний застосунок з назвою WorkWithAsync та додайте метод з назвою DoWork(), який змушує викликаючий потік чекати :
+Для ілюстрації створіть консольний застосунок з назвою FirstLookAtAsyncAwait та додайте метод з назвою DoWork(), який змушує викликаючий потік чекати п'ять секунд. Ось код на даний момент:
 
 ```cs
+static string GetThreadInfo()
+{
+    Thread thread = Thread.CurrentThread;
+    return $"\tThreadId:{thread.ManagedThreadId}" +
+        $"\tIsBackground:{thread.IsBackground}" +
+        $"\tThreadState:{thread.ThreadState}";
+}
+
 static string DoWork()
 {
-    int threadId = Thread.CurrentThread.ManagedThreadId;
-    Console.WriteLine($"\n\tI star to do long work! Thread:{threadId}");
+    Console.WriteLine($"\tI star do work!\t{GetThreadInfo()}");
     Thread.Sleep(5000); // Emulation the long work
-    return $"\tDone with work! Thread:{threadId}\n";
+    return $"\tDone with work!";
 }
 
-
-while (true)
-{
-    Console.WriteLine(DoWork());
-    Console.Write($"Thread {Thread.CurrentThread.ManagedThreadId} says: Enter somthing:");
-    Console.ReadLine();
-}
+string result = DoWork();
+Console.WriteLine(result);
+Console.WriteLine($"Complited\t{GetThreadInfo()}");
 ```
-Запустіть код на виконання і не чекаючи нажміть двічи Enter.
-
 ```
-
-        I star to do long work! Thread:1
-        Done with work! Thread:1
-
-Thread 1 says: Enter somthing:
-
-        I star to do long work! Thread:1
-        Done with work! Thread:1
-
-Thread 1 says: Enter somthing:
-
-        I star to do long work! Thread:1
-        Done with work! Thread:1
-
-Thread 1 says: Enter somthing:
+        I star do work!         ThreadId:1      IsBackground:False      ThreadState:Running
+        Done with work!
+Complited               ThreadId:1      IsBackground:False      ThreadState:Running
 ```
-Такми чино сінхронне виконання виконується з затримками. Бажано довгі навантаженя відокремити від основного потоку таким чином вивільнивши основний потік для роботи користувача. Якщо ви використаєте будь-який із попередніх методів, показаних у цьому розділі, щоб зробити вашу програму більш адаптивною, вам доведеться багато працювати. Однак, ви можете створити наступну базу коду C#:
+Тепер, враховуючи вашу роботу в цій главі, ви знаєте, що якби ви запустили програму, вам довелося б зачекати п'ять секунд, перш ніж щось ще станеться. Оскільки все відбувається в одному потоці, якби це був графічний додаток, весь екран був би заблокований до завершення роботи. 
+Якщо ви використаєте будь-який із попередніх методів, показаних у цьому розділі, щоб зробити вашу програму більш адаптивною, вам доведеться виконати чимало роботи. Однак ви можете створити наступну базу коду C#:
 
 ```cs
 static async Task<string> DoWorkAsync()
 {
-    return await Task.Run(() =>
-    {
-        int threadId = Thread.CurrentThread.ManagedThreadId;
-        Console.WriteLine($"\n\tI star to do long work asynchronous! Thread:{threadId}");
+    return await Task.Run(() => {
+        Console.WriteLine($"\tI star do work!\t{GetThreadInfo()}");
         Thread.Sleep(5000); // Emulation the long work
-        return $"\tDone with work! Thread:{threadId}\n";
+        return $"\tDone with work!";
     });
 }
 
-while (true)
-{
-    string taskResult = await DoWorkAsync();
-    Console.WriteLine(taskResult);
-
-    Console.Write($"Thread {Thread.CurrentThread.ManagedThreadId} says: Enter somthing:");
-    Console.ReadLine();
-}
+string message = await DoWorkAsync();
+Console.WriteLine(message);
+Console.WriteLine($"Complited\t{GetThreadInfo()}");
 ```
 ```
-        I star to do long work asynchronous! Thread:6
-        Done with work! Thread:6
-
-Thread 6 says: Enter somthing:
-
-        I star to do long work asynchronous! Thread:7
-        Done with work! Thread:7
-
-Thread 7 says: Enter somthing:
-
-        I star to do long work asynchronous! Thread:7
-        Done with work! Thread:7
-
-Thread 7 says: Enter somthing:
+        I star do work!         ThreadId:6      IsBackground:True       ThreadState:Background
+        Done with work!
+Complited               ThreadId:6      IsBackground:True       ThreadState:Background
 ```
-Оператори верхнього рівня, неявно є асинхронними. Зверніть увагу на ключове слово await перед тим, як назвати метод, який буде викликано асинхронним способом. Це важливо: якщо ви декоруєте метод ключовим словом async, але не маєте хоча б одного внутрішнього виклику методу, орієнтованого на await, ви, по суті, створили синхронний виклик методу (фактично, вам буде надано попередження компілятора про це). 
-Тепер зверніть увагу, що вам потрібно використовувати клас Task з простору імен System.Threading.Tasks для рефакторингу методів (додається як DoWorkAsync()). По суті, замість того, щоб одразу повертати конкретне значення, що повертається (рядковий об'єкт у цьому прикладі), ви повертаєте об'єкт Task<T>, де параметр універсального типу T є базовим, фактичним значенням, що повертається. Якщо метод не має значення, що повертається, то замість Task<T> ви просто використовуєте Task.
-Реалізація DoWorkAsync() тепер безпосередньо повертає об'єкт Task<T>, який є значенням, що повертається Task.Run(). Метод Run() приймає делегат Func<> або Action<>, і, як ви вже знаєте, ви можете спростити собі життя, використовуючи лямбда-вираз. По суті, ваша нова версія фактично говорить наступне:
-
-Коли ви мене викличете, я запущу нове завдання. Це завдання переведе викликаючий потік у режим сну на п'ять секунд, а після його завершення поверне мені рядкове значення. Я помістю цей рядок у новий об'єкт Task\<string\> та поверну його викликаючій стороні.
-
-Переклавши цю нову реалізацію DoWorkAsync() на більш природну мову, ви отримаєте деяке уявлення про справжню роль токена await. Це ключове слово завжди змінюватиме метод, який повертає об'єкт Task. Коли потік логіки досягає токена await, викликаючий потік у цьому методі призупиняється до завершення виклику. Таким чином додадкове завдання працює в вториному потоці і вам не треба за це турбуватись. Якби це був графічний застосунок, користувач міг би продовжувати використовувати інтерфейс користувача, поки виконується метод DoWorkAsync().
-
-Ми можемо запустити декілька завдань не дочекавшись їх завершення, в різних потоках.
+Зверніть увагу на ключове слово await перед тим, як назвати метод, який буде викликано асинхронно.
 
 ```cs
+string message = await DoWorkAsync();
+```
+Це важливо: якщо ви декоруєте метод ключовим словом async, але не маєте хоча б одного внутрішнього виклику методу, орієнтованого на await, ви, по суті, створили синхронний виклик методу (фактично, вам буде надано попередження компілятора про це). Додайте простий виклик.
+```cs
+DoWorkAsync();
+```
+Після такого виклику ви нічого не побачите, бо призавершені основного потоку зупиняється вториний потік. Середовище попереджає про це.
 
-while (true)
+Тепер зверніть увагу, що для рефакторингу методів верхнього рівня та DoWork() вам потрібно використовувати клас Task з простору імен System.Threading.Tasks. По суті, замість того, щоб одразу повертати конкретне значення, що повертається (рядковий об'єкт у цьому прикладі), ви повертаєте об'єкт Task\<T\>, де параметр універсального типу T є базовим, фактичним значенням, що повертається. Якщо метод не має значення, що повертається, то замість Task\<T\> ви просто використовуєте Task.
+
+```cs
+static async Task<string> DoWorkAsync()
 {
-    //string taskResult = await DoWorkAsync();
-    //Console.WriteLine(taskResult);
-    _ = DoWorkAsync();
-
-    Console.Write($"Thread {Thread.CurrentThread.ManagedThreadId} says: Enter somthing:");
-    Console.ReadLine();
+    return await Task.Run(() => {
+        //...
+        return $"\tDone with work!";
+    });
 }
 ```
+Реалізація DoWorkAsync() тепер безпосередньо повертає об'єкт Task\<string\>, який є значенням, що повертається функцією Task.Run(). Метод Run() приймає делегат Func<> або Action<>, і, як ви знаєте, ви можете спростити собі життя, використовуючи лямбда-вираз. Тобто тут діють правила на створення Task\<T\> По суті, ваша нова версія виклику DoWorkAsync() фактично говорить наступне:
 
-```
-Thread 1 says: Enter somthing:
-        I star to do long work asynchronous! Thread:6
+    Коли ви мене викличете, я запущу нове завдання. Це завдання переведе потік у режим сну на п'ять секунд, а після його завершення поверне мені рядкове значення. Я помістю цей рядок у новий об'єкт Task<string> та поверну його викликаючій стороні.
 
-Thread 1 says: Enter somthing:
-        I star to do long work asynchronous! Thread:7
-
-Thread 1 says: Enter somthing:
-        I star to do long work asynchronous! Thread:4
-
-Thread 1 says: Enter somthing:
-        I star to do long work asynchronous! Thread:10
-```
-
-
+Переклавши цю нову реалізацію DoWorkAsync() на більш природну мову, ви отримаєте деяке уявлення про справжню роль токена await. Це ключове слово завжди змінюватиме метод, який повертає об'єкт Task або Task\<T\>. Коли потік логіки досягає токена await, викликаючий потік у цьому методі призупиняється до завершення виклику. В  фреймворці з графічним застосунком, користувач міг би продовжувати використовувати інтерфейс користувача, поки виконується метод DoWorkAsync().
 
 ## SynchronizationContext та async/await
 
 Офіційне визначення SynchronizationContext – це базовий клас, який надає контекст із вільними потоками без синхронізації. Хоча це початкове визначення не дуже описове, в офіційній документації далі йдеться:
 
-Мета моделі синхронізації, реалізованої цим класом, полягає в тому, щоб забезпечити правильну роботу внутрішніх асинхронних/синхронних операцій середовища виконання загальномовних програм з різними моделями синхронізації.
+    Мета моделі синхронізації, реалізованої цим класом, полягає в тому, щоб забезпечити правильну роботу внутрішніх асинхронних/синхронних операцій середовища виконання загальномовних програм з різними моделями синхронізації.
 
-Це твердження, разом з тим, що ви знаєте про багатопоточність, проливає світло на це питання. Нагадаємо, що графічні програми (WinForms, WPF) не дозволяють вторинним потокам безпосередньо отримувати доступ до елементів керування, а повинні делегувати цей доступ. Ми вже розглядали об'єкт Dispatcher у прикладі WPF. Для консольних застосунків, це обмеження не діє. Це різні моделі синхронізації, про які йдеться. З огляду на це, давайте глибше розглянемо SynchronizationContext.
-SynchonizationContext — це тип, який надає метод віртуальної публікації, який приймає делегат для асинхронного виконання. Це забезпечує шаблон для фреймворків для належної обробки асинхронних запитів (відправлення для WPF/WinForms, безпосереднє виконання для неграфічних застосунків тощо). Це надає спосіб поставити одиницю роботи в чергу для контексту та веде облік невиконаних асинхронних операцій.
-Як ми обговорювали раніше, коли делегат ставиться в чергу для асинхронного виконання, його запуск планується в окремому потоці. Ця деталізація обробляється середовищем виконання .NET Core. Зазвичай це робиться за допомогою керованого пулу потоків .NET Core Runtime, але це можна перевизначити за допомогою власної реалізації.
-Хоча цю роботу можна керувати вручну за допомогою коду, шаблон async/await виконує більшу частину важкої роботи. Коли очікується асинхронний метод, він використовує реалізації SynchronizationContext та TaskScheduler цільового фреймворку. Наприклад, якщо ви використовуєте async/await у WPF-застосунку, WPF-фреймворк керує відправленням делегата та зворотним викликом кінцевого автомата після завершення завдання awaited для безпечного оновлення елементів керування.
+Це твердження, разом з тим, що ви знаєте про багатопоточність, проливає світло на це питання. Нагадаємо, що графічні програми (WinForms, WPF) не дозволяють вторинним потокам безпосередньо отримувати доступ до елементів керування, а повинні делегувати цей доступ. Ми вже розглядали об'єкт Dispatcher у прикладі WPF. Для консольних застосунків, які не використовували WPF, це обмеження не діє. Це різні моделі синхронізації, про які йдеться. 
+SynchonizationContext – це тип, що надає віртуальний метод публікації, який приймає делегат для асинхронного виконання. Це забезпечує шаблон для фреймворків для належної обробки асинхронних запитів (диспетчеризація для WPF/WinForms, безпосереднє виконання для не-графічних застосунків тощо). Він надає спосіб ставити одиницю роботи в чергу для контексту та веде облік невиконаних асинхронних операцій.
+Як ми обговорювали раніше, коли делегат ставиться в чергу для асинхронного виконання, його запуск планується в окремому потоці. Ця деталізація обробляється середовищем виконання .NET Core. Зазвичай це робиться за допомогою керованого пулу потоків середовища виконання .NET Core, але це можна змінити за допомогою спеціальної реалізації.
+Хоча цю спеціальну роботу можна керувати вручну за допомогою коду, шаблон async/await виконує більшу частину важкої роботи. Коли очікується асинхронний метод, він використовує реалізації SynchronizationContext та TaskScheduler цільового фреймворку. Наприклад, якщо ви використовуєте async/await у WPF-застосунку, WPF-фреймворк керує диспетчеризація делегата та зворотним викликом кінцевого отримувача після завершення завдання awaited для безпечного оновлення елементів керування.
 
-## Роль ConfigureAwait
+## Роль ConfigureAwait (це може буде затаріле)
 
-Тепер, коли ви трохи краще розумієте SynchronizationContext, настав час розглянути роль методу ConfigureAwait(). За замовчуванням очікування завдання призведе до використання контексту синхронізації. Під час розробки графічних застосунків (WinForms, WPF) саме така поведінка вам потрібна. Під час розробки графічних застосунків (WinForms, WPF) саме така поведінка вам потрібна. Щоб побачити це в дії, оновіть свої оператори верхнього рівня наступним чином:
+Тепер, коли ви трохи краще розумієте SynchronizationContext, настав час розглянути роль методу ConfigureAwait(). За замовчуванням очікування завдання призведе до використання контексту синхронізації. Під час розробки графічних застосунків (WinForms, WPF) саме така поведінка вам потрібна. Однак, якщо ви пишете код програми без графічного інтерфейсу, накладні витрати на розміщення оригінального контексту в черзі, коли він не потрібен, можуть потенційно спричинити проблеми з продуктивністю вашої програми.
+
+Щоб побачити це в дії, оновіть свої оператори верхнього рівня наступним чином:
 
 ```cs
 string message = await DoWorkAsync();
@@ -143,205 +106,143 @@ Console.WriteLine($"0 - {message}");
 string message1 = await DoWorkAsync().ConfigureAwait(false);
 Console.WriteLine($"1 - {message1}");
 ```
-
-
-```
-
-        I star to do long work asynchronous! Thread:6
-0 -     Done with work! Thread:6
-
-
-        I star to do long work asynchronous! Thread:6
-1 -     Done with work! Thread:6
-```
-
 Початковий блок коду використовує SynchronizationContext, наданий фреймворком (у цьому випадку, середовищем виконання .NET Core). Це еквівалентно виклику ConfigureAwait(true). Другий приклад ігнорує поточний контекст і планувальник.
-Рекомендації команди .NET Core пропонують під час розробки коду програми (WinForms, WPF тощо) залишати поведінку за замовчуванням.Якщо ви пишете не-програмний код (наприклад, код бібліотеки), використовуйте ConfigureAwait(false). ASP.NET Core не створює власний SynchronizationContext; тому ConfigureAwait(false) не забезпечує переваги під час використання інших фреймворків.
 
-В нашому випадку ми можемо ми можемо виклик асінхроного метода чеканя його виконнання і вивід результату відокремити в окреме завдання:
-
-```cs
-static async Task CallDoWorkAsync()
-{
-    string taskResult = await DoWorkAsync();
-    Console.WriteLine(taskResult);
-}
-```
-```cs
-while (true)
-{
-    _ = CallDoWorkAsync();
-    Console.Write($"Thread {Thread.CurrentThread.ManagedThreadId} says: Enter somthing:");
-    Console.ReadLine();
-}
-```
-```
-Thread 1 says: Enter somthing:
-        I star to do long work asynchronous! Thread:6
-
-Thread 1 says: Enter somthing:
-        I star to do long work asynchronous! Thread:4
-
-Thread 1 says: Enter somthing:
-        I star to do long work asynchronous! Thread:9
-        Done with work! Thread:9
-
-        Done with work! Thread:4
-
-        Done with work! Thread:6
-```
-Тут видно що з первинного потоку створюються окремі потоки в яких виконуються завдання.
-
+Рекомендації команди .NET Core пропонують під час розробки коду програми (WinForms, WPF тощо) залишати поведінку за замовчуванням. Якщо ви пишете не-програмний код (наприклад, код бібліотеки), використовуйте ConfigureAwait(false). Єдиним винятком є ​​ASP.NET Core (розглянуто, далі). ASP.NET Core не створює власний SynchronizationContext; тому ConfigureAwait(false) не забезпечує переваги при використанні інших фреймворків.
 
 ## Правила іменування асинхронних методів
 
-Звісно, ​​ви помітили зміну назви з DoWork() на DoWorkAsync(), але чому саме ця зміна? Що якщо викликати асінхронний метод так :
+Припустимо ви створили новий асінхроний метод MyWork:
 
 ```cs
-string message = DoWorkAsync();
+static async Task<string> MyWork()
+{
+    return await Task.Run(() => {
+
+        string result = "";
+        //...Do long work to get result 
+        return result;
+    });
+}
+```
+Потім хтось захотів його використати:
+
+```cs
+string otherString = MyWork();
+```
+Зверніть увагу, що ви справді позначили метод ключовим словом async, але не використали ключове слово await перед викликом методу MyWork(). На цьому етапі виникнуть помилки компілятора, оскільки повернене значення MyWork() є об'єктом Task\<string\>, який ви намагаєтеся призначити безпосередньо рядковій змінній. Пам'ятайте, що токен await витягує внутрішнє повернене значення, що міститься в об'єкті Task. Оскільки ви не використовували цей токен, у вас виникне невідповідність типів.
+
+```cs
+string otherString = await MyWork();
+Console.WriteLine(await MyWork());
+```
+```
+The result:
 ```
 
-На цьому етапі виникнуть помилки компілятора, оскільки повернене значення DoWork() є об'єктом Task, який ви намагаєтеся призначити безпосередньо рядковій змінній. Пам'ятайте, що токен await витягує внутрішнє повернене значення, що міститься в об'єкті Task. Оскільки ви не використовували цей токен, у вас виникне невідповідність типів.
-
-    «awaitable» метод — це просто метод, який повертає Task або Task<T>.
+    «Очікуваний» метод — це просто метод, який повертає Task або Task<T>.
 
 Враховуючи, що методи, що повертають об'єкти Task, тепер можна викликати неблокуючим чином через токени async та await, рекомендується називати будь-який метод, що повертає Task, суфіксом Async. Таким чином, розробники, які знають правила іменування, отримують візуальне нагадування про те, що ключове слово await є обов'язковим, якщо вони мають намір викликати метод в асинхронному контексті.
 
-    Обробники подій для елементів керування графічним інтерфейсом (наприклад, обробник кліку кнопки), а також методи дій у програмах у стилі MVC, які використовують ключові слова async/await, не дотримуються цієї домовленості про іменування.
+    Обробники подій для елементів керування графічним інтерфейсом (наприклад, обробник кліку кнопки), а також методи дій у програмах у стилі MVC, які використовують ключові слова async/await, не дотримуються цієї конвенції іменування.
 
 ## Асинхронні методи, що не повертають дані
 
-Наразі ваш метод DoWorkAsync() повертає Task\<string\>, який містить «реальні дані» для викликаючої сторони, що будуть прозоро отримані через ключове слово await. Однак, що робити, якщо ви хочете створити асинхронний метод, який нічого не повертає? Хоча існує два способи зробити це, насправді існує лише один правильний спосіб. Спочатку давайте розглянемо проблеми з визначенням асинхронного методу void.
+Наразі ваш метод DoWorkAsync() повертає Task<string>, який містить «реальні дані» для викликаючої сторони, що будуть прозоро отримані через ключове слово await. Однак, що робити, якщо ви хочете створити асинхронний метод, який нічого не повертає? Хоча існує два способи зробити це, насправді існує лише один правильний спосіб. Спочатку розглянемо проблеми з визначенням методу async void.
 
-### Async Void Methods
+### Mетоди async void
 
 Нижче наведено приклад асинхронного методу, який використовує void як тип повернення замість Task:
 
 ```cs
 static async void MethodReturningVoidAsync()
 {
-
     await Task.Run(() =>
     {
-        int threadId = Thread.CurrentThread.ManagedThreadId;
+        Console.WriteLine(GetThreadInfo());
         /* Do some work here... */
-        Thread.Sleep(4_000);
-        Console.WriteLine($"Thread: {threadId}");
+        Thread.Sleep(3000);
+
     });
     Console.WriteLine($"Fire and forget void method completed");
 }
-```
 
-Якщо викликати цей метод, він працюватиме самостійно, не блокуючи основний потік. Наступний код покаже повідомлення «Завершено» перед повідомленням методу MethodReturningVoidAsync():
-
-```cs
 MethodReturningVoidAsync();
-Console.WriteLine($"Completed Thread: {Thread.CurrentThread.ManagedThreadId}");
+Console.WriteLine($"Completed.{GetThreadInfo()}");
 Console.ReadLine();
 ```
 ```
-Completed Thread: 1
-Thread: 6
+Completed.      ThreadId:1      IsBackground:False      ThreadState:Running
+        ThreadId:6      IsBackground:True       ThreadState:Background
 Fire and forget void method completed
 ```
-Хоча це може здатися життєздатним варіантом для сценаріїв «запустив і забув», є більша проблема. Якщо метод викидає виняток, йому нікуди подітися, окрім контексту синхронізації викликаючого методу. Оновіть метод до наступного:
+Метод працює самостійно, не блокуючи основний потік. Повідомлення «Completed...» перед повідомленням методу MethodReturningVoidAsync() "Fire and forget..."
+Хоча це може здатися життєздатним варіантом для сценаріїв «fire and forget», є більша проблема. Якщо метод викидає виняток, йому нікуди не перейти, окрім контексту синхронізації викликаючого методу. Оновіть метод до наступного:
 
 ```cs
-static async void MethodReturningVoidAsync()
+static async void MethodReturningVoidWithExeptionAsync()
 {
-
     await Task.Run(() =>
     {
-        int threadId = Thread.CurrentThread.ManagedThreadId;
+        Console.WriteLine(GetThreadInfo());
         /* Do some work here... */
-        Thread.Sleep(4_000);
-        Console.WriteLine($"Thread: {threadId}");
+        Thread.Sleep(3000);
         throw new Exception("Something bad happened");
     });
     Console.WriteLine($"Fire and forget void method completed");
 }
 ```
-```
-Completed Thread: 1
-Thread: 6
-Unhandled exception. System.Exception: Something bad happened
-   at Program.<>c.<<Main>$>b__0_4() in D:\...\Program.cs:line 60
-   at System.Threading.Tasks.Task`1.InnerInvoke()
-   ...
-```
 Для безпеки оберніть виклик цього методу в блок try-catch і запустіть програму ще раз:
-
 ```cs
 try
 {
-    MethodReturningVoidAsync();
-    Console.WriteLine($"Completed Thread: {Thread.CurrentThread.ManagedThreadId}");
-    Console.ReadLine();
+    MethodReturningVoidWithExeptionAsync();    
 }
 catch (Exception e)
 {
-    Console.WriteLine(e.Message);
+    Console.WriteLine(e);
 }
-
 ```
-Блок catch не лише не перехоплює виняток, але й сам виняток розміщується в контексті виконання потоків. Тож, хоча це може здатися хорошою ідеєю для сценаріїв «запустив і забув», вам краще сподіватися, що в методі async void не буде створено винятку, інакше вся ваша програма може вийти з ладу.
+Блок catch не тільки не перехоплює виняток, але виняток поміщається в контекст виконання потоку. Тож, хоча це може здатися хорошою ідеєю для сценаріїв «fire and forget», вам краще сподіватися, що в методі async void не буде створено винятку, інакше вся ваша програма може вийти з ладу.
 
-### Асинхронні методи void з використанням Task
+### Методи async Task шо нічоно не повертають.
 
 Краще, щоб ваш метод використовував Task замість void. Оновіть метод до наступного:
 
 ```cs
-static async void MethodReturningVoidTaskAsync()
+static async Task MethodReturningTaskAsync()
 {
-
     await Task.Run(() =>
     {
-        int threadId = Thread.CurrentThread.ManagedThreadId;
+        Console.WriteLine(GetThreadInfo());
         /* Do some work here... */
-        Thread.Sleep(4_000);
-        Console.WriteLine($"Thread: {threadId}");
-        //throw new Exception("Something bad happened");
+        Thread.Sleep(3000);
     });
     Console.WriteLine($"Void method completed");
 }
 ```
-Якщо викликати метод with без ключового слова await, буде отримано той самий результат, що й у попередньому прикладі:
+Якщо викликати метод без ключового слова await, буде отримано той самий результат, що й у попередньому прикладі.
 
 ```cs
-static async Task MethodReturningVoidTaskAsync()
-{
-
-    await Task.Run(() =>
-    {
-        int threadId = Thread.CurrentThread.ManagedThreadId;
-        /* Do some work here... */
-        Thread.Sleep(4_000);
-        Console.WriteLine($"Thread: {threadId}");
-    });
-    Console.WriteLine($"Void method completed");
-}
-
-```
-Якщо викликати метод with без ключового слова await, буде отримано той самий результат, що й у попередньому прикладі:
-```cs
-MethodReturningVoidTaskAsync();
-Console.WriteLine($"Completed Thread: {Thread.CurrentThread.ManagedThreadId}");
+MethodReturningTaskAsync();
+Console.WriteLine($"Completed.{GetThreadInfo()}");
 Console.ReadLine();
 ```
 ```
-Completed Thread: 1
-Thread: 6
+Completed.      ThreadId:1      IsBackground:False      ThreadState:Running
+        ThreadId:6      IsBackground:True       ThreadState:Background
 Void method completed
-
 ```
-Оновіть MethodReturningVoidTaskAsync() для виклику винятку:
+Оновіть MethodReturningTaskAsync() для виклику винятку:
 
 ```cs
-static async Task MethodReturningVoidTaskAsync()
+static async Task MethodReturningTaskWithExeptionAsync()
 {
     await Task.Run(() =>
     {
-        //...
+        Console.WriteLine(GetThreadInfo());
+        /* Do some work here... */
+        Thread.Sleep(3000);
         throw new Exception("Something bad happened");
     });
     Console.WriteLine($"Void method completed");
@@ -352,81 +253,62 @@ static async Task MethodReturningVoidTaskAsync()
 ```cs
 try
 {
-    MethodReturningVoidTaskAsync();
-    Console.WriteLine($"Completed Thread: {Thread.CurrentThread.ManagedThreadId}");
+    MethodReturningTaskWithExeptionAsync();
+    Console.WriteLine($"Completed.{GetThreadInfo()}");
     Console.ReadLine();
 }
 catch (Exception e)
 {
     Console.WriteLine(e.Message);
 }
+```
+```
+Completed.      ThreadId:1      IsBackground:False      ThreadState:Running
+        ThreadId:6      IsBackground:True       ThreadState:Background
 
 ```
-Коли ви запускаєте програму і виникає виняток, відбуваються дві цікаві речі. По-перше, вся програма не аварійно завершує роботу, а по-друге, блок catch не перехоплює виняток. Коли виняток викидається методом Task/Task<T>, він перехоплюється та поміщається до об'єкта Task. Під час використання await виняток (або AggregateException) доступний для обробки. Оновіть код виклику, щоб він очікував на метод, і блок catch тепер працюватиме належним чином:
+Коли ви запускаєте програму і виникає виняток, відбуваються дві цікаві речі. Перша полягає в тому, що вся програма не аварійно завершує роботу, а друга — що блок catch не перехоплює виняток. Виняток виникає в вториному фономому потоці. Коли метод Task/Task<T> викидає виняток, він перехоплюється та поміщається до об'єкта Task. Під час використання await виняток (або AggregateException) доступний для обробки. Оновіть код виклику, щоб він очікував на метод, і блок catch тепер працюватиме належним чином:
 
 ```cs
 try
 {
-    await MethodReturningVoidTaskAsync();
-    //...
+    await MethodReturningTaskWithExeptionAsync();
+    Console.WriteLine($"Completed.{GetThreadInfo()}");
+    Console.ReadLine();
+}
+catch (Exception e)
+{
+    Console.WriteLine(e.Message);
 }
 ```
 ```
-Thread: 6
+        ThreadId:6      IsBackground:True       ThreadState:Background
 Something bad happened
 ```
-Підсумовуючи, вам слід уникати створення методів async void та використовувати методи async Task. Чи вимагати await, це бізнес-рішення, але в будь-якому випадку, принаймні ви не призведете до збою вашої програми. Тому попередній приклад з використанням CallDoWork не найкраша практика і я  його використав врашовуючи його простоту.
+Підсумовуючи, вам слід уникати створення асинхронних методів void та використовувати асинхронні методи Task. Чи чекати на них, чи ні, стає бізнес-рішенням, але в будь-якому разі, принаймні ви не призведете до збою вашої програми!
 
 ## Асинхронні методи з кількома await
 
 Цілком допустимо, щоб один асинхронний метод мав кілька контекстів очікування у своїй реалізації. Наступний приклад показує це в дії:
 
 ```cs
-static async Task MultipleAwaits()
-{
-    await Task.Run(() => { Thread.Sleep(2_000); });
-    Console.WriteLine($"Done with first task! {Thread.CurrentThread.ManagedThreadId}");
-    await Task.Run(() => { Thread.Sleep(2_000); });
-    Console.WriteLine($"Done with second task! {Thread.CurrentThread.ManagedThreadId}");
-    await Task.Run(() => { Thread.Sleep(2_000); });
-    Console.WriteLine($"Done with third task! {Thread.CurrentThread.ManagedThreadId}");
-}
-
-var watch = Stopwatch.StartNew();
-await MultipleAwaits();
-watch.Stop();
-Console.WriteLine($"Time: {watch.ElapsedMilliseconds}");
-```
-```
-Done with first task! 6
-Done with second task! 6
-Done with third task! 7
-Time: 6066
-```
-Знову ж таки, тут кожне завдання не робить набагато більше, ніж призупинення поточного потоку на певний час; проте будь-яка одиниця роботи може бути представлена ​​цими завданнями (виклик веб-сервісу, читання бази даних тощо).
-Інший варіант — не чекати на кожне завдання, а чекати на всі разом і повертати, коли всі завдання будуть виконані. Це більш імовірний сценарій, коли є три речі (перевірка електронної пошти, оновлення сервера, завантаження файлів), які потрібно виконати пакетно, але можна зробити паралельно. Ось код, оновлений за допомогою методу Task.WhenAll():
-
-```cs
 static async Task MultipleAwaitsAsync()
 {
-    await Task.WhenAll(
-            Task.Run(() =>
-            {
-                Thread.Sleep(2_000);
-                Console.WriteLine($"Done with first task! {Thread.CurrentThread.ManagedThreadId}");
-            }), 
-            Task.Run(() =>
-            {
-                Thread.Sleep(1_000);
-                Console.WriteLine($"Done with second task! {Thread.CurrentThread.ManagedThreadId}");
-            }), 
-            Task.Run(() =>
-            {
-                int threadId = Thread.CurrentThread.ManagedThreadId;
-                Thread.Sleep(2_000);
-                Console.WriteLine($"Done with third task! {Thread.CurrentThread.ManagedThreadId}");
-            })
-     );
+    await Task.Run(() =>
+    {
+        Thread.Sleep(2000);
+        Console.WriteLine($"Done with first task! {GetThreadInfo()}");
+    });
+    await Task.Run(() => 
+    {
+        Thread.Sleep(1000);
+        Console.WriteLine($"Done with second task! {GetThreadInfo()}");
+    });
+    await Task.Run(() => 
+    {
+        Thread.Sleep(2000);
+        Console.WriteLine($"Done with third task! {GetThreadInfo()}");
+    });
 }
 
 var watch = Stopwatch.StartNew();
@@ -434,76 +316,82 @@ await MultipleAwaitsAsync();
 watch.Stop();
 Console.WriteLine($"Time: {watch.ElapsedMilliseconds}");
 ```
-Коли ви зараз запустите програму, ви побачите, що три завдання запускаються в порядку найменшого часу сну.
 ```
-Done with second task! Thread:7
-Done with third task! Thread:8
-Done with first task! Thread:6
-Time: 2010
+Done with first task!   ThreadId:6      IsBackground:True       ThreadState:Background
+Done with second task!  ThreadId:6      IsBackground:True       ThreadState:Background
+Done with third task!   ThreadId:7      IsBackground:True       ThreadState:Background
+Time: 5068
 ```
-Повертаючись до прикладу з початку розділу виконаємо DoWork() подібним чином.
+Знову ж таки, тут кожне завдання не робить набагато більше, ніж призупинення поточного потоку на певний час; проте будь-яка одиниця роботи може бути представлена ​​цими завданнями (виклик веб-сервісу, читання бази даних тощо).
+
+Інший варіант — не чекати на кожне завдання, а чекати на всі разом і повертатися, коли всі завдання будуть виконані. Це більш імовірний сценарій, де є три речі (перевірка електронної пошти, оновлення сервера, завантаження файлів), які необхідно виконати пакетно, але можна зробити паралельно. Ось код, оновлений за допомогою методу Task.WhenAll():
 
 ```cs
-static async Task WhenAllDoWork()
+static async Task MultipleAwaitsWhenAllAsync()
 {
     await Task.WhenAll(
-        Task.Run(() => DoWork()),
-        Task.Run(() => DoWork()),
-        Task.Run(() => DoWork()));
+            Task.Run(() =>
+            {
+                Thread.Sleep(2_000);
+                Console.WriteLine($"Done with first task! {GetThreadInfo()}");
+            }),
+            Task.Run(() =>
+            {
+                Thread.Sleep(1_000);
+                Console.WriteLine($"Done with second task! {GetThreadInfo()}");
+            }),
+            Task.Run(() =>
+            {
+                Thread.Sleep(2_000);
+                Console.WriteLine($"Done with third task! {GetThreadInfo()}");
+            })
+     );
 }
 
 var watch = Stopwatch.StartNew();
-await WhenAllDoWork();
+await MultipleAwaitsWhenAllAsync();
 watch.Stop();
 Console.WriteLine($"Time: {watch.ElapsedMilliseconds}");
 ```
-```
 
-        I star to do long work! Thread:6
-
-        I star to do long work! Thread:8
-
-        I star to do long work! Thread:7
-Time: 5032
+Коли ви зараз запустите програму, ви побачите, що три завдання запускаються в порядку найменшого часу сну.
 
 ```
-Таким чином виконання виконується параллельно.
-
-Також існує WhenAny(), який сигналізує про завершення одного із завдань. Метод повертає перше завершене завдання. Щоб продемонструвати WhenAny():
+Done with second task!  ThreadId:7      IsBackground:True       ThreadState:Background
+Done with third task!   ThreadId:8      IsBackground:True       ThreadState:Background
+Done with first task!   ThreadId:6      IsBackground:True       ThreadState:Background
+Time: 2017
+```
+Також існує WhenAny(), який сигналізує про завершення одного із завдань. Метод повертає перше завершене завдання. 
 
 ```cs
 static async Task MultipleAwaitsWhenAnyAsync()
 {
     await Task.WhenAny(
-        Task.Run(() =>
-        {
-            Thread.Sleep(2_000);
-            Console.WriteLine("Done with first task!");
-        }), 
-        Task.Run(() =>
-        {
-            Thread.Sleep(1_000);
-            Console.WriteLine("Done with second task!");
-        }), 
-        Task.Run(() =>
-        {
-            Thread.Sleep(2_000);
-            Console.WriteLine("Done with third task!");
-        })
-    );
+            Task.Run(() =>
+            {
+                Thread.Sleep(2_000);
+                Console.WriteLine($"Done with first task! {GetThreadInfo()}");
+            }),
+            Task.Run(() =>
+            {
+                Thread.Sleep(1_000);
+                Console.WriteLine($"Done with second task! {GetThreadInfo()}");
+            }),
+            Task.Run(() =>
+            {
+                Thread.Sleep(2_000);
+                Console.WriteLine($"Done with third task! {GetThreadInfo()}");
+            })
+     );
 }
+```
+```
+Done with second task!  ThreadId:7      IsBackground:True       ThreadState:Background
+Time: 1050
+```
 
-var watch = Stopwatch.StartNew();
-await MultipleAwaitsWhenAnyAsync();
-watch.Stop();
-Console.WriteLine($"Time: {watch.ElapsedMilliseconds}");
-
-```
-```
-Done with second task!
-Time: 1023
-```
-Кожен із цих методів також працює з масивом завдань. Щоб продемонструвати це, створіть новий метод з назвою MultipleAwaitsWithListTaskAsync(). У цьому методі створіть List<Task>, додайте до нього три завдання, а потім викличте Task.WhenAll() або Task.WhenAny():
+Кожен із цих методів також працює з масивом завдань. Щоб продемонструвати це, створіть новий метод з назвою MultipleAwaitsWithListTaskAsync(). У цьому методі створіть List, додайте до нього три завдання, а потім викличте Task.WhenAll() або Task.WhenAny():
 
 ```cs
 static async Task MultipleAwaitsWithListTaskAsync()
@@ -512,48 +400,51 @@ static async Task MultipleAwaitsWithListTaskAsync()
     tasks.Add(Task.Run(() =>
     {
         Thread.Sleep(2_000);
-        Console.WriteLine("Done with first task!");
+        Console.WriteLine($"Done with first task! {GetThreadInfo()}");
     }));
     tasks.Add(Task.Run(() =>
     {
         Thread.Sleep(1_000);
-        Console.WriteLine("Done with second task!");
+        Console.WriteLine($"Done with second task! {GetThreadInfo()}");
     }));
     tasks.Add(Task.Run(() =>
     {
         Thread.Sleep(2_000);
-        Console.WriteLine("Done with third task!");
+        Console.WriteLine($"Done with third task! {GetThreadInfo()}");
     }));
-    //await Task.WhenAny(tasks);
     await Task.WhenAll(tasks);
+    //await Task.WhenAny(tasks);
+
 }
 
 var watch = Stopwatch.StartNew();
 await MultipleAwaitsWithListTaskAsync();
 watch.Stop();
 Console.WriteLine($"Time: {watch.ElapsedMilliseconds}");
-```
-```
-Done with second task!
-Done with first task!
-Done with third task!
-Time: 2017
-```
 
+```
+```
+Done with second task!  ThreadId:7      IsBackground:True       ThreadState:Background
+Done with first task!   ThreadId:6      IsBackground:True       ThreadState:Background
+Done with third task!   ThreadId:8      IsBackground:True       ThreadState:Background
+Time: 2010
+```
 ## Виклик асинхронних методів із синхронних методів
 
-У кожному з попередніх прикладів використовувалося ключове слово async для повернення потоку до виклику коду під час виконання методу async. У огляді, ключове слово await можна використовувати лише в методі, позначеному як async. Що робити, якщо ви не можете (або не хочете) позначити метод як async?
-Існують способи викликати асинхронні методи в синхронному контексті. Більшість із них погані. 
-Перший варіант — просто відмовитися від ключового слова await, що дозволить початковому потоку продовжувати виконання, поки асинхронний метод працює в окремому потоці, ніколи не повертаючись до викликаючого кода. Це поводиться подібно до попереднього прикладу виклику асинхронних методів Task. Будь-які значення, які повертає метод, втрачаються, а винятки проковтуються.
-Це може відповідати вашим потребам, але якщо ні, у вас є три варіанти. Перший — просто використовувати властивість Result для Task<T> або метод Wait() для методів Task. Якщо метод завершується невдачею, будь-які винятки огортаються винятком AggregateException, що потенційно ускладнює обробку помилок. Ви також можете викликати GetAwaiter().GetResult(). Це поводиться так само, як і виклики Wait() та Result, з невеликою різницею, що винятки не обгортаються в AggregateException. Хоча методи GetAwaiter().GetResult() працюють як з методами з поверненим значенням, так і з методами без поверненого значення, у документації вони позначені як «не для зовнішнього використання», що означає, що вони можуть змінитися або зникнути в майбутньому.
-Хоча ці два варіанти здаються нешкідливою заміною використання await в асинхронному методі, існує серйозніша проблема з їх використанням. Виклик Wait(), Result або GetAwaiter().GetResult() блокує потік, що викликає, обробляє метод async в іншому потоці, а потім повертається назад до потоку, що викликає, зв'язуючи два потоки для виконання роботи. Ще гірше те, що кожен з цих процесів може спричинити взаємоблокування, особливо якщо потік, що викликає, знаходиться в інтерфейсі користувача програми.
+У кожному з попередніх прикладів використовувалося ключове слово async для повернення потоку щоб викликати код під час виконання асінхронного методу. Для отримання результату, ключове слово await можна використовувати лише в методі, позначеному як async. Що робити, якщо ви не можете (або не хочете) позначити метод як async? Існують способи викликати асинхронні методи в синхронному контексті. На жаль, більшість із них погані. 
+Перший варіант полягає в тому, щоб просто відмовитися від ключового слова await, дозволяючи початковому потоку продовжувати виконання, тоді як асинхронний метод виконується в окремому потоці, ніколи не повертаючись до викликаючого.
+Це поводиться подібно до попереднього прикладу виклику асинхронних методів Task. Будь-які значення, які повертає метод, втрачаються, а винятки проковтуються.
+Це може відповідати вашим потребам, але якщо ні, у вас є три варіанти. Перший — просто використовувати властивість Result для Task\<T\> або метод Wait() для методів Task. Якщо метод завершується невдачею, будь-які винятки обгортаються в AggregateException, що потенційно ускладнює обробку помилок. Ви також можете викликати GetAwaiter().GetResult(). Це поводиться так само, як і виклики Wait() та Result, з невеликою різницею, що винятки не обгортаються в AggregateException. Хоча методи GetAwaiter().GetResult() працюють як з методами зі значенням, що повертається, так і з методами без значення, що повертається, вони позначені в документації як «не для зовнішнього використання», що означає, що вони можуть змінитися або зникнути в майбутньому. 
+Хоча ці два варіанти здаються нешкідливою заміною використання await в асинхронному методі, існує серйозніша проблема з їх використанням. Виклик Wait(), Result або GetAwaiter().GetResult() блокує викликаючий потік, обробляє асинхронний метод в іншому потоці, а потім повертається назад до викликаючого потоку, зв'язуючи два потоки для виконання роботи. Ще гірше те, що кожен з цих варіантів може спричинити взаємоблокування, особливо якщо викликаючий потік знаходиться в інтерфейсі користувача програми.
 Щоб допомогти виявити та виправити неправильний код async/await (та правила іменування), додайте до проєкту пакет Microsoft.VisualStudio.Threading.Analyzers. Цей пакет додає аналізатори, які надаватимуть попередження компілятора, коли виявлено неправильний код потоків, включаючи неправильні правила іменування. Щоб побачити це в дії, додайте наступний код до операторів верхнього рівня:
 
 ```cs
-_ = DoWorkAsync().Result;
-_ = DoWorkAsync().GetAwaiter().GetResult();
+ _ = DoWorkAsync().Result;
+ _ = DoWorkAsync().GetAwaiter().GetResult();
 ```
+
 Це призводить до такого попередження компілятора:
+
 ```
 VSTHRD002   Synchronously waiting on tasks or awaiters may cause deadlocks. Use await or
 JoinableTaskFactory.Run instead.
@@ -566,37 +457,20 @@ using Microsoft.VisualStudio.Threading;
 Об'єкту JoinableTaskFactory потрібен JoinableTaskContext у конструкторі:
 
 ```cs
+JoinableTaskFactory joinableTaskFactory = new JoinableTaskFactory(
+    new JoinableTaskContext());
+```
+З урахуванням цього ви можете використовувати метод Run() для безпечного виконання асинхронного методу, такого як метод DoWork(), із синхронного контексту:
+```cs
 string message = joinableTaskFactory.Run(async () => await DoWorkAsync());
 Console.WriteLine(message);
 ```
 ```
-
-        I star to do long work asynchronous! Thread:4
-        Done with work! Thread:4
-
+        I star do work!         ThreadId:4      IsBackground:True       ThreadState:Background
+        Done with work!
 ```
 
-Як ви знаєте, метод DoWorkAsync() повертає Task<string>, і це значення дійсно повертається методом Run(). Ви також можете викликати методи, які просто повертають Task, наступним чином:
-
-```cs
-try
-{
-    joinableTaskFactory.Run(async () =>
-    {
-        await MethodReturningVoidTaskAsync();
-        //await SomeOtherAsyncMethod();
-    });
-}
-catch (Exception ex)
-{
-    Console.WriteLine(ex.Message);
-}
-
-```
-```
-Thread: 4
-Something bad happened
-```
+    Хоча в назвах пакетів є VisualStudio, вони не залежать від Visual Studio. Це пакети .NET, які можна використовувати як з встановленим Visual Studio, так і без нього.
 
 ## Await в блоках catch та finally
 
@@ -621,19 +495,23 @@ static async Task<string> MethodWithTryCatch()
   }
 }
 ```
-## Узагальнені типи повернення асинхронних значень
+
+## Узагальнені асинхронні типи повернення
 
 Існують додаткові типи повернення, якщо вони відповідають шаблону асинхронізації. Одним конкретним прикладом є ValueTask. Щоб побачити це в дії, створіть такий код:
 
 ```cs
-static async ValueTask<int> ReturnAnInt()
+static async ValueTask<int> ReturnAnIntAsync()
 {
     await Task.Delay(3_000);
     return 5;
 }
 
-//Console.WriteLine( ReturnAnInt() );
-Console.WriteLine(await ReturnAnInt());
+//Console.WriteLine(ReturnAnIntAsync()); // You won't see anything.
+Console.WriteLine(await ReturnAnIntAsync());
+```
+```
+5
 ```
 Ті самі правила застосовуються для ValueTask, що й для Task, оскільки ValueTask є просто Task для типів значень, а не примусовим виділенням об'єкта в купі.
 
@@ -656,7 +534,11 @@ static async Task MethodWithProblems(int firstParam, int secondParam)
 }
 await MethodWithProblems(1, -2);
 ```
+```
+First Complete
+Something bad happened
 
+```
 Сценарій такий, що друге тривале завдання завершується невдачею через недійсні вхідні дані. Ви можете (і повинні) додавати перевірки на початок методу, але оскільки весь метод є асинхронним, немає гарантії, коли перевірки будуть виконані. Було б краще, якби перевірки відбувалися одразу, перш ніж викликальний код перейде далі. У наступному оновленні перевірки виконуються синхронно, а потім приватна функція виконується асинхронно:
 
 ```cs
@@ -681,16 +563,16 @@ static async Task MethodWithProblemsFixed(int firstParam, int secondParam)
         });
     }
 }
-
 await MethodWithProblemsFixed(1, -2);
 ```
-
+```
+Bad data
+```
 
 ## Приклад застосування async/await в GUI
 
 Для демонстрації ми використаємо той самий проект WPF, що й раніше в цьому розділі. Створемо проект типу WPF Application з назвою PictureHandlerWithAsyncAwait. Встановити пакет System.Drawing.Common. Tools > NuGet Package Manager > Manage NuGet Packages for Solution > В рядку пошуку System.Drawing.Common > Install
-Для тестування в католог D:\Temp\Pitures скопіюємо декілька будь-яких зображень з розширенням *.jpg.
-Змінемо файл MainWindow.xalm і додайте обробники подій кнопок.
+Для тестування в католог D:\Temp\Pitures скопіюємо декілька будь-яких зображень з розширенням *.jpg. Змінемо файл MainWindow.xalm і додайте обробники подій кнопок.
 
 ```xml
 <<Window x:Class="PictureHandlerWithAsyncAwait.MainWindow"
@@ -735,17 +617,23 @@ await MethodWithProblemsFixed(1, -2);
         </Grid>
     </Grid>
 </Window>
-
 ```
 Змінимо файл MainWindow.xalm.сs (можливо треба розгорнути стрілку файлу MainWindow.xalm). В верхній частині оператори using.
+
 ```cs
 //using System.Windows.Shapes;
 using System.IO;
 using System.Drawing;
 ```
-Спробуємо застосувати патерн для довгого завдання. Змінемо обробник для кнопки DoWork
+Спробуємо застосувати патерн async/await для довгого завдання. Змінемо обробник для кнопки DoWork
 
 ```cs
+        private static string GetThreadInfo(Thread thread)
+        {
+            return  $" ThreadId: {thread.ManagedThreadId} " +
+                    $" IsBackground: {thread.IsBackground} " +
+                    $" ThreadState: {thread.ThreadState} ";
+        }
         private void DoWork(int interval)
         {
             Thread.Sleep(interval); // Emulation the long work
@@ -755,17 +643,19 @@ using System.Drawing;
         {
             await Task.Run(() =>
             {
-                int threadId = Thread.CurrentThread.ManagedThreadId;
-                Dispatcher?.Invoke(() => { Title = $"Start work in thread:{threadId} ...";});
-                DoWork(10000);
-                Dispatcher?.Invoke(() => { Title = $"Work completed!"; });
+                Thread thread = Thread.CurrentThread;
+                int? taskId = Task.CurrentId;
+                Dispatcher?.Invoke(() => { Title = $"Start work {taskId}. {GetThreadInfo(thread)} ...";});
+                
+                DoWork(5000);
+                
+                Dispatcher?.Invoke(() => { Title = $"End work {taskId}. {GetThreadInfo(thread)}"; });
             });
         }
 ```
+Якшо ви натисните на DoWork інтерфейс не блокується і можна продовжувати вводити текст покі завдання виконується в окремому потоці. Також натиснути можна декілька разів не чекаючи.
 
-Якшо ви натисните на DoWork інтерфейс не блокується і можна продовжувати вводити текст покі завдання виконується в окремому потоці.
-
-## Скасування операцій async/await
+## Обробка зображень і скасування операцій з async/await
 
 Скасування також можливе за допомогою шаблону async/await, і це набагато простіше, ніж за допомогою Parallel.ForEach. Додамо зміну рівня класа типу CancellationTokenSource та обробник події натискання Cancel.
 
@@ -784,15 +674,18 @@ using System.Drawing;
 Додамо метод який обробляє одне зобрадення.
 
 ```cs
-        private async Task ProcessFileAsync(string currentFile,string outputDirectory, CancellationToken token)
+        private async Task ProcessFileAsync(string currentFile, string outputDirectory, CancellationToken token)
         {
             string filename = Path.GetFileName(currentFile);
-            using Bitmap bitmap = new(currentFile);
             try
             {
                 await Task.Run(() =>
                 {
-                    Dispatcher?.Invoke(() => { Title = $"Processing in thread:{threadId} {filename}"; });
+                    Thread thread = Thread.CurrentThread;
+                    int? taskId = Task.CurrentId;
+                    Dispatcher?.Invoke(() => { Title = $"Processing {taskId} {GetThreadInfo(thread)} {filename}";});
+
+                    using Bitmap bitmap = new(currentFile);
                     bitmap.RotateFlip(RotateFlipType.Rotate180FlipNone);
                     bitmap.Save(Path.Combine(outputDirectory, filename));
                 }, token);
@@ -809,10 +702,9 @@ using System.Drawing;
             }
         }
 ```
-Цей метод використовує інше перевантаження команди Task.Run, приймаючи CancellationToken як параметр. Команда Task.Run обгорнута блоком try/catch (як і код виклику) на випадок, якщо користувач натисне кнопку Cancel. 
+Цей метод використовує інше перевантаження команди Task.Run, приймаючи CancellationToken як параметр. Команда Task.Run обгорнута блоком try/catch (як і код виклику) на випадок, якщо користувач натисне кнопку Cancel.
 
-Процес обробки зображень такий самий, як і в попередньому прикладі: отримати каталог зображень, створити вихідний каталог, отримати файли зображень, повернути їх та зберегти в новому каталозі.
-Замість використання Parallel.ForEach() у цій новій версії для виконання роботи використовуватимуть асинхронні методи, а сигнатури методів прийматимуть CancellationToken як параметр.
+Процес обробки зображень такий самий, як і в попередньому прикладі: отримати каталог зображень, створити вихідний каталог, отримати файли зображень, повернути їх та зберегти в новому каталозі. У цій версії для виконання роботи використовуватимуть асинхронні методи в циклі foreach, а сигнатури методів прийматимуть CancellationToken як параметр.
 
 ```cs
         private async void cmdProcess_Click(object sender, RoutedEventArgs e)
@@ -844,20 +736,26 @@ using System.Drawing;
                 Console.WriteLine(ex);
             }
             _cancellationTokenSource = null;
-
         }
 ```
-Після початкового налаштування код перебирає файли та асинхронно викликає ProcessFileAsync() для кожного файлу. Виклик ProcessFileAsync() обгортається блоком try/catch, а CancellationToken передається в метод ProcessFile(). Якщо Cancel() виконується на CancellationTokenSource (наприклад, коли користувач натискає кнопку «Cancel»), виникає виняток OperationCanceledException. При виникнені винятку цикл переривається. Подія настисканя на виконання обробки не впливає на користувацький інтерфейс бо все відбувається в вторинному робочому потоці. Хоча інтерфейс не блокується обробка зображень відбувається послідовно в окремомоу потоці якій зупиняється і чекає.
+Після початкового налаштування код перебирає файли та асинхронно викликає ProcessFileAsync() для кожного файлу. Виклик ProcessFileAsync() обгортається блоком try/catch, а CancellationToken передається в метод ProcessFile(). Якщо Cancel() виконується на CancellationTokenSource (наприклад, коли користувач натискає кнопку «Cancel»), виникає виняток OperationCanceledException. При виникнені винятку цикл переривається. Подія настисканя на виконання обробки не впливає на користувацький інтерфейс бо все відбувається в вторинному робочому потоці. Хоча інтерфейс не блокується обробка зображень відбувається послідовно в томуж самому вторинному потоці якій зупиняється і чекає.
 
 ## Асінхроний метод Parallel.ForEachAsync.
 
-В класі Paralell є метод ForEachAsync який є асінхроним і дозволяє використати асінхроний метод для тіла циклу.
-Додамо в проект обробник натискання.
+В класі Paralell є метод ForEachAsync який є асінхроним і дозволяє використати асінхроний метод для тіла циклу. Додамо в проект обробник натискання.
 
 ```cs
         private async void cmdProcessWithForEachAsync_Click(object sender, RoutedEventArgs e)
         {
-            await ProcessWithForEachAsync();
+            try
+            {
+                await ProcessWithForEachAsync();
+            }
+            catch (Exception ex)
+            {
+                Title = ex.Message;
+            }
+      
         }
 
         private async Task ProcessWithForEachAsync()
@@ -886,20 +784,19 @@ using System.Drawing;
             {
                 await Parallel.ForEachAsync(files, parallelOptions, async (currentFile, token) =>
                 {
-                    token.ThrowIfCancellationRequested();
-                    string filename = Path.GetFileName(currentFile);
-
-                    //For title
-                    int threadId = Environment.CurrentManagedThreadId;
-                    Dispatcher?.Invoke(() =>
+                    await Task.Run(() =>
                     {
-                        Title = $"Processing in thread:{threadId}   File:{filename}";
+                        token.ThrowIfCancellationRequested();
+                        string filename = Path.GetFileName(currentFile);
+
+                        Thread thread = Thread.CurrentThread;
+                        int? taskId = Task.CurrentId;
+                        Dispatcher?.Invoke(() => { Title = $"Processing {taskId} {GetThreadInfo(thread)} {filename}"; });
+
+                        using Bitmap bitmap = new Bitmap(currentFile);
+                        bitmap.RotateFlip(RotateFlipType.Rotate180FlipNone);
+                        bitmap.Save(Path.Combine(outputDirectory, filename));
                     });
-
-                    using Bitmap bitmap = new Bitmap(currentFile);
-
-                    bitmap.RotateFlip(RotateFlipType.Rotate180FlipNone);
-                    bitmap.Save(Path.Combine(outputDirectory, filename));
                 });
                 Dispatcher?.Invoke(() => Title = "Process complite.");
             }
@@ -909,77 +806,76 @@ using System.Drawing;
             }
         }
 ```
-В об'єкті ParallelOptions зберігаеться послання на властивість CancellationTokenSource.Token якій відповідає для скасування виконнання циклу. Тіло цилу використовує асінхроний метод який вказано у вигляді лямбда виразу. Можливо в цьому випадку краще було б зробити окрмий метод замість лямбда-виразу. Як видно завдання повністью відпрацьовується швидше з використання Parallel.ForEachAsync ніж коли обробляється коже окреме зображення.
+В об'єкті ParallelOptions зберігаеться послання на властивість CancellationTokenSource.Token якій відповідає для скасування виконнання циклу. Тіло цилу використовує асінхроний метод який вказано у вигляді лямбда виразу. Можливо в цьому випадку краще було б зробити окремий метод замість лямбда-виразу. Як видно завдання параалельно відпрацьовуються швидше з використання Parallel.ForEachAsync ніж коли звичайний цикл завдань.
 
-##  Скасування в патерні async/await за допомогою методу WaitAsync().
+## Скасування в патерні async/await за допомогою методу WaitAsync().
 
-Асинхронні виклики можна скасувати за допомогою токена скасування та/або після досягнення ліміту часу за допомогою методу WaitAsync(). Повернемся до проекту WorkWithAsync. 
+Асинхронні виклики можна скасувати за допомогою токена скасування та/або після досягнення ліміту часу за допомогою методу WaitAsync(). Повернемся до проекту FirstLookAtAsyncAwait.
 
 Ми маємо метод.
-
 ```cs
 static async Task<string> DoWorkAsync()
 {
-    return await Task.Run(() =>
-    {
-        int threadId = Thread.CurrentThread.ManagedThreadId;
-        Console.WriteLine($"\n\tI star to do long work asynchronous! Thread:{threadId}");
+    return await Task.Run(() => {
+        Console.WriteLine($"\tI star do work!\t{GetThreadInfo()}");
         Thread.Sleep(5000); // Emulation the long work
-        return $"\tDone with work! Thread:{threadId}\n";
+        return $"\tDone with work!\t{GetThreadInfo()}\n";
     });
 }
 ```
+
 Скасувати завдання можна за допомогою методу WaitAsync().
+
 ```cs
 async Task UsingWaitAsync()
 {
     CancellationTokenSource cancellationTokenSource = new();
 
-    try
-    {
-        string message = await DoLongWorkAsync().WaitAsync(TimeSpan.FromSeconds(12));
-        await Console.Out.WriteLineAsync(message);
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine(ex.Message);
-    }
+    //try
+    //{
+    //    string message = await DoWorkAsync().WaitAsync(TimeSpan.FromSeconds(12));
+    //    await Console.Out.WriteLineAsync(message);
+    //}
+    //catch (Exception ex)
+    //{
+    //    Console.WriteLine(ex.Message);
+    //}
 
-    try
-    {
-        string message = await DoLongWorkAsync().WaitAsync(TimeSpan.FromSeconds(2));
-        await Console.Out.WriteLineAsync(message);
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine(ex.Message);
-    }
+    //try
+    //{
+    //    string message = await DoWorkAsync().WaitAsync(TimeSpan.FromSeconds(2));
+    //    await Console.Out.WriteLineAsync(message);
+    //}
+    //catch (Exception ex)
+    //{
+    //    Console.WriteLine(ex.Message);
+    //}
 
-    try
-    {
-        string message = await DoLongWorkAsync().WaitAsync(cancellationTokenSource.Token);
-        await Console.Out.WriteLineAsync(message);
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine(ex.Message);
-    }
+    //try
+    //{
+    //    string message = await DoWorkAsync().WaitAsync(cancellationTokenSource.Token);
+    //    await Console.Out.WriteLineAsync(message);
+    //}
+    //catch (Exception ex)
+    //{
+    //    Console.WriteLine(ex.Message);
+    //}
 
 
     cancellationTokenSource.Cancel();
 
-    try
-    {
-        _ = await DoLongWorkAsync().WaitAsync(cancellationTokenSource.Token);
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine(ex.Message);
-    }
+    //try
+    //{
+    //    _ = await DoWorkAsync().WaitAsync(cancellationTokenSource.Token);
+    //}
+    //catch (Exception ex)
+    //{
+    //    Console.WriteLine(ex.Message);
+    //}
 
     try
     {
-        _ = await DoLongWorkAsync().WaitAsync(TimeSpan.FromSeconds(2),cancellationTokenSource.Token);
+        _ = await DoWorkAsync().WaitAsync(TimeSpan.FromSeconds(2), cancellationTokenSource.Token);
     }
     catch (Exception ex)
     {
@@ -990,51 +886,34 @@ async Task UsingWaitAsync()
 await UsingWaitAsync();
 ```
 ```
-
-        I star to do long work asynchronous! Thread:6
-        Done with work! Thread:6
-
-
-        I star to do long work asynchronous! Thread:7
-The operation has timed out.
-
-        I star to do long work asynchronous! Thread:11
-        Done with work! Thread:11
-
-
-        I star to do long work asynchronous! Thread:7
-A task was canceled.
-
-        I star to do long work asynchronous! Thread:6
+        I star do work!         ThreadId:6      IsBackground:True       ThreadState:Background
 A task was canceled.
 ```
-
 ## Скасування операцій async/await у синхронних викликах
 
-Метод Wait() також може приймати токен скасування під час виклику асинхронних методів з неасинхронного методу.
-Це можна використовувати з тайм-аутом або без нього. При використанні з тайм-аутом, тайм-аут має бути в мілісекундах:
+Метод Wait() також може приймати токен скасування під час виклику асинхронних методів з неасинхронного методу. Це можна використовувати з тайм-аутом або без нього. При використанні з тайм-аутом, тайм-аут має бути в мілісекундах:
 
 ```cs
 void UsingWait()
 {
     CancellationTokenSource tokenSource = new CancellationTokenSource();
-    MethodReturningVoidTaskAsync().Wait(tokenSource.Token);
-    MethodReturningVoidTaskAsync().Wait(10000, tokenSource.Token);
+    //MethodReturningTaskAsync().Wait(tokenSource.Token);
+    //MethodReturningTaskAsync().Wait(10000, tokenSource.Token);
 
     tokenSource.Cancel();
 
-    try
-    {
-       MethodReturningVoidTaskAsync().Wait(tokenSource.Token);
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine(ex.Message);
-    }
+    //try
+    //{
+    //    MethodReturningTaskAsync().Wait(tokenSource.Token);
+    //}
+    //catch (Exception ex)
+    //{
+    //    Console.WriteLine(ex.Message);
+    //}
 
     try
     {
-        MethodReturningVoidTaskAsync().Wait(2000, tokenSource.Token);
+        MethodReturningTaskAsync().Wait(2000, tokenSource.Token);
     }
     catch (Exception ex)
     {
@@ -1044,11 +923,7 @@ void UsingWait()
 UsingWait();
 ```
 ```
-Thread: 6
-Void method completed
-Thread: 6
-Void method completed
-The operation was canceled.
+        ThreadId:6      IsBackground:True       ThreadState:Background
 The operation was canceled.
 ```
 Ви також можете використовувати JoinableTaskFactory та метод WaitAsync() під час виклику із синхронного коду:
@@ -1058,12 +933,13 @@ void UsingWaitAsyncInSync()
 {
     JoinableTaskFactory joinableTaskFactory = new JoinableTaskFactory(new JoinableTaskContext());
     CancellationTokenSource tokenSource = new CancellationTokenSource();
+    tokenSource.Cancel();
     try
     {
         joinableTaskFactory.Run(async () =>
         {
-            await MethodReturningVoidTaskAsync().WaitAsync(tokenSource.Token);
-            await MethodReturningVoidTaskAsync().WaitAsync(TimeSpan.FromSeconds(2), tokenSource.Token);
+            //await MethodReturningTaskAsync().WaitAsync(tokenSource.Token);
+            await MethodReturningTaskAsync().WaitAsync(TimeSpan.FromSeconds(2), tokenSource.Token);
         });
     }
     catch (Exception ex)
@@ -1074,20 +950,19 @@ void UsingWaitAsyncInSync()
 UsingWaitAsyncInSync();
 ```
 ```
-Thread: 4
-Void method completed
-The operation has timed out.
+        ThreadId:4      IsBackground:True       ThreadState:Background
+A task was canceled.
 ```
+
 ## Асинхронні streams(потоки)
 
 Потоки (більш детально описані в іншій главі) можуть створюватися та використовуватися асинхронно. Метод, який повертає асинхронний потік
 
 1. Оголошується з модифікатором async
-2. Повертає IAsyncEnumerable<T>
+2. Повертає IAsyncEnumerable
 3. Містить оператори yield return (розглянуті раніше) для повернення послідовних елементів в асинхронному потоці
 
 Візьмемо наступний приклад:
-
 ```cs
 static async IAsyncEnumerable<int> GenerateSequence()
 {
@@ -1098,13 +973,15 @@ static async IAsyncEnumerable<int> GenerateSequence()
     }
 }
 ```
-Метод оголошено як async, повертає IAsyncEnumerable\<int\> та використовує yield return для повернення цілих чисел з послідовності.Щоб викликати цей метод, додайте наступний код до коду виклику:
-
+Метод оголошено як async, повертає IAsyncEnumerable<int> та використовує yield return для повернення цілих чисел з послідовності.Щоб викликати цей метод, додайте наступний код до коду виклику:
 ```cs
 await foreach (var number in GenerateSequence())
 {
     Console.WriteLine(number);
 }
+```
+```
+0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19
 ```
 
 ## Використання async/await для завантажень.
@@ -1126,7 +1003,6 @@ async Task DownloadBookWihtAsyncAwaitAndGetStatisticAsync()
     {
         HttpClient httpClient = new();
         _theEbook = await httpClient.GetStringAsync("http://www.gutenberg.org/files/98/98-0.txt");
-        //await Console.Out.WriteLineAsync("Download complite");
         GetStats();
     }
 
@@ -1199,7 +1075,7 @@ husband
 Gutenberg
 Longest word is: undistinguishable
 ```
-В цьому прикладі оновлено метод GetBookAsync 
+В цьому прикладі оновлено метод GetBookAsync
 
 ```cs
     async Task GetBookAsync()
@@ -1214,9 +1090,9 @@ Longest word is: undistinguishable
 
 ## Підсумки стосовно патерна async/await
 
-У цьому розділі було багато прикладів; ось ключові моменти цього розділу:
+Ключові моменти при роботі з async/await:
 
-1. Методи (а також лямбда-вирази або анонімні методи) можна позначити ключовим словом async, щоб метод міг виконувати роботу без блокування.
+1. Методи (а також лямбда-вирази або анонімні методи) можна позначити ключовим словом async, щоб метод міг виконувати роботу в робочому потоці без блокування первинного.
 
 2. Методи (а також лямбда-вирази або анонімні методи), позначені ключовим словом async, будуть виконуватися синхронно, доки не буде знайдено ключове слово await.
 
@@ -1226,7 +1102,7 @@ Longest word is: undistinguishable
 
 5. Ключове слово await приховає повернений об'єкт Task з поля зору, виглядаючи так, ніби він безпосередньо повертає базове повернене значення. Методи без поверненого значення просто повертають void.
 
-6. Перевірку параметрів та іншу обробку помилок слід виконувати в основній частині методу, а фактичну асинхронну частину переміщувати до приватної функції.
+6. Перевірку параметрів та іншу обробку помилок слід виконувати в основній частині методу, а фактичну частину переміщувати до приватної асінхронної функції.
 
 7. Для змінних стеку об'єкт ValueTask ефективніший за Task, що може призвести до упаковки та розпакування.
 
@@ -1234,5 +1110,6 @@ Longest word is: undistinguishable
 
 # Підсумки
 
-Ця глава розпочалася з вивчення ролі простору імен System.Threading. Як ви дізналися, коли програма створює додаткові потоки виконання, це призводить до того, що відповідна програма може виконувати численні завдання одночасно. Ви також розглянули кілька способів захисту блоків коду, залежних від потоків, щоб гарантувати, що спільні ресурси не стануть непридатними для використання одиницями фальшивих даних. 
-У цьому розділі було розглянуто деякі моделі роботи з багатопотоковою розробкою, зокрема бібліотеку Task Parallel Library та PLINQ. Я завершив розгляд ролі ключових слів async та await. Як ви бачили, ці ключові слова використовують багато типів фреймворку TPL у фоновому режимі; однак компілятор виконує більшу частину роботи зі створення складного коду потоків та синхронізації за вас.
+Ця глава розпочалася з вивчення ролі простору імен System.Threading. Як ви дізналися, коли програма створює додаткові потоки виконання, це призводить до того, що відповідна програма може виконувати численні завдання одночасно. Ви також розглянули кілька способів захисту блоків коду, залежних від потоків, щоб гарантувати, що спільні ресурси не стануть непридатними для використання одиницями фальшивих даних.
+У цьому розділі було розглянуто деякі моделі роботи з багатопотоковою розробкою, зокрема бібліотеку Task Parallel Library та PLINQ. 
+Я завершив розгляд ролі ключових слів async та await. Як ви бачили, ці ключові слова використовують багато типів фреймворку TPL у фоновому режимі; однак компілятор виконує більшу частину роботи зі створення складного коду потоків та синхронізації за вас.

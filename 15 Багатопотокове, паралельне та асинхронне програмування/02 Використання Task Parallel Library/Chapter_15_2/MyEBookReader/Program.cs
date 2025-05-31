@@ -68,7 +68,6 @@ string FindLongestWord(string[] words)
     return query.FirstOrDefault()!;
 }
 
-
 void GetStatsWithParalell()
 {
     string[] words = _theEBook.Split(new char[] { ' ', '\u000A', ',', '.', ';', ':', '-', '?', '/' }, StringSplitOptions.RemoveEmptyEntries);

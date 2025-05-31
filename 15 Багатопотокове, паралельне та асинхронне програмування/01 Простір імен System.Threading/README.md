@@ -107,8 +107,6 @@ static void ExtractCurrentThreadExecutionContext()
 ```cs
 static void PrimaryThread()
 {
-    Console.WriteLine("***** Primary Thread stats *****\n");
-
     // Obtain and name the current thread.
     Thread primaryThread = Thread.CurrentThread;
     primaryThread.Name = "ThePrimaryThread";
@@ -124,8 +122,6 @@ static void PrimaryThread()
 PrimaryThread();
 ```
 ```
-***** Primary Thread stats *****
-
 ID of current thread: 1
 Thread Name: ThePrimaryThread
 Has thread started?: True
@@ -176,13 +172,15 @@ public enum ThreadPriority
 Припускаючи, що ви імпортували простір імен System.Threading, вашим першим кроком є ​​визначення методу для виконання роботи (можливого) вторинного потоку. Щоб зосередитися на механіці створення багатопотокових програм, цей метод просто виведе послідовність чисел у вікно консолі, зупиняючись приблизно на дві секунди з кожним проходом. Ось повне визначення класу Printer:
 
 ```cs
+
 public class Printer
 {
     public int Counter { get; set; }
     public void PrintNumbers()
     {
         // Display Thread info.
-        Console.WriteLine($"{Thread.CurrentThread.Name} is executing PrintNumbers()");
+        string threadInfo = $"{Thread.CurrentThread.Name}(id:{Thread.CurrentThread.ManagedThreadId})";
+        Console.WriteLine($"{threadInfo} is executing PrintNumbers()");
         
         // Print out numbers.
         Console.Write("Your numbers: ");
@@ -199,19 +197,17 @@ public class Printer
 Тепер у Program.cs ви додасте оператори верхнього рівня, щоб спочатку запропонувати користувачеві визначити, один чи два потоки будуть використані для виконання роботи програми. Якщо користувач запитує один потік, вам просто потрібно викликати метод PrintNumbers() в основному потоці. Однак, якщо користувач вказує два потоки, ви створите делегат ThreadStart, який вказує на PrintNumbers(), передасте цей об'єкт делегату в конструктор нового об'єкта Thread та викличете Start(), щоб повідомити середовище виконання .NET Core, що цей потік готовий до обробки. Ось повна реалізація:
 
 ```cs
-using SimpleMultiThreadApp;
-
 static void Run()
 {
-    Console.Write("Do you want 1 or 2 threads? Enter (1/2) : ");
-    string threadCount = Console.ReadLine();
-
     // Name the current thread.
     Thread primaryThread = Thread.CurrentThread;
     primaryThread.Name = "Primary";
-
     // Display Thread info.
-    Console.WriteLine($"\t{Thread.CurrentThread.Name} is executing Main()");
+    string threadInfo = $"{Thread.CurrentThread.Name}(id:{primaryThread.ManagedThreadId})";
+    Console.WriteLine($"{threadInfo} is executing");
+
+    Console.Write("Do you want 1 or 2 threads? Enter (1/2) : ");
+    string? threadCount = Console.ReadLine();
 
     // Make worker class.
     Printer p = new Printer();
@@ -232,32 +228,37 @@ static void Run()
             goto case "1";
     }
     // Do some additional work.
-    Console.WriteLine("This is on the main thread, and we are finished.");
+    Console.WriteLine("\tThis is on the main thread, and we are finished.");
     Console.ReadLine();
 }
 Run();
 ```
 ```
+Primary(id:1) is executing
 Do you want 1 or 2 threads? Enter (1/2) : 1
-Primary is executing Main()
-Primary is executing PrintNumbers()
-Your numbers: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+Primary(id:1) is executing PrintNumbers()
+Your numbers: 0 1 2 3 4 5 6 7 8 9
         This is on the main thread, and we are finished.
-I'm doing something else.
-
 ```
 ```
+Primary(id:1) is executing
 Do you want 1 or 2 threads? Enter (1/2) : 2
-Primary is executing Main()
         This is on the main thread, and we are finished.
-Secondary is executing PrintNumbers()
-Your numbers: 0, I'm1, doing2, something3, else.4, 5, 6, 7, 8, 9,
+Secondary(id:9) is executing PrintNumbers()
+Your numbers: 0 I'm1 doing2 something3 else.4 5 6 7 8 9
 ```
-Тепер, якщо ви запустите цю програму з одним потоком, ви побачите, що кінцевий вивід консолі не відобразить повідомлення, доки вся послідовність чисел не буде виведена на консоль. Оскільки ви явно зупиняєтеся приблизно на дві секунди після виведення кожного числа, це призведе до не дуже вдалого досвіду для кінцевого користувача. Однак, якщо вибрати два потоки, вікно повідомлення відображається миттєво, враховуючи, що унікальний об'єкт Thread відповідає за виведення чисел у консоль.
+Тепер, якщо ви запустите цю програму з одним потоком, ви побачите, що кінцевий вивід консолі не відобразить повідомлення, доки вся послідовність чисел не буде виведена на консоль. Оскільки ви явно зупиняєтеся приблизно на дві секунди після виведення кожного числа, це призведе до не дуже вдалого досвіду для кінцевого користувача. Однак, якщо вибрати два потоки, вікно повідомлення відображається миттєво, враховуючи, що унікальний об'єкт Thread відповідає за виведення чисел у консоль. Обох випадках домен програми чекає покі вториний потік закінчить свою роботу.
+
 
 ## Робота з делегатом ParameterizedThreadStart
 
-Нагадаємо, що делегат ThreadStart може вказувати лише на методи, які повертають значення void та не приймають аргументів. Хоча в деяких випадках це може бути доречним, якщо ви хочете передавати дані методу, який виконується у вторинному потоці, вам потрібно буде використовувати тип делегату ParameterizedThreadStart.
+В попередьному прикладі вториний потік створювався наступним чином:
+```cs
+            Thread backgroundThread = new Thread(new ThreadStart(p.PrintNumbers));
+            backgroundThread.Name = "Secondary";
+            backgroundThread.Start();
+```
+Делегат ThreadStart може вказувати лише на методи, які повертають значення void та не приймають аргументів. Хоча в деяких випадках це може бути доречним, якщо ви хочете передавати дані методу, який виконується у вторинному потоці, вам потрібно буде використовувати тип делегату ParameterizedThreadStart.
 Для ілюстрації додайте новий проект консольної програми з назвою AddWithThreads. Тепер, враховуючи, що ParameterizedThreadStart може вказувати на будь-який метод, що приймає параметр System.Object, ви створите власний тип, що містить числа, які потрібно додати, ось так:
 
 ```cs
@@ -271,86 +272,115 @@ class AddParams
     }
 }
 ```
-Далі створіть метод у файлі Program.cs, який прийматиме параметр AddParams та виводитиме суму двох чисел, наступним чином:
+Далі створіть метод, який буде виконуватися в вторинному потоці, у файлі Program.cs. Він прийматиме параметр AddParams та виводитиме суму двох чисел, наступним чином:
 
 ```cs
     void Add(object? data)
     {
         if (data is AddParams ap)
         {
-            Console.WriteLine($"ID of thread in Add(): {Environment.CurrentManagedThreadId}");
+            Console.WriteLine($"Id of thread in Add(): {Environment.CurrentManagedThreadId}");
 
             Console.WriteLine($"{ap.a} + {ap.b} is {ap.a + ap.b}");
         }
     }
 ```
+Цей метод відповідає сігнатурі ParameterizedThreadStart.
+
 Код для виклику цього методу в Program.cs є простим. Просто використовуйте ParameterizedThreadStart замість ThreadStart, ось так:
 
 ```cs
+void SimpleUseParameterizedThreadStart()
+{
+    Console.WriteLine($"Id of thread in top-lavel: {Environment.CurrentManagedThreadId}");
 
-Console.WriteLine($"ID of thread in Main(): {Environment.CurrentManagedThreadId}");
-
-// Make an AddParams object to pass to the secondary thread.
-AddParams ap = new AddParams(10, 10);
-
-Thread t = new Thread(new ParameterizedThreadStart(Add));
-t.Start(ap);
-
-Thread.Sleep(5);
-
+    // Make an AddParams object to pass to the secondary thread.
+    AddParams ap = new AddParams(10, 10);
+    Thread t = new Thread(new ParameterizedThreadStart(Add));
+    t.Start(ap);
+    // Force a wait to let other thread finish.
+    Thread.Sleep(5);
+    Console.WriteLine(t.ThreadState);
+}
+SimpleUseParameterizedThreadStart();
 ```
 ```
-ID of thread in Main(): 1
-ID of thread in Add(): 7
+Id of thread in top-lavel: 1
+Id of thread in Add(): 8
 10 + 10 is 20
+Stopped
 ```
 
 ## Клас AutoResetEvent
 
-У цих перших кількох прикладах немає чіткого способу дізнатися, коли вторинний потік завершив свою роботу. В останньому прикладі Sleep було викликано з довільним часом, щоб дозволити іншому потоку завершитися. Один простий та потокобезпечний спосіб змусити потік чекати, поки не завершиться інший, – це використовувати клас AutoResetEvent. У потоці, який має чекати, створіть екземпляр цього класу та передайте конструктору значення false, щоб позначити, що вас ще не сповістили. Потім, коли ви захочете чекати, викличте метод WaitOne(). Коли інший потік завершить своє робоче навантаження, він викличе метод Set() для того самого екземпляра типу AutoResetEvent. Ось оновлення класу Program.cs, яке виконає саме це, використовуючи змінну-член AutoResetEvent статичного рівня:
+У цих перших кількох прикладах немає чіткого способу дізнатися, коли вторинний потік завершив свою роботу. В останньому прикладі Sleep було викликано з довільним часом, щоб дозволити іншому потоку завершитися. Якшо цю стоку закоментувати основний потік закінчиться раніше вторинного.
+
+```
+Id of thread in top-lavel: 1
+Running // вторинний потік працює
+Id of thread in Add(): 7
+10 + 10 is 20
+```
+
+Один простий та потокобезпечний спосіб змусити потік чекати, поки не завершиться інший, – це використовувати клас AutoResetEvent. У потоці, який має чекати, створіть екземпляр цього класу та передайте конструктору значення false, щоб позначити, що вас ще не сповістили. Потім, коли ви захочете чекати, викличте метод WaitOne(). Коли вториний потік завершить своє робоче навантаження, він викличе метод Set() для того самого екземпляра типу AutoResetEvent. Ось оновлення класу Program.cs, яке виконає саме це, використовуючи змінну-член AutoResetEvent статичного рівня:
 
 ```cs
-AutoResetEvent _waitHandle = new AutoResetEvent(false);
-
-void Add(object? data)
+void UseParameterizedThreadStartWithAutoResetEvent()
 {
-    if (data is AddParams ap)
+    Console.WriteLine($"Id of thread in top-lavel: {Environment.CurrentManagedThreadId}");
+
+    AutoResetEvent _waitHandle = new AutoResetEvent(false);
+    
+    AddParams ap = new AddParams(10, 10);
+    Thread thread = new Thread(new ParameterizedThreadStart(AddWithAutoResetEvent));
+    thread.Start(ap);
+
+    //Wait for the wait handle to complete
+    _waitHandle.WaitOne();
+    Console.WriteLine(thread.ThreadState);
+
+
+    // New version Add
+    void AddWithAutoResetEvent(object? data)
     {
-        Console.WriteLine($"ID of thread in Add(): {Environment.CurrentManagedThreadId}");
-        Console.WriteLine($"{ap.a} + {ap.b} is {ap.a + ap.b}");
-        
-        _waitHandle.Set();
+        if (data is AddParams ap)
+        {
+            //Add in sleep to show the background thread getting terminated
+            Thread.Sleep(2000);
+
+            Console.WriteLine($"Id of thread in AddWithAutoResetEvent(): {Environment.CurrentManagedThreadId}");
+            Console.WriteLine($"{ap.a} + {ap.b} is {ap.a + ap.b}");
+
+            // Tell other thread we are done.
+            _waitHandle.Set();
+        }
     }
 }
-
-
-
-Console.WriteLine($"ID of thread in Main(): {Environment.CurrentManagedThreadId}");
-
-// Make an AddParams object to pass to the secondary thread.
-AddParams ap = new AddParams(10, 10);
-Thread t = new Thread(new ParameterizedThreadStart(Add));
-t.Start(ap);
-
-// Wait here until you are notified!
-_waitHandle.WaitOne();
-Console.WriteLine("Other thread is done!");
+UseParameterizedThreadStartWithAutoResetEvent();
 
 ```
 ```
-ID of thread in Main(): 1
-ID of thread in Add(): 8
+Id of thread in top-lavel: 1
+Id of thread in AddWithAutoResetEvent(): 7
 10 + 10 is 20
-Other thread is done!
+Stopped
+```
+Закоментуйте рядок   _waitHandle.WaitOne();
+
+```
+Id of thread in top-lavel: 1
+Running
+Id of thread in AddWithAutoResetEvent(): 7
+10 + 10 is 20
 ```
 
-## Потоки переднього плану та фонові потоки
+## Потоки переднього плану(foreground) та фонові(background) потоки
 
 Тепер, коли ви побачили, як програмно створювати нові потоки виконання за допомогою простору імен System.Threading, давайте формалізуємо різницю між потоками переднього плану та фоновими потоками:
 
 Потоки переднього плану можуть запобігти завершенню поточної програми. Середовище виконання .NET Core не завершить роботу програми (тобто не вивантажить домен програми, що знаходиться на її базі), доки не завершаться всі потоки переднього плану.
 
-Фонові потоки (іноді їх називають потоками демона) розглядаються середовищем виконання .NET Core як вільні шляхи виконання, які можна ігнорувати в будь-який момент часу (навіть якщо вони наразі працюють над певною одиницею роботи). Таким чином, якщо всі потоки переднього плану завершилися, всі фонові потоки автоматично завершуються під час вивантаження домену застосунку.
+Фонові потоки розглядаються середовищем виконання .NET Core як вільні шляхи виконання, які можна ігнорувати в будь-який момент часу (навіть якщо вони наразі працюють над певною одиницею роботи). Таким чином, якщо всі потоки переднього плану завершилися, всі фонові потоки автоматично завершуються під час вивантаження домену застосунку.
 
 Важливо зазначити, що потоки переднього плану та фонові потоки не є синонімами основних та робочих потоків. За замовчуванням кожен потік, який ви створюєте за допомогою методу Thread.Start(), автоматично є потоком переднього плану. Знову ж таки, це означає, що AppDomain не вивантажиться, доки всі потоки виконання не завершать свої одиниці роботи. У більшості випадків це саме та поведінка, яка вам потрібна. 
 Однак, для пояснень, припустимо, що ви хочете викликати Printer.PrintNumbers() у вторинному потоці, який має поводитися як фоновий потік. Знову ж таки, це означає, що метод, на який вказує тип Thread (через делегат ThreadStart або ParameterizedThreadStart), повинен мати можливість безпечно зупинитися, щойно всі потоки переднього плану завершать свою роботу. Налаштування такого потоку просте, як встановлення властивості IsBackground значення true.
@@ -363,7 +393,7 @@ public class Printer
     public void PrintNumbers()
     {
         // Display Thread info.
-        Console.WriteLine($"{Thread.CurrentThread.Name} is executing PrintNumbers()");
+        Console.WriteLine($"Thread id:{Thread.CurrentThread.ManagedThreadId} is executing PrintNumbers()");
         
         // Print out numbers.
         Console.Write("Your numbers: ");
@@ -389,6 +419,24 @@ bgroundThread.Start();
 ```
 Зауважте, що цей код не здійснює виклик Console.ReadLine(), щоб змусити консоль залишатися видимою, доки ви не натиснете клавішу Enter. Таким чином, коли ви запускаєте програму, вона негайно завершить роботу, оскільки об'єкт Thread налаштовано як фоновий потік. Враховуючи, що точка входу в програму (або оператори верхнього рівня, як показано тут, або метод Main()) ініціює створення основного потоку переднього плану, щойно логіка в точці входу завершується, AppDomain вивантажується до того, як вторинний потік зможе завершити свою роботу.
 Однак, якщо закоментувати рядок, який встановлює властивість IsBackground, то побачите, що кожне число виводиться в консоль, оскільки всі потоки переднього плану повинні завершити свою роботу, перш ніж AppDomain буде вивантажено з процесу розміщення.
+Зробимо деякі зміни:
+
+```cs
+Printer p = new Printer();
+
+Thread bgroundThread = new Thread(new ThreadStart(p.PrintNumbers));
+// This is now a background thread.
+bgroundThread.IsBackground = true;
+bgroundThread.Start();
+
+Thread.Sleep(7000);
+```
+```
+Thread id:6 is executing PrintNumbers()
+Your numbers: 0 1 2 3
+```
+Тут видно шо вториний потік обривається коли ми натискаєио Enter і закінчує роботу первинний потік.
+
 Здебільшого, налаштування потоку для роботи у фоновому режимі може бути корисним, коли відповідний робочий потік виконує некритичне завдання, яке більше не потрібне після завершення основного завдання програми. Наприклад, ви можете створити застосунок, який кожні кілька хвилин надсилає запити на нові електронні листи на поштовий сервер, оновлює поточні погодні умови або виконує якесь інше некритичне завдання.
 
 ## Проблема паралельності
@@ -445,25 +493,25 @@ Run();
 
 ```
         Worker thread #1 is executing PrintNumbers()
-        Worker thread #0 is executing PrintNumbers()
-        Worker thread #2 is executing PrintNumbers()
+        Worker thread #4 is executing PrintNumbers()
         Worker thread #3 is executing PrintNumbers()
-0,      Worker thread #4 is executing PrintNumbers()
+        Worker thread #2 is executing PrintNumbers()
+        Worker thread #0 is executing PrintNumbers()
         Worker thread #5 is executing PrintNumbers()
         Worker thread #6 is executing PrintNumbers()
         Worker thread #7 is executing PrintNumbers()
 0,      Worker thread #8 is executing PrintNumbers()
-1, 2,   Worker thread #9 is executing PrintNumbers()
-1, 2, 3, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 2, 3, 3, 0, 1, 4, 1, 2, 1, 4, 2, 2, 2, 3, 1, 1, 4, 2, 4, 5, 3, 3, 3, 5, 2, 3, 4, 6, 2, 3, 4, 5, 5, 4, 5, 6, 7, 7, 5, 6, 8, 9,
-4, 6, 3, 6, 8, 4, 5, 7, 5, 7, 5, 6, 6, 8, 7, 9,
-9,
-4, 7, 6, 6, 7, 8, 8, 8, 9,
-8, 5, 7, 7, 9,
+0,      Worker thread #9 is executing PrintNumbers()
+1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 2, 1, 0, 1, 1, 2, 3, 2, 2, 2, 1, 1, 2, 3, 1, 3, 3, 4, 4, 5, 5, 3, 2, 2, 2, 4, 6, 5, 4, 3, 5, 6, 7, 6, 2, 3, 3, 7, 3, 6, 3, 4, 4, 4, 4, 7, 8, 9,
 8, 9,
+7, 5, 4, 5, 5, 4, 5, 8, 5, 6, 7, 6, 8, 6, 6, 7, 8, 5, 6, 7, 9,
+9,
+9,
+6, 8, 8, 7, 7, 7, 9,
+9,
+8, 8, 9,
 9,
 8, 9,
-6, 9,
-7, 8, 9,
 ```
 Тепер запустіть програму ще кілька разів і перевірте результат. Швидше за все, щоразу він буде відрізнятися.
 
@@ -521,7 +569,7 @@ public class Printer
             {
                 // Put thread to sleep for a random amount of time.
                 Random r = new Random();
-                Thread.Sleep(1000 * r.Next(5));
+                Thread.Sleep(100 * r.Next(5));
                 Console.Write($"{i}, ");
             }
             Console.WriteLine();
@@ -536,20 +584,32 @@ public class Printer
 Якщо ви тепер запустите програму, то побачите, що кожен потік має достатньо можливостей для завершення своєї роботи.
 
 ```cs
-        Worker thread #1 is executing PrintNumbers()
-0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
         Worker thread #0 is executing PrintNumbers()
+0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+        Worker thread #1 is executing PrintNumbers()
 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
         Worker thread #2 is executing PrintNumbers()
 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
         Worker thread #3 is executing PrintNumbers()
-0, 1,
+0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+        Worker thread #5 is executing PrintNumbers()
+0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+        Worker thread #4 is executing PrintNumbers()
+0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+        Worker thread #6 is executing PrintNumbers()
+0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+        Worker thread #7 is executing PrintNumbers()
+0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+        Worker thread #8 is executing PrintNumbers()
+0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+        Worker thread #9 is executing PrintNumbers()
+0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
 
 ```
 
 ## Синхронізація за допомогою типу System.Threading.Monitor
 
-Оператор блокування C# - це скорочення позначення для роботи з класом System.threading.monitor. Після обробки компілятором C#, область блокування приймає наступне значення (що можна перевірити за допомогою ildasm.exe): 
+Оператор lock C# - це скорочення позначення для роботи з класом System.Threading.Monitor. Після обробки компілятором C#, область блокування приймає наступне значення (що можна перевірити за допомогою ildasm.exe): 
 
 ```cs
 public void PrintNumbers()
@@ -558,8 +618,8 @@ public void PrintNumbers()
   try
   {
     // Display Thread info.
-    Console.WriteLine('-> {0} is executing PrintNumbers()',
-      Thread.CurrentThread.Name);
+    Console.WriteLine($"\t{Thread.CurrentThread.Name} is executing PrintNumbers()");
+
     // Print out numbers.
     Console.Write('Your numbers: ');
     for (int i = 0; i < 10; i++)
@@ -623,13 +683,21 @@ Interlocked.CompareExchange(ref myInt, 99, 83);
 
 ## Програмування з використанням Timer Callbacks
 
-Багато програм потребують викликати певний метод протягом регулярних проміжків часу. Наприклад, у вас може бути програма, якій потрібно відображати час початку роботи у рядку стану за допомогою певної допоміжної функції. Як інший приклад, ви можете захотіти, щоб ваша програма час від часу викликала допоміжну функцію для виконання некритичних фонових завдань, таких як перевірка нових повідомлень електронної пошти. У таких ситуаціях можна використовувати тип System.Threading.Timer разом із пов'язаним делегатом з іменем TimerCallback.
+Багато програм потребують викликати певний метод протягом регулярних проміжків часу. Наприклад, у вас може бути програма, якій потрібно відображати сповіщеня після часу з початку роботи у рядку стану за допомогою певної допоміжної функції. Як інший приклад, ви можете захотіти, щоб ваша програма час від часу викликала допоміжну функцію для виконання некритичних фонових завдань, таких як перевірка нових повідомлень електронної пошти. У таких ситуаціях можна використовувати тип System.Threading.Timer разом із пов'язаним делегатом з іменем TimerCallback.
 Для ілюстрації, припустимо, що у вас є проект консольного застосунку TimerApp, який виводитиме поточний час щосекунди, доки користувач не натисне клавішу для завершення роботи застосунку. Першим очевидним кроком є ​​написання методу, який буде викликатися типом Timer.
 
 ```cs
-static void PrintTime(object state)
+static void PrintTime(object? state)
 {
-    Console.WriteLine($"Time is: {DateTime.Now.ToLongTimeString()}");
+    Thread thread = Thread.CurrentThread;
+
+    string message =
+        $"Time is: {DateTime.Now.ToLongTimeString()}\t" +
+        $"Param is {state}\t" +
+        $"ManagedThreadId: {thread.ManagedThreadId}\t" +
+        $"IsBackground: {thread.IsBackground}";
+
+    Console.WriteLine(message);
 }
 ```
 Зверніть увагу, що метод PrintTime() має один параметр типу System.Object і повертає значення void. Це є обов'язковим, враховуючи, що делегат TimerCallback може викликати лише методи, що відповідають цьому підпису. Значення, що передається в ціль вашого делегата TimerCallback, може бути об'єктом будь-якого типу (у випадку з прикладом електронної пошти цей параметр може представляти назву сервера, з яким потрібно взаємодіяти під час процесу). Також зверніть увагу, що враховуючи, що цей параметр дійсно є System.Object, ви можете передавати кілька аргументів, використовуючи System.Array або власний клас/структуру.
@@ -638,13 +706,15 @@ static void PrintTime(object state)
 ```cs
 void Run()
 {
+    Console.WriteLine($"Primary thread id: {Thread.CurrentThread.ManagedThreadId}");
+
     // Create the delegate for the Timer type.
-    TimerCallback timeCB = new TimerCallback(PrintTime);
+    TimerCallback timerCallback = new TimerCallback(PrintTime);
 
     // Establish timer settings.
     Timer t = new Timer(
-      timeCB,     // The TimerCallback delegate object.
-      null,       // Any info to pass into the called method (null for no info).
+      timerCallback,     // The TimerCallback delegate object.
+      "It's noon",       // Any info to pass into the called method (null for no info).
       0,          // Amount of time to wait before starting (in milliseconds).
       1000);      // Interval of time between calls (in milliseconds).
 
@@ -656,34 +726,22 @@ Run();
 У цьому випадку метод PrintTime() буде викликатися приблизно щосекунди та не передаватиме жодної додаткової інформації до цього методу. Ось результат:
 
 ```
+Primary thread id: 1
 Hit Enter key to terminate...
-Time is: 18:55:17
-Time is: 18:55:18
-Time is: 18:55:19
-Time is: 18:55:20
-Time is: 18:55:21
+Time is: 12:35:53       Param is It's noon      ManagedThreadId: 4      IsBackground: True
+Time is: 12:35:54       Param is It's noon      ManagedThreadId: 6      IsBackground: True
+Time is: 12:35:55       Param is It's noon      ManagedThreadId: 6      IsBackground: True
+Time is: 12:35:56       Param is It's noon      ManagedThreadId: 6      IsBackground: True
+Time is: 12:35:57       Param is It's noon      ManagedThreadId: 6      IsBackground: True
+Time is: 12:35:58       Param is It's noon      ManagedThreadId: 6      IsBackground: True
+Time is: 12:35:59       Param is It's noon      ManagedThreadId: 6      IsBackground: True
 
-```
-Якщо ви хочете надіслати певну інформацію для використання цільовим делегатом, просто замініть значення null другого параметра конструктора відповідною інформацією, ось так:
-
-```cs
-// Establish timer settings.
-Timer t = new Timer(timeCB, "It's evening ", 0, 1000);
-```
-Потім ви можете отримати вхідні дані наступним чином:
-
-```cs
-static void PrintTime(object state)
-{
-    Console.WriteLine($"Time is: {DateTime.Now.ToLongTimeString()}. " +
-        $"Param is {state.ToString()}");
-}
 ```
 Змінна Timer не використовується в жодному шляху виконання, тому її можна замінити на відкидання, наступним чином:
 
 ```cs
 // Establish timer settings.
-_ = new Timer(timeCB, "It's evening ", 0, 1000);
+_ = new Timer(timerCallback, "It's evening ", 0, 1000);
 ```
 
 ## Розуміння пулу потоків
@@ -696,8 +754,7 @@ public static class ThreadPool
 {
   ...
   public static bool QueueUserWorkItem(WaitCallback callBack);
-  public static bool QueueUserWorkItem(WaitCallback callBack,
-                                      object state);
+  public static bool QueueUserWorkItem(WaitCallback callBack, object state);
 }
 ```
 Делегат WaitCallback може вказувати на будь-який метод, який приймає System.Object як єдиний параметр (який представляє необов'язкові дані стану) і нічого не повертає. Зверніть увагу, що якщо ви не надаєте System.Object під час виклику QueueUserWorkItem(), середовище виконання .NET Core автоматично передає значення null. Щоб проілюструвати методи черг, що використовуються пулом потоків .NET Core Runtime, розглянемо наступну програму ThreadPoolApp, яка знову використовує тип Printer.
@@ -712,13 +769,13 @@ public class Printer
         lock (threadLock)
         {
             // Display Thread info.
-            Console.WriteLine($"\t{Thread.CurrentThread.Name} is executing PrintNumbers()");
+            Console.WriteLine($"Thread id:{Thread.CurrentThread.ManagedThreadId} is executing PrintNumbers()");
 
             // Print out numbers.
             for (int i = 0; i < 10; i++)
             {
                 Console.Write($"{i}, ");
-                Thread.Sleep(1000);
+                Thread.Sleep(50);
             }
             Console.WriteLine();
         }
@@ -728,14 +785,17 @@ public class Printer
 Однак у цьому випадку ви не створюєте вручну масив об'єктів Thread; радше ви призначаєте члени пулу методу PrintNumbers().
 
 ```cs
-static void PrintTheNumbers(object state)
+
+using ThreadPoolApp;
+
+static void PrintTheNumbers(object? obj)
 {
-    Printer printer = (Printer)state;
+    if (obj == null) return;
+    Printer printer = (Printer)obj;
     printer.PrintNumbers();
 }
 
-int id = Environment.CurrentManagedThreadId;
-Console.WriteLine($"Main thread started. ThreadID = {id}");
+Console.WriteLine($"Main thread id:{Environment.CurrentManagedThreadId} started.");
 Printer p = new Printer();
 
 WaitCallback workItem = new(PrintTheNumbers);
@@ -746,9 +806,43 @@ for (int i = 0; i < 10; i++)
     ThreadPool.QueueUserWorkItem(workItem, p);
 }
 Console.WriteLine("All tasks queued");
-
 Console.ReadLine();
 ```
+```
+Main thread id:1 started.
+All tasks queued
+Thread id:6 is executing PrintNumbers()
+0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+Thread id:8 is executing PrintNumbers()
+0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+Thread id:7 is executing PrintNumbers()
+0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+Thread id:10 is executing PrintNumbers()
+0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+Thread id:11 is executing PrintNumbers()
+0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+Thread id:6 is executing PrintNumbers()
+0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+Thread id:8 is executing PrintNumbers()
+0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+Thread id:12 is executing PrintNumbers()
+0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+Thread id:4 is executing PrintNumbers()
+0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+Thread id:7 is executing PrintNumbers()
+0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+```
+Крім того ми можемо побачити що ці потоки фонові і їх можно прирвати в будь який момент.
+
+```
+Main thread id:1 started.
+All tasks queued
+Thread id:7 is executing PrintNumbers()
+0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+Thread id:8 is executing PrintNumbers()
+0, 1, 2, 3, 4, 5, 6, 7, 8,
+```
+
 
 На цьому етапі ви можете задатися питанням, чи не було б вигідно використовувати пул потоків, що підтримується середовищем виконання .NET Core, замість явного створення об'єктів Thread. Розглянемо ці переваги використання пулу потоків:
 
@@ -757,7 +851,57 @@ Console.ReadLine();
 
 Однак у деяких випадках перевагу надається ручному управлінню потоками. Ось приклад:
 
-1. Якщо вам потрібні потоки переднього плану або потрібно встановити пріоритет потоків, об'єднані потоки завжди є фоновими потоками з пріоритетом за замовчуванням (ThreadPriority.Normal).
+1. Якщо вам потрібні потоки переднього плану або потрібно встановити пріоритет потоків, потоки в пулі завжди є фоновими потоками з пріоритетом за замовчуванням (ThreadPriority.Normal).
+
 2. Якщо вам потрібен потік з фіксованою ідентифікатором, перервіть його, призупиніть або знайдіть його за назвою.
+
+## Підсумки розділу.
+
+В цьому розділі ми розлянули як створювати одниицю роботи в вторинному потоці. Підсумуємо найважливіше в проекті SummaryThread.
+
+Маемо одиницю роботи яка потребуєчас на виконання.
+
+```cs
+void DoWork(int delay) 
+{ 
+    Thread.Sleep(delay);
+}
+```
+Створюємо метод який відповідає делегату ThreadStart або ParameterizedThreadStart
+
+```cs
+void MethodForWork()
+{
+    // Display Thread info.
+    string threadInfo = $"{Thread.CurrentThread.Name} (id:{Thread.CurrentThread.ManagedThreadId})";
+    Console.WriteLine($"{threadInfo} is executing DoWork 3000 ms.");
+    DoWork(3000);
+}
+```
+Створюємо потік і запускаєм.
+
+```cs
+void Run()
+{
+    // Display Thread info.
+    string threadInfo = $"Primary (id:{Thread.CurrentThread.ManagedThreadId})";
+    Console.WriteLine(threadInfo);
+
+    Thread thread = new Thread(new ThreadStart(MethodForWork));
+    thread.Name = "Secondary";
+    thread.IsBackground = true;
+    thread.Start();
+
+    Console.ReadLine();
+}
+Run();
+```
+```
+Primary (id:1)
+Secondary (id:7) is executing DoWork 5000 ms.
+
+
+```
+Якшо в потоці властивість IsBackground = true він преривається разом з первиним потоком.
 
 Звісно, ​​розуміння тем, представлених у цому розділі (особливо під час розгляду питань паралельності), буде надзвичайно цінним під час створення багатопотокової програми. З огляду на цю основу, тепер ви звернете свою увагу на кілька нових тем, орієнтованих на потоки. Для початку ви розглянете роль альтернативної моделі потоків – бібліотеки паралельного виконання завдань (Task Parallel Library).

@@ -22,23 +22,22 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <Button Name="cmdCancel" Grid.Column="0" Margin="65,0,665,10" Click="cmdCancel_Click" Height="20" VerticalAlignment="Bottom" Grid.ColumnSpan="2">
+
+            <Button Name="cmdCancel" Grid.Column="0" Margin="65,0,0,0" Click="cmdCancel_Click" Height="20" VerticalAlignment="Center" Grid.ColumnSpan="2" HorizontalAlignment="Left" Width="53">
                 Cancel
             </Button>
-            <Button Name="cmdDoWork" Grid.Row="0" Grid.Column="1" Margin="353,10,353,10" 
-                    Click="cmdDoWork_Click">
-                Do work
+            <Button Name="cmdDoWork" Grid.Row="0" Grid.Column="1" Margin="696,10,10,10" VerticalAlignment="Bottom"
+                    Click="cmdDoWork_Click" HorizontalAlignment="Right">
+                DoWork
             </Button>
-            <Button Name="cmdProcess" Grid.Row="0" Grid.Column="1" Margin="468,10,210,10"
-                    Click="cmdProcess_Click">
-                Process
+            <Button Name="cmdProcessFilesAsync" Grid.Row="0" Grid.Column="1" Margin="560,10,118,10" VerticalAlignment="Bottom"
+                    Click="cmdProcessFilesAsync_Click" HorizontalAlignment="Right">
+                ProcessFilesAsync
             </Button>
-            <Button Name="cmdProcessWithForEachAsync" Grid.Row="0" Grid.Column="1" Margin="595,10,40,10" 
-                    Click="cmdProcessWithForEachAsync_Click">
+            <Button Name="cmdProcessWithForEachAsync" Grid.Row="0" Grid.Column="1" Margin="378,10,257,10" VerticalAlignment="Bottom"
+                    Click="cmdProcessWithForEachAsync_Click" HorizontalAlignment="Right">
                 ProcessWithForEachAsync
             </Button>
-
-
         </Grid>
     </Grid>
 </Window>

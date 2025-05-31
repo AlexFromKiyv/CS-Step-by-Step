@@ -1,7 +1,5 @@
 ﻿static void PrimaryThread()
 {
-    Console.WriteLine("***** Primary Thread stats *****\n");
-
     // Obtain and name the current thread.
     Thread primaryThread = Thread.CurrentThread;
     primaryThread.Name = "ThePrimaryThread";

@@ -15,15 +15,16 @@ public class Printer
         lock (threadLock)
         {
             // Display Thread info.
-            Console.WriteLine($"\t{Thread.CurrentThread.Name} is executing PrintNumbers()");
+            Console.WriteLine($"Thread id:{Thread.CurrentThread.ManagedThreadId} is executing PrintNumbers()");
 
             // Print out numbers.
             for (int i = 0; i < 10; i++)
             {
                 Console.Write($"{i}, ");
-                Thread.Sleep(1000);
+                Thread.Sleep(50);
             }
             Console.WriteLine();
         }
     }
+
 }

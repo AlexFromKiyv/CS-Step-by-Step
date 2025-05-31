@@ -3,15 +3,15 @@ using SimpleMultiThreadApp;
 
 static void Run()
 {
-    Console.Write("Do you want 1 or 2 threads? Enter (1/2) : ");
-    string threadCount = Console.ReadLine();
-
     // Name the current thread.
     Thread primaryThread = Thread.CurrentThread;
     primaryThread.Name = "Primary";
-
     // Display Thread info.
-    Console.WriteLine($"{Thread.CurrentThread.Name} is executing Main()");
+    string threadInfo = $"{Thread.CurrentThread.Name}(id:{primaryThread.ManagedThreadId})";
+    Console.WriteLine($"{threadInfo} is executing");
+
+    Console.Write("Do you want 1 or 2 threads? Enter (1/2) : ");
+    string? threadCount = Console.ReadLine();
 
     // Make worker class.
     Printer p = new Printer();

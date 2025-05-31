@@ -1,14 +1,14 @@
 ﻿
 using ThreadPoolApp;
 
-static void PrintTheNumbers(object state)
+static void PrintTheNumbers(object? obj)
 {
-    Printer printer = (Printer)state;
+    if (obj == null) return;
+    Printer printer = (Printer)obj;
     printer.PrintNumbers();
 }
 
-int id = Environment.CurrentManagedThreadId;
-Console.WriteLine($"Main thread started. ThreadID = {id}");
+Console.WriteLine($"Main thread id:{Environment.CurrentManagedThreadId} started.");
 Printer p = new Printer();
 
 WaitCallback workItem = new(PrintTheNumbers);
@@ -21,5 +21,6 @@ for (int i = 0; i < 10; i++)
 Console.WriteLine("All tasks queued");
 
 Console.ReadLine();
+
 
 

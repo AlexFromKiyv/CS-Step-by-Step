@@ -4,10 +4,9 @@ using System.Threading;
 void UsingPLINQ()
 {
     Console.WriteLine("Processing");
-    Task.Factory.StartNew(ProcessingIntData);
-    //Task.Factory.StartNew(ProcessingIntDataWithPLINQ);
+    //Task.Factory.StartNew(ProcessingIntData);
+    Task.Factory.StartNew(ProcessingIntDataWithPLINQ);
     Console.ReadLine();
-
 
     void ProcessingIntData()
     {
@@ -22,10 +21,9 @@ void UsingPLINQ()
                     select number;
 
         var watch = Stopwatch.StartNew();
-
         int[] modThreeIsZero = query.ToArray();
-
         watch.Stop();
+
         Console.WriteLine($"Time:{watch.ElapsedMilliseconds}");
         Console.WriteLine($"Found {modThreeIsZero.Count()} numbers that match query!");
     }
@@ -43,10 +41,9 @@ void UsingPLINQ()
                     select number;
 
         var watch = Stopwatch.StartNew();
-
         int[] modThreeIsZero = query.ToArray();
-
         watch.Stop();
+
         Console.WriteLine($"With Paralell\nTime:{watch.ElapsedMilliseconds}");
         Console.WriteLine($"Found {modThreeIsZero.Count()} numbers that match query!");
     }
@@ -61,7 +58,7 @@ void UsingPLINQWithCancellation()
     {
         Console.WriteLine("Start any key to start processing");
         Console.ReadKey();
-        Console.WriteLine("Processing");
+        Console.WriteLine("Processing ...");
         Task.Factory.StartNew(ProcessingIntDataWithPLINQAndCancellation);
         Console.Write("Enter Q to quit: ");
         string? answer = Console.ReadLine();
@@ -88,11 +85,12 @@ void UsingPLINQWithCancellation()
 
         try
         {
+
             var watch = Stopwatch.StartNew();
             Thread.Sleep(1000);
             int[] modThreeIsZero = query.ToArray();
-
             watch.Stop();
+
             Console.WriteLine($"\nWith Paralell\nTime:{watch.ElapsedMilliseconds}");
             Console.WriteLine($"\tAmount:{modThreeIsZero.Count()}");
         }

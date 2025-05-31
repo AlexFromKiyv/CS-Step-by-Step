@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.IO;
 using System.Text;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -36,7 +37,6 @@ namespace DataParallelismWithForEach
             Title = $"Starting...";
             var watch = Stopwatch.StartNew();
             ProcessFiles();
-            //ProcessFilesParallel();
             watch.Stop();
             Title = $"Processing Complete. Time: {watch.ElapsedMilliseconds}";
         }
@@ -70,6 +70,14 @@ namespace DataParallelismWithForEach
             }
         }
 
+        private void cmdProcessParrallel_Click(object sender, RoutedEventArgs e)
+        {
+            Title = $"Starting...";
+            var watch = Stopwatch.StartNew();
+            ProcessFilesParallel();
+            watch.Stop();
+            Title = $"Processing Complete. Time: {watch.ElapsedMilliseconds}";
+        }
         private void ProcessFilesParallel()
         {
             var basePath = @"D:\Temp";
@@ -83,6 +91,7 @@ namespace DataParallelismWithForEach
             }
             Directory.CreateDirectory(outputDirectory);
 
+           
             //Process
             string[] files = Directory.GetFiles(pictureDirectory, "*.jpg", SearchOption.AllDirectories);
 
@@ -97,6 +106,7 @@ namespace DataParallelismWithForEach
                 bitmap.RotateFlip(RotateFlipType.Rotate180FlipNone);
                 bitmap.Save(System.IO.Path.Combine(outputDirectory, filename));
             });
+ 
         }
 
         private void ProcessWithTaskFactory_Click(object sender, RoutedEventArgs e)
@@ -104,7 +114,6 @@ namespace DataParallelismWithForEach
             Task.Factory.StartNew(ProcessFilesWithForEachAndTask);
             //Or
             //Task.Factory.StartNew(() => ProcessFilesWithForEachAndTask());
-           
         }
 
         private void ProcessFilesWithForEachAndTask()

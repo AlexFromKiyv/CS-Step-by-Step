@@ -14,7 +14,7 @@ public class Printer
     {
         lock (threadLock)
         {
-            // Display Thread info.
+            //    // Display Thread info.
             Console.WriteLine($"\t{Thread.CurrentThread.Name} is executing PrintNumbers()");
 
             // Print out numbers.
@@ -22,7 +22,7 @@ public class Printer
             {
                 // Put thread to sleep for a random amount of time.
                 Random r = new Random();
-                Thread.Sleep(1000 * r.Next(5));
+                Thread.Sleep(100 * r.Next(5));
                 Console.Write($"{i}, ");
             }
             Console.WriteLine();

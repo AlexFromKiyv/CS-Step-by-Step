@@ -1,4 +1,8 @@
-﻿using System.Text;
+﻿using System.Drawing;
+//using System.Windows.Shapes;
+using System.IO;
+using System.Text;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -7,9 +11,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-//using System.Windows.Shapes;
-using System.IO;
-using System.Drawing;
 
 namespace PictureHandlerWithAsyncAwait
 {
@@ -29,7 +30,12 @@ namespace PictureHandlerWithAsyncAwait
             _cancellationTokenSource?.Cancel();
         }
 
-
+        private static string GetThreadInfo(Thread thread)
+        {
+            return  $" ThreadId: {thread.ManagedThreadId} " +
+                    $" IsBackground: {thread.IsBackground} " +
+                    $" ThreadState: {thread.ThreadState} ";
+        }
         private void DoWork(int interval)
         {
             Thread.Sleep(interval); // Emulation the long work
@@ -39,14 +45,17 @@ namespace PictureHandlerWithAsyncAwait
         {
             await Task.Run(() =>
             {
-                int threadId = Thread.CurrentThread.ManagedThreadId;
-                Dispatcher?.Invoke(() => { Title = $"Start work in thread:{threadId} ...";});
-                DoWork(10000);
-                Dispatcher?.Invoke(() => { Title = $"Work completed!"; });
+                Thread thread = Thread.CurrentThread;
+                int? taskId = Task.CurrentId;
+                Dispatcher?.Invoke(() => { Title = $"Start work {taskId}. {GetThreadInfo(thread)} ...";});
+                
+                DoWork(5000);
+                
+                Dispatcher?.Invoke(() => { Title = $"End work {taskId}. {GetThreadInfo(thread)}"; });
             });
         }
 
-        private async void cmdProcess_Click(object sender, RoutedEventArgs e)
+        private async void cmdProcessFilesAsync_Click(object sender, RoutedEventArgs e)
         {
             _cancellationTokenSource = new();
             string pictureDirectory = @"D:\Temp\Pictures";
@@ -80,13 +89,15 @@ namespace PictureHandlerWithAsyncAwait
         private async Task ProcessFileAsync(string currentFile, string outputDirectory, CancellationToken token)
         {
             string filename = Path.GetFileName(currentFile);
-            using Bitmap bitmap = new(currentFile);
             try
             {
                 await Task.Run(() =>
                 {
-                    int threadId = Thread.CurrentThread.ManagedThreadId;
-                    Dispatcher?.Invoke(() => { Title = $"Processing in thread:{threadId} {filename}"; });
+                    Thread thread = Thread.CurrentThread;
+                    int? taskId = Task.CurrentId;
+                    Dispatcher?.Invoke(() => { Title = $"Processing {taskId} {GetThreadInfo(thread)} {filename}";});
+
+                    using Bitmap bitmap = new(currentFile);
                     bitmap.RotateFlip(RotateFlipType.Rotate180FlipNone);
                     bitmap.Save(Path.Combine(outputDirectory, filename));
                 }, token);
@@ -105,7 +116,15 @@ namespace PictureHandlerWithAsyncAwait
 
         private async void cmdProcessWithForEachAsync_Click(object sender, RoutedEventArgs e)
         {
-            await ProcessWithForEachAsync();
+            try
+            {
+                await ProcessWithForEachAsync();
+            }
+            catch (Exception ex)
+            {
+                Title = ex.Message;
+            }
+      
         }
 
         private async Task ProcessWithForEachAsync()
@@ -134,20 +153,19 @@ namespace PictureHandlerWithAsyncAwait
             {
                 await Parallel.ForEachAsync(files, parallelOptions, async (currentFile, token) =>
                 {
-                    token.ThrowIfCancellationRequested();
-                    string filename = Path.GetFileName(currentFile);
-
-                    //For title
-                    int threadId = Environment.CurrentManagedThreadId;
-                    Dispatcher?.Invoke(() =>
+                    await Task.Run(() =>
                     {
-                        Title = $"Processing in thread:{threadId}   File:{filename}";
+                        token.ThrowIfCancellationRequested();
+                        string filename = Path.GetFileName(currentFile);
+
+                        Thread thread = Thread.CurrentThread;
+                        int? taskId = Task.CurrentId;
+                        Dispatcher?.Invoke(() => { Title = $"Processing {taskId} {GetThreadInfo(thread)} {filename}"; });
+
+                        using Bitmap bitmap = new Bitmap(currentFile);
+                        bitmap.RotateFlip(RotateFlipType.Rotate180FlipNone);
+                        bitmap.Save(Path.Combine(outputDirectory, filename));
                     });
-
-                    using Bitmap bitmap = new Bitmap(currentFile);
-
-                    bitmap.RotateFlip(RotateFlipType.Rotate180FlipNone);
-                    bitmap.Save(Path.Combine(@"D:\Temp\ModifiedPictures", filename));
                 });
                 Dispatcher?.Invoke(() => Title = "Process complite.");
             }
@@ -156,6 +174,5 @@ namespace PictureHandlerWithAsyncAwait
                 Dispatcher?.Invoke(() => { Title = $"Process canceled! {ex.Message}"; });
             }
         }
-
     }
 }
