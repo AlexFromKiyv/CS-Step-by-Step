@@ -7,7 +7,7 @@
 
 # Вступ до Model-View-ViewModel
 
-Перш ніж заглиблюватися в сповіщення, перевірки та команди в WPF, було б добре зрозуміти кінцеву мету цього розділу, а саме патерн Model-View-ViewModel (MVVM). Похідний від шаблону «Модель презентації» Мартіна Фаулера, MVVM використовує специфічні для XAML можливості, обговорені в цьому розділі, щоб зробити розробку на WPF швидшою та чистішою. ​​Сама назва описує основні компоненти шаблону: модель, вигляд, модель вигляду.
+Перш ніж заглиблюватися в сповіщення, перевірки та команди в WPF, було б добре зрозуміти кінцеву мету цього розділу, а саме патерн Model-View-ViewModel (MVVM). Похідний від шаблону «Presentation Model» Мартіна Фаулера, MVVM використовує специфічні для XAML можливості, обговорені в цьому розділі, щоб зробити розробку на WPF швидшою та чистішою. ​​Сама назва описує основні компоненти шаблону: модель, вигляд, модель вигляду.
 
 ## Модель
 
@@ -38,9 +38,7 @@
 Істотним недоліком системи зв'язування для WinForms є відсутність сповіщень. Якщо дані, представлені у view, оновлюються програмно, інтерфейс користувача також має оновлюватися програмно, щоб вони були синхронізовані. Це призводить до великої кількості викликів Refresh() для елементів керування, зазвичай більше, ніж це абсолютно необхідно для безпеки. Хоча зазвичай включення занадто великої кількості викликів Refresh() не є суттєвою проблемою продуктивності, якщо ви не включите достатньо, це може негативно вплинути на враження користувача.
 Система зв'язування, вбудована в програми на основі XAML, виправляє цю проблему, дозволяючи вам підключати ваші об'єкти даних та колекції до системи сповіщень, розробляючи їх як спостережувані об'єкти. Щоразу, коли значення властивості змінюється у спостережуваній моделі або змінюється колекція (наприклад, елементи додаються, видаляються або перевпорядковуються) у спостережуваній колекції, викликається подія (NotifyPropertyChanged або NotifyCollectionChanged). Фреймворк зв'язування автоматично прослуховує ці події та оновлює зв'язані елементи керування, коли вони спрацьовують. Ще краще те, що як розробник ви можете контролювати, які властивості викликають сповіщення. Звучить ідеально, чи не так? Що ж, це не зовсім ідеально. Налаштування цього для спостережуваних моделей може зайняти чимало коду, якщо робити все вручну. На щастя, існує фреймворк з відкритим кодом, який значно спрощує це, як ви скоро побачите.
 
-## Спостережувані моделі та колекції
-
-Спостережувані моделі та колекції
+## Спостережувані (Observable) моделі та колекції
 
 У цьому розділі ви створите застосунок, який використовує спостережувані моделі та колекції. Щоб розпочати, створіть нову WPF-застосунок з назвою WpfNotifications. Застосунок буде формою типу «головний-детальний», що дозволить користувачеві вибрати певний автомобіль за допомогою поля зі списком (ComboBox), а потім деталі цього автомобіля відображатимуться в наступних елементах керування TextBox. Оновіть MainWindow.xaml, замінивши стандартну Grid наступною розміткою:
 
@@ -123,7 +121,7 @@ public class Car
             <Label Grid.Column="0" Grid.Row="2" Content="Color"/>
             <TextBox Grid.Column="1" Grid.Row="2" Text="{Binding Path=Color}"/>
             <Label Grid.Column="0" Grid.Row="3" Content="Pet Name"/>
-            <TextBox Grid.Column="1" Grid.Row="3" Text="{Binding Path=PetName} " />
+            <TextBox Grid.Column="1" Grid.Row="3" Text="{Binding Path=PetName}"/>
 ```
 
 Нарешті, додайте дані до ComboBox. У MainWindow.xaml.cs створіть новий список записів Car та встановіть ItemsSource для ComboBox у цьому списку. Також додайте оператор using для простору імен Notifications.Models.
@@ -182,7 +180,7 @@ public class Car
 
 ## Спостережувані моделі
 
-Проблема зміни даних у властивості вашої моделі, яка не відображається в інтерфейсі користувача, вирішується шляхом реалізації інтерфейсу INotifyPropertyChanged у класі моделі Car. Інтерфейс INotifyPropertyChanged містить одну подію: PropertyChangedEvent. Інтерфейс INotifyPropertyChanged містить одну подію: PropertyChangedEvent. Механізм зв'язування XAML прослуховує цю подію для кожної зв'язаної властивості в класах, що реалізують інтерфейс INotifyPropertyChanged. Інтерфейс показано тут:
+Проблема зміни даних у властивості вашої моделі, яка не відображається в інтерфейсі користувача, вирішується шляхом реалізації інтерфейсу INotifyPropertyChanged у класі моделі Car. Інтерфейс INotifyPropertyChanged містить одну подію: PropertyChangedEvent. Механізм зв'язування XAML прослуховує цю подію для кожної зв'язаної властивості в класах, що реалізують інтерфейс INotifyPropertyChanged. Інтерфейс показано тут:
 
 ```cs
 public interface INotifyPropertyChanged
@@ -209,8 +207,7 @@ public class Car : INotifyPropertyChanged
 Подія PropertyChanged приймає посилання на об'єкт та новий екземпляр класу PropertyChangedEventArgs, як у цьому прикладі:
 
 ```cs
-PropertyChanged?.Invoke(this,
-  new PropertyChangedEventArgs("Color"));
+PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Color"));
 ```
 Перший параметр – це екземпляр об'єкта, який викликає подію. Конструктор PropertyChangedEventArgs приймає рядок, який вказує на властивість, що була змінена та потребує оновлення. Коли виникає подія, механізм прив'язки шукає будь-які елементи керування, пов'язані з іменованою властивістю цього екземпляра. Якщо передати String.Empty в PropertyChangedEventArgs, усі зв'язані властивості екземпляра оновлюються. 
 Ви контролюєте, які властивості враховуються в автоматичних оновленнях. Тільки ті властивості, які викликають подію PropertyChanged у set, будуть автоматично оновлені. Зазвичай це всі властивості ваших класів моделей, але ви можете пропустити певні властивості залежно від вимог вашої програми. Замість того, щоб викликати подію безпосередньо в set для кожної з перелічених властивостей, поширеним шаблоном є створення допоміжного методу (зазвичай з назвою OnPropertyChanged()), який викликає подію від імені властивостей, зазвичай у базовому класі для ваших моделей. Додайте наступний метод і код до класу Car.cs:
@@ -218,17 +215,16 @@ PropertyChanged?.Invoke(this,
 ```cs
     protected void OnPropertyChanged([CallerMemberName] string propertyName = "")
     {
-        PropertyChanged?.Invoke(this,
-          new PropertyChangedEventArgs(propertyName));
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 ```
 Далі оновіть кожну з автоматичних властивостей у класі Car, щоб мати повноцінний геттер та сеттер з резервним полем.
 
 ```cs
-    private string _make;
+    private string _make = null!;
     private int _id;
-    private string _color;
-    private string _petName;
+    private string _color = null!;
+    private string _petName = null!;
 
     public int Id
     {
@@ -335,8 +331,7 @@ public bool IsChanged {
         {
             IsChanged = true;
         }
-        PropertyChanged?.Invoke(this,
-          new PropertyChangedEventArgs(propertyName));
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 ```
 Відкрийте MainWindow.xaml та додайте додатковий RowDefinition до DetailsGrid. Додайте наступний код до кінця Grid, який містить Label та CheckBox, пов'язані з властивістю IsChanged, наступним чином:
@@ -348,6 +343,7 @@ public bool IsChanged {
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -372,7 +368,6 @@ public bool IsChanged {
             <Label Grid.Column="0" Grid.Row="5" Content="Is Changed"/>
             <CheckBox Grid.Column="1" Grid.Row="5" VerticalAlignment="Center"
                       Margin="10,0,0,0" IsEnabled="False" IsChecked="{Binding Path=IsChanged}" />
-
         </Grid>
 ```
 Якби ви зараз запустили програму, ви б побачили, що кожен запис відображається як змінений, навіть якщо ви нічого не змінювали! Це пояснюється тим, що створення об'єкта встановлює значення властивостей, а встановлення будь-яких значень викликає OnPropertyChanged(). Це встановлює властивість об'єкта IsChanged. Щоб виправити це, встановіть для властивості IsChanged значення false як останньої властивості в коді ініціалізації об'єкта. Відкрийте MainWindow.xaml.cs та змініть код, який створює список, на такий:
@@ -419,7 +414,7 @@ UpdateSourceTrigger значення
 ```xml
 <TextBox Grid.Column="1" Grid.Row="2" Text="{Binding Path=Color, UpdateSourceTrigger=PropertyChanged}" />
 ```
-Тепер, коли ви запускаєте програму та починаєте вводити текст у текстове поле «Колір», прапорець одразу встановлюється. Ви можете запитати, чому для елементів керування TextBox за замовчуванням встановлено значення LostFocus. Будь-яка перевірка (про яку буде розказано трохи згодом) для моделі спрацьовує разом з UpdateSourceTrigger. Для текстового поля це може призвести до постійного миготіння помилок, доки користувач не введе правильні значення. Наприклад, якщо правила перевірки не дозволяють використовувати менше п’яти символів у текстовому полі (TextBox), помилка відображатиметься з кожним натисканням клавіші, доки користувач не введе п’ять або більше символів. У таких випадках найкраще зачекати, поки користувач вийде з текстового поля за допомогою клавіші Tab (після завершення зміни тексту), щоб оновити джерело.
+Тепер, коли ви запускаєте програму та починаєте вводити текст у текстове поле «Color», прапорець одразу встановлюється. Ви можете запитати, чому для елементів керування TextBox за замовчуванням встановлено значення LostFocus. Будь-яка перевірка (про яку буде розказано трохи згодом) для моделі спрацьовує разом з UpdateSourceTrigger. Для текстового поля це може призвести до постійного миготіння помилок, доки користувач не введе правильні значення. Наприклад, якщо правила перевірки не дозволяють використовувати менше п’яти символів у текстовому полі (TextBox), помилка відображатиметься з кожним натисканням клавіші, доки користувач не введе п’ять або більше символів. У таких випадках найкраще зачекати, поки користувач вийде з текстового поля за допомогою клавіші Tab (після завершення зміни тексту), щоб оновити джерело.
 
 ## Завершення роботи зі сповіщеннями та спостережуваними елементами
 
@@ -605,11 +600,21 @@ public partial class Car : INotifyDataErrorInfo, IDataErrorInfo
 ```cs
 private void OnErrorsChanged(string propertyName)
 {
-  ErrorsChanged?.Invoke(this,
-    new DataErrorsChangedEventArgs(propertyName));
+  ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(propertyName));
 }
 ```
 Як згадувалося раніше, метод GetErrors() повинен повертати будь-які помилки у словнику, якщо параметр порожній або має значення null. Якщо передано значення propertyName, метод поверне будь-які помилки, знайдені для цієї властивості. Якщо параметр не збігається (або для властивості немає помилок), то метод поверне значення null.
+
+```cs
+    public IEnumerable GetErrors(string? propertyName)
+    {
+        if (string.IsNullOrEmpty(propertyName))
+        {
+            return _errors.Values;
+        }
+        return _errors.ContainsKey(propertyName) ? _errors[propertyName] : null;
+    }
+```
 
 Останній набір допоміжних методів додасть одну або декілька помилок для властивості або очистить усі помилки для властивості (або всіх властивостей). Щоразу, коли словник змінюється, не забудьте викликати допоміжний метод OnErrorsChanged().
 
@@ -670,7 +675,7 @@ public string Make
     _make = value;
     if (Make == "ModelT")
     {
-      AddError(nameof(Make), 'Too Old');
+      AddError(nameof(Make), "Too Old");
     }
     else
     {
@@ -700,10 +705,9 @@ public string this[string columnName]
         break;
       case nameof(Make):
         CheckMakeAndColor();
-        if (Make == 'ModelT')
+        if (Make == "ModelT")
         {
-          AddError(nameof(Make), 'Too Old');
-          hasError = true;
+          AddError(nameof(Make), "Too Old");
         }
         break;
       case nameof(Color):
@@ -715,13 +719,13 @@ public string this[string columnName]
     return string.Empty;
   }
 }
-internal bool CheckMakeAndColor()
+
+private bool CheckMakeAndColor()
 {
-  if (Make == 'Chevy' && Color == 'Pink')
+  if (Make == "Chevy" && Color == "Pink")
   {
-    AddError(nameof(Make), $'{Make}'s don't come in {Color}');
-    AddError(nameof(Color),
-      $'{Make}'s don't come in {Color}');
+    AddError(nameof(Make), $"{Make}'s don't come in {Color}");
+    AddError(nameof(Color),$"{Make}'s don't come in {Color}");
     return true;
   }
   return false;
@@ -765,10 +769,66 @@ using System.ComponentModel;
 
 namespace WpfValidations.Models;
 
-class BaseEntity : INotifyDataErrorInfo
+public class BaseEntity : INotifyDataErrorInfo
 {
-    //...
+    protected readonly Dictionary<string, List<string>> _errors = new Dictionary<string, List<string>>();
+
+    public IEnumerable GetErrors(string propertyName)
+    {
+        if (string.IsNullOrEmpty(propertyName))
+        {
+            return _errors.Values;
+        }
+        return _errors.ContainsKey(propertyName) ? _errors[propertyName] : null;
+    }
+
+    public bool HasErrors => _errors.Any();
+    public event EventHandler<DataErrorsChangedEventArgs> ErrorsChanged;
+    protected void OnErrorsChanged(string propertyName)
+    {
+        ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(propertyName));
+    }
+    protected void AddError(string propertyName, string error)
+    {
+        AddErrors(propertyName, new List<string> { error });
+    }
+    protected void AddErrors(string propertyName, IList<string> errors)
+    {
+        if (errors == null || !errors.Any())
+        {
+            return;
+        }
+        var changed = false;
+        if (!_errors.ContainsKey(propertyName))
+        {
+            _errors.Add(propertyName, new List<string>());
+            changed = true;
+        }
+        foreach (var err in errors)
+        {
+            if (_errors[propertyName].Contains(err)) continue;
+            _errors[propertyName].Add(err);
+            changed = true;
+        }
+        if (changed)
+        {
+            OnErrorsChanged(propertyName);
+        }
+    }
+    protected void ClearErrors(string propertyName = "")
+    {
+        if (string.IsNullOrEmpty(propertyName))
+        {
+            _errors.Clear();
+        }
+        else
+        {
+            _errors.Remove(propertyName);
+        }
+        OnErrorsChanged(propertyName);
+    }
 }
+
 ```
 Перемістіть весь код з CarPartial.cs, що стосується INofityDataErrorInfo, у новий базовий клас. Будь-які private методи та змінні потрібно зробити protected. Далі видаліть інтерфейс INotifyDataErrorInfo з класу CarPartial.cs та додайте BaseEntity як базовий клас наступним чином:
 
@@ -788,7 +848,25 @@ WPF також може використовувати анотації дани
 
 ## Додавання анотацій даних до моделі
 
-Відкрийте Car.cs та додайте using System.ComponentModel.DataAnnotations. Додайте атрибути [Required] та [StringLength(50)] до властивостей Make, Color та PetName. Атрибут Required додає правило перевірки, що властивість не повинна бути null (щоправда, це надлишкове для властивості Id, оскільки вона не є цілим числом, що може мати значення null). Атрибут StringLength(50) додає правило перевірки, що значення властивості не може бути довшим за 50 символів.
+Відкрийте Car.cs та додайте using System.ComponentModel.DataAnnotations. Додайте атрибути [Required] та [StringLength(50)] до властивостей Make, Color та PetName. 
+
+```cs
+    [Required]
+    [StringLength(50)]
+    public string Color
+    {
+        get => _color;
+        set
+        {
+            if (value == _color) return;
+            _color = value;
+            OnPropertyChanged();
+        }
+    }
+```
+
+
+Атрибут Required додає правило перевірки, що властивість не повинна бути null (щоправда, це надлишкове для властивості Id, оскільки вона не є цілим числом, що може мати значення null). Атрибут StringLength(50) додає правило перевірки, що значення властивості не може бути довшим за 50 символів.
 
 ## Перевірка на наявність помилок перевірки на основі анотацій даних
 
@@ -843,8 +921,6 @@ using System.ComponentModel.DataAnnotations;
 Запустіть програму, виберіть один із транспортних засобів і додайте текст для кольору, який містить понад 50 символів. Коли ви перевищуєте поріг у 50 символів, анотація даних StringLength створює помилку перевірки, про яку повідомляється користувачеві.
 
 ## Налаштування ErrorTemplate
-
-Налаштування ErrorTemplate
 
 Остання тема — створити стиль, який застосовуватиметься, коли в елементі керування виникне помилка, а також оновити ErrorTemplate для відображення більш змістовної інформації про помилку. Як ви дізналися з попереднього розділу, елементи керування можна налаштовувати за допомогою стилів та шаблонів елементів керування. 
 Почніть з додавання нового стилю в розділі Windows.Resources файлу MainWindow.xaml з цільовим типом TextBox. Далі додайте тригер до стилю, який встановлює властивості, коли властивість Validation.HasError має значення true. Властивості та значення, які потрібно встановити для ErrorContent, це Background (Pink), Foreground (Black) та Tooltip. Сетери Background та Foreground не є чимось новим, але синтаксис для встановлення ToolTip потребує деякого пояснення. Прив'язка вказує на елемент керування, до якого застосовується цей стиль, у цьому випадку, TextBox. Шлях – це перше значення ErrorContent колекції Validation.Errors. Розмітка виглядає наступним чином:
@@ -981,6 +1057,12 @@ using WpfCommands.Commands;
 ```
 Далі додайте публічну властивість з назвою ChangeColorCmd типу ICommand з полем private.
 
+```cs
+       private ICommand _changeColorCommand = null;
+       public ICommand ChangeColorCmd =>
+            _changeColorCommand ??= new ChangeColorCommand();
+```
+
 ## Оновлення MainWindow.xaml
 
 Клікувальні елементи керування в WPF (наприклад, елементи керування Button) мають властивість Command, яка дозволяє призначити об'єкт команди елементу керування. Почніть з підключення вашої команди, створеної в коді програмного забезпечення, до кнопки btnChangeColor. Оскільки властивість команди знаходиться в класі MainWindow, для доступу до вікна, яке містить кнопку, використовується синтаксис зв'язування RelativeSourceMode наступним чином:
@@ -1058,7 +1140,8 @@ class AddCarCommand : CommandBase
             Id = ++maxCount,
             Color = "Yellow",
             Make = "VW",
-            PetName = "Birdie"
+            PetName = "Birdie",
+            IsChanged = false
         });
     }
 }
@@ -1122,7 +1205,13 @@ public class RelayCommand : CommandBase
 Створіть три конструктори. Перший — це конструктор за замовчуванням (потрібен класу, похідному від RelayCommand<T>), другий — це конструктор, який приймає параметр Action, а третій — це конструктор, який приймає параметр Action та параметр Func, як показано нижче:
 
 ```cs
-
+    public RelayCommand() { }
+    public RelayCommand(Action execute) : this(execute, null) { }
+    public RelayCommand(Action execute, Func<bool> canExecute)
+    {
+        _execute = execute ?? throw new ArgumentNullException(nameof(execute));
+        _canExecute = canExecute;
+    }
 ```
 Нарешті, реалізуйте перевизначення CanExecute() та Execute(). CanExecute() повертає true, якщо Func має значення null; або якщо воно не має значення null, виконується та повертає true. Execute() виконує параметр Action.
 
@@ -1173,11 +1262,6 @@ public class RelayCommand<T> : RelayCommand
         private RelayCommand<Car> _deleteCarCommand = null;
         public RelayCommand<Car> DeleteCarCmd
             => _deleteCarCommand ??= new RelayCommand<Car>(DeleteCar, CanDeleteCar);
-        private bool CanDeleteCar(Car car) => car != null;
-        private void DeleteCar(Car car)
-        {
-            _cars.Remove(car);
-        }
 ```
 Також необхідно створити методи DeleteCar() та CanDeleteCar() наступним чином:
 

@@ -1549,11 +1549,25 @@ public partial class MainWindow : Window
 Відкрийте MainWindow.xaml.cs, додайте остаточну допоміжну функцію під назвою ConfigureGrid() і викличте її з вашого конструктора після того, як ви налаштували ApplicationDbContext. Все, що вам потрібно зробити, це додати кілька рядків коду, наприклад:
 
 ```cs
+    public MainWindow()
+    {
+        InitializeComponent();
+        // Be in Ink mode by default.
+        MyInkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+        inkRadio.IsChecked = true;
+        comboColors.SelectedIndex = 0;
+        SetBindings();
+        GetConfigurationAndDbContext();
+        ConfigureGrid();
+    }
+```
+
+```cs
     private void ConfigureGrid()
     {
         using var repo = new CarRepo(_context);
         gridInventory.ItemsSource = repo.GetAllIgnoreQueryFilters().ToList()
-            .Select(x => new { x.Id, x.Color, x.PetName, x.MakeId }); ;
+            .Select(x => new { x.Id, x.Color, x.PetName, x.MakeId });
     }
 ```
 
