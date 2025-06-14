@@ -25,8 +25,15 @@ static void TraditionalDelegateSyntax()
 {
     List<int> ints = [20, 1, 4, 8, 9, 44];
 
+    // Target for the Predicate<> delegate.
+    static bool IsEvenNumber(int i)
+    {
+        return (i % 2 == 0);
+    }
+
     // Call FindAll() using traditional delegate syntax.
     Predicate<int> callback = IsEvenNumber;
+
     List<int> evenNumbers = ints.FindAll(callback);
 
     foreach (var number in evenNumbers)
@@ -34,11 +41,6 @@ static void TraditionalDelegateSyntax()
         Console.Write(number+"\t");
     }
 
-    // Target for the Predicate<> delegate.
-    static bool IsEvenNumber(int i)
-    {
-        return (i % 2 == 0);
-    }
 }
 TraditionalDelegateSyntax();
 ```
@@ -337,7 +339,7 @@ static void UsingLambda()
 UsingLambda();
 ```
 
-## Лямбда-вирази та члени з тілом виразу
+## Лямбда-вирази та члени класу з тілом виразу
 
 Тепер, коли ви розумієте лямбда-вирази та те, як вони працюють, має бути набагато зрозуміліше, як члени, що містять вирази, працюють під ковдрою. Дозволено використовувати оператор => для спрощення реалізації членів. Зокрема, якщо у вас є метод або властивість (на додаток до спеціального оператора або частини коду перетворення), які складаються лише з одного рядка коду в реалізації, вам не потрібно визначати область за допомогою фігурних дужок. Натомість ви можете використати лямбда-оператор і написати елемент із тілом виразу. Також можете використовувати цей синтаксис для конструкторів класів, фіналізаторів, а також засобів доступу для отримання та встановлення для елементів властивості.
 
