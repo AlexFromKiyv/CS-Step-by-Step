@@ -25,7 +25,7 @@ docker pull mcr.microsoft.com/mssql/server:2019-latest
 docker run -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=P@ssw0rd' -p 5433:1433 --name AutoLot -h AutoLotHost -d mcr.microsoft.com/mssql/server:2019-latest
 ```
 
-Попередня команда приймає ліцензійну угоду кінцевого користувача, встановлює пароль (у реальному житті потрібно використовувати надійний пароль), встановлює зіставлення портів (порт 5433 на вашому комп’ютері зіставляється з портом за замовчуванням для SQL Server, яким є 1433) у контейнері, називає контейнер (AutoLot), називає хост (AutoLotHost) і, нарешті, інформує Docker використовувати попередньо завантажений образ. Це не налаштування, які ви хочете використовувати для реального розвитку. Щоб отримати інформацію про зміну пароля SA та переглянути навчальний посібник, перейдіть на сторінку https://docs.microsoft.com/en-us/sql/linux/quickstart-install-connect-docker?view=sql-server-ver15&pivots=cs1 -cmd.
+Попередня команда приймає ліцензійну угоду кінцевого користувача, встановлює пароль (у реальному житті потрібно використовувати надійний пароль), встановлює зіставлення портів (порт 5433 на вашому комп’ютері зіставляється з портом за замовчуванням для SQL Server, яким є 1433) у контейнері, називає контейнер (AutoLot), називає хост (AutoLotHost) і, нарешті, інформує Docker використовувати попередньо завантажений образ. Це не налаштування, які ви хочете використовувати для реального розвитку. Щоб отримати інформацію про зміну пароля SA та переглянути навчальний посібник, перейдіть на сторінку https://docs.microsoft.com/en-us/sql/linux/quickstart-install-connect-docker?view=sql-server-ver15&pivots=cs1-cmd.
 
 Щоб переконатися, що він працює, введіть команду docker ps -a у командному рядку.
 
@@ -47,8 +47,6 @@ CONTAINER ID IMAGE                                       PORTS                  
 Спеціальний екземпляр SQL Server під назвою LocalDb інсталюється разом із Visual Studio 2022. Якщо ви вирішите не використовувати SQL Server Express LocalDB або Docker і користуєтеся комп’ютером Windows, вам потрібно інсталювати SQL Server 2019 Developer Edition. SQL Server 2019 Developer Edition є безкоштовним і його можна завантажити тут:
 
 https://www.microsoft.com/en-us/sql-server/sql-server-downloads
-
-
 
 
 ### Встановлення IDE SQL Server - Azure Data Studio
@@ -128,10 +126,9 @@ docker cp ./AutoLotDocker.bak AutoLot:var/opt/mssql/backup
 
 Створення бази даних з нуля може дати більше розуміння з чого вона складається і як створити свою власну. Можна використати або Azure Data Studio або SQL Server Management Studio. 
 
-
 ### Строрення БД.
 
-Щоб створити базу даних AutoLot, підключіться до сервера бази даних за допомогою Azure Data Studio. Відкрийте новий запит, вибравши  File ➤ New Query (або натиснувши Ctrl+N) і ввівши такий текст команди:
+Щоб створити базу даних AutoLot, підключіться до сервера бази даних за допомогою Azure Data Studio. Відкрийте новий запит, вибравши  AutoLotLocalDb ➤ New Query (або натиснувши Ctrl+N) і ввівши такий текст команди:
 
 ```sql
 USE [master]
@@ -150,7 +147,7 @@ GO
 
 ### Створення таблиці Inventory
 
-Таблиця для обліку наявних авто.
+Таблиця для обліку наявних авто. Станьте на AutoLot ➤ New Query
 
 ```sql
 USE [AutoLot]
@@ -168,7 +165,7 @@ CREATE TABLE [dbo].[Inventory](
 ) ON [PRIMARY]
 GO
 ```
-У таблиці Inventory зберігається зовнішній ключ до (ще не створеної) таблиці Makes.
+У таблиці Inventory зберігається зовнішній ключ поле MakeId до (ще не створеної) таблиці Makes.
 
 Якщо ви не знайомі з типом даних SQL Server TimeStamp (який відповідає byte[] у C#), не хвилюйтеся про це зараз. Просто знайте, що він використовується для перевірки паралельності на рівні рядків.
 
@@ -333,7 +330,7 @@ GO
 
 ### Створення Stored Procedure
 
- ADO.NET дозволяє викликати Stored Procedure. Це підпрограми коду, що зберігаються в базі даних, які виконують певні дії. Stored Procedures можуть повертати дані або просто оперувати даними, нічого не повертаючи. Створимо процедуру.
+ADO.NET дозволяє викликати Stored Procedure. Це підпрограми коду, що зберігаються в базі даних, які виконують певні дії. Stored Procedures можуть повертати дані або просто оперувати даними, нічого не повертаючи. Створимо процедуру.
 
 ```sql
 USE [AutoLot]
@@ -345,7 +342,7 @@ AS
 SELECT @petName = PetName from dbo.Inventory where Id = @carID
 GO
 ```
-Повертає ім’я улюбленця автомобіля на основі наданого carId.
+Повертає улуюбленне ім’я автомобіля на основі наданого carId.
 
 ### Додавання даних в таблицю Makes
 
@@ -459,8 +456,7 @@ public abstract class DbProviderFactory
 
 ```cs
 // Get the factory for the SQL data provider.
-DbProviderFactory sqlFactory =
-  Microsoft.Data.SqlClient.SqlClientFactory.Instance;
+DbProviderFactory sqlFactory = Microsoft.Data.SqlClient.SqlClientFactory.Instance;
 ```
 Щоб зробити програму більш універсальною, ви можете створити фабрику DbProviderFactory, яка повертає певний варіант DbProviderFactory на основі налаштування у файлі appsettings.json для програми. Коли ви отримаєте фабрику для вашого провайдера даних можна отримати асоційовані об’єкти даних провайдера (наприклад, з’єднання, команди та зчитувачі даних).
 
@@ -469,11 +465,12 @@ DbProviderFactory sqlFactory =
 Створіть новий проект C# Console Application під назвою DataProviderFactory, який роздрукує залишки автомобілів з бази даних AutoLot. Для цього початкового прикладу ви жорстко закодуєте логіку доступу до даних безпосередньо в консольній програмі (для спрощення), але далі буде розглянуто більш універсальний варіант.
 
 Додайте в проект пакети:
-Microsoft.Extensions.Configuration.Json
-System.Data.Common
-System.Data.Odbc
-System.Data.OleDb
-Microsoft.Data.SqlClient
+
+    Microsoft.Extensions.Configuration.Json
+    System.Data.Common
+    System.Data.Odbc
+    System.Data.OleDb
+    Microsoft.Data.SqlClient
 
 Далі визначте константу компілятора PC (якщо ви використовуєте ОС Windows)
 
@@ -647,7 +644,7 @@ static void PrintOutSimpleList()
 
     command.Connection = connection;
     command.CommandText =
-        "Select i.Id, m.Name From Inventory " +
+        "Select i.Id, i.PetName, m.Name From Inventory " +
         "i inner join Makes m on m.Id = i.MakeId";
 
     // Make data reader
@@ -658,7 +655,7 @@ static void PrintOutSimpleList()
     //Print out data
     while (reader.Read())
     {
-        Console.WriteLine($"\t{reader["Id"]}\t{reader["Name"]} ");
+        Console.WriteLine($"\t{reader["Id"]}\t{reader["Name"]}\t{reader["PetName"]}");
     }
 }
 ```
@@ -669,15 +666,15 @@ Your data reader object is a : SqlDataReader
 
                 Inventory
 
-        1       VW
-        2       Ford
-        3       Saab
-        4       Yugo
-        9       Yugo
-        5       BMW
-        6       BMW
-        7       BMW
-        8       Pinto
+        1       VW      Zippy
+        2       Ford    Rusty
+        3       Saab    Mel
+        4       Yugo    Clunker
+        5       BMW     Bimmer
+        6       BMW     Hank
+        7       BMW     Pinky
+        8       Pinto   Pete
+        9       Yugo    Brownie
 ```
 Зауважте, що для діагностичних цілей ви використовуєте служби рефлексії, щоб надрукувати ім’я базового з’єднання, команди та читача даних.
 
@@ -706,15 +703,15 @@ Your data reader object is a : OdbcDataReader
 
                 Inventory
 
-        1       VW
-        2       Ford
-        3       Saab
-        4       Yugo
-        9       Yugo
-        5       BMW
-        6       BMW
-        7       BMW
-        8       Pinto
+        1       VW      Zippy
+        2       Ford    Rusty
+        3       Saab    Mel
+        4       Yugo    Clunker
+        5       BMW     Bimmer
+        6       BMW     Hank
+        7       BMW     Pinky
+        8       Pinto   Pete
+        9       Yugo    Brownie
 ```
 
 На цьому етапі достатньо знати, що ви можете використовувати модель фабрики постачальників даних ADO.NET для створення єдиної кодової бази, яка може використовувати різні постачальники даних декларативним способом. Змінюється об'ект провайдера та рядок підключення весь інший код залишається однаковим для вирішування завдання.
@@ -722,11 +719,15 @@ Your data reader object is a : OdbcDataReader
 Хоча підхід з використанням фабрики досить потужний він не без доліків. Ви повинні переконатися, що база коду використовує лише типи та методи, спільні для всіх постачальників через членів абстрактних базових класів. Таким чином, під час створення бази коду ви обмежені членами, доступними DbConnection, DbCommand та іншими типами простору імен System.Data.Common. Враховуючи це, ви можете виявити, що цей узагальнений підхід не дозволяє вам отримати прямий доступ до деяких особливих можливостей конкретної СУБД. Якщо ви повинні мати можливість викликати певних членів основного постачальника (наприклад, SqlConnection), ви можете зробити це за допомогою явного приведення, як у цьому прикладі:
 
 ```cs
-if (connection is SqlConnection sqlConnection)
-{
-  // Print out which version of SQL Server is used.
-  WriteLine(sqlConnection.ServerVersion);
-}
+    //...
+    connection.Open();
+
+    if (connection is SqlConnection sqlConnection)
+    {
+        // Print out which version of SQL Server is used.
+        Console.WriteLine(sqlConnection.ServerVersion);
+    }
+   //.. 
 ```
 Однак, роблячи це, вашу кодову базу стає дещо важче підтримувати (і менш гнучкою), оскільки ви повинні додати кілька перевірок під час виконання. Тим не менш, якщо вам потрібно побудувати бібліотеки доступу до даних ADO.NET найбільш гнучким можливим способом, використання шаблона factory постачальника даних забезпечує чудовий механізм для цього.
 
@@ -745,8 +746,6 @@ Entity Framework Core і його підтримка впровадження з
 Щоб почати, створіть новий проект консольної програми під назвою AutoLot.DataReader і додайте пакет Microsoft.Data.SqlClient.
 
 ```cs
-using Microsoft.Data.SqlClient;
-
 static void UseDataReader()
 {
     using SqlConnection connection = new();
@@ -766,7 +765,11 @@ static void UseDataReader()
 
     while (myDataReader.Read())
     {
-        Console.WriteLine($"{myDataReader["Make"]} {myDataReader["Color"]} {myDataReader["PetName"]}");
+        Console.WriteLine($"" +
+            $"{myDataReader["Id"]}" +
+            $"\t{myDataReader["Make"]}" +
+            $"\t{myDataReader["Color"]}" +
+            $"\t{myDataReader["PetName"]}");
     }
 
 }
@@ -775,15 +778,15 @@ UseDataReader();
 ```console
 Connection state: Open
 
-VW Black Zippy
-Ford Rust Rusty
-Saab Black Mel
-Yugo Yellow Clunker
-BMW Black Bimmer
-BMW Green Hank
-BMW Pink Pinky
-Pinto Black Pete
-Yugo Brown Brownie
+1       VW      Black   Zippy
+2       Ford    Rust    Rusty
+3       Saab    Black   Mel
+4       Yugo    Yellow  Clunker
+5       BMW     Black   Bimmer
+6       BMW     Green   Hank
+7       BMW     Pink    Pinky
+8       Pinto   Black   Pete
+9       Yugo    Brown   Brownie
 ```
 
 ## Робота з об’єктами Connection
@@ -1127,6 +1130,8 @@ Id      FirstName       LastName
 
 Термін NonQuery — це оператор SQL, який не повертає набір результатів. Таким чином, оператори Select є запитами, тоді як оператори Insert, Update та Delete – ні. Враховуючи це, ExecuteNonQuery() повертає int, який представляє кількість рядків, які зазнали впливу, а не новий набір записів.
 
+# Створення DataAccessLayer
+
 Попередні приклади лише відкривали з’єднання та використовували їх для отримання даних. Це лише одна частина роботи з базою даних; фреймворк доступу до даних не принесе великої користі, якщо він також повністю не підтримує функції Create, Read, Update та Delete (CRUD). Дізнаємось як це зробити за допомогою викликів ExecuteNonQuery().
 
 Почніть із створення нового проекту типу Console App C# під назвою AutoLot.DataAccessLayer та додайте пакет Microsoft.Data.SqlClient. Додайте новий файл класу під назвою GlobalUsings.cs до проекту та оновіть файл до таких глобальних операторів using :
@@ -1303,6 +1308,7 @@ public class InventoryDal : IDisposable
        using SqlCommand command = new(sql, _sqlConnection);
 
        SqlDataReader dataReader = command.ExecuteReader(CommandBehavior.CloseConnection);
+
        while (dataReader.Read())
        {
            inventory.Add(new CarViewModel
@@ -1563,11 +1569,11 @@ The statement has been terminated.
 12      VW      Gray    Elektric
 ```
 
-Як бачимо рядок не видалено.
+Як бачимо рядок з Id = 5  не видалено, тому що на нього є посилання з іншої таблиці. 
 
 ### Метод оновлення
 
-Коли справа доходить до оновлення наявного запису в таблиці інвентаризації, перше, що ви повинні вирішити, це те, що ви хочете дозволити абоненту змінити, будь то колір автомобіля, ім’я домашньої тварини, марка чи все одразу. Один із способів надати абоненту повну гнучкість — це визначити метод, який приймає тип рядка для представлення будь-якого виду оператора SQL, але це в кращому випадку ризиковано. 
+Коли справа доходить до оновлення наявного запису в таблиці інвентаризації, перше, що ви повинні вирішити, це те, що ви хочете дозволити абоненту змінити, будь то колір автомобіля, улюбленне ім’я, марка чи все одразу. Один із способів надати абоненту повну гнучкість — це визначити метод, який приймає тип рядка для представлення будь-якого виду оператора SQL, але це в кращому випадку ризиковано. 
 В ідеалі ви хочете мати набір методів, які дозволяють абоненту оновлювати запис різними способами. Реалізуєм метод для одного поля.
 
 ```cs
@@ -1593,7 +1599,7 @@ static void Test_Simple_Update()
     Console.WriteLine();
 
     InventoryDal inventoryDal = new InventoryDal();
-    inventoryDal.Simple_Update(12, "Electra");
+    inventoryDal.Simple_Update(8, "Peter");
 
     TestGetAllInventory();
 }
@@ -1611,7 +1617,6 @@ Test_Simple_Update();
 8       Pinto   Black   Pete
 9       Yugo    Brown   Brownie
 10      VW      Green   Ella
-12      VW      Gray    Elektric
 
 1       VW      Black   Zippy
 2       Ford    Rust    Rusty
@@ -1620,10 +1625,9 @@ Test_Simple_Update();
 5       BMW     Black   Bimmer
 6       BMW     Green   Hank
 7       BMW     Pink    Pinky
-8       Pinto   Black   Pete
+8       Pinto   Black   Peter
 9       Yugo    Brown   Brownie
 10      VW      Green   Ella
-12      VW      Gray    Electra
 ```
 
 ## Робота з параметризованими об’єктами Command
@@ -1644,7 +1648,6 @@ Test_Simple_Update();
 |IsNullable|Отримує або встановлює, чи параметр приймає нульові значення|
 |ParameterName|Отримує або встановлює назву DbParameter|
 |Size|Отримує або встановлює максимальний розмір параметра даних у байтах; це корисно лише для текстових даних
-|
 |Value|Отримує або встановлює значення параметра|
 
 Тепер давайте розглянемо, як заповнити колекцію об’єкта команди сумісними з DBParameter об’єктами, переробивши методи InventoryDal для використання параметрів.
@@ -1705,6 +1708,81 @@ Test_GetCar();
 ```
 Значення ParameterName має відповідати імені, яке використовується в запиті SQL , тип має відповідати типу стовпця бази даних, а напрямок залежить від того, чи використовується параметр для надсилання даних у запит (ParameterDirection.Input) або якщо він призначений для повернення даних із запиту (ParameterDirection.Output). Параметри також можуть бути визначені як input/output або як значення, що повертаються (наприклад, із збереженої процедури). В рядку sql використвується назва параметра @id.
 
+### Додавання параметру до методу вставки
+
+```cs
+    // Method for insert with parameters
+    public void InsertCar(Car car)
+    {
+        OpenConnection();
+
+        string sql = "Insert Into Inventory" +
+                     "(MakeId, Color, PetName) Values" +
+                     "(@MakeId, @Color, @PetName)";
+
+        using SqlCommand command = new(sql, _sqlConnection);
+
+        SqlParameter parameter = new SqlParameter
+        {
+            ParameterName = "@MakeId",
+            Value = car.MakeId,
+            SqlDbType = SqlDbType.Int,
+            Direction = ParameterDirection.Input
+        };
+        command.Parameters.Add(parameter);
+
+        parameter = new SqlParameter
+        {
+            ParameterName = "@Color",
+            Value = car.Color,
+            SqlDbType = SqlDbType.NVarChar,
+            Size = 50,
+            Direction = ParameterDirection.Input
+        };
+        command.Parameters.Add(parameter);
+
+        parameter = new SqlParameter
+        {
+            ParameterName = "@PetName",
+            Value = car.PetName,
+            SqlDbType = SqlDbType.NVarChar,
+            Size = 50,
+            Direction = ParameterDirection.Input
+        };
+        command.Parameters.Add(parameter);
+
+        command.ExecuteNonQuery();
+
+        CloseConnection();
+    }
+```
+
+
+```cs
+static void Test_InsertCar()
+{
+    InventoryDal inventoryDal = new InventoryDal();
+    Car car = new() { Color = "White", MakeId = 2, PetName = "Lapik" };
+    inventoryDal.InsertCar(car);
+
+    TestGetAllInventory();
+}
+Test_InsertCar();
+```
+```
+1       VW      Black   Zippy
+2       Ford    Rust    Rusty
+3       Saab    Black   Mel
+4       Yugo    Yellow  Clunker
+5       BMW     Black   Bimmer
+6       BMW     Green   Hank
+7       BMW     Pink    Pinky
+8       Pinto   Black   Peter
+9       Yugo    Brown   Brownie
+10      VW      Green   Ella
+12      Ford    White   Lapik
+```
+
 ### Додавання параметру до методу видалення
 
 Аналогічно можна оновити метод видалення.
@@ -1749,7 +1827,7 @@ static void Test_DeleteCar()
     Console.WriteLine();
 
     InventoryDal inventoryDal = new InventoryDal();
-    inventoryDal.Simple_DeleteCar(12);
+    inventoryDal.DeleteCar(12);
 
     TestGetAllInventory();
 
@@ -1764,10 +1842,10 @@ Test_DeleteCar();
 5       BMW     Black   Bimmer
 6       BMW     Green   Hank
 7       BMW     Pink    Pinky
-8       Pinto   Black   Pete
+8       Pinto   Black   Peter
 9       Yugo    Brown   Brownie
 10      VW      Green   Ella
-12      VW      Gray    Electra
+12      Ford    White   Lapik
 
 1       VW      Black   Zippy
 2       Ford    Rust    Rusty
@@ -1776,7 +1854,7 @@ Test_DeleteCar();
 5       BMW     Black   Bimmer
 6       BMW     Green   Hank
 7       BMW     Pink    Pinky
-8       Pinto   Black   Pete
+8       Pinto   Black   Peter
 9       Yugo    Brown   Brownie
 10      VW      Green   Ella
 ```
@@ -1844,7 +1922,7 @@ Test_Update();
 5       BMW     Black   Bimmer
 6       BMW     Green   Hank
 7       BMW     Pink    Pinky
-8       Pinto   Black   Pete
+8       Pinto   Black   Peter
 9       Yugo    Brown   Brownie
 10      VW      Green   Ella
 
@@ -1855,85 +1933,9 @@ Test_Update();
 5       BMW     Black   Bimmer
 6       BMW     Green   Hank
 7       BMW     Pink    Pinky
-8       Pinto   Black   Pete
+8       Pinto   Black   Peter
 9       Yugo    Brown   Brownie
 10      VW      Green   Electra
-```
-
-### Додавання параметру до методу вставки
-
-```cs
-    // Method for insert with parameters
-    public void InsertCar(Car car)
-    {
-        OpenConnection();
-
-        string sql = "Insert Into Inventory" +
-                     "(MakeId, Color, PetName) Values" +
-                     "(@MakeId, @Color, @PetName)";
-
-
-        using SqlCommand command = new(sql, _sqlConnection);
-
-        SqlParameter parameter = new SqlParameter
-        {
-            ParameterName = "@MakeId",
-            Value = car.MakeId,
-            SqlDbType = SqlDbType.Int,
-            Direction = ParameterDirection.Input
-        };
-        command.Parameters.Add(parameter);
-
-        parameter = new SqlParameter
-        {
-            ParameterName = "@Color",
-            Value = car.Color,
-            SqlDbType = SqlDbType.NVarChar,
-            Size = 50,
-            Direction = ParameterDirection.Input
-        };
-        command.Parameters.Add(parameter);
-
-        parameter = new SqlParameter
-        {
-            ParameterName = "@PetName",
-            Value = car.PetName,
-            SqlDbType = SqlDbType.NVarChar,
-            Size = 50,
-            Direction = ParameterDirection.Input
-        };
-        command.Parameters.Add(parameter);
-
-        command.ExecuteNonQuery();
-
-        CloseConnection();
-    }
-```
-
-
-```cs
-static void Test_InsertCar()
-{
-    InventoryDal inventoryDal = new InventoryDal();
-    Car car = new() { Color = "White", MakeId = 2, PetName = "Lapik" };
-    inventoryDal.InsertCar(car);
-
-    TestGetAllInventory();
-}
-Test_InsertCar();
-```
-```
-1       VW      Black   Zippy
-2       Ford    Rust    Rusty
-3       Saab    Black   Mel
-4       Yugo    Yellow  Clunker
-5       BMW     Black   Bimmer
-6       BMW     Green   Hank
-7       BMW     Pink    Pinky
-8       Pinto   Black   Pete
-9       Yugo    Brown   Brownie
-10      VW      Green   Electra
-13      Ford    White   Lapik
 ```
 Хоча для створення параметризованого запиту часто потрібно більше коду, кінцевим результатом є зручніший спосіб програмного налаштування операторів SQL, а також досягнення кращої загальної продуктивності. Вони також надзвичайно корисні, коли ви хочете запустити збережену процедуру.
 
@@ -2032,7 +2034,7 @@ Bimmer
 
 ## Використанна класу клієнським додатком
 
-Додайте новий проект у рішення AutoLot.Client до рішення і додайте посилання на проект AutoLot.DataAccessLayer. Очистіть створений код у файлі program.cs та додайте наступні using у верхній частині файлу:
+Додайте новий проект у рішення AutoLot.Client до рішення і додайте посилання на проект AutoLot.DataAccessLayer. Додайте наступні using у верхній частині файлу:
 
 
 ```cs
@@ -2073,7 +2075,7 @@ static void Run()
 
 
     Console.WriteLine("\t\tUpdate");
-    inventoryDal.Update(13, "Shmapik");
+    inventoryDal.Update(5, "Shmapik");
     ViewListOfCar(inventoryDal.GetAllInventory());
     Console.WriteLine("\n\n");
 
@@ -2132,12 +2134,10 @@ Id      Make    Color   Pet Name
 9       Yugo    Brown   Brownie
 10      VW      Green   Electra
 13      Ford    White   Lapik
-17      BMW     Red     Cher
-
 
 
                 Delete
-Last ID 17
+Last ID 13
 Id      Make    Color   Pet Name
 1       VW      Black   Zippy
 2       Ford    Rust    Rusty
@@ -2149,8 +2149,6 @@ Id      Make    Color   Pet Name
 8       Pinto   Black   Pete
 9       Yugo    Brown   Brownie
 10      VW      Green   Electra
-13      Ford    White   Lapik
-
 
 
                 Update
@@ -2159,14 +2157,12 @@ Id      Make    Color   Pet Name
 2       Ford    Rust    Rusty
 3       Saab    Black   Mel
 4       Yugo    Yellow  Clunker
-5       BMW     Black   Bimmer
+5       BMW     Black   Shmapik
 6       BMW     Green   Hank
 7       BMW     Pink    Pinky
 8       Pinto   Black   Pete
 9       Yugo    Brown   Brownie
 10      VW      Green   Electra
-13      Ford    White   Shmapik
-
 
 
                 Delete with SqlException
@@ -2177,7 +2173,7 @@ Id      Make    Color   Pet Name
 2       Ford    Rust    Rusty
 3       Saab    Black   Mel
 4       Yugo    Yellow  Clunker
-5       BMW     Black   Bimmer
+5       BMW     Black   Shmapik
 6       BMW     Green   Hank
 7       BMW     Pink    Pinky
 8       Pinto   Black   Pete
@@ -2226,11 +2222,11 @@ public interface IDbTransaction : IDisposable
 ```cs
 public void ProcessCreditRisk(bool throwEx, int customerId)
 {
+    string firstName, lastName;
+
     OpenConnection();
 
     // Look up customer by id
-    string firstName, lastName;
-
     SqlParameter parameterId = new()
     {
         ParameterName = "@CustomerId",
@@ -2314,7 +2310,7 @@ public void ProcessCreditRisk(bool throwEx, int customerId)
         // Simulate error
         if (throwEx)
         {
-            throw new Exception('Sorry!  Database error! Tx failed...');
+            throw new Exception("Sorry!  Database error! Tx failed...");
         }
         transaction?.Commit();
     }
@@ -2326,7 +2322,7 @@ public void ProcessCreditRisk(bool throwEx, int customerId)
     finally
     {
         CloseConnection();
-    };
+    }
 }
 ```
 Тут ви використовуєте вхідний параметр bool, щоб ініціювати ситуацію коли виник виняток.
@@ -2357,6 +2353,7 @@ public void ProcessCreditRisk(bool throwEx, int customerId)
        
         CloseConnection();
     }
+
     public void GetAllCreditRisks()
     {
 
@@ -2880,6 +2877,15 @@ void DoBulkCopy()
     ViewListOfCar(inventoryDal.GetAllInventory());
 }
 DoBulkCopy();
+
+static void ViewListOfCar(List<CarViewModel> cars)
+{
+    Console.WriteLine("Id\tMake\tColor\tPet Name");
+    foreach (var item in cars)
+    {
+        Console.WriteLine($"{item.Id}\t{item.Make}\t{item.Color}\t{item.PetName}");
+    }
+}
 ```
 ```
                 Before bulk copy
@@ -2888,13 +2894,12 @@ Id      Make    Color   Pet Name
 2       Ford    Rust    Rusty
 3       Saab    Black   Mel
 4       Yugo    Yellow  Clunker
-5       BMW     Black   Bimmer
+5       BMW     Black   Shmapik
 6       BMW     Green   Hank
 7       BMW     Pink    Pinky
-8       Pinto   Black   Pete
+8       Pinto   Black   Peter
 9       Yugo    Brown   Brownie
 10      VW      Green   Electra
-13      Ford    White   Shmapik
 
 
 
@@ -2904,17 +2909,16 @@ Id      Make    Color   Pet Name
 2       Ford    Rust    Rusty
 3       Saab    Black   Mel
 4       Yugo    Yellow  Clunker
-5       BMW     Black   Bimmer
+5       BMW     Black   Shmapik
 6       BMW     Green   Hank
 7       BMW     Pink    Pinky
-8       Pinto   Black   Pete
+8       Pinto   Black   Peter
 9       Yugo    Brown   Brownie
 10      VW      Green   Electra
-13      Ford    White   Shmapik
-18      Yugo    Blue    MyCar1
-19      Saab    Red     MyCar2
-20      VW      White   MyCar3
-21      Ford    Yellow  MyCar4
+14      Yugo    Blue    MyCar1
+15      Saab    Red     MyCar2
+16      VW      White   MyCar3
+17      Ford    Yellow  MyCar4
 ```
 
 Хоча додавання чотирьох нових записів не демонструє переваг роботи, пов’язаної з використанням класу SqlBulkCopy, уявіть спробу завантажити тисячі записів.
@@ -2922,7 +2926,7 @@ Id      Make    Color   Pet Name
 
 # SQLite
 
-SQLite це СУБД дозволяє зберігати структуровані дані в єдиному файлі. Не потребує сервера портативна, крос-платформена і мобільна. БД після компіляції додадку счтає частиною додадку. 
+SQLite це СУБД дозволяє зберігати структуровані дані в єдиному файлі. Не потребує сервера портативна, крос-платформена і мобільна. БД після компіляції додадку стає частиною додадку. 
 
 ## Робота з БД
 
@@ -2974,7 +2978,7 @@ D:\Temp\users.db
 
 ## SqliteCommand та виконання команд
 
-Провайдер Microsoft.Data.Sqlite пеалізовує всі інтерфейси яки повинен реалізовувати провайдер тому як ви бачили з'єднання виконується аналогічно тому як ми розглядали. Теж саме з командами.
+Провайдер Microsoft.Data.Sqlite реалізовує всі інтерфейси яки повинен реалізовувати провайдер тому як ви бачили з'єднання виконується аналогічно тому як ми розглядали. Теж саме з командами.
 
 ### Додавання нової таблиці
 
@@ -3043,7 +3047,7 @@ AddUsers();
 ```
 Rows have been added to the Users table: 2
 ```
-Зачення id останнього доданого рядка можна отримати запросом SELECT last_insert_rowid();
+Значення id останнього доданого рядка можна отримати запросом SELECT last_insert_rowid();
 
 
 ### Оновлення даних 
@@ -3241,3 +3245,8 @@ RetrieveScalarValue();
 Треба враховувати що ExecuteScalar повертає object?. 
 
 Отже робота з класами різних провайдерів схожа між собою.
+
+# Підсумки
+
+ADO.NET — це власна технологія доступу до даних платформи .NET. У цьому розділі ви почали з вивчення ролі постачальників даних, які по суті є конкретними реалізаціями кількох абстрактних базових класів (у просторі імен System.Data.Common) та типів інтерфейсів (у просторі імен System.Data). Ви також побачили, що можна створити базу коду, нейтральну до постачальника, за допомогою моделі фабрики постачальників даних ADO.NET.
+Ви також дізналися, що для вибору, оновлення, вставки та видалення записів використовуються об'єкти підключення, об'єкти транзакцій, об'єкти команд та об'єкти зчитування даних. Також пам'ятайте, що об'єкти команд підтримують внутрішню колекцію параметрів, яку можна використовувати для додавання певної безпеки типів до ваших SQL-запитів; вони також виявляються досить корисними під час запуску збережених процедур.
