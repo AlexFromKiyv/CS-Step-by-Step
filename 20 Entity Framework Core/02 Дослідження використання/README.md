@@ -33,7 +33,7 @@ SaveChanges() виконується в неявній транзакції, я�
 
 ### Додавання одного запису і стан сутності.
 
-Коли сутність створюється за допомогою коду, але ще не додається до DbSet<T>, EntityState є  Detached(відокремлений). Після додавання нової сутності до DbSet<T> EntityState встановлюється на Added. Після успішного виконання SaveChanges() EntityState встановлюється на Unchanged.
+Коли сутність створюється за допомогою коду, але ще не додається до DbSet<T>, EntityState є  Detached(відокремлений). Після додавання нової сутності до DbSet<T> EntityState встановлюється на Added. Після успішного виконання SaveChanges() EntityState встановлюється на Unchanged. Щоб додати новий запис Make до бази даних, створіть новий екземпляр сутності та викличте метод Add() відповідного DbSet<T>. Щоб ініціювати збереження даних, необхідно також викликати SaveChanges() похідного класу DbContext.
 
 ```cs
 static void AddRecords()
@@ -74,7 +74,7 @@ State of the entity is Unchanged
         Id:1
         Name:BMW
 ```
-Щоб додати новий запис Make до бази даних, створіть новий екземпляр сутності та викличте метод Add() відповідного DbSet<T>. Щоб ініціювати збереження даних, необхідно також викликати SaveChanges() похідного класу DbContext.
+
 Після того, як сутність було додано до засобу відстеження змін (за допомогою методу Add()), стан було змінено на Added. Повідомлення про збереження змін надходить від обробника подій SavingChanges, а повідомлення «Saved 1 entities» — від обробника подій SavedChanges. Після виклику SaveChanges() у контексті стан сутності змінюється на Unchanged.
 На сервері буде виконано запит SQL.
 
@@ -90,7 +90,7 @@ WHERE @@ROWCOUNT = 1 AND [Id] = scope_identity();
 
 ### Як побачити запрос на сервері.
 
-Для того аби відслідковувати які sql-запити виконуються на сервері можна встановити Azure Data Studio. В ньому встанвити розширення SQL Server Profiler і прочитати як їм користуватися по запиту документації "SQL Server Profiler extension".
+Для того аби відслідковувати які sql-запити виконуються на сервері можна встановити Azure Data Studio. В ньому встановити розширення SQL Server Profiler і прочитати як їм користуватися по запиту документації "SQL Server Profiler extension".
 
 
 ### Додавання нового запису за допомогою Attach
@@ -495,7 +495,7 @@ ClearSampleData();
 
 ### Метод для очистки і заповнення початкових даних
 
-Створимо метод який буду виклккати подляд попереньо створені методи.
+Створимо метод який буду викликати послідовно попередньо створені методи.
 
 ```cs
 static void ClearAndFillDB()
@@ -521,11 +521,11 @@ Saved change 12 entities
 
 Запит даних за допомогою EF Core зазвичай виконується за допомогою запитів LINQ. Пам'ятайте, що під час використання LINQ для запиту до бази даних для списку сутностей запит не виконується, доки запит не буде перебирати список, перетворюватнись на List<T> (або масив) або прив’язано до елемента керування списком (як сітка даних). Тобто до тих пір як дані реально потрібні для показу або використання. Для запитів з одним записом оператор виконується негайно, коли використовується виклик з одним записом (First(), Single() тощо).
 
-Більше прикладів LINQ можна знайти в мережі інтернет за запитом "microsoft linq samples"
+Більше прикладів LINQ можна знайти в мережі за запитом "microsoft linq samples"
 
 Ви можете викликати метод ToQueryString() у більшості запитів LINQ, щоб перевірити запит, який виконується до бази даних. Основним винятком є ​​будь-які запити негайного виконання, такі як First()/FirstOrDefault(). Для розділених запитів метод ToQueryString() повертає лише перший запит, який буде виконано.
 
-### Отримання всіх запитів 
+### Отримання всіх записів 
 
 Щоб отримати всі записи для таблиці, просто використовуйте властивість DbSet<T> безпосередньо без будь-яких операторів LINQ. 
 
@@ -548,10 +548,9 @@ static void ShowCars()
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
     var cars = context.Cars;
     Console.WriteLine(cars.ToQueryString());
-    Console.WriteLine(context.Cars.GetType());
+    Console.WriteLine(cars.GetType());
     Console.WriteLine();
     CollectionCarToConsole(cars, "All cars");
-    Console.WriteLine();
 }
 ShowCars();
 ```
@@ -646,7 +645,7 @@ An entity of type Car was loaded from the database.
 9 Brown Brownie
 10 Rust Lemon
 ```
-Метод використовує метод Clear() на ChangeTracker для скидання ApplicationDbContext до початкового стану коли сутності не відслідковуються. Якшо цю сторку закоментувати другий раз считування з БД не буде а будуть використовуватись дані з пам'яті.
+Метод використовує метод Clear() на ChangeTracker для скидання ApplicationDbContext до початкового стану коли сутності не відслідковуються. Якшо цей рядок закоментувати другий раз считування з БД не буде а будуть використовуватись дані з пам'яті.
 
 ### Where. Фільтрація записів.
 
@@ -889,28 +888,26 @@ static void ReversData()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
-
     IQueryable<Car> cars = context.Cars
-        .OrderBy(c => c.Color)
-        .ThenByDescending(c => c.PetName)
+        .OrderBy(c => c.Id)
         .Reverse();
 
-    string text = "Cars ordered by Color then PetName in reverse";
+    string text = "Cars ordered by Id in reverse";
     CollectionCarToConsole(cars, text);
 }
 ReversData();
 ```
 ```console
-        Cars ordered by Color then PetName in reverse
-4 Yellow Clunker
+        Cars ordered by Id in reverse
 10 Rust Lemon
-2 Rust Rusty
+9 Brown Brownie
+8 Black Pete
 7 Pink Pinky
 6 Green Hank
-9 Brown Brownie
 5 Black Bimmer
+4 Yellow Clunker
 3 Black Mel
-8 Black Pete
+2 Rust Rusty
 1 Black Zippy
 ```
 Зауважте, що тип даних, який повертається із запиту LINQ із пропозицією Reverse(), є IQueryable<Car>, а не IOrderedQueryable<Car>.
@@ -921,7 +918,7 @@ ReversData();
 SELECT [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display],
     [i].[IsDrivable], [i].[MakeId], [i].[PetName], [i].[TimeStamp]
 FROM [dbo].[Inventory] AS [i]
-ORDER BY [i].[Color] DESC, [i].[PetName] DESC
+ORDER BY [i].[Id] DESC
 ```
 
 ### Skip. Take. Створення сторінок (paging)
@@ -1713,32 +1710,48 @@ static void EagerLoading_2()
     Console.WriteLine(query.ToQueryString());
     Console.WriteLine();
 
-    Make? make = query.First();
-    List<Car>? cars = make?.Cars.ToList();
-    CollectionCarToConsole(cars, $"Cars of {make?.Name}");
+    foreach (var make in query.ToList())
+    {
+        Console.WriteLine($"{make.Name}\n");
+
+        var cars = make.Cars;
+        foreach (var car in cars)
+        {
+            Console.WriteLine($"\t{car.Id}\t{car.Color}\t{car.PetName}");
+            var drivers = car.Drivers;
+            foreach (var driver in drivers)
+            {
+                Console.WriteLine($"\t\t{driver.Id}\t{driver.PersonInfo.FirstName}");
+            }
+        }
+    }
+
+    Make? make1 = query.First();
+    List<Car>? cars1 = make1?.Cars.ToList();
+    CollectionCarToConsole(cars1!, $"Cars of {make1?.Name}");
     Console.WriteLine();
 
-    Car? car = cars?.First();
-    Driver? driver = car?.Drivers.First();
+    Car? car1 = cars1?.First();
+    Driver? driver1 = car1?.Drivers.First();
     Console.WriteLine($"" +
-        $"Driver {driver?.PersonInfo.FirstName} {driver?.PersonInfo.LastName} " +
-        $"of car {car?.Id} {car?.MakeNavigation.Name} {car?.Color} {car?.PetName}");
+        $"Driver {driver1?.PersonInfo.FirstName} {driver1?.PersonInfo.LastName} " +
+        $"of car {car1?.Id} {car1?.MakeNavigation.Name} {car1?.Color} {car1?.PetName}");
 }
 EagerLoading_2();
 ```
 ```console
-SELECT [m].[Id], [m].[Name], [m].[TimeStamp], [t0].[Id], [t0].[Color], [t0].[DateBuilt], [t0].[Display], [t0].[IsDrivable], [t0].[MakeId], [t0].[PetName], [t0].[TimeStamp], [t0].[InventoryId], [t0].[DriverId], [t0].[Id0], [t0].[TimeStamp0], [t0].[Id00], [t0].[TimeStamp00], [t0].[FirstName], [t0].[LastName]
-FROM [dbo].[Makes] AS [m]
+SELECT [m].[Id], [m].[Name], [m].[TimeStamp], [s0].[Id], [s0].[Color], [s0].[DateBuilt], [s0].[Display], [s0].[IsDrivable], [s0].[MakeId], [s0].[PetName], [s0].[TimeStamp], [s0].[InventoryId], [s0].[DriverId], [s0].[Id0], [s0].[TimeStamp0], [s0].[Id00], [s0].[TimeStamp00], [s0].[FirstName], [s0].[LastName]
+FROM [Makes] AS [m]
 LEFT JOIN (
-    SELECT [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display], [i].[IsDrivable], [i].[MakeId], [i].[PetName], [i].[TimeStamp], [t].[InventoryId], [t].[DriverId], [t].[Id] AS [Id0], [t].[TimeStamp] AS [TimeStamp0], [t].[Id0] AS [Id00], [t].[TimeStamp0] AS [TimeStamp00], [t].[FirstName], [t].[LastName]
+    SELECT [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display], [i].[IsDrivable], [i].[MakeId], [i].[PetName], [i].[TimeStamp], [s].[InventoryId], [s].[DriverId], [s].[Id] AS [Id0], [s].[TimeStamp] AS [TimeStamp0], [s].[Id0] AS [Id00], [s].[TimeStamp0] AS [TimeStamp00], [s].[FirstName], [s].[LastName]
     FROM [dbo].[Inventory] AS [i]
     LEFT JOIN (
         SELECT [i0].[InventoryId], [i0].[DriverId], [i0].[Id], [i0].[TimeStamp], [d].[Id] AS [Id0], [d].[TimeStamp] AS [TimeStamp0], [d].[FirstName], [d].[LastName]
         FROM [dbo].[InventoryToDrivers] AS [i0]
         INNER JOIN [Drivers] AS [d] ON [i0].[DriverId] = [d].[Id]
-    ) AS [t] ON [i].[Id] = [t].[InventoryId]
-) AS [t0] ON [m].[Id] = [t0].[MakeId]
-ORDER BY [m].[Id], [t0].[Id], [t0].[InventoryId], [t0].[DriverId]
+    ) AS [s] ON [i].[Id] = [s].[InventoryId]
+) AS [s0] ON [m].[Id] = [s0].[MakeId]
+ORDER BY [m].[Id], [s0].[Id], [s0].[InventoryId], [s0].[DriverId]
 
 An entity of type Make was loaded from the database.
 An entity of type Car was loaded from the database.
@@ -1752,6 +1765,56 @@ An entity of type CarDriver was loaded from the database.
 An entity of type Driver was loaded from the database.
 An entity of type Person was loaded from the database.
 An entity of type Car was loaded from the database.
+An entity of type Make was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type CarDriver was loaded from the database.
+An entity of type Driver was loaded from the database.
+An entity of type Person was loaded from the database.
+An entity of type CarDriver was loaded from the database.
+An entity of type Driver was loaded from the database.
+An entity of type Person was loaded from the database.
+An entity of type CarDriver was loaded from the database.
+An entity of type Driver was loaded from the database.
+An entity of type Person was loaded from the database.
+An entity of type Make was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Make was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Make was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Make was loaded from the database.
+An entity of type Car was loaded from the database.
+VW
+
+        1       Black   Zippy
+                1       Fred
+                2       Wilma
+                3       BamBam
+        10      Rust    Lemon
+Ford
+
+        2       Rust    Rusty
+                4       Barney
+                5       Betty
+                6       Pebbles
+Saab
+
+        3       Black   Mel
+Yugo
+
+        4       Yellow  Clunker
+        9       Brown   Brownie
+BMW
+
+        5       Black   Bimmer
+        6       Green   Hank
+        7       Pink    Pinky
+Pinto
+
+        8       Black   Pete
         Cars of VW
 1 Black Zippy
 10 Rust Lemon
@@ -1801,25 +1864,33 @@ static void FilteredInclude()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
-    var query = context
-        .Makes
+    var query = context.Makes
         .Include(m => m.Cars.Where(c => c.Color == "Yellow"));
 
     Console.WriteLine(query.ToQueryString());
     Console.WriteLine();
 
-    _ = query.ToList();
+    var makes = query.ToList();
+
+    foreach (var make in makes)
+    {
+        Console.WriteLine($"{make.Name}");
+        foreach (var car in make.Cars)
+        {
+            Console.WriteLine($"\t{car.Id}\t{car.Color}\t{car.PetName}");
+        }
+    }
 }
 FilteredInclude();
 ```
 ```
-SELECT [m].[Id], [m].[Name], [m].[TimeStamp], [t].[Id], [t].[Color], [t].[DateBuilt], [t].[Display], [t].[IsDrivable], [t].[MakeId], [t].[PetName], [t].[TimeStamp]
-FROM [dbo].[Makes] AS [m]
+SELECT [m].[Id], [m].[Name], [m].[TimeStamp], [i0].[Id], [i0].[Color], [i0].[DateBuilt], [i0].[Display], [i0].[IsDrivable], [i0].[MakeId], [i0].[PetName], [i0].[TimeStamp]
+FROM [Makes] AS [m]
 LEFT JOIN (
     SELECT [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display], [i].[IsDrivable], [i].[MakeId], [i].[PetName], [i].[TimeStamp]
     FROM [dbo].[Inventory] AS [i]
     WHERE [i].[Color] = N'Yellow'
-) AS [t] ON [m].[Id] = [t].[MakeId]
+) AS [i0] ON [m].[Id] = [i0].[MakeId]
 ORDER BY [m].[Id]
 
 An entity of type Make was loaded from the database.
@@ -1829,6 +1900,13 @@ An entity of type Make was loaded from the database.
 An entity of type Car was loaded from the database.
 An entity of type Make was loaded from the database.
 An entity of type Make was loaded from the database.
+VW
+Ford
+Saab
+Yugo
+        4       Yellow  Clunker
+BMW
+Pinto
 ```
 Як видно завантажується лише один Car.
 
@@ -1895,25 +1973,32 @@ static void ManyToManyQueries()
     Console.WriteLine(query.ToQueryString());
     Console.WriteLine();
 
-    _ = query.ToList();
-    Console.WriteLine(query.Count());
+    List<Car> cars = query.ToList();
+    foreach (var car in cars)
+    {
+        Console.WriteLine($"{car.Id}\t{car.PetName}\t{car.Color}");
+        foreach (var driver in car.Drivers)
+        {
+            Console.WriteLine($"\t{driver.Id}\t{driver.PersonInfo.FirstName}");
+        }
+    }
 }
 ManyToManyQueries();
 ```
 ```console
-SELECT [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display], [i].[IsDrivable], [i].[MakeId], [i].[PetName], [i].[TimeStamp], [t].[InventoryId], [t].[DriverId], [t].[Id], [t].[TimeStamp], [t].[Id0], [t].[TimeStamp0], [t].[FirstName], [t].[LastName]
+SELECT [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display], [i].[IsDrivable], [i].[MakeId], [i].[PetName], [i].[TimeStamp], [s].[InventoryId], [s].[DriverId], [s].[Id], [s].[TimeStamp], [s].[Id0], [s].[TimeStamp0], [s].[FirstName], [s].[LastName]
 FROM [dbo].[Inventory] AS [i]
 LEFT JOIN (
     SELECT [i1].[InventoryId], [i1].[DriverId], [i1].[Id], [i1].[TimeStamp], [d0].[Id] AS [Id0], [d0].[TimeStamp] AS [TimeStamp0], [d0].[FirstName], [d0].[LastName]
     FROM [dbo].[InventoryToDrivers] AS [i1]
     INNER JOIN [Drivers] AS [d0] ON [i1].[DriverId] = [d0].[Id]
-) AS [t] ON [i].[Id] = [t].[InventoryId]
+) AS [s] ON [i].[Id] = [s].[InventoryId]
 WHERE EXISTS (
     SELECT 1
     FROM [dbo].[InventoryToDrivers] AS [i0]
     INNER JOIN [Drivers] AS [d] ON [i0].[DriverId] = [d].[Id]
     WHERE [i].[Id] = [i0].[InventoryId])
-ORDER BY [i].[Id], [t].[InventoryId], [t].[DriverId]
+ORDER BY [i].[Id], [s].[InventoryId], [s].[DriverId]
 
 An entity of type Car was loaded from the database.
 An entity of type CarDriver was loaded from the database.
@@ -1935,7 +2020,14 @@ An entity of type Person was loaded from the database.
 An entity of type CarDriver was loaded from the database.
 An entity of type Driver was loaded from the database.
 An entity of type Person was loaded from the database.
-2
+1       Zippy   Black
+        1       Fred
+        2       Wilma
+        3       BamBam
+2       Rusty   Rust
+        4       Barney
+        5       Betty
+        6       Pebbles
 ```
 Як ви можете бачити зі згенерованого оператора SQL select, EF Core піклується про роботу зі зведеною таблицею, щоб правильно зіставити записи.
 
@@ -1948,13 +2040,17 @@ static void ExplicitLoading()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
-    //Get the Car record
-    Car? car = context.Cars.First(c => c.Id == 1);
-    Console.WriteLine($"{car.Id} {car.MakeId} {car.MakeNavigation?.Name}");
+    List<Car> cars = context.Cars.ToList();
+
+    Car car1 = cars[0];
 
     //Load Make entity and define MakeNavigation 
-    context.Entry(car).Reference(c => c.MakeNavigation).Load();
-    Console.WriteLine($"{car.Id} {car.MakeId} {car.MakeNavigation?.Name}");
+    context.Entry(car1).Reference(c => c.MakeNavigation).Load();
+
+    foreach (var car in cars)
+    {
+        Console.WriteLine($"{car.Id} {car.MakeId} {car.MakeNavigation?.Name}");
+    }
 
 }
 ExplicitLoading();
@@ -1963,21 +2059,32 @@ ExplicitLoading();
 
 ```
 An entity of type Car was loaded from the database.
-1 1
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
+An entity of type Car was loaded from the database.
 An entity of type Make was loaded from the database.
 1 1 VW
+2 2
+3 3
+4 4
+5 5
+6 5
+7 5
+8 6
+9 4
+10 1 VW
 ```
 ```sql
---Get the Car record
-SELECT TOP(1) [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display], [i].[IsDrivable],
-    [i].[MakeId], [i].[PetName], [i].[TimeStamp]
-FROM [dbo].[Inventory] AS [i]
-WHERE [i].[Id] = 1
-
 --Load Make entity and define MakeNavigation 
 SELECT [m].[Id], [m].[Name], [m].[TimeStamp]
 FROM [Makes] AS [m]
-WHERE [m].[Id] = 5
+WHERE [m].[Id] = 1
 ```
 Якшо властивість навігації коллекція то використовується інший підхід. Наприклад треба отримати всі Car певного Make.
 
@@ -1998,8 +2105,14 @@ static void ExplicitLoadingCollectionOneToMany()
     Console.WriteLine("Entities cars loaded into memory.\n");
     List<Car>? cars = query.ToList();
 
-    CollectionCarToConsole(cars, $"{make.Name} cars");
-
+    foreach (var make1 in context.Makes)
+    {
+        Console.WriteLine(make1.Name);
+        foreach (var car in make1.Cars)
+        {
+            Console.WriteLine($"\t{car.Id}\t{car.PetName}");
+        }
+    }
 }
 ExplicitLoadingCollectionOneToMany();
 ```
@@ -2019,9 +2132,19 @@ An entity of type Car was loaded from the database.
 An entity of type Car was loaded from the database.
 Entities cars loaded into memory.
 
-        VW cars
-1 Black Zippy
-10 Rust Lemon
+VW
+        1       Zippy
+        10      Lemon
+An entity of type Make was loaded from the database.
+Ford
+An entity of type Make was loaded from the database.
+Saab
+An entity of type Make was loaded from the database.
+Yugo
+An entity of type Make was loaded from the database.
+BMW
+An entity of type Make was loaded from the database.
+Pinto
 ```
 Такий самий підхід можна використовувати для відношення між сутностями Many-To-Many. Наприклад треба отримати всіх Driver для певного Car
 
@@ -2043,13 +2166,11 @@ static void ExplicitLoadingCollectionManyToMany()
     query.Load();
     Console.WriteLine();
 
-    List<Driver>? drivers = query.ToList();
-    foreach (var driver in drivers)
+    foreach (var driver in car.Drivers)
     {
         Console.WriteLine($"" +
             $"{driver.Id} " +
-            $"{driver.PersonInfo.FirstName} " +
-            $"{driver.PersonInfo.LastName} ");
+            $"{driver.PersonInfo.FirstName}");
     }
 }
 ExplicitLoadingCollectionManyToMany();
@@ -2061,21 +2182,21 @@ An entity of type Car was loaded from the database.
 
 DECLARE @__p_0 int = 1;
 
-SELECT [t].[Id], [t].[TimeStamp], [t].[FirstName], [t].[LastName], [i].[Id], [t].[InventoryId], [t].[DriverId], [t0].[InventoryId], [t0].[DriverId], [t0].[Id], [t0].[TimeStamp], [t0].[Id0], [t0].[Color], [t0].[DateBuilt], [t0].[Display], [t0].[IsDrivable], [t0].[MakeId], [t0].[PetName], [t0].[TimeStamp0]
+SELECT [s].[Id], [s].[TimeStamp], [s].[FirstName], [s].[LastName], [i].[Id], [s].[InventoryId], [s].[DriverId], [s0].[InventoryId], [s0].[DriverId], [s0].[Id], [s0].[TimeStamp], [s0].[Id0], [s0].[Color], [s0].[DateBuilt], [s0].[Display], [s0].[IsDrivable], [s0].[MakeId], [s0].[PetName], [s0].[TimeStamp0]
 FROM [dbo].[Inventory] AS [i]
 INNER JOIN (
     SELECT [d].[Id], [d].[TimeStamp], [i0].[InventoryId], [i0].[DriverId], [d].[FirstName], [d].[LastName]
     FROM [dbo].[InventoryToDrivers] AS [i0]
     INNER JOIN [Drivers] AS [d] ON [i0].[DriverId] = [d].[Id]
-) AS [t] ON [i].[Id] = [t].[InventoryId]
+) AS [s] ON [i].[Id] = [s].[InventoryId]
 LEFT JOIN (
     SELECT [i1].[InventoryId], [i1].[DriverId], [i1].[Id], [i1].[TimeStamp], [i2].[Id] AS [Id0], [i2].[Color], [i2].[DateBuilt], [i2].[Display], [i2].[IsDrivable], [i2].[MakeId], [i2].[PetName], [i2].[TimeStamp] AS [TimeStamp0]
     FROM [dbo].[InventoryToDrivers] AS [i1]
     INNER JOIN [dbo].[Inventory] AS [i2] ON [i1].[InventoryId] = [i2].[Id]
     WHERE [i2].[Id] = @__p_0
-) AS [t0] ON [t].[Id] = [t0].[DriverId]
+) AS [s0] ON [s].[Id] = [s0].[DriverId]
 WHERE [i].[Id] = @__p_0
-ORDER BY [i].[Id], [t].[InventoryId], [t].[DriverId], [t].[Id], [t0].[InventoryId], [t0].[DriverId]
+ORDER BY [i].[Id], [s].[InventoryId], [s].[DriverId], [s].[Id], [s0].[InventoryId], [s0].[DriverId]
 
 An entity of type Driver was loaded from the database.
 An entity of type Person was loaded from the database.
@@ -2087,9 +2208,9 @@ An entity of type Driver was loaded from the database.
 An entity of type Person was loaded from the database.
 An entity of type CarDriver was loaded from the database.
 
-1 Fred Flinstone
-2 Wilma Flinstone
-3 BamBam Flinstone
+1 Fred
+2 Wilma
+3 BamBam
 ```
 У цьому випажку виконується багато роботи, щоб просто отримати записи про Driver для вибраного запису про Car.
 Це показує нам два важливі факти:
@@ -2313,7 +2434,7 @@ static void UpdateNontrackedEntities()
     context.Cars.Update(car);
     context.SaveChanges();
 
-    ShowFirstCar();
+    CarToConsole(car, "First car");
 }
 UpdateNontrackedEntities();
 ```
@@ -2568,11 +2689,11 @@ FROM [dbo].[Inventory] AS [i]
 Total cars: 8
 Drivable cars: 7
 ```
-Після додавання IgnoreQueryFilters() до запиту LINQ згенерований оператор SQL більше не містить речення where.
+Після додавання IgnoreQueryFilters() до запиту LINQ згенерований оператор SQL більше не містить речення where глобального фільтра.
 
 Важливо зауважити, що виклик IgnoreQueryFilters() видаляє фільтр запиту для кожної сутності в запиті LINQ, включно з усіма, які беруть участь у операторах Include() або ThenInclude().
 
-Глобальні фільтри запитів є повністю конструкцією EF Core. Жодних змін до бази даних не вноситься. Пам'ятайте якшо програма не показує яких записів а в базі даних вони існують то можливо спрацьовує глобальний фільтр. 
+Глобальні фільтри запитів є повністю конструкцією EF Core. Жодних змін до бази даних не вноситься. Пам'ятайте якшо програма не показує якихось записів а в базі даних вони існують то можливо спрацьовує глобальний фільтр. 
 
 ### Глобальні фільтри запитів у властивостях навігації
 
@@ -2628,14 +2749,16 @@ static void ReletedDataWithGlobalQueryFilters()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
-    var query = context.Cars.IgnoreQueryFilters().Where(c=>c.MakeId==1);
+    var query = context.Cars.IgnoreQueryFilters().Where(c => c.MakeId == 1);
 
     Console.WriteLine($"Car with MakerId = 1 : {query.Count()}");
     Console.WriteLine();
     context.ChangeTracker.Clear();
- 
+
     var make = context.Makes.First(m => m.Id == 1);
     context.Entry(make).Collection(m => m.Cars).Load();
+    
+    Console.WriteLine(make.Cars.Count());
 }
 ReletedDataWithGlobalQueryFilters();
 ```
@@ -2644,6 +2767,7 @@ Car with MakerId = 1 : 2
 
 An entity of type Make was loaded from the database.
 An entity of type Car was loaded from the database.
+1
 ```
 ```sql
 SELECT [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display],
@@ -2707,7 +2831,7 @@ dbo
 Inventory
 ```
 
-Якщо припустити, що глобальний фільтр запиту з попереднього розділу встановлено для об’єкта Car, наступний оператор LINQ отримає перший запис, де Id = 1, включить пов’язані дані Make та відфільтрує автомобілі IsDrivable == ture:
+Якщо припустити, що глобальний фільтр запиту з попереднього розділу встановлено для об’єкта Car, наступний оператор LINQ отримає перший запис, де Id = 1, включить пов’язані дані Make та відфільтрує автомобілі IsDrivable == true:
 
 ```cs
 static void UsingFromSqlRawInterpolated()
@@ -2793,7 +2917,7 @@ static void ProjectionToCarMakeViewModel()
     {
         CarId = c.Id,
         Color = c.Color,
-        DateBuild = c.DateBuilt.GetValueOrDefault(),
+        DateBuilt = c.DateBuilt.GetValueOrDefault(),
         Display = c.Display,
         IsDrivable = c.IsDrivable.GetValueOrDefault(false),
         Make = c.MakeNavigation.Name,
@@ -3059,6 +3183,7 @@ BEGIN
     RETURN @Result
 END
 GO
+
 ```
 
 Щоб використовувати це в C#, створіть нову функцію в похідному класі DbContext. Тіло C# цієї функції ніколи не виконується; це просто заповнювач, який відображається на функцію SQL Server. Зауважте, що цей метод можна розмістити де завгодно, але зазвичай його розміщують у похідному класі DbContext для видимості:
@@ -3211,7 +3336,7 @@ An entity of type Car was loaded from the database.
 
 ### Пакетування операторів
 
-EF Core значно підвищиє продуктивність під час збереження змін у базі даних, виконавши оператори одним або кількома пакетами. Це зменшує переміщення між додатком і базою даних, підвищуючи продуктивність і потенційно знижуючи витрати (наприклад, для хмарних баз даних, де клієнти стягують плату за транзакцію). EF Core групує оператори  create, update, та delete я за допомогою параметрів із табличними значеннями(table-valued). Кількість операторів, які EF групує, залежить від постачальника бази даних. Наприклад, для SQL Server пакетування неефективне при кількості операторів менше 4 і понад 40, тому EF Core збільшить кількість операторів до 42. Незалежно від кількості пакетів, усі оператори все одно виконуються в транзакції. Розмір пакета також можна налаштувати за допомогою DbContextOptions, але рекомендується дозволити EF Core обчислювати розмір пакета для більшості (якщо не всіх) ситуацій.
+EF Core значно підвищиє продуктивність під час збереження змін у базі даних, виконавши оператори одним або кількома пакетами. Це зменшує переміщення між додатком і базою даних, підвищуючи продуктивність і потенційно знижуючи витрати (наприклад, для хмарних баз даних, де клієнти стягують плату за транзакцію). EF Core групує оператори  create, update, та delete за допомогою параметрів із табличними значеннями(table-valued). Кількість операторів, які EF групує, залежить від постачальника бази даних. Наприклад, для SQL Server пакетування неефективне при кількості операторів менше 4 і понад 40, тому EF Core збільшить кількість операторів до 42. Незалежно від кількості пакетів, усі оператори все одно виконуються в транзакції. Розмір пакета також можна налаштувати за допомогою DbContextOptions, але рекомендується дозволити EF Core обчислювати розмір пакета для більшості (якщо не всіх) ситуацій.
 ```cs
 static void Batching()
 {
@@ -3292,7 +3417,7 @@ EF Core об’єднує оператори в один виклик.
 public class Car : BaseEntity
 {
     //...
-    public string Price { get; set; }
+    public string? Price { get; set; }
      //...
 }
 ```
@@ -3491,11 +3616,11 @@ Saved change 4 entities
 8 Pete is deleted False
 ```
 
-### Підтримка Часової таблиці SQL Server
+## Підтримка Часової таблиці SQL Server
 
 Часові таблиці SQL Server автоматично відстежують усі дані, які коли-небудь зберігалися в таблиці. Це досягається за допомогою таблиці історії, у якій зберігається копія даних із міткою часу щоразу, коли вноситься зміна або видалення в основній таблиці. Потім архівні дані доступні для запиту, аудиту або відновлення. EF Core підтримує створення часових таблиць, перетворення звичайних таблиць у часові таблиці, запит історичних даних і відновлення даних із певного моменту часу.
 
-#### Налаштування часових таблиць
+### Налаштування часових таблиць
 
 Щоб додати підтримку часових таблиць за замовчуванням, скористайтеся методом ToTable() Fluent API. Цей метод також можна використовувати для визначення назви та схеми таблиці, але в нашому прикладі він не потрібен через атрибут Table в сутності Car. Оновіть метод Configure() класу CarConfiguration, щоб додати виклик ToTable().
 
@@ -3520,7 +3645,7 @@ Saved change 4 entities
 
 Додамо в БД схему audits.
 
-Додамо нову міграцію.
+Для цього додамо нову міграцію.
 ```console
  dotnet ef migrations add AddSchemaAudits
 ```
@@ -3642,7 +3767,7 @@ CREATE FUNCTION udtf_GetCarsForMake ( @makeId int )
 --- ...
 ```
 
-#### Взаємодії основної таблиці та таблиці історії
+### Взаємодії основної таблиці та таблиці історії
 
 Оскільки значення стовпців PeriodStart і PeriodEnd підтримуються SQL Server, ви можете продовжувати використовувати сутність Car, як і до додавання підтримки тимчасової таблиці. Оновлення та видалення завжди спрямовані на основну таблицю, а запити, які не посилаються на тіньові властивості, отримують поточний стан таблиці. Хоча при використанні зі звичайними операціями CRUD на основі LINQ немає жодних відмінностей між нечасовою та часовою таблицями, за лаштунками існує постійна взаємодія з таблицею історії.
 Щоб побачити це в дії, така локальна функція додає,  запис в таблиці Inventory за допомогою звичайної взаємодії EF Core:
@@ -3717,7 +3842,7 @@ Saved change 1 entities
 Коли запис видаляється, копія запису, який потрібно видалити, додається до таблиці історії (перед оператором видалення), а значення PeriodEnd встановлюється на початок транзакції. У головній таблиці запис просто видаляється. Тепер, коли ви надсилаєте запит до двох таблиць, ви побачите, що в таблиці Inventory немає жодних даних і два записи в таблиці InventoryAudit.
 
 
-#### Запити до часових таблиць
+### Запити до часових таблиць
 
 Як бачимо часовою таблицєю опікується SQL Server. Він додав реченя FOR SYSTEM_TIME, яка використовує основну таблицю та таблицю історії для реконструкції стану даних у вказаний час(и). Є п’ять підпунктів, які можна використовувати з пунктом FOR SYSTEM_TIME
 
@@ -3840,7 +3965,7 @@ Warrior 23.11.2024 8:15:46 23.11.2024 8:15:51
 ```
 Як останнє зауваження щодо запитів до тимчасових таблиць, усі запити, які використовують один із Temporal операторів, є запитами без відстеження. Наприклад, якщо ви хочете відновити запис, який було видалено, ви повинні використати один із Temporal операторів, щоб отримати історичний запис і викликати Add() у DbSet<T>, а потім викликати SaveChanges().
 
-#### Очищення часових таблиць
+### Очищення часових таблиць
 
 Як повністю очистити часові таблиці. Коротка відповідь полягає в тому, що ви не можете, не видаливши керування версіями, очистити історичні дані. Коли керування версіями вимкнено, таблиця історії та основна таблиця від’єднуються. Потім ви можете видалити всі записи з головної таблиці (яка більше не записує історію) і таблиці історії; тоді ви можете знову ввімкнути керування версіями, і таблиці буде повторно зв’язано. Щоб зробити це в Azure Data Studio або SSMS, введіть такі команди:
 
@@ -3878,7 +4003,7 @@ static void ClearingTemporalTables()
 ClearingTemporalTables();
 ```
 
-#### Design-time model.
+### Design-time model.
 
 В попередньому прикладі ми в коді прописали назву часової таблиці. Зробити процес очистки база даних більш загальним трохи складніше. Для сутності є метод (IsTemporal()), який перевіряє, чи є таблиця часовою, і два методи для отримання імені таблиці історії (GetHistoryTableName()) і схеми (GetHistoryTableSchema()). Хоча IsTemporal() працює під час виконання, методи отримання назви таблиці та схеми не працюють із моделлю середовища виконання. Модель середовища виконання містить лише те, що потрібно для виконання EF Core (і вашого коду), тоді як модель часу розробки(design-time model) містить усе. Щоб використовувати ці методи, ви повинні отримати екземпляр моделі часу розробки під час виконання.
 
@@ -3890,6 +4015,10 @@ ClearingTemporalTables();
 Отримаємо дані в моделі для temporal таблиці.
 
 ```cs
+using Microsoft.Extensions.DependencyInjection;
+
+//...
+
 static void SchemaAndNameForTemporal()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
@@ -3908,7 +4037,7 @@ static void SchemaAndNameForTemporal()
 
     Console.WriteLine(historySchema + "\t" + tableName);
 }
-//SchemaAndNameForTemporal();
+SchemaAndNameForTemporal();
 ```
 ```console
 audits  InventoryAudit
@@ -3959,3 +4088,9 @@ static void ClearSampleDataAndTemporal()
 }
 ClearSampleDataAndTemporal();
 ```
+
+# Підсумки
+
+Цей розділ розпочався з детального огляду операцій створення, читання, оновлення та видалення (CRUD) за допомогою EF Core, а потім було розглянуто кілька функцій EF Core, які допомагають підвищити продуктивність розробників.
+
+Тепер, коли у вас є міцна основа для роботи EF Core, у наступному розділі буде створено рівень доступу до даних AutoLot (data access layer).
