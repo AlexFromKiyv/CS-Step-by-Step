@@ -1,16 +1,13 @@
 # Створення Data Access Layer з EF Core
 
 Цей розділ присвячено застосуванню того, що ви дізналися про EF Core, для створення рівня доступу до даних AutoLot. Цей розділ починається зі створення одного проекту для сутностей і іншого для коду бібліотеки доступу до даних. Відокремлення моделей від коду доступу до даних є звичайним проектним рішенням, яке використано в ASP.NET Core.
-
 Наступним кроком є ​риштування(створення каркасу моделі) наявної бази даних із розділу ADO.NET на сутності та похідний DbContext за допомогою інтерфейсу командного рядка (CLI) EF Core. Це демонструє процес database first. Потім проект змінюється на code first, де дизайн бази даних керується сутностями C#. 
 Сутності з розділу ADO.NET оновлюються до остаточної версії, нові сутності з попередніх розділів додаються в модель, а база даних оновлюється за допомогою міграцій EF Core. Потім збережена процедура, перегляд бази даних і визначені користувачем функції інтегруються в систему міграції EF Core, забезпечуючи розробникам унікальний механізм отримання повної копії бази даних. Остаточна міграція EF Core завершує базу даних. 
-
 Наступним кроком є ​​створення репозиторіїв, які надають інкапсульований доступ для створення, читання, оновлення та видалення (CRUD) до бази даних. Останнім кроком у цій главі є додавання коду ініціалізації даних для надання зразкових даних, що є звичайною практикою для тестування рівня доступу до даних.
 
 ## Створення проектів AutoLot.Dal і AutoLot.Models
 
-AutoLot прошарок доступу до даних складається з двох проектів: один для зберігання коду EF Core (похідний DbContext, фабрика контексту, репозиторії, міграції тощо), а інший для зберігання сутностей і моделей перегляду. 
-
+AutoLot прошарок доступу до даних складається з двох проектів: один для зберігання коду EF Core (похідний DbContext, фабрика контексту, репозиторії, міграції тощо), а інший для зберігання сутностей і моделей перегляду.
 Створіть нове рішення під назвою AutoLotSolution, додайте до нього бібліотеку класів .NET Core під назвою AutoLot.Models і додайте до проекту пакети. Це можна зробити створивши папку AutoLotSolution і виконавши в ній команди.
 
 ```console
@@ -40,7 +37,7 @@ dotnet add AutoLot.Dal reference AutoLot.Models
 ```
 Якщо ви не використовуєте машину під керуванням Windows, налаштуйте роздільник каталогів для вашої операційної системи в попередніх командах.
 
-Оновіть файл проекту AutoLot.Dal, щоб увімкнути доступ до моделі часу розробки під час виконання. Оновіть метадані для пакета Microsoft.EntityFrameworkCore.Design до наступного.
+Тепер можна вдкрити рішення в VS. Оновіть файл проекту AutoLot.Dal, щоб увімкнути доступ до моделі часу розробки під час виконання. Оновіть метадані для пакета Microsoft.EntityFrameworkCore.Design до наступного.
 
 ```xml
       <!--<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>-->
@@ -50,9 +47,9 @@ dotnet add AutoLot.Dal reference AutoLot.Models
 
 ### Додайте представлення бази даних 
 
-Якщо у вас немає бази даних AutoLot див. главу присвячену ADO.NET та Взаємодія з DBMS. Там вказано як відновити БД.
+Якщо у вас немає бази даних AutoLot див. главу присвячену ADO.NET та Взаємодія з DBMS. Там вказано як відновити БД або створити з нуля.
 
-Перш ніж риштувати(scaffolding) для сутностей і похідного DbContext з бази даних, додайте користувацьке представлення бази даних до бази даних AutoLot, яке використовуватиметься далі. Ми додаємо його зараз, щоб продемонструвати підтримку scaffolding для представлень. Підключіться до бази даних AutoLot (за допомогою SQL Server Management Studio або Azure Data Studio) і виконайте такий оператор SQL.
+Перш ніж робити риштування(scaffolding) сутностей і похідного DbContext з бази даних, додайте користувацьке представлення бази даних до бази даних AutoLot, яке використовуватиметься далі. Ми додаємо його зараз, щоб продемонструвати підтримку scaffolding для представлень. Підключіться до бази даних AutoLot (за допомогою SQL Server Management Studio або SQL Server Object Explorer) і виконайте такий оператор SQL.
 
 ```sql
 CREATE VIEW [dbo].[CustomerOrderView]
@@ -65,9 +62,7 @@ FROM dbo.Orders
      INNER JOIN dbo.Makes ON dbo.Makes.Id=dbo.Inventory.MakeId;
 ```
 
-
-
-## Створення каркасу(scaffolding) DbContext і Entities
+# Створення каркасу(scaffolding) DbContext і Entities
 
 Наступним кроком є створення похідного DbContext та сутностей бази даних AutoLot за допомогою інструментів EF Core CLI. Перейдіть до каталогу проекту AutoLot.Dal у командному рядку. Використовуйте інструменти EF Core CLI, щоб створити для базу даних AutoLot каркаси сутностей та похідний від DbContext клас за допомогою наступної команди, оновлюючи рядок підключення за потреби (всі в одному рядку):
 
@@ -78,21 +73,21 @@ dotnet ef dbcontext scaffold "Server=(localdb)\mssqllocaldb;Database=AutoLot;Tru
 Попередня команда створює каркаси(scaffold) для бази даних, розташовану в наданому рядку підключення, використовуючи постачальника бази даних SQL Server. Прапор –data-annotations призначений для визначення пріоритетності анотацій даних, де це можливо (над Fluent API). --context називає контекст, --context-namespaces визначає простір імен для контексту, --context-dir вказує каталог (щодо поточного проекту) для створення контексту, --no-onconfiguring запобігає створення методу OnConfiguring, --output-dir є вихідним каталогом для сутностей (відносно каталогу проекту), а --namespace визначає простір імен для сутностей. Ця команда розміщує всі сутності в проекті AutoLot.Models у папці Entities, а клас ApplicationDbContext.cs — у папці EfStructures проекту AutoLot.Dal. Останній параметр (--force) використовується для примусового перезапису будь-яких існуючих файлів.
 Команди EF Core CLI були детально розглянуті в розділі Entity Framework Core > Перший погляд.
 
-### Розгляд результату scaffold.
+## Розгляд результату scaffold.
 
 Після виконання команди ви побачите шість сутностей у проекті AutoLot.Models (у папці Entities) і один похідний DbContext у проекті AutoLot.Dal (у папці EfStructures). Кожна таблиця риштується в клас сутності C# і додається як властивість DbSet<T> до похідного DbContext. Представлення риштується в сутності без ключа, додаються як DbSet<T> і зіставляються з відповідним представленням бази даних за допомогою Fluent API.
 Команда scaffold, яку ми використовували, вказала прапорець --data-annotations, щоб надавати перевагу анотаціям над Fluent API. Вивчаючи створені класи, ви помітите, що в анотаціях є кілька промахів. Наприклад, властивості TimeStamp не мають атрибута [Timestamp], а натомість налаштовані як RowVersion ConcurrencyTokens у Fluent API.
-
 Вважаю, наявність анотацій у класі робить код більш читабельним, ніж наявність усієї конфігурації у Fluent API. Якщо ви віддаєте перевагу використанню Fluent API, видаліть параметр –data-annotations із команди.
 
-### Перемикання на Code First
+## Перемикання на Code First
 
 Тепер, коли у вас є риштування база даних, в похідний DbContext і сутності, настав час переключитися з Database First на Code First. Процес не складний, але його не варто виконувати регулярно. Краще визначитися з парадигмою і дотримуватися її. Більшість гнучких команд віддають перевагу Code First, оскільки новий дизайн програми та її об’єктів перетікає в базу даних. Процес, який ми тут розглядаємо, імітує запуск нового проекту за допомогою EF Core, орієнтованого на існуючу базу даних.
+
 Етапи, пов’язані з переходом, передбачають створення фабрики DbContext (для інструментів CLI), створення початкової міграції для поточного стану графа об’єктів, а потім видалення бази даних і повторне створення бази даних за допомогою або міграція або «підробки», застосована шляхом обману EF Core.
 
-### Створення файлів GlobalUsings
+## Створення файлів GlobalUsings
 
-Перейменуйте файли Class1.cs у проектах AutoLot.Dal і AutoLot.Models на GlobalUsings.cs. Очистіть увесь код у кожному з файлів і замініть їх наступним чином:
+У проектах AutoLot.Dal і AutoLot.Models додайте GlobalUsings.cs.
 
 AutoLot.Dal/GlobalUsings.cs
 ```cs
@@ -126,7 +121,7 @@ global using System.Xml.Linq;
 ```
 
 
-### Створення DbContext Design-Time Factory
+## Створення DbContext Design-Time Factory
 
 Якшо ви виконаєте команду в рядку в проекті AutoLot.Dal вона не спрацює і вкаже причину.
 ```console
@@ -155,7 +150,7 @@ public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<Applicati
 
 Після цого команда в командному рядку dbcontext info покаже дані що до класу контексту.
 
-### Створення початкової міграцію
+## Створення початкової міграцію
 
 Під час першої міграції буде створено три файли: два файли для самої міграції та повний знімок моделі. Введіть наступне в командному рядку (у каталозі AutoLot.Dal), щоб створити нову міграцію з іменем Initial (використовуючи екземпляр ApplicationDbContext, який щойно створили), і розмістіть файли міграції в папці EfStructures\Migrations проекту AutoLot.Dal:
 
@@ -175,7 +170,7 @@ Server=(localdb)\mssqllocaldb;Database=AutoLot;Trusted_Connection=True;ConnectRe
 ```
 Результат покаже, що початкова міграція очікує на розгляд. Рядок підключення відображається у вихідних даних завдяки Console.Writeline() у методі CreateDbContext().
 
-### Застосування міграції
+## Застосування міграції
 
 Найпростіший спосіб застосувати міграцію до бази даних — видалити базу даних і створити її заново. Для цього можна ввести такі команди:
 
@@ -259,7 +254,7 @@ global using AutoLot.Dal.Exceptions;
 ```
 
 
-## Доопрацювання сутностей(Entities) та моделей перегляду(ViewModel)
+# Доопрацювання сутностей(Entities) та моделей перегляду(ViewModel)
 
 Цей розділ оновлює риштовані сутності до їх остаточної версії, додає додаткові сутності з попередніх двох розділів і додає сутність журналювання(logging entity).
 
@@ -267,7 +262,7 @@ global using AutoLot.Dal.Exceptions;
 
 У каталозі Entities проекту AutoLot.Models ви знайдете шість файлів, по одному для кожної таблиці в базі даних і один для перегляду бази даних. Зауважте, що назви є одниною, а не множиною (як у базі даних). Як випливає з назви, засіб множинності відображає однину імен сутностей у множину імен таблиць і навпаки. У попередніх розділах детально розглядалися угоди EF Core, анотації даних і Fluent API, тому більшу частину цього розділу складатимуть списки кодів із короткими описами.
 
-### Клас BaseEntity
+## Клас BaseEntity
 
 Клас BaseEntity буде містити стовпці Id і TimeStamp, які є в кожній сутності. Створіть новий каталог під назвою Base у каталозі Entities проекту AutoLot.Models. У цьому каталозі створіть новий файл під назвою BaseEntity.cs
 
@@ -289,7 +284,7 @@ public abstract class BaseEntity
 global using AutoLot.Models.Entities.Base;
 ```
 
-### Owned сутність Person
+## Owned сутність Person
 
 Усі сутності Customer, CreditRisk і Driver мають властивості FirstName і LastName. Сутності, які мають однакові властивості в кожному, можуть отримати вигоду від Owned класу. Хоча переміщення цих двох властивостей у Owned клас є дещо тривіальним прикладом, Owned сутності допомагають зменшити дублювання коду та підвищити узгодженість.
 
@@ -316,7 +311,7 @@ public class Person
 global using AutoLot.Models.Entities.Owned;
 ```
 
-### Сутності Car 
+## Сутності 
 
 Таблицю Inventory було риштовано в клас сутності під назвою Inventory. Ми збираємося змінити ім’я сутності на Car, залишивши назву таблиці. Це приклад зіставлення сутності з таблицею з іншою назвою. Це легко виправити: змініть ім’я файлу на Car.cs і ім’я класу на Car. Атрибут Table уже застосовано правильно, тому можна просто додайте схему dbo. Зауважте, що параметр схеми є необов’язковим, оскільки SQL Server за замовчуванням має dbo, але я включив його для повноти. Простори імен також можна видалити, оскільки вони охоплюються глобальними просторами імен.
 
@@ -336,7 +331,7 @@ public partial class Car : BaseEntity
     public string PetName { get; set; } = null!;
 
     [ForeignKey("MakeId")]
-    [InverseProperty("Cars")]
+    [InverseProperty("Inventories")]
     public virtual Make Make { get; set; } = null!;
 
     [InverseProperty("Car")]
@@ -357,7 +352,15 @@ public partial class Car : BaseEntity
 ```
 Атрибут DisplayName використовується ASP.NET Core і буде розглянуто в цьому розділі.
 
-Властивість Make navigation потрібно перейменувати на MakeNavigation, а інверсна властивість використовує магічний рядок замість методу C# nameof().
+Перш ніж міняти властивість навігації Make відкриемо цей клас і змінемо помилку.
+
+```cs
+    //public virtual ICollection<Inventory> Inventories { get; set; } = new List<Inventory>();
+    public virtual ICollection<Car> Cars { get; set; } = new List<Car>();
+```
+
+
+Властивість навігації Make потрібно перейменувати на MakeNavigation, а інверсна властивість використовує магічний рядок замість методу C# nameof().
 
 ```cs
     [ForeignKey(nameof(MakeId))]
@@ -385,7 +388,7 @@ public partial class Car : BaseEntity
 ```cs
     public override string? ToString()
     {
-        return $"{PetName ?? "No name"} is a {Color} {MakeNavigation?.Name} with Id:{Id}";
+        return $"{Id}\t{PetName ?? "No name"}\t{Color}\t{MakeNavigation?.Name}";
     }
 ```
 
@@ -415,7 +418,7 @@ public partial class Car : BaseEntity
 ```cs
     public virtual DbSet<Car> Cars { get; set; }
 ```
-Крім того компілятор покаже ше помикли де траба поміняти назві Invertory. Треба помінять назви в інших класах.
+Крім того компілятор покаже ше помикли де траба поміняти назви Invertory та посилання. Треба помінять назви в інших класах.
 
 Також в класі Make
 
@@ -491,8 +494,6 @@ modelBuilder.Entity<Car>(entity =>
 ```cs
 protected override void OnModelCreating(ModelBuilder modelBuilder)
 {
-    //...
-
     new CarConfiguration().Configure(modelBuilder.Entity<Car>());
 
     //...
@@ -514,7 +515,7 @@ public partial class Car : BaseEntity
 
 Додамо постір імен в GlobalUsing.cs цього проекту
 ```cs
-using AutoLot.Models.Entities.Configuration;
+global using AutoLot.Models.Entities.Configuration;
 ```
 
 ```console
@@ -522,7 +523,7 @@ dotnet ef migrations add ChangeCar
 dotnet ef database update
 ```
 
-### Проект простих тестів
+## Проект простих тестів
 
 Додамо до рішеня проект типу ConsoleApp з назвою SimpleTest з посиланням на проект AutoLot.Dal.
 
@@ -534,29 +535,40 @@ static void Test_Make_Car()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
-    Make make = new Make()  {  Name = "VW" };
+    // Create data
+
+    Make make = new Make() { Name = "VW" };
     context.Makes.Add(make);
 
-    Car car = new() {  MakeNavigation = make, Color = "Grey", PetName = "Wolf" };
+    Car car = new() { MakeNavigation = make, Color = "Grey", PetName = "Wolf" };
     context.Cars.Add(car);
 
     context.SaveChanges();
-    Console.WriteLine(car);
 
-    Car? car1 = context.Cars.Find(car.Id);
+    // Read data
 
-    Console.WriteLine(car1);
+    var makes = context.Makes;
+    foreach (var make1 in makes)
+    {
+        Console.WriteLine($"{make1.Id} {make1.Name}");
+    }
+
+    var cars = context.Cars;
+    foreach (var car1 in cars)
+    {
+        Console.WriteLine(car1);
+    }
 }
 Test_Make_Car();
 ```
 ```console
-Wolf is a Grey VW with Id:1
-Wolf is a Grey VW with Id:1
+1 VW
+1       Wolf    Grey    VW
 ```
 
-### Сутність Driver , CarDriver та відношеня Many-To-Many між Car і Driver
+## Сутність Driver , CarDriver та відношеня Many-To-Many між Car і Driver
 
-#### Сутність Driver
+## Сутність Driver
 
 В БД немає таблиці як зберігає дани про водіїв. Оскільки цієї таблиці не було в базі даних, її немає в нашому риштованому коді. Додайте новий файл із іменем Driver.cs до папки Entities:
 
@@ -616,7 +628,7 @@ public class Driver : BaseEntity
 new DriverConfiguration().Configure(modelBuilder.Entity<Driver>());
 ```
 
-#### Сутність CarDriver
+## Сутність CarDriver
 
 Для налаштування зв’язку «Many-To-Many» між Car і Driver, додайте новий клас під назвою CarDriver.
 
@@ -682,7 +694,7 @@ public class CarDriver :BaseEntity
         new CarDriverConfiguration().Configure(modelBuilder.Entity<CarDriver>());
 ```
 
-#### Створення ввідношеня Many-To-Many між Car і Driver
+## Створення ввідношеня Many-To-Many між Car і Driver
 
 В класі Driver додамо властивість Cars.
 
@@ -694,6 +706,7 @@ public class CarDriver :BaseEntity
 ```cs
 [InverseProperty(nameof(Driver.Cars))]
 public virtual ICollection<Driver> Drivers { get; set; } = new List<Driver>();
+
 [InverseProperty(nameof(CarDriver.CarNavigation))]
 public virtual ICollection<CarDriver> CarDrivers { get; set; } = new List<CarDriver>();
 ```
@@ -709,26 +722,24 @@ public virtual ICollection<CarDriver> CarDrivers { get; set; } = new List<CarDri
 
 В класі CarConfiuration в методі Configure додамо визначеня відносин.
 ```cs
-        builder
-           .HasMany(p => p.Drivers)
-           .WithMany(p => p.Cars)
-           .UsingEntity<CarDriver>(
-              j => j
-                  .HasOne(cd => cd.DriverNavigation)
-                  .WithMany(d => d.CarDrivers)
-                  .HasForeignKey(nameof(CarDriver.DriverId))
-                  .HasConstraintName("FK_InventoryDriver_Drivers_DriverId")
-                  .OnDelete(DeleteBehavior.Cascade),
-              j => j
-                  .HasOne(cd => cd.CarNavigation)
-                  .WithMany(c => c.CarDrivers)
-                  .HasForeignKey(nameof(CarDriver.CarId))
-                  .HasConstraintName("FK_InventoryDriver_Inventory_InventoryId")
-                  .OnDelete(DeleteBehavior.ClientCascade),
-              j =>
-              {
-                  j.HasKey(cd => new { cd.CarId, cd.DriverId });
-              });
+        builder.HasMany(p => p.Drivers).WithMany(p => p.Cars)
+       .UsingEntity<CarDriver>(
+          j => j
+              .HasOne(cd => cd.DriverNavigation)
+              .WithMany(d => d.CarDrivers)
+              .HasForeignKey(nameof(CarDriver.DriverId))
+              .HasConstraintName("FK_InventoryDriver_Drivers_DriverId")
+              .OnDelete(DeleteBehavior.Cascade),
+          j => j
+              .HasOne(cd => cd.CarNavigation)
+              .WithMany(c => c.CarDrivers)
+              .HasForeignKey(nameof(CarDriver.CarId))
+              .HasConstraintName("FK_InventoryDriver_Inventory_InventoryId")
+              .OnDelete(DeleteBehavior.ClientCascade),
+          j =>
+          {
+              j.HasKey(cd => new { cd.CarId, cd.DriverId });
+          });
 ```
 
 Перивіримо зміни
@@ -785,13 +796,13 @@ static void Test_Car_Driver()
 Test_Car_Driver();
 ```
 ```console
-Wolf is a Black VW with Id:3
-2 Conor, Sara
-Wolf is a Black VW with Id:3
-2 Conor, Sara
+2       Wolf    Black   VW
+1 Conor, Sara
+2       Wolf    Black   VW
+1 Conor, Sara
 ```
 
-### Сутність Radio та відношення One-To-One між Car і Radio
+## Сутність Radio та відношення One-To-One між Car і Radio
 
 Додайте новий клас із назвою Radio.cs до папки Entities:
 
@@ -816,7 +827,7 @@ public class Radio : BaseEntity
     public virtual DbSet<Radio> Radios { get; set; }
 ```
 
-#### Створення відношення One-To-One між Car і Radio 
+## Створення відношення One-To-One між Car і Radio 
 
 У клас Car додайте властивість навігації посилання для сутності Radio:
 ```cs
@@ -900,10 +911,10 @@ Test_Car_Radio();
 ```
 ```console
 1 RDV23451
-Panter is a Black BWV with Id:4
+3       Panter  Black   VW
 ```
 
-### Сутність Customer
+## Сутність Customer
 
 Таблицю Customers було риштовано в клас сутності під назвою Customer. Успадкуйте від BaseEntity та видаліть властивості Id і TimeStamp. Видаліть властивості FirstName і LastName, оскільки їх буде замінено Owned сутністю Person.
 
@@ -985,14 +996,16 @@ public partial class Customer : BaseEntity
 ```cs
         new CustomerConfiguration().Configure(modelBuilder.Entity<Customer>());
 ```
-Виправіть посилання.
-
-Перевіримо  сутність.
+Виправіть лямбда-вирази з навігаційними посиланнями.
 
 ```console
 dotnet ef migrations add ChangeCustomer
 dotnet ef database update
 ```
+
+Перевіримо  сутність.
+
+
 ```cs
 static void Test_Customer()
 {
@@ -1015,7 +1028,7 @@ Test_Customer();
 1 Stark, Tommy
 ```
 
-### Сутність Make
+## Сутність Make
 
 Таблиця Makes була створена для класу сутності під назвою Make. Успадкуйте від BaseEntity та видаліть властивості Id і TimeStamp.
 
@@ -1086,12 +1099,8 @@ Test_Make();
 ```
 Також можна запустити попередьно зроблений метод Test_Make_Car
 
-```console
-Wolf is a Grey VW with Id:5
-Wolf is a Grey VW with Id:5
-```
 
-### Сутність CreditRisk
+## Сутність CreditRisk
 
 Таблицю CreditRisks було риштовано в клас сутності під назвою CreditRisk. Успадкуйте від BaseEntity та видаліть властивості Id і TimeStamp. Видаліть властивості FirstName і LastName. Виправте властивість навігації за допомогою методу nameof() в атрибуті InverseProperty. Додати Owned власність. Відносини будуть далі налаштовані в API Fluent.
 
@@ -1194,7 +1203,7 @@ Test_CreditRisk();
 1 James Bond
 ```
 
-### Сутність Order
+## Сутність Order
 
 Таблицю Orders було риштовано в клас сутності під назвою Order. Успадкуйте від BaseEntity та видаліть властивості Id і TimeStamp. Змінить параметри для ForeignKey та InverseProperty використавши nameof
 
@@ -1217,7 +1226,7 @@ public partial class Order :BaseEntity
     public virtual Customer CustomerNavigation { get; set; } = null!;
 }
 ```
-Створимо файл конфігурації. В конфігурації вказані зв'язки і те шо табличя буде часовою.
+Створимо файл конфігурації. В конфігурації вказані зв'язки і те шо таблиця буде часовою.
 
 ```cs
 namespace AutoLot.Models.Entities.Configuration;
@@ -1287,24 +1296,29 @@ static void Test_Order()
     context.SaveChanges();
 
     Order order_1 = context.Orders
-        .Include(o=>o.CarNavigation)
-        .Include(o=>o.CustomerNavigation)
-        .Single(o=>o.Id == order.Id);
+        .Include(o => o.CarNavigation)
+        .ThenInclude(c=>c.MakeNavigation)
+        .Include(o => o.CustomerNavigation)
+        .Single(o => o.Id == 1);
 
     Console.WriteLine($"" +
-        $"{order_1.CarNavigation.PetName} " +
-        $"{order_1.CustomerNavigation.PersonInformation.FirstName}");
+        $"Car: {order_1.CarNavigation.Id}\t" +
+        $"{order_1.CarNavigation.Color}\t{order_1.CarNavigation.PetName}\t" +
+        $"{order_1.CarNavigation.MakeName}\n" +
+        $"Customer: {order_1.CustomerNavigation.PersonInformation.FirstName}\t" +
+        $"{order_1.CustomerNavigation.PersonInformation.LastName}");
 
 }
 Test_Order();
 ```
 ```
-Fox Lara
+Car: 7  Fox     Red     Peugeot
+Customer: Lara  Croft
 ```
 
-### Додавання властивості TimeStamp в BaseEntity.
+## Додавання властивості TimeStamp в BaseEntity.
 
-Коли в базі даних існує ствопець TimeStamp і ми хочемо створити міграцію, EF Core створює запроси які збираються змінити існуючий за допомогою alter. SQL Server не дозволяє змінівати стовпці типу TimeStamp. Ми по суті виділи TimeStamp з кожної сутності коли успадкували від BaseEntity. Для того додати TimeStamp треба зняти коментар в класі BaseEntity.
+Коли в базі даних існує ствопець TimeStamp і ми хочемо створити міграцію, EF Core створює запроси які збираються змінити існуючий за допомогою ALTER. SQL Server не дозволяє змінівати стовпці типу TimeStamp. Ми по суті виділи TimeStamp з кожної сутності коли успадкували від BaseEntity. Для того додати TimeStamp треба зняти коментар в класі BaseEntity.
 
 ```cs
 public abstract class BaseEntity
@@ -1312,7 +1326,7 @@ public abstract class BaseEntity
     [Key,DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
     [Timestamp]
-    public byte[] TimeStamp { get; set; }
+    public byte[] TimeStamp { get; set; } = null;
 }
 ```
 Створимо створимо міграцію.
@@ -1329,9 +1343,9 @@ dotnet ef database update
 ```
 Після цього можна запустити всі тестові методи вони повині спрацювати.
 
-### Сутність SeriLogEntry
+## Сутність SeriLogEntry
 
-Базі даних потрібна додаткова таблиця для зберігання записів журналу. Проекти ASP.NET Core, наведені далі , використовують framework журналювання SeriLog, і одним із варіантів є запис логів журналу в таблицю SQL Server. Ми збираємося додати таблицю зараз, знаючи, що вона буде використовуватися через кілька розділів.
+Базі даних потрібна додаткова таблиця для зберігання записів журналу. Проекти ASP.NET Core, наведені далі, використовують framework журналювання SeriLog, і одним із варіантів є запис логів журналу в таблицю SQL Server. Ми збираємося додати таблицю зараз, знаючи, що вона буде використовуватися через кілька розділів.
 Таблиця не пов’язана з іншими таблицями та не використовує клас BaseEntity.Додайте новий файл класу під назвою SeriLogEntry.cs у папку Entities.
 
 ```cs
@@ -1402,7 +1416,7 @@ dotnet ef database update
 
 CustomerOrderView разом із таблицями бази даних було створено як безключову сутність. Інший термін, який використовується для безключових сутностей, — моделі перегляду(view models), оскільки вони призначені для перегляду даних, як правило, із кількох таблиць. Цей розділ оновить риштовану сутність до її остаточної форми, а також додасть нову модель перегляду для перегляду часових даних. 
 
-### CustomerOrderViewModel
+## CustomerOrderViewModel
 
 Почніть із додавання нової папки під назвою ViewModels у проект AutoLot.Models. Перемістіть клас CustomerOrderView.cs із папки Entities у цю папку та перейменуйте файл на CustomerOrderViewModel.cs, а клас — на CustomerOrderViewModel. 
 
@@ -1517,12 +1531,13 @@ Test_Order();
 Test_CustomerOrderViewModel();
 ```
 ```console
-Fox Lara
+Car: 4  Red     Fox     Peugeot
+Customer: Lara  Croft
 Lara Croft ordered a Red Peugeot named Fox
 Lara Croft ordered a Red Peugeot named Fox
 ```
 
-### TemporalViewModel
+## TemporalViewModel
 
 Згадайте з попереднього розділу, що під час роботи з тимчасовими даними корисно мати клас, який зберігає рядок разом із датами рядка з і до. Створіть новий клас під назвою TemporalViewModel у папці ViewModels.
 
@@ -1541,23 +1556,11 @@ public class TemporalViewModel<T> where T : BaseEntity, new()
 
 Таким чином ми переглянули всі сутності.
 
-## Оновлення ApplicationDbContext
+# Оновлення ApplicationDbContext
 
 Настав час оновити файл ApplicationDbContext.cs. Конструктор приймає екземпляр об’єкта DbContextOptions і наразі працює добре.
 
-### Додавання зіставлень функції бази даних
-
-Визначені користувачем функції бази даних можна зіставити з функціями C# для використання в запитах LINQ. Додайте такі функції до ApplicationDbContext для двох визначених користувачем функцій:
-
-```cs
-    // DB Functions
-    [DbFunction("udf_CountOfMakes",Schema ="dbo")]
-    public static int InventoryCountFor(int makeId)
-        => throw new NotSupportedException();
-    [DbFunction("udtf_GetCarsForMake", Schema = "dbo")]
-    public IQueryable<Car> GetCarsFor(int makeId)
-        => FromExpression(() => GetCarsFor(makeId));
-```
+## Додавання зіставлень функції бази даних
 
 Додамо функції в БД
 
@@ -1582,6 +1585,19 @@ RETURN
 )
 GO
 ```
+
+Визначені користувачем функції бази даних можна зіставити з функціями C# для використання в запитах LINQ. Додайте такі функції до ApplicationDbContext для двох визначених користувачем функцій:
+
+```cs
+    // DB Functions
+    [DbFunction("udf_CountOfMakes",Schema ="dbo")]
+    public static int InventoryCountFor(int makeId)
+        => throw new NotSupportedException();
+    [DbFunction("udtf_GetCarsForMake", Schema = "dbo")]
+    public IQueryable<Car> GetCarsFor(int makeId)
+        => FromExpression(() => GetCarsFor(makeId));
+```
+
 Перивіримо їх роботу.
 
 ```cs
@@ -1621,7 +1637,7 @@ WHERE [u].[IsDrivable] = CAST(1 AS bit)
 Wolf is a Grey VW with Id:1
 ```
 
-### Обробка подій DbContext і ChangeTracker
+## Обробка подій DbContext і ChangeTracker
 
 Перейдіть до конструктора ApplicationDbContext і додайте три події DbContext, розглянуті в попередньому розділі.
 
@@ -1734,9 +1750,9 @@ static void Run()
 Run();
 ```
 
-### Перевизначати домовленностей
+## Перевизначати домовленностей
 
-Додайте в класі ApplicationDbContext перевизначення для ConfigureConventions. Наступні зміни за умовчанням  ігноруватимуть сутності, які реалізують інтерфейс INonPersisted.Будь-які анотації даних або команди Fluent API, які суперечать цим параметрам, замінять налаштовані угоди:
+Додайте в класі ApplicationDbContext перевизначення для ConfigureConventions. Наступні зміни за умовчанням  ігноруватимуть сутності, які реалізують інтерфейс INonPersisted. Будь-які анотації даних або команди Fluent API, які суперечать цим параметрам, замінять налаштовані угоди:
 
 ```cs
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
@@ -1745,7 +1761,7 @@ Run();
     }
 ```
 
-### Перевизначте метод SaveChanges
+## Перевизначте метод SaveChanges
 
 Метод SaveChanges() у базовому класі DbContext зберігає оновлення, додавання та видалення даних у базі даних. Заміна цього методу в похідному DbContext дає змогу інкапсулювати передачу винятків в одному місці.
 
@@ -1781,14 +1797,14 @@ Run();
     }
 ```
 
-## Використовуйте EF Migrations для створення/оновлення об’єктів бази даних
+# Використовуйте EF Migrations для створення/оновлення об’єктів бази даних
 
-Хоча CustomerOrderViewModel було риштовано з CustomerOrderView яке існувало в базі даних, саме представлення не представлено в конфігорувані моделі кодом C#. Якщо ви видалите базу даних і заново створите її за допомогою міграцій EF Core, представлення не існуватиме. Якшо ви запустите програму тестуваня то тести для переглядів і функцій DB не виконаються і програма вивалиться з винятком.
+Хоча ми створили CustomerOrderViewModel з рештованої CustomerOrderView яке існувало в базі даних, саме представлення не представлено в конфігорувані моделі кодом C#. Якщо ви видалите базу даних і заново створите її за допомогою міграцій EF Core, представлення не існуватиме. Якшо ви запустите програму тестуваня то тести для переглядів і функцій DB не виконаються і програма вивалиться з винятком.
 
 Для об’єктів бази даних у вас є два варіанти: підтримувати їх окремо та застосовувати за допомогою SSMS/Azure Data Studio або використовувати міграції EF Core для обробки їх створення.
 Згадайте, що кожен файл міграції EF Core має метод Up() (для застосування міграції до бази даних) і метод Down() (для відкату змін). MigrationBuilder також має метод Sql(), який виконує оператори SQL безпосередньо щодо бази даних. Додавши оператори CREATE і DROP до методів Up() і Down() міграції, система міграції оброблятиме застосування (і відкат) змін бази даних.
 
-### Додайте клас MigrationHelpers
+## Додайте клас MigrationHelpers
 
 Допоміжний клас буде містити всі оператори SQL, які використовуються під час спеціальної міграції. Це розділення запобігає втраті коду, якщо міграцію буде видалено із системи. 
 
@@ -1815,6 +1831,8 @@ public static class MigrationHelpers
     {
         migrationBuilder.Sql("exec (N' DROP VIEW [dbo].[CustomerOrderView] ')");
     }
+
+
     public static void CreateSproc(MigrationBuilder migrationBuilder)
     {
         migrationBuilder.Sql(@"exec (N' 
@@ -1828,6 +1846,8 @@ public static class MigrationHelpers
     {
         migrationBuilder.Sql("EXEC (N' DROP PROCEDURE [dbo].[GetPetName]')");
     }
+
+
     public static void CreateFunctions(MigrationBuilder migrationBuilder)
     {
         migrationBuilder.Sql(@"exec (N'
@@ -1872,7 +1892,7 @@ public static class MigrationHelpers
 ```
 Інструкції CREATE включено в інструкцію exec SQL Server, тому вони будуть успішно виконуватися під час міграції за сценарієм. Кожен процес міграції загорнутий у блок IF, а оператори створення мають бути загорнуті в оператори exec, коли вони виконуються всередині IF.
 
-### Створення міграції для додавання перегляду і функцій БД.
+## Створення міграції для додавання view і функцій БД.
 
 Виконайте команду і превірте шо ваша модель співпадає з моделью БД.
 
@@ -1924,18 +1944,19 @@ dotnet ef database update
 ```
 Ви також можете написати код, який спочатку перевірить існування об’єкта та видалить його, якщо він уже існує, але я вважаю, що надмірне вирішення проблеми трапляється лише один раз під час переходу від бази даних до коду.
 
-Запустіть тести в яки використовуються додані об'єкти. 
+Тепер ви можете видалити базу даних і створимти заново і запустити тести в яких використовуються додані об'єкти на стороні сервера. 
 
 
-## Репозиторії
+
+# Репозиторії
 
 Загальним патерном проектування доступу до даних є патерн repository(сховище). Як описано Мартіном Фаулером, основою цього шаблону є посередництво між шарами домену та відображення даних. Наявність загального базового сховища, яке містить загальний код доступу до даних, допомагає усунути дублювання коду. Наявність спеціальних репозиторіїв та інтерфейсів, які походять від базового репозиторію, також добре працює з інфраструктурою впровадження залежностей у ASP.NET Core.
 Кожна сутність домену на рівні доступу до даних AutoLot матиме строго типізований репозіторій для інкапсуляції всієї роботи доступу до даних.
 
-### Додайте інтерфейс IBaseViewRepo
+## Додайте інтерфейс IBaseViewRepo
 
 Для початку створіть папку під назвою Repos у проекті AutoLot.Dal для зберігання всіх класів.
-Інтерфейс IBaseViewRepo надає три методи отримання даних із моделі перегляду. Створіть нову папку під назвою Base у каталозі Repos. Додайте новий інтерфейс у папку Repos\Base під назвою IBaseViewRepo. 
+Створіть нову папку під назвою Base у каталозі Repos. Додайте новий інтерфейс у папку Repos\Base під назвою IBaseViewRepo. Інтерфейс IBaseViewRepo надає три методи отримання даних із моделі перегляду.  
 
 ```cs
 namespace AutoLot.Dal.Repos.Base;
@@ -1948,20 +1969,21 @@ public interface IBaseViewRepo<T> : IDisposable where T : class, new()
     IEnumerable<T> GetAllIgnoreQueryFilters();
 }
 ```
+Тут обмеженя узагальнення вказує що тип повине бути reference тип і мати конструктор за замовчуванням.
 
-### Додайте реалізацію BaseViewRepo
 
-Додайте клас під назвою BaseViewRepo до каталогу Repos\Base. Цей клас реалізує інтерфейс IBaseViewRepo та забезпечить реалізацію інтерфейсу. Зробіть клас універсальним за допомогою типу T і обмежте тип до класу та new(), який обмежує типи класами, які мають конструктор без параметрів. Реалізуйте інтерфейс IBaseViewRepo<T>.
+## Додайте реалізацію BaseViewRepo
+
+Додайте клас під назвою BaseViewRepo до каталогу Repos\Base. Цей клас реалізує інтерфейс IBaseViewRepo та забезпечить реалізацію інтерфейсу. Зробіть клас узагальненим за допомогою типу T і обмежте тип до класу та new(), який обмежує типи класами, які мають конструктор без параметрів. Реалізуйте інтерфейс IBaseViewRepo<T>.
 
 ```cs
 namespace AutoLot.Dal.Repos.Base;
 
 public abstract class BaseViewRepo<T> : IBaseViewRepo<T> where T : class, new()
 {
-    //...
 }
 ```
-Репо потребує екземпляр ApplicationDbContext, вставлений у конструктор. У разі використання з контейнером впровадження залежностей (DI) ASP.NET Core контейнер оброблятиме весь час існування контексту. Другий конструктор, який використовується для тестування інтеграції, прийме екземпляр DbContextOptions і використає його для створення екземпляра ApplicationDbContext. Цей контекст потрібно буде видалити, оскільки ним не керує контейнер DI. Оскільки цей клас є абстрактним, обидва конструктори protected. Додайте два конструктори та шаблон Dispose:
+Репозіторій потребує екземпляр ApplicationDbContext, вставлений у конструктор. У разі використання з контейнером впровадження залежностей (DI) ASP.NET Core контейнер оброблятиме один і той самий контекст протягом роботи програми. Другий конструктор, який використовується для тестування інтеграції, прийме екземпляр DbContextOptions і використає його для створення екземпляра ApplicationDbContext. Цей контекст потрібно буде примусово видалити з пам'яті (to be disposed), оскільки ним не керує контейнер DI. Оскільки цей клас є абстрактним, обидва конструктори protected. Додайте два конструктори та шаблон Dispose:
 
 ```cs
 namespace AutoLot.Dal.Repos.Base;
@@ -1969,6 +1991,7 @@ namespace AutoLot.Dal.Repos.Base;
 public abstract class BaseViewRepo<T> : IBaseViewRepo<T> where T : class, new()
 {
     private readonly bool _disposeContext;
+
     public ApplicationDbContext Context { get; }
     
     protected BaseViewRepo(ApplicationDbContext context)
@@ -2029,7 +2052,7 @@ public abstract class BaseViewRepo<T> : IBaseViewRepo<T> where T : class, new()
     }
 ```
 
-#### Реалізація методів читання 
+### Реалізація методів читання 
 
 Наступна серія методів повертає записи за допомогою операторів LINQ або SQL-запиту. Методи повертають усі записи з таблиці. Перший отримує їх у порядку бази даних, а другий вимикає всі фільтри запитів. Метод ExecuteSqlString() призначений для виконання запитів FromSqlRaw().
 
@@ -2042,7 +2065,7 @@ public abstract class BaseViewRepo<T> : IBaseViewRepo<T> where T : class, new()
         => Table.FromSqlRaw(sql);
 ```
 
-### Додайте інтерфейс IBaseRepo
+## Додайте інтерфейс IBaseRepo
 
 Інтерфейс IBaseRepo надає багато поширених методів, які використовуються для доступу до даних за допомогою властивостей DbSet<T>, де T має тип BaseEntity. Додайте новий інтерфейс у папку Repos\Base під назвою IBaseRepo.
 
@@ -2066,7 +2089,7 @@ public interface IBaseRepo<T> : IBaseViewRepo<T> where T : BaseEntity, new()
 }
 ```
 
-### Додайте BaseRepo з реалізацією інтерфейсу
+## Додайте BaseRepo з реалізацією інтерфейсу
 
 Додайте клас під назвою BaseRepo до каталогу Repos\Base. Цей клас реалізує інтерфейс IBaseRepo, успадкований від абстрактного класу BaseViewRepo<T>, і надає основну функціональність для певного типу репозиторіїв, які будуть створені для кожної сутності. Зробіть клас загальним із типом T і обмежте тип до BaseEntity та new(), що обмежує типи класами, які успадковують від BaseEntity та мають конструктор без параметрів. Реалізуйте інтерфейс IBaseRepo<T> наступним чином
 
@@ -2078,7 +2101,7 @@ public abstract class BaseRepo<T> : BaseViewRepo<T>,IBaseRepo<T> where T : BaseE
 
 }
 ```
-Репо використовує BaseViewRepo<T> для обробки екземпляра ApplicationDbContext, а також реалізації шаблону Dispose(). Додайте наступний код для двох конструкторів
+Репозіторій використовує BaseViewRepo<T> для обробки екземпляра ApplicationDbContext, а також реалізації шаблону Dispose(). Додайте наступний код для двох конструкторів
 
 ```cs
     protected BaseRepo(ApplicationDbContext context) : base(context) {}
@@ -2087,7 +2110,7 @@ public abstract class BaseRepo<T> : BaseViewRepo<T>,IBaseRepo<T> where T : BaseE
     }
 ```
 
-#### Реалізуйте метод SaveChanges
+### Реалізуйте метод SaveChanges
 
 BaseRepo має метод SaveChanges(), який викликає перевизначений метод SaveChanges() у класі ApplicationDbContext.
 
@@ -2112,7 +2135,7 @@ BaseRepo має метод SaveChanges(), який викликає переви
     }
 ```
 
-#### Реалізуйте загальні методи читання
+### Реалізуйте загальні методи читання
 
 Наступна серія методів повертає записи за допомогою операторів LINQ. Метод Find() приймає значення первинного ключа та спочатку шукає ChangeTracker. Якщо сутність уже відстежується, повертається відстежуваний екземпляр. Якщо ні, запис витягується з бази даних.
 
@@ -2142,7 +2165,7 @@ BaseRepo має метод SaveChanges(), який викликає переви
     }
 ```
 
-#### Методи додавання, оновлення та видалення 
+### Методи додавання, оновлення та видалення 
 
 Наступний блок коду, який потрібно додати, охвачує відповідні методи Add()/AddRange(), Update()/UpdateRange() і Remove()/RemoveRange() у певній властивості DbSet<T>. Параметр persist визначає, чи репозиторій виконує SaveChanges() одразу після виклику методів репозиторію. Усі методи позначені віртуальними, щоб дозволити перевизначення нащадкам.
 
@@ -2190,7 +2213,7 @@ BaseRepo має метод SaveChanges(), який викликає переви
     }
 ```
 
-### Додайте інтерфейс ITemporalTableBaseRepo
+## Додайте інтерфейс ITemporalTableBaseRepo
 
 Інтерфейс ITemporalTableBaseRepo розкриває часові можливості EF Core. Додайте новий інтерфейс у папку Repos\Base під назвою ITemporalTableBaseRepo.
 
@@ -2206,7 +2229,7 @@ public interface ITemporalTableBaseRepo<T> : IBaseRepo<T> where T : BaseEntity,n
     IEnumerable<TemporalViewModel<T>> GetHistoryFromTo(DateTime startDateTime, DateTime endDateTime);
 }
 ```
-### Додайте TemporalTableBaseRepo з реалізацією інтерфейсу
+## Додайте TemporalTableBaseRepo з реалізацією інтерфейсу
 
 Додайте клас під назвою TemporalTableBaseRepo до каталогу Repos\Base. Цей клас реалізує інтерфейс ITemporalTableBaseRepo, успадкований від BaseRepo<T>, і забезпечує функціональність для використання тимчасових таблиць. Також зробіть клас загальним із типом T і обмежте тип до BaseEntity та new().
 
@@ -2218,8 +2241,7 @@ public abstract class TemporalTableBaseRepo<T> : BaseRepo<T>, ITemporalTableBase
 
 }
 ```
-
-Репо використовує BaseRepo<T> для обробки екземпляра ApplicationDbContext, а також реалізації шаблону Dispose(). Додайте наступний код для двох конструкторів:
+Репозіторій використовує BaseRepo<T> для обробки екземпляра ApplicationDbContext, а також реалізації шаблону Dispose(). Додайте наступний код для двох конструкторів:
 
 ```cs
     protected TemporalTableBaseRepo(ApplicationDbContext context) : base(context) {}
@@ -2229,7 +2251,7 @@ public abstract class TemporalTableBaseRepo<T> : BaseRepo<T>, ITemporalTableBase
     }
 ```
 
-#### Створіть допоміжні методи
+### Створіть допоміжні методи
 
 У цьому класі є два допоміжні методи. Перший перетворює поточний час (на основі TimeZoneInfo комп’ютера, що виконується) на час UTC.
 
@@ -2251,7 +2273,7 @@ public abstract class TemporalTableBaseRepo<T> : BaseRepo<T>, ITemporalTableBase
         } );
 ```
 
-#### Реалізація методів інтерфейсу ITemporalTableBaseRepo
+### Реалізація методів інтерфейсу ITemporalTableBaseRepo
 
 Останнім кроком є ​​реалізація п’яти temporal(часових) методів інтерфейсу. Вони приймають необхідні параметри даних, викликають відповідний часовий метод EF Core, а потім передають виконання допоміжному методу ExecuteQuery():
 
@@ -2269,22 +2291,22 @@ public abstract class TemporalTableBaseRepo<T> : BaseRepo<T>, ITemporalTableBase
         DateTime startDateTime, DateTime endDateTime)
         => ExecuteQuery(Table.TemporalFromTo(ConvertToUtc(startDateTime), ConvertToUtc(endDateTime)));
 ```
-Тепер, коли всі базові репозиторії готові, настав час створити репозиторії для окремих об’єктів
+Тепер, коли всі базові репозиторії готові, настав час створити репозиторії для окремих сутностей.
 
 
-### Спеціальні інтерфейси для сутності
+## Спеціальні інтерфейси для сутності
 
 Кожна сутність і модель представлення матимуть строго типізований репозиторій, похідний від BaseRepo<T>, і інтерфейс, який реалізує IRepo<T>. Додайте нову папку під назвою Interfaces у каталозі Repos у проекті AutoLot.Dal. В ній будуть інтерфейси.
 
 
-### Оновіть файли GlobalUsings.cs
+## Оновіть файли GlobalUsings.cs
 Нові простори імен репозиторіїв потрібно додати до файлу GlobalUsings.cs у проекті AutoLot.Dal. Завдяки цьому базові класи і інтерфейси будуть доступні в кожному похідному без потреби використовувати using.
 ```cs
 global using AutoLot.Dal.Repos.Base;
 global using AutoLot.Dal.Repos.Interfaces;
 ```
 
-#### Інтерфейс репозиторію CarDriver
+## Інтерфейс репозиторію CarDriver
 
 Створіть інтерфейс ICarDriverRepo.cs. Цей інтерфейс не додає жодної функціональності, окрім тієї, що надається в TemporalTableBaseRepo.
 
@@ -2295,7 +2317,7 @@ public interface ICarDriverRepo : ITemporalTableBaseRepo<CarDriver>
 {
 }
 ```
-#### Інтерфейс репозиторію Car
+## Інтерфейс репозиторію Car
 
 Створіть інтерфейс ICarRepo.cs. Змініть інтерфейс на публічний і визначте репо наступним чином
 
@@ -2309,7 +2331,7 @@ public interface ICarRepo : ITemporalTableBaseRepo<Car>
 }
 ```
 
-#### Інтерфейс репозиторію CreditRisk
+## Інтерфейс репозиторію CreditRisk
 
 Створіть інтерфейс ICreditRiskRepo.cs. Цей інтерфейс не додає жодної функціональності, окрім тієї, що надається в BaseRepo.
 
@@ -2320,7 +2342,7 @@ public interface ICreditRiskRepo : IBaseRepo<CreditRisk>
 {
 }
 ```
-#### Інтерфейс репозиторію CustomerOrderViewModel
+## Інтерфейс репозиторію CustomerOrderViewModel
 
 Створіть інтерфейс ICustomerOrderViewModelRepo.cs. Цей інтерфейс не додає жодної функціональності, окрім тієї, що надається в BaseViewRepo.
 
@@ -2331,7 +2353,7 @@ public interface ICustomerOrderViewModelRepo : IBaseViewRepo<CustomerOrderViewMo
 {
 }
 ```
-#### Інтерфейс репозиторію Customer
+## Інтерфейс репозиторію Customer
 
 Створіть інтерфейс ICustomerRepo.cs. Цей інтерфейс не додає жодної функціональності, окрім тієї, що надається в BaseRepo.
 
@@ -2342,7 +2364,7 @@ public interface ICustomerRepo : IBaseRepo<Customer>
 {
 }
 ```
-#### Інтерфейс репозиторію Driver
+## Інтерфейс репозиторію Driver
 
 Створіть інтерфейс IDriverRepo.cs. Цей інтерфейс не додає жодної функціональності, окрім тієї, що надається в BaseRepo.
 
@@ -2353,7 +2375,7 @@ public interface IDriverRepo : IBaseRepo<Driver>
 {
 }
 ```
-#### Інтерфейс репозиторію Make
+## Інтерфейс репозиторію Make
 
 Створіть інтерфейс IMakeRepo.cs. Цей інтерфейс не додає жодної функціональності, окрім тієї, що надається в TemporalTableBaseRepo.
 
@@ -2364,7 +2386,7 @@ public interface IMakeRepo : ITemporalTableBaseRepo<Make>
 {
 }
 ```
-#### Інтерфейс репозиторію Order
+## Інтерфейс репозиторію Order
 
 Створіть інтерфейс IOrderRepo.cs. Цей інтерфейс не додає жодної функціональності, окрім тієї, що надається в TemporalTableBaseRepo.
 
@@ -2375,7 +2397,7 @@ public interface IOrderRepo : ITemporalTableBaseRepo<Order>
 {
 }
 ```
-#### Інтерфейс репозиторію Radio
+## Інтерфейс репозиторію Radio
 
 Створіть інтерфейс IRadioRepo.cs.
 
@@ -2389,15 +2411,14 @@ public interface IRadioRepo : ITemporalTableBaseRepo<Radio>
 Це завершує створення інтерфейсів для репозиторіїв для окремих сутностей.
 
 
-### Створення репозиторіїв для окремих сутностей
+## Створення репозиторіїв для окремих сутностей
 
 Реалізовані репозиторії отримують більшу частину своєї функціональності від базового класу. У цьому розділі описано функціональні можливості, додані або перевизначені з базового репозіторія. 
 
-Всі в каталозі Repos.
+Всі в каталозі Repos. Ви помітите, що жоден із класів репозиторію не має коду обробки помилок або журналювання. Це зроблено навмисно, щоб приклади були зосередженими. Ви захочете переконатися, що ви обробляєте (і реєструєте) помилки у своєму робочому коді.
 
-Ви помітите, що жоден із класів репозиторію не має коду обробки помилок або журналювання. Це зроблено навмисно, щоб приклади були зосередженими. Ви захочете переконатися, що ви обробляєте (і реєструєте) помилки у своєму робочому коді.
 
-### Репозіторій CarDriver
+## Репозіторій CarDriver
 
 Створіть клас CarDriverRepo.cs, змініть на public, успадкуйте від TemporalTableBaseRepo<CarDriver> і запровадьте ICarDriverRepo. 
 
@@ -2410,7 +2431,7 @@ public class CarDriverRepo : TemporalTableBaseRepo<CarDriver>, ICarDriverRepo
 }
 ```
 
-Кожний з репозиторіїв має реалізовувати два конструктори з BaseRepo. Перший конструктор використовуватиметься ASP.NET Core і його вбудованим процесом впровадження залежностей. Другий використовуватиметься в інтеграційних тестах (розглянуто в наступному розділі) і в розділах Windows Presentation Foundation (WPF).
+Кожний з репозиторіїв має реалізовувати два конструктори з BaseRepo. Перший конструктор використовуватиметься ASP.NET Core і його вбудованим процесом впровадження залежностей. Другий використовуватиметься в інтеграційних тестах (розглянуто в наступному розділі).
 
 ```cs
     public CarDriverRepo(ApplicationDbContext context) : base(context)
@@ -2420,7 +2441,7 @@ public class CarDriverRepo : TemporalTableBaseRepo<CarDriver>, ICarDriverRepo
     {
     }
 ```
-Далі створіть внутрішній метод, який містить властивості CarNavigation і DriverNavigation. Зауважте, що тип повернення – IIncludableQueryable<CarDriver, Driver>. Якщо використовується кілька включень, відкритий тип використовує базовий тип (CarDriver) і остаточний включений тип (Driver). Цей метод використовуватиметься загальнодоступними методами репо.
+Далі створіть внутрішній метод, який містить властивості CarNavigation і DriverNavigation. Зауважте, що тип повернення – IIncludableQueryable\<CarDriver, Driver\>. Якщо використовується кілька включень, відкритий тип використовує базовий тип (CarDriver) і остаточний включений тип (Driver). Цей метод використовуватиметься загальнодоступними методами репозіторія.
 
 ```cs
     internal IIncludableQueryable<CarDriver, Driver> BuildBaseQuery()
@@ -2438,9 +2459,9 @@ public class CarDriverRepo : TemporalTableBaseRepo<CarDriver>, ICarDriverRepo
         .Where(cd=>cd.Id == id).FirstOrDefault();
 ```
 
-### Репозіторій Car
+## Репозіторій Car
 
-Створіть клас CarRepo.cs і змініть його на public, успадкуйте від TemporalTableBaseRepo<Car> і реалізуйте ICarRepo та стандартні конструктори:
+Створіть клас CarRepo.cs і змініть його на public, успадкуйте від TemporalTableBaseRepo<Car> і реалізуйте ICarRepo та конструктори:
 
 ```cs
 
@@ -2480,7 +2501,7 @@ public class CarRepo : TemporalTableBaseRepo<Car>, ICarRepo
         .FirstOrDefault();
 ```
 
-Додайте метод для отримання значення PetName за допомогою збереженої процедури. Це використовує метод ExecuteParameterizedQuery() базового класу та повертає значення параметра OUT.
+Додайте метод для отримання значення PetName за допомогою збереженої процедури. Це використовує метод ExecuteParameterizedQuery() базового класу та повертає значення параметра OUTPUT.
 
 ```cs
     public string GetPetName(int id)
@@ -2506,17 +2527,23 @@ public class CarRepo : TemporalTableBaseRepo<Car>, ICarRepo
 ```
 
 Перивіримо клас репозіторію.
-SimpleTest\Program.ca
+SimpleTest\Program.cs
 ```cs
 static void Test_CarRepo()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
-
     CarRepo carRepo = new(context);
-    ShowCars(carRepo.GetAll());    Console.WriteLine();
-    ShowCars(carRepo.GetAllBy(1));    Console.WriteLine();
-    Console.WriteLine(carRepo.GetPetName(1)); Console.WriteLine();
-    Console.WriteLine(carRepo.Find(1));
+
+    Make make = new Make() { Name = "VW" };
+    Car car = new() { MakeNavigation = make, Color = "White", PetName = "Electron" };
+    carRepo.Add(car, true);
+
+    int id = carRepo.Table.Max(c => c.Id);
+
+    ShowCars(carRepo.GetAll()); Console.WriteLine();
+    ShowCars(carRepo.GetAllBy(id)); Console.WriteLine();
+    Console.WriteLine(carRepo.GetPetName(id)); Console.WriteLine();
+    Console.WriteLine(carRepo.Find(id));
 
     static void ShowCars(IEnumerable<Car> cars)
     {
@@ -2541,7 +2568,7 @@ static void Run()
 }
 ```
 
-### Репозіторій CreditRisk
+## Репозіторій CreditRisk
 
 Створіть клас CreditRiskRepo.cs і змініть його на public, успадкуйте від BaseRepo<CreditRisk>, реалізуйте ICreditRiskRepo та додайте два необхідні конструктори.
 
@@ -2561,7 +2588,7 @@ public class CreditRiskRepo : BaseRepo<CreditRisk>, ICreditRiskRepo
 }
 ```
 
-### Репозиторій CustomerOrderViewModel
+## Репозиторій CustomerOrderViewModel
 
 Створіть клас CustomerOrderViewModelRepo.cs і змініть його на public, успадкуйте від BaseViewRepo<CustomerOrderViewModel>, реалізуйте ICustomerOrderViewModelRepo та додайте два необхідні конструктори.
 
@@ -2581,7 +2608,7 @@ public class CustomerOrderViewModelRepo : BaseViewRepo<CustomerOrderViewModel>, 
 }
 ```
 
-### Репозиторій Customer
+## Репозиторій Customer
 
 Створіть клас CustomerRepo.cs і змініть його на public, успадкуйте від BaseRepo<Customer>, реалізуйте ICustomerRepo та додайте два необхідні конструктори.
 
@@ -2608,7 +2635,7 @@ public class CustomerRepo : BaseRepo<Customer>, ICustomerRepo
         .OrderBy(o => o.PersonInformation.LastName);
 ```
 
-### Репозиторій Driver
+## Репозиторій Driver
 
 Створіть клас DriverRepo.cs і змініть його на public, успадкуйте від BaseRepo<Driver>, реалізуйте IDriverRepo та додайте два конструктори.
 
@@ -2646,7 +2673,7 @@ public class DriverRepo : BaseRepo<Driver>, IDriverRepo
         BuildQuery().IgnoreQueryFilters();
 ```
 
-### Репозиторій Make
+## Репозиторій Make
 
 Створіть клас MakeRepo.cs і змініть його на public, успадкуйте від TemporalTableBaseRepo<Make>, реалізуйте IMakeRepo та додайте два необхідні конструктори.
 
@@ -2679,7 +2706,7 @@ public class MakeRepo : TemporalTableBaseRepo<Make>, IMakeRepo
         BuildQuery().IgnoreQueryFilters();
 ```
 
-### Репозиторій Order
+## Репозиторій Order
 
 Створіть клас OrderRepo.cs і змініть його на public, успадкуйте від TemporalTableBaseRepo<Order>, реалізуйте IOrderRepo та додайте два необхідні конструктори.
 
@@ -2699,7 +2726,7 @@ public class OrderRepo : TemporalTableBaseRepo<Order>, IOrderRepo
 }
 ```
 
-### Репозиторій Radio
+## Репозиторій Radio
 
 Створіть клас RadioRepo.cs і змініть його на public, успадкуйте від TemporalTableBaseRepo<Radio>, реалізуйте IRadioRepo та додайте два необхідні конструктори.
 
@@ -2718,7 +2745,7 @@ public class RadioRepo : TemporalTableBaseRepo<Radio>, IRadioRepo
     }
 }
 ```
-## Програмна обробка бази даних і міграцій
+# Програмна обробка бази даних і міграцій
 
 Властивість Database DbContext надає програмні методи для видалення та створення бази даних, а також виконання всіх міграцій. Ось методи, пов'язані з цими операціями.
 
@@ -2732,7 +2759,7 @@ public class RadioRepo : TemporalTableBaseRepo<Radio>, IRadioRepo
 
 Як зазначено в таблиці, метод EnsureCreated() створить базу даних, якщо вона не існує, а потім створить таблиці, стовпці та індекси на основі моделі сутності. Він не застосовує жодних міграцій. Якщо ви використовуєте міграції (як ми), це призведе до помилок під час роботи з базою даних, і вам доведеться обдурити EF Core (як ми робили раніше), щоб повірити, що міграції застосовано. Вам також доведеться вручну створювати будь-які спеціальні об’єкти SQL до бази даних. Коли ви працюєте з міграціями, завжди використовуйте метод Migrate() для програмного створення бази даних, а не метод EnsureCreated().
 
-### Drop, Create, та Clean для бази даних
+## Drop, Create, та Clean для бази даних
 
 Під час розробки може бути корисно видалити та повторно створити базу даних розробки, а потім заповнити її зразками даних. Це створює стабільну та передбачувану настройку бази даних, корисну під час тестування (ручного чи автоматичного). Створіть нову папку з назвою Initialization у проекті AutoLot.Dal. У цій папці створіть новий клас під назвою SampleDataInitializer.cs. Зробіть клас public і static.
 
@@ -2807,12 +2834,12 @@ internal static class SampleDataInitializer
 ```
 Слід обережно використовувати метод ExecuteSqlRaw() фасаду бази даних, щоб запобігти потенційним атакам SQL-ін’єкцій.
 
-### Ініціалізація даних
+## Ініціалізація даних
 
 Ми збираємося створити власну систему заповнення даних, яку можна запускати за потреби.
 Першим кроком є ​​створення зразків даних, а потім додавання методів у SampleDataInitializer, який використовується для завантаження зразків даних у базу даних.
 
-#### Зразки даних
+## Зразки даних
 
 Додайте новий файл із назвою SampleData.cs до папки Initialization. Зробіть клас публічним і статичним. Клас складається з восьми статичних властивостей із методом, який створює зразки даних.
 
@@ -2903,7 +2930,7 @@ public static class SampleData
 }
 ```
 
-#### Завантаження зразків даних
+## Завантаження зразків даних
 
 Внутрішній метод SeedData() у класі SampleDataInitializer додає дані з методів SampleData в екземпляр ApplicationDbContext, а потім зберігає дані в базі даних.
 
@@ -2995,7 +3022,7 @@ static void Run()
     {
             //...
             $"11 Test_InitializeData()\n" +
-            $"12 Test_InitializeData()\n"
+            $"12 Test_ClearAndSeedData()\n"
             //...
             case 11: Test_InitializeData(); break;
             case 12: Test_ClearAndSeedData(); break;
@@ -3003,7 +3030,7 @@ static void Run()
     }        
 }
 ```
-Тест методу Test_ClearAndSeedData() не проходить з винятком повязаним з недоступністю файлів. Аби рішити цю проблему теба в проект SimpleTest додадти пакет 
+Тест методу Test_ClearAndSeedData() не проходить з винятком повязаним з недоступністю файлів. Аби рішити цю проблему можна в проект SimpleTest додадти пакет 
 
 Microsoft.EntityFrameworkCore.Design
 
@@ -3045,3 +3072,7 @@ dotnet ef database update
 Після ціх змін тест виконається.
 
 Код ініціалізації буде детально опрацьований у наступному розділі.
+
+# Підсумки
+
+У цьому розділі використано знання, отримані в попередньому розділі, для завершення рівня доступу до даних для бази даних AutoLot. Ви використовували інструменти командного рядка EF Core для створення каркасу існуючої бази даних, оновили модель до її остаточної версії, а потім створили міграції та застосували їх. Для інкапсуляції доступу до даних було додано репозиторії, а код ініціалізації бази даних зі зразками даних може бути видалений та створений у повторюваний та надійний спосіб. Наступний розділ зосереджений на тестуванні рівня доступу до даних.
