@@ -296,7 +296,6 @@ static void Test_CarRepo()
 static void Test_InitializeData()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
-
     SampleDataInitializer.InitializeData(context);
 }
 
@@ -304,6 +303,5 @@ static void Test_InitializeData()
 static void Test_ClearAndSeedData()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
-
     SampleDataInitializer.ClearAndSeedData(context);
 }
