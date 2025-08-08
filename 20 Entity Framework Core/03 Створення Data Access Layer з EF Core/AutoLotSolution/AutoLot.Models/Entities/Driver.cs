@@ -1,5 +1,4 @@
-﻿
-namespace AutoLot.Models.Entities;
+﻿namespace AutoLot.Models.Entities;
 
 [EntityTypeConfiguration(typeof(DriverConfiguration))]
 public class Driver : BaseEntity
@@ -11,5 +10,4 @@ public class Driver : BaseEntity
 
     [InverseProperty(nameof(CarDriver.DriverNavigation))]
     public ICollection<CarDriver> CarDrivers { get; set; } = new List<CarDriver>();
-
 }

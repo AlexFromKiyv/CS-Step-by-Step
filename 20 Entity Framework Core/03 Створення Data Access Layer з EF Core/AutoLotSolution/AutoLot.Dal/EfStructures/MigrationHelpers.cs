@@ -18,6 +18,8 @@ public static class MigrationHelpers
     {
         migrationBuilder.Sql("exec (N' DROP VIEW [dbo].[CustomerOrderView] ')");
     }
+
+
     public static void CreateSproc(MigrationBuilder migrationBuilder)
     {
         migrationBuilder.Sql(@"exec (N' 
@@ -31,6 +33,8 @@ public static class MigrationHelpers
     {
         migrationBuilder.Sql("EXEC (N' DROP PROCEDURE [dbo].[GetPetName]')");
     }
+
+
     public static void CreateFunctions(MigrationBuilder migrationBuilder)
     {
         migrationBuilder.Sql(@"exec (N'

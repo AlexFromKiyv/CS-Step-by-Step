@@ -1,5 +1,4 @@
-﻿
-namespace AutoLot.Dal.Initialization;
+﻿namespace AutoLot.Dal.Initialization;
 
 public static class SampleDataInitializer
 {
@@ -26,7 +25,7 @@ public static class SampleDataInitializer
         var serviceCollection = new ServiceCollection();
         serviceCollection.AddDbContextDesignTimeServices(context);
         var serviceProvider = serviceCollection.BuildServiceProvider();
-        IModel? designTimeModel = serviceProvider.GetService<IModel>();
+        var designTimeModel = serviceProvider.GetService<IModel>();
 
         foreach (var entityName in entities)
         {

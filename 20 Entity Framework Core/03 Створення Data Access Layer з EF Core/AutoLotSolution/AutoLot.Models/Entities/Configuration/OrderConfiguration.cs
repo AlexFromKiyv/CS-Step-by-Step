@@ -1,5 +1,4 @@
-﻿
-namespace AutoLot.Models.Entities.Configuration;
+﻿namespace AutoLot.Models.Entities.Configuration;
 
 public class OrderConfiguration : IEntityTypeConfiguration<Order>
 {

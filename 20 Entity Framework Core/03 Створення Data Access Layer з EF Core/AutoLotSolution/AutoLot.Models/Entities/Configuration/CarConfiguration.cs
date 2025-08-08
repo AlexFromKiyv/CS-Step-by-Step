@@ -1,9 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AutoLot.Models.Entities.Configuration;
 
@@ -31,28 +26,26 @@ public class CarConfiguration : IEntityTypeConfiguration<Car>
         
         builder.ToTable(b => b.IsTemporal(t =>
         {
-            t.UseHistoryTable("InventoryAudit","dbo");
+            t.UseHistoryTable("InventoryAudit", "dbo");
         }));
 
-        builder
-   .HasMany(p => p.Drivers)
-   .WithMany(p => p.Cars)
-   .UsingEntity<CarDriver>(
-      j => j
-          .HasOne(cd => cd.DriverNavigation)
-          .WithMany(d => d.CarDrivers)
-          .HasForeignKey(nameof(CarDriver.DriverId))
-          .HasConstraintName("FK_InventoryDriver_Drivers_DriverId")
-          .OnDelete(DeleteBehavior.Cascade),
-      j => j
-          .HasOne(cd => cd.CarNavigation)
-          .WithMany(c => c.CarDrivers)
-          .HasForeignKey(nameof(CarDriver.CarId))
-          .HasConstraintName("FK_InventoryDriver_Inventory_InventoryId")
-          .OnDelete(DeleteBehavior.ClientCascade),
-      j =>
-      {
-          j.HasKey(cd => new { cd.CarId, cd.DriverId });
-      });
+        builder.HasMany(p => p.Drivers).WithMany(p => p.Cars)
+        .UsingEntity<CarDriver>(
+          j => j
+              .HasOne(cd => cd.DriverNavigation)
+              .WithMany(d => d.CarDrivers)
+              .HasForeignKey(nameof(CarDriver.DriverId))
+              .HasConstraintName("FK_InventoryDriver_Drivers_DriverId")
+              .OnDelete(DeleteBehavior.Cascade),
+          j => j
+              .HasOne(cd => cd.CarNavigation)
+              .WithMany(c => c.CarDrivers)
+              .HasForeignKey(nameof(CarDriver.CarId))
+              .HasConstraintName("FK_InventoryDriver_Inventory_InventoryId")
+              .OnDelete(DeleteBehavior.ClientCascade),
+          j =>
+          {
+              j.HasKey(cd => new { cd.CarId, cd.DriverId });
+          });
     }
 }

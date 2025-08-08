@@ -12,15 +12,15 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AutoLot.Dal.EfStructures.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241214104706_ChangeMake")]
-    partial class ChangeMake
+    [Migration("20250806081615_ChangeCreditRisk")]
+    partial class ChangeCreditRisk
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.0")
+                .HasAnnotation("ProductVersion", "9.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -146,21 +146,6 @@ namespace AutoLot.Dal.EfStructures.Migrations
 
                     b.Property<int>("CustomerId")
                         .HasColumnType("int");
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<byte[]>("TimeStamp")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
 
                     b.HasKey("Id");
 
@@ -388,7 +373,42 @@ namespace AutoLot.Dal.EfStructures.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_CreditRisks_Customers");
 
+                    b.OwnsOne("AutoLot.Models.Entities.Owned.Person", "PersonInformation", b1 =>
+                        {
+                            b1.Property<int>("CreditRiskId")
+                                .HasColumnType("int");
+
+                            b1.Property<string>("FirstName")
+                                .IsRequired()
+                                .HasMaxLength(50)
+                                .HasColumnType("nvarchar(50)")
+                                .HasColumnName("FirstName");
+
+                            b1.Property<string>("FullName")
+                                .IsRequired()
+                                .ValueGeneratedOnAddOrUpdate()
+                                .HasColumnType("nvarchar(max)")
+                                .HasColumnName("FullName")
+                                .HasComputedColumnSql("[LastName] + ', ' + [FirstName]");
+
+                            b1.Property<string>("LastName")
+                                .IsRequired()
+                                .HasMaxLength(50)
+                                .HasColumnType("nvarchar(50)")
+                                .HasColumnName("LastName");
+
+                            b1.HasKey("CreditRiskId");
+
+                            b1.ToTable("CreditRisks");
+
+                            b1.WithOwner()
+                                .HasForeignKey("CreditRiskId");
+                        });
+
                     b.Navigation("CustomerNavigation");
+
+                    b.Navigation("PersonInformation")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("AutoLot.Models.Entities.Customer", b =>

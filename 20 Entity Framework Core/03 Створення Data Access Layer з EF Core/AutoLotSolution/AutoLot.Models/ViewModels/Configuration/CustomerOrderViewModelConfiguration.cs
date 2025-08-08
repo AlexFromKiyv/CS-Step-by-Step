@@ -1,5 +1,4 @@
-﻿
-namespace AutoLot.Models.ViewModels.Configuration;
+﻿namespace AutoLot.Models.ViewModels.Configuration;
 
 public class CustomerOrderViewModelConfiguration : IEntityTypeConfiguration<CustomerOrderViewModel>
 {

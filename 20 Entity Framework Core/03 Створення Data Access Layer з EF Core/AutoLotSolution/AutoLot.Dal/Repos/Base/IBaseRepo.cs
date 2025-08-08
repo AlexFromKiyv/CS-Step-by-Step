@@ -1,5 +1,4 @@
-﻿
-namespace AutoLot.Dal.Repos.Base;
+﻿namespace AutoLot.Dal.Repos.Base;
 
 public interface IBaseRepo<T> : IBaseViewRepo<T> where T : BaseEntity, new()
 {

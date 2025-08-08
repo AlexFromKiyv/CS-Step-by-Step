@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace AutoLot.Models.Entities.Owned;
+﻿namespace AutoLot.Models.Entities.Owned;
 
 [Owned]
 public class Person

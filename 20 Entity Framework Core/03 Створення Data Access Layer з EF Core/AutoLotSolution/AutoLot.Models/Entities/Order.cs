@@ -1,5 +1,4 @@
-﻿
-namespace AutoLot.Models.Entities;
+﻿namespace AutoLot.Models.Entities;
 
 [Index("CarId", Name = "IX_Orders_CarId")]
 [Index("CustomerId", "CarId", Name = "IX_Orders_CustomerId_CarId", IsUnique = true)]

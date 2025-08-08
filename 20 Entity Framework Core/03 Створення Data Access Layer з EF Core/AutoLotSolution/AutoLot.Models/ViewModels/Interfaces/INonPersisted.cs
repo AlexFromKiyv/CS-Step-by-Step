@@ -1,5 +1,4 @@
-﻿
-namespace AutoLot.Models.ViewModels.Interfaces;
+﻿namespace AutoLot.Models.ViewModels.Interfaces;
 
 public interface INonPersisted
 {

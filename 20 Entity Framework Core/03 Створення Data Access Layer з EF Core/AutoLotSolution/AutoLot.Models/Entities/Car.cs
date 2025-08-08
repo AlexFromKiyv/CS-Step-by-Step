@@ -6,6 +6,10 @@ namespace AutoLot.Models.Entities;
 [EntityTypeConfiguration(typeof(CarConfiguration))]
 public partial class Car : BaseEntity
 {
+    [Required]
+    [DisplayName("Make")]
+    public int MakeId { get; set; }
+
     private bool? _isDrivable;
 
     [Required]
@@ -16,14 +20,9 @@ public partial class Car : BaseEntity
         set => _isDrivable = value;
     }
 
-    [Required]
-    [DisplayName("Make")]
-    public int MakeId { get; set; }
-
     [StringLength(50)]
     public string Color { get; set; } = null!;
 
-    [Required]
     [StringLength(50)]
     [DisplayName("Pet Name")]
     public string PetName { get; set; } = null!;
@@ -32,27 +31,27 @@ public partial class Car : BaseEntity
     public string? Price { get; set; }
     public DateTime? DateBuilt { get; set; }
 
-    [ForeignKey(nameof(MakeId))]
-    [InverseProperty(nameof(Make.Cars))]
-    public virtual Make MakeNavigation { get; set; } = null!;
-
-    [InverseProperty(nameof(Order.CarNavigation))]
-    public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
-
     [InverseProperty(nameof(Driver.Cars))]
     public virtual ICollection<Driver> Drivers { get; set; } = new List<Driver>();
+
     [InverseProperty(nameof(CarDriver.CarNavigation))]
     public virtual ICollection<CarDriver> CarDrivers { get; set; } = new List<CarDriver>();
 
+    [ForeignKey("MakeId")]
+    [InverseProperty(nameof(Make.Cars))]
+    public virtual Make MakeNavigation { get; set; } = null!;
+
     [InverseProperty(nameof(Radio.CarNavigation))]
     public virtual Radio RadioNavigation { get; set; } = null!;
+
+    [InverseProperty(nameof(Order.CarNavigation))]
+    public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
 
     [NotMapped]
     public string MakeName => MakeNavigation?.Name ?? "Unknown";
 
     public override string? ToString()
     {
-        return $"{PetName ?? "No name"} is a {Color} {MakeNavigation?.Name} with Id:{Id}";
+        return $"{Id}\t{PetName ?? "No name"}\t{Color}\t{MakeNavigation?.Name}";
     }
-
 }

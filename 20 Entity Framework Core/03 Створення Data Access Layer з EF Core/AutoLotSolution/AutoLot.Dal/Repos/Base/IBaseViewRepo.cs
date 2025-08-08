@@ -1,5 +1,4 @@
-﻿
-namespace AutoLot.Dal.Repos.Base;
+﻿namespace AutoLot.Dal.Repos.Base;
 
 public interface IBaseViewRepo<T> : IDisposable where T : class, new()
 {

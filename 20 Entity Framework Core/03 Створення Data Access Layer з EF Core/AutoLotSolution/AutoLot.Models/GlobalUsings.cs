@@ -7,7 +7,9 @@ global using System.Globalization;
 global using System.Xml.Linq;
 
 global using AutoLot.Models.Entities.Base;
+
 global using AutoLot.Models.Entities.Owned;
+
 global using AutoLot.Models.Entities.Configuration;
 
 global using AutoLot.Models.ViewModels.Interfaces;
