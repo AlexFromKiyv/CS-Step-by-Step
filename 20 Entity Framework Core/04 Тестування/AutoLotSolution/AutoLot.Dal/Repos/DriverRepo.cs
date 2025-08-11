@@ -1,5 +1,4 @@
-﻿
-namespace AutoLot.Dal.Repos;
+﻿namespace AutoLot.Dal.Repos;
 
 public class DriverRepo : BaseRepo<Driver>, IDriverRepo
 {

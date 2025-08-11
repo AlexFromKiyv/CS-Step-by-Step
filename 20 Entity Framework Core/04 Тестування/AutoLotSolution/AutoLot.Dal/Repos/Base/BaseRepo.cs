@@ -1,17 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace AutoLot.Dal.Repos.Base;
+﻿namespace AutoLot.Dal.Repos.Base;
 
 public abstract class BaseRepo<T> : BaseViewRepo<T>, IBaseRepo<T> where T : BaseEntity, new()
 {
-    protected BaseRepo(ApplicationDbContext context) : base(context) {}
-    protected BaseRepo(DbContextOptions<ApplicationDbContext> options) : base(options) {}
-
-
+    protected BaseRepo(ApplicationDbContext context) : base(context) { }
+    protected BaseRepo(DbContextOptions<ApplicationDbContext> options) : this(new ApplicationDbContext(options))
+    {
+    }
     public int SaveChanges()
     {
         try
@@ -30,15 +24,15 @@ public abstract class BaseRepo<T> : BaseViewRepo<T>, IBaseRepo<T> where T : Base
             throw new CustomException("An error occurred updating the database", ex);
         }
     }
+    
     public virtual T? Find(int id) =>
-        Table.Find(id);
+    Table.Find(id);
     public virtual T? FindAsNoTracking(int id) =>
-        Table.AsNoTrackingWithIdentityResolution()
-        .FirstOrDefault(e => e.Id == id);
+    Table.AsNoTrackingWithIdentityResolution()
+    .FirstOrDefault(e => e.Id == id);
     public virtual T? FindIgnoreQueryFilters(int id) =>
-        Table.IgnoreQueryFilters()
-        .FirstOrDefault(e => e.Id == id);
-
+    Table.IgnoreQueryFilters()
+    .FirstOrDefault(e => e.Id == id);
     public virtual void ExecuteParameterizedQuery(string sql, object[] sqlParametersObjects)
     {
         Context.Database.ExecuteSqlRaw(sql, sqlParametersObjects);
@@ -73,11 +67,11 @@ public abstract class BaseRepo<T> : BaseViewRepo<T>, IBaseRepo<T> where T : Base
         Table.RemoveRange(entities);
         return persist ? SaveChanges() : 0;
     }
-
     public virtual int Delete(int id, byte[] timeStamp, bool persist = true)
     {
         var entity = new T { Id = id, TimeStamp = timeStamp };
         Context.Entry(entity).State = EntityState.Deleted;
         return persist ? SaveChanges() : 0;
     }
+
 }

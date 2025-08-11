@@ -21,13 +21,13 @@ public partial class CustomerOrderViewModel : INonPersisted
     public string Make { get; set; } = null!;
 
     public bool? IsDrivable { get; set; }
-    public string Display { get; set; }
+    public string Display { get; set; } = null!;
     public string? Price { get; set; }
     public DateTime? DateBuilt { get; set; }
+
     [NotMapped]
     public string FullDetail =>
     $"{FirstName} {LastName} ordered a {Color} {Make} named {PetName}";
 
     public override string ToString() => FullDetail;
-
 }

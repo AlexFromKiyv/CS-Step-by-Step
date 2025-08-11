@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace AutoLot.Dal.Repos.Base;
+﻿namespace AutoLot.Dal.Repos.Base;
 
 public interface ITemporalTableBaseRepo<T> : IBaseRepo<T> where T : BaseEntity, new()
 {

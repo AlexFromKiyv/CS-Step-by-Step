@@ -1,5 +1,4 @@
-﻿
-namespace AutoLot.Dal.Tests;
+﻿namespace AutoLot.Dal.Tests;
 
 public static class TestHelpers
 {
@@ -26,4 +25,5 @@ public static class TestHelpers
         context.Database.UseTransaction(transaction.GetDbTransaction());
         return context;
     }
+
 }

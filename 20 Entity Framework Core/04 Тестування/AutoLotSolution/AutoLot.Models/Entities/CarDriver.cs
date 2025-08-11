@@ -1,5 +1,4 @@
-﻿
-namespace AutoLot.Models.Entities;
+﻿namespace AutoLot.Models.Entities;
 
 [Table("InventoryToDrivers")]
 [EntityTypeConfiguration(typeof(CarDriverConfiguration))]

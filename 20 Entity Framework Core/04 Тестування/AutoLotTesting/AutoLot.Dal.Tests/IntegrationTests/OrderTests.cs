@@ -1,4 +1,6 @@
-﻿namespace AutoLot.Dal.Tests.IntegrationTests;
+﻿using AutoLot.Dal.Tests.Base;
+
+namespace AutoLot.Dal.Tests.IntegrationTests;
 
 [Collection("Integration Tests")]
 public class OrderTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixture>
@@ -14,7 +16,6 @@ public class OrderTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixtu
         _repo.Dispose();
         base.Dispose();
     }
-
     [Fact]
     public void ShouldGetAllOrdersExceptFiltered()
     {
@@ -36,5 +37,7 @@ public class OrderTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixtu
         Assert.NotEmpty(orders);
         Assert.Equal(5, orders.Count);
     }
+
+
 
 }

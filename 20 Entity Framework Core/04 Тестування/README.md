@@ -14,7 +14,7 @@
 
 ```console
 dotnet new sln 
-dotnet new xunit -n AutoLot.Dal.Tests
+dotnet new xunit -n AutoLot.Dal.Tests -f net8.0
 dotnet sln add AutoLot.Dal.Tests
 ```
 Додамо NuGet пакети до проекту AutoLot.Dal.Tests. Для CLI це наступні команди.
@@ -31,7 +31,7 @@ dotnet add AutoLot.Dal.Tests package Microsoft.Extensions.Configuration.Json
 dotnet add AutoLot.Dal.Tests package Microsoft.NET.Test.Sdk
 dotnet add AutoLot.Dal.Tests package coverlet.collector
 ```
-Скопіюємо папку з попередьного розділу AutoLotSolution в папку де ми створили AutoLotTesting. Далі додайте посилання на проект до AutoLot.Models і AutoLot.Dal.
+Скопіюємо папку з попередьного розділу AutoLotSolution в папку де ми створили папку AutoLotTesting. Далі додайте посилання на проект до AutoLot.Models і AutoLot.Dal.
 Щоб зробити це з командного рядка, виконайте наступне (можете оновіть шлях і роздільник каталогів для ваших проектів і на копіювати рішення):
 
 ```console
@@ -51,13 +51,12 @@ dotnet add AutoLot.Dal.Tests reference ..\AutoLotSolution\AutoLot.Models
     </PackageReference>
 ```
 
-
 Для перевірки (або використання) методів і класів у проекті AutoLot.Dal, позначених як внутрішні, внутрішні елементи потрібно зробити видимими для проекту AutoLot.Dal.Tests.
 Відкрийте файл AutoLot.Dal.csproj і додайте наступне:
 
 ```xml
 <ItemGroup>
-  <AssemblyAttribute Include='System.Runtime.CompilerServices.InternalsVisibleToAttribute'>
+  <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
     <_Parameter1>AutoLot.Dal.Tests</_Parameter1>
   </AssemblyAttribute>
 </ItemGroup>
@@ -212,7 +211,7 @@ public static class TestHelpers
 
 ## Додайте клас BaseTest
 
-Клас BaseTest керуватиме інфраструктурою для тестів. Додайте нову папку під назвою Base до тестового проекту та додайте новий файл класу під назвою BaseTest.cs до цієї папки. Зробіть клас абстрактним і реалізуйте IDisposable. Додайте дві захищені властивості лише для читання, щоб зберігати екземпляри IConfiguration і ApplicationDbContext, а також утилізуйте екземпляр ApplicationDbContext у віртуальному методі Dispose().
+Клас BaseTest керуватиме інфраструктурою для тестів. Додайте нову папку під назвою Base до тестового проекту та додайте новий файл класу під назвою BaseTest.cs до цієї папки. Зробіть клас абстрактним і реалізуйте IDisposable. Додайте дві захищені властивості лише для читання, щоб зберігати екземпляри IConfiguration і ApplicationDbContext, а також метод видалення з пам'яті екземпляра ApplicationDbContext у віртуальному методі Dispose().
 
 ```cs
 
@@ -861,6 +860,7 @@ public void SingleShouldThrowExceptionIfMoreThenOneMatch()
   // Throws due to more than one match
   Assert.Throws<InvalidOperationException>(() => Context.Customers.Single());
 }
+
 [Fact]
 public void SingleOrDefaultShouldThrowExceptionIfMoreThenOneMatch()
 {
@@ -918,6 +918,11 @@ WHERE [i].[IsDrivable] = CAST(1 AS bit)
         OutputHelper.WriteLine(query.ToQueryString());
         var cars = query.ToList();
         Assert.Equal(10, cars.Count());
+
+        foreach (var car in cars)
+        {
+            OutputHelper.WriteLine(car.ToString()+$"\t{car.IsDrivable}");
+        }
     }
 ```
 ```sql
@@ -951,7 +956,7 @@ FROM [Inventory] AS [i]
         Assert.Equal(4, orders.Count);
     }
 ```
-Оскільки навігаційна властивість CarNavigation є обов’язковою навігаційною властивістю, система перекладу запитів використовує INNER JOIN, усуваючи записи Order, у яких Car не можна керувати.
+Оскільки навігаційна властивість CarNavigation є обов’язковою навігаційною властивістю, система перекладу запитів використовує INNER JOIN, усуваючи записи Order, у яких Car має значення для IsDrivable false .
 ```sql
 SELECT [o].[Id], [o].[CarId], [o].[CustomerId], [o].[PeriodEnd], [o].[PeriodStart], [o].[TimeStamp]
 FROM [Orders] AS [o]
@@ -1435,7 +1440,7 @@ WHERE [a].[IsDrivable] = CAST(1 AS bit)
 
 ```cs
 [Fact]
-public void ShouldNotGetAllCarsUsingFromSqlWithoutFilter()
+public void ShouldGetAllCarsUsingFromSqlWithoutFilter()
 {
     //...
     var query = Context.Cars.FromSqlRaw(sql).IgnoreQueryFilters();

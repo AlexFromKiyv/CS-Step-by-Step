@@ -1,6 +1,4 @@
-﻿
-namespace AutoLot.Models.Entities;
-
+﻿namespace AutoLot.Models.Entities;
 [EntityTypeConfiguration(typeof(RadioConfiguration))]
 public class Radio : BaseEntity
 {

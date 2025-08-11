@@ -1,4 +1,6 @@
-﻿namespace AutoLot.Dal.Tests.IntegrationTests;
+﻿using AutoLot.Dal.Tests.Base;
+
+namespace AutoLot.Dal.Tests.IntegrationTests;
 
 [Collection("Integration Tests")]
 public class CarTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixture>
@@ -56,7 +58,6 @@ public class CarTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixture
         Assert.NotEmpty(cars);
         Assert.Equal(9, cars.Count());
     }
-
     [Fact]
     public void ShouldGetAllOfTheCars()
     {
@@ -64,6 +65,11 @@ public class CarTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixture
         OutputHelper.WriteLine(query.ToQueryString());
         var cars = query.ToList();
         Assert.Equal(10, cars.Count());
+
+        foreach (var car in cars)
+        {
+            OutputHelper.WriteLine(car.ToString()+$"\t{car.IsDrivable}");
+        }
     }
 
     [Fact]
@@ -74,6 +80,10 @@ public class CarTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixture
         OutputHelper.WriteLine(query.ToQueryString());
         var cars = query.ToList();
         Assert.Equal(9, cars.Count());
+        foreach (var car in cars)
+        {
+            OutputHelper.WriteLine(car.ToString());
+        }
     }
 
     [Fact]
@@ -166,34 +176,31 @@ public class CarTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixture
     }
 
     [Fact]
-    public void ShouldGetCarsOnOrderWithCustomerAsSplitQueryIgnoreQueryFilters()
+    public void ShouldGetAllMakesAndCarsThatAreYellow()
     {
-        IQueryable<Car> query = Context.Cars
+        IQueryable<Make> query = Context.Makes
             .IgnoreQueryFilters()
-            .Where(c => c.Orders.Any())
-            .Include(c => c.MakeNavigation)
-            .Include(c => c.Orders)
-            .ThenInclude(o => o.CustomerNavigation)
-            .AsSplitQuery();
+            .Include(m => m.Cars.Where(c => c.Color == "Yellow"));
         OutputHelper.WriteLine(query.ToQueryString());
-        var cars = query.ToList();
-        foreach (var car in cars)
+
+        List<Make> makes = query.ToList();
+
+        foreach (var make in makes)
         {
-            OutputHelper.WriteLine($"{car.Id} {car.PetName} {car.MakeName}");
-            foreach (var order in car.Orders)
+            OutputHelper.WriteLine($"{make.Id} {make.Name}");
+            foreach (var car in make.Cars)
             {
-                OutputHelper.WriteLine(
-                    $"\t\t{order.Id} " +
-                    $"{order.CustomerNavigation.PersonInformation.LastName}");
+                OutputHelper.WriteLine($"\t{car.Id} {car.MakeName} {car.Color} {car.PetName}");
             }
         }
-
-        Assert.Equal(5, query.Count());
-        cars.ForEach(c =>
-        {
-            Assert.NotNull(c.MakeNavigation);
-            Assert.NotNull(c.Orders.ToList()[0].CustomerNavigation);
-        });
+        Assert.NotNull(makes);
+        Assert.NotEmpty(makes);
+        Assert.Contains(makes, m => m.Cars.Any());
+        Assert.Empty(makes.First(m => m.Id == 1).Cars);
+        Assert.Empty(makes.First(m => m.Id == 2).Cars);
+        Assert.Empty(makes.First(m => m.Id == 3).Cars);
+        Assert.Empty(makes.First(m => m.Id == 5).Cars);
+        Assert.NotEmpty(makes.First(m => m.Id == 4).Cars);
     }
 
     [Fact]
@@ -219,6 +226,39 @@ public class CarTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixture
         Assert.Single(car.Orders);
     }
 
+    [Theory]
+    [InlineData(1, 1)]
+    [InlineData(2, 1)]
+    [InlineData(3, 1)]
+    [InlineData(4, 2)]
+    [InlineData(5, 3)]
+    [InlineData(6, 1)]
+    public void ShouldGetAllCarsForAMakeExplicitlyWithQueryFilters(int makeId, int carCount)
+    {
+        Make? make = Context.Makes.Single(m => m.Id == makeId);
+        IQueryable<Car> query = Context.Entry(make).Collection(m => m.Cars).Query();
+        OutputHelper.WriteLine(query.ToQueryString());
+        query.Load();
+        Assert.Equal(carCount, make.Cars.Count);
+    }
+
+    [Theory]
+    [InlineData(1, 2)]
+    [InlineData(2, 1)]
+    [InlineData(3, 1)]
+    [InlineData(4, 2)]
+    [InlineData(5, 3)]
+    [InlineData(6, 1)]
+    public void ShouldGetAllCarsForAMakeExplicitlyWithoutQueryFilters(int makeId, int carCount)
+    {
+        Make? make = Context.Makes.Single(m => m.Id == makeId);
+        IQueryable<Car> query = Context.Entry(make).Collection(m => m.Cars)
+            .Query().IgnoreQueryFilters();
+        OutputHelper.WriteLine(query.ToQueryString());
+        query.Load();
+        Assert.Equal(carCount, make.Cars.Count);
+    }
+
     [Fact]
     public void ShouldNotGetAllCarsUsingFromSql()
     {
@@ -235,7 +275,7 @@ public class CarTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixture
     }
 
     [Fact]
-    public void ShouldNotGetAllCarsUsingFromSqlWithoutFilter()
+    public void ShouldGetAllCarsUsingFromSqlWithoutFilter()
     {
         var entity = Context.Model.FindEntityType(typeof(Car).FullName!);
         var tableName = entity!.GetTableName();
@@ -274,7 +314,6 @@ public class CarTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixture
         var count = Context.Cars.IgnoreQueryFilters().Count();
         Assert.Equal(10, count);
     }
-
     [Theory]
     [InlineData(1, 1)]
     [InlineData(2, 1)]
@@ -562,5 +601,4 @@ public class CarTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixture
             Assert.Throws<CustomDbUpdateException>(() => Context.SaveChanges());
         }
     }
-
 }

@@ -1,5 +1,4 @@
-﻿
-namespace AutoLot.Models.Entities;
+﻿namespace AutoLot.Models.Entities;
 
 [Index("CustomerId", Name = "IX_CreditRisks_CustomerId")]
 [EntityTypeConfiguration(typeof(CreditRiskConfiguration))]

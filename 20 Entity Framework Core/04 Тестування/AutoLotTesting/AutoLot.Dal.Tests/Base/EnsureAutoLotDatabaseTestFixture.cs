@@ -1,5 +1,4 @@
-﻿
-namespace AutoLot.Dal.Tests.Base;
+﻿namespace AutoLot.Dal.Tests.Base;
 
 public sealed class EnsureAutoLotDatabaseTestFixture : IDisposable
 {

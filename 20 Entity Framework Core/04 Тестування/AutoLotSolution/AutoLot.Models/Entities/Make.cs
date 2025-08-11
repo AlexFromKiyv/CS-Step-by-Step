@@ -1,5 +1,4 @@
-﻿
-namespace AutoLot.Models.Entities;
+﻿namespace AutoLot.Models.Entities;
 [EntityTypeConfiguration(typeof(MakeConfiguration))]
 public partial class Make : BaseEntity
 {

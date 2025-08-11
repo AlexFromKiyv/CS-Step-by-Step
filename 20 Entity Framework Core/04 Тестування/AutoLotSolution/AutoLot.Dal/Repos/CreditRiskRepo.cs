@@ -1,5 +1,4 @@
-﻿
-namespace AutoLot.Dal.Repos;
+﻿namespace AutoLot.Dal.Repos;
 
 public class CreditRiskRepo : BaseRepo<CreditRisk>, ICreditRiskRepo
 {
@@ -11,4 +10,3 @@ public class CreditRiskRepo : BaseRepo<CreditRisk>, ICreditRiskRepo
     {
     }
 }
-

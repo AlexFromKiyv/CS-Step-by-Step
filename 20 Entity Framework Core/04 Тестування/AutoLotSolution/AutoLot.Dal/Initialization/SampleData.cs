@@ -1,5 +1,4 @@
-﻿
-namespace AutoLot.Dal.Initialization;
+﻿namespace AutoLot.Dal.Initialization;
 
 public static class SampleData
 {

@@ -1,9 +1,14 @@
-﻿
-namespace AutoLot.Models.Entities;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
+namespace AutoLot.Models.Entities;
 [EntityTypeConfiguration(typeof(CustomerConfiguration))]
 public partial class Customer : BaseEntity
 {
+
     public Person PersonInformation { get; set; } = new Person();
 
     [InverseProperty(nameof(CreditRisk.CustomerNavigation))]

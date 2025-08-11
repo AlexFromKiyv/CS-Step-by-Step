@@ -33,9 +33,10 @@ static void Run()
         switch (choice)
         {
             case 0:
-                Test_Make_Car(); Test_Make_Car();Test_Car_Driver(); 
-                Test_Car_Radio();Test_Customer(); Test_CreditRisk();
-                Test_Order(); Test_CustomerOrderViewModel(); Test_DB_Functions(); 
+                Test_Make_Car(); Test_Make_Car(); Test_Car_Driver();
+                Test_Car_Radio(); Test_Customer(); Test_CreditRisk();
+                Test_Order(); Test_CustomerOrderViewModel(); Test_DB_Functions();
+                Test_CarRepo(); Test_InitializeData(); Test_ClearAndSeedData();
                 break;
             case 1: Test_Make_Car(); break;
             case 2: Test_Car_Driver(); break;
@@ -58,10 +59,11 @@ static void Run()
 Run();
 
 
-
 static void Test_Make_Car()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    // Create data
 
     Make make = new Make() { Name = "VW" };
     context.Makes.Add(make);
@@ -70,13 +72,22 @@ static void Test_Make_Car()
     context.Cars.Add(car);
 
     context.SaveChanges();
-    Console.WriteLine(car);
 
-    Car? car1 = context.Cars.Find(car.Id);
+    // Read data
 
-    Console.WriteLine(car1);
+    var makes = context.Makes;
+    foreach (var make1 in makes)
+    {
+        Console.WriteLine($"{make1.Id} {make1.Name}");
+    }
+
+    var cars = context.Cars;
+    foreach (var car1 in cars)
+    {
+        Console.WriteLine(car1);
+    }
 }
-Test_Make_Car();
+//Test_Make_Car();
 
 static int Test_Car_Driver_Create()
 {
@@ -108,7 +119,7 @@ static void Test_Car_Driver()
 
     int id = Test_Car_Driver_Create();
 
-    Car car = context.Cars.Include(c=>c.MakeNavigation)
+    Car car = context.Cars.Include(c => c.MakeNavigation)
         .Include(c => c.CarDrivers)
         .ThenInclude(cd => cd.DriverNavigation)
         .Where(c => c.Id == id)
@@ -125,7 +136,7 @@ static void Test_Car_Radio()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
     // Create
-    Make make = new() { Name = "BWV" };
+    Make make = new() { Name = "VW" };
     context.Makes.Add(make);
     Car car = new() { MakeNavigation = make, Color = "Black", PetName = "Panter" };
 
@@ -230,12 +241,16 @@ static void Test_Order()
 
     Order order_1 = context.Orders
         .Include(o => o.CarNavigation)
+        .ThenInclude(c => c.MakeNavigation)
         .Include(o => o.CustomerNavigation)
-        .Single(o => o.Id == order.Id);
+        .Single(o => o.Id == 1);
 
     Console.WriteLine($"" +
-        $"{order_1.CarNavigation.PetName} " +
-        $"{order_1.CustomerNavigation.PersonInformation.FirstName}");
+        $"Car: {order_1.CarNavigation.Id}\t" +
+        $"{order_1.CarNavigation.Color}\t{order_1.CarNavigation.PetName}\t" +
+        $"{order_1.CarNavigation.MakeName}\n" +
+        $"Customer: {order_1.CustomerNavigation.PersonInformation.FirstName}\t" +
+        $"{order_1.CustomerNavigation.PersonInformation.LastName}");
 
 }
 //Test_Order();
@@ -249,7 +264,6 @@ static void Test_CustomerOrderViewModel()
         Console.WriteLine(customerOrder.FullDetail);
     }
 }
-//Test_Order();
 //Test_CustomerOrderViewModel();
 
 static void Test_DB_Functions()
@@ -277,12 +291,18 @@ static void Test_DB_Functions()
 static void Test_CarRepo()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
-
     CarRepo carRepo = new(context);
+
+    Make make = new Make() { Name = "VW" };
+    Car car = new() { MakeNavigation = make, Color = "White", PetName = "Electron" };
+    carRepo.Add(car, true);
+
+    int id = carRepo.Table.Max(c => c.Id);
+
     ShowCars(carRepo.GetAll()); Console.WriteLine();
-    ShowCars(carRepo.GetAllBy(1)); Console.WriteLine();
-    Console.WriteLine(carRepo.GetPetName(1)); Console.WriteLine();
-    Console.WriteLine(carRepo.Find(1));
+    ShowCars(carRepo.GetAllBy(id)); Console.WriteLine();
+    Console.WriteLine(carRepo.GetPetName(id)); Console.WriteLine();
+    Console.WriteLine(carRepo.Find(id));
 
     static void ShowCars(IEnumerable<Car> cars)
     {
@@ -296,7 +316,6 @@ static void Test_CarRepo()
 static void Test_InitializeData()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
-
     SampleDataInitializer.InitializeData(context);
 }
 
@@ -304,6 +323,5 @@ static void Test_InitializeData()
 static void Test_ClearAndSeedData()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
-
     SampleDataInitializer.ClearAndSeedData(context);
 }
