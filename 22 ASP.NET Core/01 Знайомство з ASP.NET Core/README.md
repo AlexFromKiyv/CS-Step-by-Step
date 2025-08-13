@@ -1,7 +1,7 @@
 # Знайомство з ASP.NET Core
 
 У цій главі розглядаються ASP.NET Core, C# та платформа веб-розробки .NET. Розділ починається зі вступу до ASP.NET MVC та основ шаблону MVC, реалізованого в ASP.NET Core. Далі ви створите рішення та три проекти ASP.NET Core, які будуть розроблені протягом решти секції. Перша програма, AutoLot.Api, — це RESTful-сервіс ASP.NET Core, друга — це веб-програма ASP.NET Core, що використовує шаблон Model-View-Controller, а остання програма — це веб-програма ASP.NET Core, що використовує сторінки Razor. Сервіси RESTful слугують додатковим сервером для програм MVC та Razor Page, а проекти AutoLot.Dal та AutoLot.Models, які ви створили раніше в цій книзі, слугуватимуть рівнем доступу до даних для всіх програм.
-Після створення проектів та рішення, у наступному розділі демонструються численні способи запуску та налагодження проектів ASP.NET Core за допомогою Visual Studio або Visual Studio Code. У решті цього розділу розглядаються численні функції ASP.NET, які були перенесені в ASP.NET Core. Це включає контролери та дії, маршрутизацію, прив'язку та перевірку моделей, і фільтри.
+Після створення проектів та рішення, у наступному розділі демонструються численні способи запуску та налагодження проектів ASP.NET Core за допомогою Visual Studio або Visual Studio Code. У решті цієї глави розглядаються численні функції ASP.NET, які були перенесені в ASP.NET Core. Це включає контролери та дії, маршрутизацію, прив'язку та перевірку моделей, і фільтри.
 
 ## Короткий огляд ASP.NET MVC
 
@@ -48,7 +48,7 @@ ASP.NET Core здатний створювати багато типів веб-
 
 Visual Studio має перевагу графічного інтерфейсу, який покроково покроково керує процесом створення рішення та проектів, додавання пакетів NuGet та створення посилань між проектами. 
 
-Почніть зі створення нового проекту у Visual Studio. Виберіть шаблон C# ASP.NET Core Web API у діалоговому вікні «Create a new project». У діалоговому вікні «Configure your new project» введіть <b>AutoLot.Api</b> як назву проекту та <b>AutoLot</b> як назву рішення. На екрані Додаткова інформація залиште прапорці «Configure for HTTPS» та «Enable OpenAPI». Потім натисніть кнопку Create.
+Почніть зі створення нового проекту у Visual Studio. Виберіть шаблон C# ASP.NET Core Web API у діалоговому вікні «Create a new project». У діалоговому вікні «Configure your new project» введіть <b>AutoLot.Api</b> як назву проекту та <b>AutoLot</b> як назву рішення. На екрані "Додаткова інформація" виберіть .Net 8.0 и  залиште прапорці «Configure for HTTPS» та «Enable OpenAPI». Потім натисніть кнопку Create.
 
 Тепер додайте до рішення ще один веб-застосунок ASP.NET Core. Виберіть шаблон «ASP.NET Core Web App (Model-View-Controller)». Назвіть проект <b>AutoLot.Mvc</b> і опція «Configure for HTTPS» позначена.
 
@@ -186,8 +186,9 @@ dotnet sln AutoLot.sln add AutoLot.Dal
 
 ```console
 rem create the class library for the application services and add it to the solution
-dotnet new classlib -n AutoLot.Services -o .\AutoLot.Services
+dotnet new classlib -n AutoLot.Services -o .\AutoLot.Services -f net8.0
 dotnet sln AutoLot.sln add AutoLot.Services
+
 dotnet add AutoLot.Services package Microsoft.Extensions.Hosting.Abstractions
 dotnet add AutoLot.Services package Microsoft.Extensions.Options
 dotnet add AutoLot.Services package Serilog.AspNetCore
@@ -198,6 +199,7 @@ dotnet add AutoLot.Services package Serilog.Sinks.File
 dotnet add AutoLot.Services package Serilog.Sinks.MSSqlServer
 dotnet add AutoLot.Services package System.Text.Json
 dotnet add AutoLot.Services  package Microsoft.VisualStudio.Threading.Analyzers
+
 rem update the path references as needed
 dotnet add AutoLot.Services reference AutoLot.Models
 dotnet add AutoLot.Services reference AutoLot.Dal
@@ -207,8 +209,9 @@ dotnet add AutoLot.Services reference AutoLot.Dal
 Створіть проект AutoLot.Api, додайте його до рішення, додайте пакети NuGet та посилання на проект.
 
 ```console
-dotnet new webapi -n AutoLot.Api -au none -o .\AutoLot.Api
+dotnet new webapi -n AutoLot.Api -au none -o .\AutoLot.Api -f net8.0
 dotnet sln AutoLot.sln add AutoLot.Api
+
 dotnet add AutoLot.Api package AutoMapper
 dotnet add AutoLot.Api package Swashbuckle.AspNetCore
 dotnet add AutoLot.Api package Swashbuckle.AspNetCore.Annotations
@@ -222,6 +225,7 @@ dotnet add AutoLot.Api package Microsoft.VisualStudio.Threading.Analyzers
 dotnet add AutoLot.Api package System.Text.Json
 dotnet add AutoLot.Api package Microsoft.AspNetCore.Mvc.Versioning
 dotnet add AutoLot.Api package Microsoft.AspNetCore.Mvc.Versioning.ApiExplorer
+
 rem add project references
 rem update the path references as needed
 dotnet add AutoLot.Api reference AutoLot.Dal
@@ -232,9 +236,10 @@ dotnet add AutoLot.Api reference AutoLot.Services
 Створіть проект AutoLot.Mvc, додайте його до рішення, додайте пакети NuGet та посилання на проект.
 
 ```console
-dotnet new mvc -n AutoLot.Mvc -au none -o .\AutoLot.Mvc
+dotnet new mvc -n AutoLot.Mvc -au none -o .\AutoLot.Mvc -f net8.0
 dotnet sln AutoLot.sln add AutoLot.Mvc
 rem add packages
+
 dotnet add AutoLot.Mvc package AutoMapper
 dotnet add AutoLot.Mvc package System.Text.Json
 dotnet add AutoLot.Mvc package LigerShark.WebOptimizer.Core
@@ -243,6 +248,7 @@ dotnet add AutoLot.Mvc package Microsoft.EntityFrameworkCore.Design
 dotnet add AutoLot.Mvc package Microsoft.EntityFrameworkCore.SqlServer
 dotnet add AutoLot.Mvc package Microsoft.VisualStudio.Threading.Analyzers
 dotnet add AutoLot.Mvc package Microsoft.VisualStudio.Web.CodeGeneration.Design
+
 rem add project references
 rem update the path references as needed
 dotnet add AutoLot.Mvc reference AutoLot.Models
@@ -252,9 +258,10 @@ dotnet add AutoLot.Mvc reference AutoLot.Services
 Нарешті, створіть проект AutoLot.Web, додайте його до рішення, додайте пакети NuGet та посилання на проект.
 
 ```console
-dotnet new webapp -n AutoLot.Web -au none -o .\AutoLot.Web
+dotnet new webapp -n AutoLot.Web -au none -o .\AutoLot.Web -f net8.0
 dotnet sln AutoLot.sln add AutoLot.Web
 rem add packages
+
 dotnet add AutoLot.Web package AutoMapper
 dotnet add AutoLot.Web package System.Text.Json
 dotnet add AutoLot.Web package LigerShark.WebOptimizer.Core
@@ -263,6 +270,7 @@ dotnet add AutoLot.Web package Microsoft.EntityFrameworkCore.SqlServer
 dotnet add AutoLot.Web package Microsoft.EntityFrameworkCore.SqlServer.Design
 dotnet add AutoLot.Web package Microsoft.VisualStudio.Web.CodeGeneration.Design
 dotnet add AutoLot.Web package Microsoft.VisualStudio.Threading.Analyzers
+
 rem add project references
 rem update the path references as needed
 dotnet add AutoLot.Web reference AutoLot.Models
@@ -270,7 +278,7 @@ dotnet add AutoLot.Web reference AutoLot.Dal
 dotnet add AutoLot.Web reference AutoLot.Services
 ```
 
-Це завершує налаштування за допомогою командного рядка. Як ви, мабуть, бачите, це набагато ефективніше, якщо вам не потрібна допомога графічного інтерфейсу Visual Studio. Можливо використання Visual Studio і посилання на проекти а командний рядок для додавання пакетів.
+Це завершує налаштування за допомогою командного рядка. Як ви, мабуть, бачите, це набагато ефективніше, якщо вам не потрібна допомога графічного інтерфейсу Visual Studio. Можливо використання Visual Studio для створення і посилання на проекти а командний рядок використати для додавання пакетів.
 
 ## Оновлення посилання на пакет Entity Framework Core
 
@@ -303,13 +311,21 @@ ASP.NET Core застосунки зазвичай запускаються за
 
 ```json
 {
-  "$schema": "https://json.schemastore.org/launchsettings.json",
+  "$schema": "http://json.schemastore.org/launchsettings.json",
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "http://localhost:21557",
+      "sslPort": 44385
+    }
+  },
   "profiles": {
     "http": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
-      "applicationUrl": "http://localhost:5214",
+      "applicationUrl": "http://localhost:5160",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
@@ -318,13 +334,21 @@ ASP.NET Core застосунки зазвичай запускаються за
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
-      "applicationUrl": "https://localhost:7170;http://localhost:5214",
+      "applicationUrl": "https://localhost:7287;http://localhost:5160",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "IIS Express": {
+      "commandName": "IISExpress",
+      "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     }
   }
 }
+
 ```
 
 ## Використання Visual Studio
@@ -504,8 +528,8 @@ ASP.NET MVC та ASP.NET Web API зменшили обсяг необхідно�
 |Ok|OkResult|200|
 |NotFound|NotFoundResult|404|
 |BadRequest|BadRequestResult|400|
-|CreatedCreatedAtActionCreatedAtRoute|CreatedResultCreatedAtActionResultCreateAtRouteResult|201|
-|AcceptedAcceptedAtActionAcceptedAtRoute|AcceptedResultAcceptedAtActionResultAcceptedAtRouteResult|202|
+|CreatedCreatedAtAction CreatedAtRoute|CreatedResultCreatedAtActionResult CreateAtRouteResult|201|
+|AcceptedAcceptedAtAction AcceptedAtRoute|AcceptedResultAcceptedAtActionResult AcceptedAtRouteResult|202|
 
 ## Дії (Actions)
 
@@ -1086,7 +1110,7 @@ public async Task<IActionResult> Create()
 public async Task<IActionResult> OnPostAsync()
 {
   var newCar = new Car();
-  if (await TryUpdateModelAsync(newCar ,'', c=>c.Color,c=>c.PetName,c=>c.MakeId))
+  if (await TryUpdateModelAsync(newCar ,"", c=>c.Color,c=>c.PetName,c=>c.MakeId))
   {
     //do something important
   }
@@ -1138,7 +1162,7 @@ public class EditModel : PageModel
   }
   public async Task<IActionResult> OnPost(int id)
   {
-    //Handle the HTTP Get request
+    //Handle the HTTP Post request
   }
 }
 ```
@@ -1290,7 +1314,7 @@ public async Task<ActionResult> OnPostAsync(int? id, [FromForm]Car car)
 ## Явна перевірка моделі
 
 Явна перевірка моделі виконується за допомогою виклику TryValidateModel(), передаючи екземпляр типу, що перевіряється. Результатом цього виклику є заповнений екземпляр ModelState з усіма недійсними властивостями. Дійсні властивості не записуються до об'єкта ModelState, як це відбувається у випадку комбінації зв'язування/валідації.
-Розглянемо наступний код як приклад. Цей метод використовує явне зв'язування, пропускаючи властивість Color. Оскільки властивість color є обов'язковою, ModelState повідомляє про недійсність. Колір оновлюється, викликається явна перевірка, але ModelState все ще недійсний:
+Розглянемо наступний код як приклад. Цей метод використовує явне зв'язування, пропускаючи властивість Color. Оскільки властивість Color є обов'язковою, ModelState повідомляє про недійсність. Колір оновлюється, викликається явна перевірка, але ModelState все ще недійсний:
 
 ```cs
 [HttpPost]
