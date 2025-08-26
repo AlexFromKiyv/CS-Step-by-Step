@@ -7,14 +7,16 @@ namespace AutoLot.Web.Pages
     {
         private readonly ILogger<IndexModel> _logger;
 
+        public DealerInfo DealerInfoInstance { get; set; }  
+
         public IndexModel(ILogger<IndexModel> logger)
         {
             _logger = logger;
         }
 
-        public void OnGet()
+        public void OnGet([FromServices] IOptionsMonitor<DealerInfo> dealerOptions)
         {
-
+            DealerInfoInstance = dealerOptions.CurrentValue;
         }
     }
 }

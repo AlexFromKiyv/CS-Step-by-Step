@@ -6,7 +6,7 @@ public class CreditRiskRepo : BaseRepo<CreditRisk>, ICreditRiskRepo
     {
     }
 
-    public CreditRiskRepo(DbContextOptions<ApplicationDbContext> options) : base(options)
+    internal CreditRiskRepo(DbContextOptions<ApplicationDbContext> options) : base(options)
     {
     }
 }

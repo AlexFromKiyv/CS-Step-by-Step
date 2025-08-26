@@ -13,9 +13,10 @@ namespace AutoLot.Mvc.Controllers
             _logger = logger;
         }
 
-        public IActionResult Index()
+        public IActionResult Index([FromServices] IOptionsMonitor<DealerInfo> dealerMonitor)
         {
-            return View();
+            DealerInfo? vm = dealerMonitor.CurrentValue;
+            return View(vm);
         }
 
         public IActionResult Privacy()

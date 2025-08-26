@@ -5,8 +5,7 @@ public class DriverRepo : BaseRepo<Driver>, IDriverRepo
     public DriverRepo(ApplicationDbContext context) : base(context)
     {
     }
-
-    public DriverRepo(DbContextOptions<ApplicationDbContext> options) : base(options)
+    internal DriverRepo(DbContextOptions<ApplicationDbContext> options) : base(options)
     {
     }
 

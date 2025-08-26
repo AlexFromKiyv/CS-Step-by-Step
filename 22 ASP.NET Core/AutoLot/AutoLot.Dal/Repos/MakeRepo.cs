@@ -6,7 +6,7 @@ public class MakeRepo : TemporalTableBaseRepo<Make>, IMakeRepo
     {
     }
 
-    public MakeRepo(DbContextOptions<ApplicationDbContext> options) : base(options)
+    internal MakeRepo(DbContextOptions<ApplicationDbContext> options) : base(options)
     {
     }
     internal IOrderedQueryable<Make> BuildQuery() =>

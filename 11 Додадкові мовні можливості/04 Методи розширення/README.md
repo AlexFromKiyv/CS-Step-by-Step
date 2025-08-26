@@ -55,6 +55,8 @@ static class MyExtensions
 Тепер, коли у вас є ці методи розширення, розглянемо наступний приклад коду, який застосовує метод розширення до різних типів у бібліотеках базових класів:
 
 ```cs
+using ExtensionMethods;
+
 static void InvokingExtensionMethods()
 {
     // The int has assumed a new identity!
@@ -66,17 +68,15 @@ static void InvokingExtensionMethods()
     d.DisplayDefiningAssembly();
 
     // Use new integer functionality.
-    Console.WriteLine("Value of myInt: {myInt}");
+    Console.WriteLine($"Value of myInt: {myInt}");
     Console.WriteLine($"Reversed digits of myInt: {myInt.ReverseDigits()}");
 }
 InvokingExtensionMethods();
 ```
 ```
 Int32 lives here: => System.Private.CoreLib
-
 DataSet lives here: => System.Data.Common
-
-Value of myInt: {myInt}
+Value of myInt: 12345678
 Reversed digits of myInt: 87654321
 ```
 

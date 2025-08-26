@@ -6,7 +6,7 @@ public class OrderRepo : TemporalTableBaseRepo<Order>, IOrderRepo
     {
     }
 
-    public OrderRepo(DbContextOptions<ApplicationDbContext> options) : base(options)
+    internal OrderRepo(DbContextOptions<ApplicationDbContext> options) : base(options)
     {
     }
 }

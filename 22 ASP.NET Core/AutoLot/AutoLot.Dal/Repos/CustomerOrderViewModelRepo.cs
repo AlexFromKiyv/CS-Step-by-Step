@@ -6,7 +6,7 @@ public class CustomerOrderViewModelRepo : BaseViewRepo<CustomerOrderViewModel>, 
     {
     }
 
-    public CustomerOrderViewModelRepo(DbContextOptions<ApplicationDbContext> options) : base(options)
+    internal CustomerOrderViewModelRepo(DbContextOptions<ApplicationDbContext> options) : base(options)
     {
     }
 }

@@ -6,7 +6,7 @@ public class CustomerRepo : BaseRepo<Customer>, ICustomerRepo
     {
     }
 
-    public CustomerRepo(DbContextOptions<ApplicationDbContext> options) : base(options)
+    internal CustomerRepo(DbContextOptions<ApplicationDbContext> options) : base(options)
     {
     }
 

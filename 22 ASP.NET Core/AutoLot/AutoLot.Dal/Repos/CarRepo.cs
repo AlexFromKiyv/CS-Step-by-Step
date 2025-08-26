@@ -5,9 +5,10 @@ public class CarRepo : TemporalTableBaseRepo<Car>, ICarRepo
     public CarRepo(ApplicationDbContext context) : base(context)
     {
     }
-    public CarRepo(DbContextOptions<ApplicationDbContext> options) : base(options)
+    internal CarRepo(DbContextOptions<ApplicationDbContext> options) : base(options)
     {
     }
+
     internal IOrderedQueryable<Car> BuildBaseQuery() =>
     Table.Include(c => c.MakeNavigation).OrderBy(c => c.PetName);
     public IEnumerable<Car> GetAllBy(int makeId) =>

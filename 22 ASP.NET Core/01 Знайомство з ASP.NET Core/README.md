@@ -267,7 +267,7 @@ dotnet add AutoLot.Web package System.Text.Json
 dotnet add AutoLot.Web package LigerShark.WebOptimizer.Core
 dotnet add AutoLot.Web package Microsoft.Web.LibraryManager.Build
 dotnet add AutoLot.Web package Microsoft.EntityFrameworkCore.SqlServer
-dotnet add AutoLot.Web package Microsoft.EntityFrameworkCore.SqlServer.Design
+dotnet add AutoLot.Web package Microsoft.EntityFrameworkCore.Design
 dotnet add AutoLot.Web package Microsoft.VisualStudio.Web.CodeGeneration.Design
 dotnet add AutoLot.Web package Microsoft.VisualStudio.Threading.Analyzers
 
