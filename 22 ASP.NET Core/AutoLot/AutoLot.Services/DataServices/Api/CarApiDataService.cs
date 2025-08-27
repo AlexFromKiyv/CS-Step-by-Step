@@ -2,12 +2,14 @@
 
 public class CarApiDataService : ApiDataServiceBase<Car>, ICarDataService
 {
-    public CarApiDataService() : base()
+    public CarApiDataService(ICarApiServiceWrapper serviceWrapper) : base(serviceWrapper)
     {
     }
 
-    public Task<IEnumerable<Car>> GetAllByMakeIdAsync(int? makeId)
+    public async Task<IEnumerable<Car>> GetAllByMakeIdAsync(int? makeId)
     {
-        throw new NotImplementedException();
+        return makeId.HasValue
+            ? await ((ICarApiServiceWrapper)ServiceWrapper).GetCarsByMakeAsync(makeId.Value)
+            : await GetAllAsync();
     }
 }

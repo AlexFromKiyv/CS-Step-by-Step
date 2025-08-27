@@ -1462,5 +1462,70 @@ public class MakeApiServiceWrapper : ApiServiceWrapperBase<Make>, IMakeApiServic
 Як останній крок, зареєструйте два типізовані клієнти, оновивши метод ConfigureApiServiceWrapper у класі ServiceConfiguration до наступного:
 
 ```cs
-
+public static class ServiceConfiguration
+{
+    public static IServiceCollection ConfigureApiServiceWrapper(this IServiceCollection services, IConfiguration config)
+    {
+        services.Configure<ApiServiceSettings>(config.GetSection(nameof(ApiServiceSettings)));
+        services.AddHttpClient<ICarApiServiceWrapper, CarApiServiceWrapper>();
+        services.AddHttpClient<IMakeApiServiceWrapper, MakeApiServiceWrapper>();
+        return services;
+    }
+}
 ```
+# Завершення роботи над службами даних API
+
+Тепер, коли обгортки API-сервісів завершено, настав час повернутися до API-сервісів даних та завершити реалізацію класів.
+
+## Завершення класу ApiDataServiceBase
+
+Першим кроком для завершення базового класу є оновлення конструктора для отримання екземпляра інтерфейсу IApiServiceWrapperBase<TEntity> та присвоєння його полю:
+
+```cs
+    protected readonly IApiServiceWrapperBase<TEntity> ServiceWrapper;
+    protected ApiDataServiceBase(IApiServiceWrapperBase<TEntity> serviceWrapperBase)
+    {
+        ServiceWrapper = serviceWrapperBase;
+    }
+```
+
+Реалізація кожного з методів CRUD викликає відповідний метод на ServiceWrapper:
+
+```cs
+    public async Task<IEnumerable<TEntity>> GetAllAsync()
+        => await ServiceWrapper.GetAllEntitiesAsync();
+    public async Task<TEntity> FindAsync(int id)
+        => await ServiceWrapper.GetEntityAsync(id);
+    public async Task<TEntity> AddAsync(TEntity entity, bool persist = true)
+        => await ServiceWrapper.AddEntityAsync(entity);
+    public async Task<TEntity> UpdateAsync(TEntity entity, bool persist = true)
+        => await ServiceWrapper.UpdateEntityAsync(entity);
+    public async Task DeleteAsync(TEntity entity, bool persist = true)
+        => await ServiceWrapper.DeleteEntityAsync(entity);
+```
+
+## Завершіть класи, специфічні для сутностей
+
+Класи CarApiDataService та MakeApiDataService потребують оновлення конструкторів, щоб отримати специфічний для сутності похідний екземпляр інтерфейсу IApiServiceWrapperBase<TEntity> та передати його базовому класу:
+
+```cs
+    public CarApiDataService(ICarApiServiceWrapper serviceWrapper) : base(serviceWrapper)
+    {
+    }
+```
+```cs
+    public MakeApiDataService(IMakeApiServiceWrapper serviceWrapper):base(serviceWrapper)
+    {
+    }
+```
+Метод GetAllByMakeIdIdAsync() визначає, чи було передано значення для параметра makeId. Якщо значення є, викликається відповідний метод на ICarApiServiceWrapper. В іншому випадку викликається базовий GetAllAsync():
+
+```cs
+    public async Task<IEnumerable<Car>> GetAllByMakeIdAsync(int? makeId)
+    {
+        return makeId.HasValue
+            ? await ((ICarApiServiceWrapper)ServiceWrapper).GetCarsByMakeAsync(makeId.Value)
+            : await GetAllAsync();
+    }
+```
+

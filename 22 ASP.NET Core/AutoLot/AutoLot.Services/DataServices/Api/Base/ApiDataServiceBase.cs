@@ -3,27 +3,20 @@
 public abstract class ApiDataServiceBase<TEntity> : IDataServiceBase<TEntity>
     where TEntity : BaseEntity, new()
 {
-    protected ApiDataServiceBase()
+    protected readonly IApiServiceWrapperBase<TEntity> ServiceWrapper;
+    protected ApiDataServiceBase(IApiServiceWrapperBase<TEntity> serviceWrapperBase)
     {
+        ServiceWrapper = serviceWrapperBase;
     }
-    public Task<IEnumerable<TEntity>> GetAllAsync()
-    {
-        throw new NotImplementedException();
-    }
-    public Task<TEntity> FindAsync(int id)
-    {
-        throw new NotImplementedException();
-    }
-    public Task<TEntity> AddAsync(TEntity entity, bool persist = true)
-    {
-        throw new NotImplementedException();
-    }
-    public Task<TEntity> UpdateAsync(TEntity entity, bool persist = true)
-    {
-        throw new NotImplementedException();
-    }
-    public Task DeleteAsync(TEntity entity, bool persist = true)
-    {
-        throw new NotImplementedException();
-    }
+    public async Task<IEnumerable<TEntity>> GetAllAsync()
+        => await ServiceWrapper.GetAllEntitiesAsync();
+    public async Task<TEntity> FindAsync(int id)
+        => await ServiceWrapper.GetEntityAsync(id);
+    public async Task<TEntity> AddAsync(TEntity entity, bool persist = true)
+        => await ServiceWrapper.AddEntityAsync(entity);
+    public async Task<TEntity> UpdateAsync(TEntity entity, bool persist = true)
+        => await ServiceWrapper.UpdateEntityAsync(entity);
+    public async Task DeleteAsync(TEntity entity, bool persist = true)
+        => await ServiceWrapper.DeleteEntityAsync(entity);
+    
 }
