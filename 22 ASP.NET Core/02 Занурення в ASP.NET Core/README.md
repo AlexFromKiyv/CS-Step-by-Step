@@ -1529,3 +1529,595 @@ public static class ServiceConfiguration
     }
 ```
 
+# Розгортання застосунків ASP.NET Core
+
+Попередні версії ASP.NET-застосунків можна було розгортати лише на серверах Windows, використовуючи IIS як веб-сервер. ASP.NET Core можна розгорнути на кількох операційних системах різними способами, використовуючи різноманітні веб-сервери. Застосунки ASP.NET Core також можна розгортати поза веб-сервером. Варіанти високого рівня такі:
+
+    На сервері Windows (включно з Azure) за допомогою IIS
+    На сервері Windows (включно з службами програм Azure) поза IIS
+    На сервері Linux за допомогою Apache або NGINX
+    У Windows або Linux у контейнері
+
+Така гнучкість дозволяє організаціям вибирати платформу розгортання, яка має для них найбільший сенс, включаючи популярні моделі розгортання на основі контейнерів (наприклад, використання Docker), на відміну від прив'язки до серверів Windows.
+
+# Легкий та модульний конвеєр HTTP-запитів
+
+Дотримуючись принципів .NET, ви повинні погодитися на все в ASP.NET Core. За замовчуванням у програму нічого не завантажується. Це дозволяє зробити програми максимально легкими, покращити продуктивність, мінімізувати обсях ресурсів та потенційний ризик.
+
+# Ведення журналу (Logging)
+
+Ведення журналу в ASP.NET Core базується на ILoggerFactory. Це дозволяє різним постачальникам логування підключатися до системи логування для надсилання повідомлень журналу в різні місця, такі як консоль. ILoggerFactory використовується для створення екземпляра ILogger<T>, який надає такі методи для ведення журналу за допомогою класу LoggerExtensions:
+
+```cs
+public static class LoggerExtensions
+{
+    public static void LogDebug(this ILogger logger, EventId eventId,
+    Exception exception, string message, params object[] args)
+    //...
+    public static void LogTrace(this ILogger logger, EventId eventId,
+    Exception exception, string message, params object[] args)
+    //...
+    public static void LogInformation(this ILogger logger, EventId eventId,
+    Exception exception, string message, params object[] args)
+    //..
+    public static void LogWarning(this ILogger logger, EventId eventId,
+    Exception exception, string message, params object[] args)
+    //..
+     public static void LogError(this ILogger logger, EventId eventId,
+    Exception exception, string message, params object[] args)
+    //..
+    public static void LogCritical(this ILogger logger, EventId eventId,
+    Exception exception, string message, params object[] args)
+    //..
+    public static void Log(this ILogger logger, LogLevel logLevel, string message, params
+    object[] args)
+}
+```
+
+## Додавання ведення журналу за допомогою Serilog
+
+Будь-який постачальник, що надає розширення ILoggerFactory, може бути використаний для ведення журналу в ASP.NET Core, і Serilog є одним із таких фреймворків для ведення журналу. У наступних розділах розглядається створення інфраструктури ведення журналу на основі Serilog та налаштування програм ASP.NET Core для використання нового коду ведення журналу.
+
+## Налаштування ведення журналу
+
+Щоб налаштувати Serilog, ми використовуватимемо файли конфігурації програми разом із класом C#. Почніть з додавання нової папки з назвою Logging до проекту AutoLot.Service. Створіть нову папку з назвою Settings у папці Logging, а в цій новій папці додайте клас з назвою AppLoggingSettings.
+
+```cs
+namespace AutoLot.Services.Logging.Settings;
+
+public class AppLoggingSettings
+{
+    public GeneralSettings General { get; set; }
+    public FileSettings File { get; set; }
+    public SqlServerSettings MSSqlServer { get; set; }
+
+    public class GeneralSettings
+    {
+        public string RestrictedToMinimumLevel { get; set; }
+    }
+    public class SqlServerSettings
+    {
+        public string TableName { get; set; }
+        public string Schema { get; set; }
+        public string ConnectionStringName { get; set; }
+    }
+
+    public class FileSettings
+    {
+        public string Drive { get; set; }
+        public string FilePath { get; set; }
+        public string FileName { get; set; }
+        public string FullLogPathAndFileName =>
+            $"{Drive}{Path.VolumeSeparatorChar}{Path.DirectorySeparatorChar}{FilePath}{Path.DirectorySeparatorChar}{FileName}";
+    }
+}
+```
+Додайте наступний оператор using до файлу GlobalUsings.cs у проекті AutoLot.Service.
+
+```cs
+global using AutoLot.Services.Logging.Settings;
+```
+Далі, використовуйте наступний JSON, щоб замінити сформовані за замовчуванням дані журналу у файлах appsettings.Development.json для проектів AutoLot.Api, AutoLot.Mvc та AutoLot.Web:
+
+```json
+  "AppLoggingSettings": {
+    "MSSqlServer": {
+      "TableName": "SeriLogs",
+      "Schema": "log",
+      "ConnectionStringName": "AutoLot"
+    },
+    "File": {
+      "Drive": "d",
+      "FilePath": "temp",
+      "FileName": "log_AutoLot.txt"
+    },
+    "General": {
+      "RestrictedToMinimumLevel": "Information"
+    }
+  }
+```
+Далі додайте наступний вузол AppName до кожного з файлів, налаштований для кожної програми:
+
+```json
+ "AppName": "AutoLot.Api - Dev"
+```
+```json
+ "AppName": "AutoLot.Mvc - Dev"
+```
+```json
+ "AppName": "AutoLot.Web - Dev"
+```
+Додадйте додадковий рядок з початку в проект AutoLot.Web:
+
+```json
+ "DetailedErrors": true,
+```
+Останній крок – очистити розділ Logging кожного з файлів appsettings.json, залишивши лише запис AllowedHosts у проекті AutoLot.Api, а також AllowedHosts та DealerInfo у проектах AutoLot.Mvc та AutoLot.Web:
+
+```json
+{
+  "AllowedHosts": "*",
+  "DealerInfo": {
+    "DealerName": "Skimedic's Used Cars",
+    "City": "West Chester",
+    "State": "Ohio"
+  }
+}
+```
+
+## Конфігурація ведення журналу
+
+Наступний крок – налаштування Serilog. Почніть з додавання нової папки під назвою Configuration у папку Logging проекту AutoLot.Service. У цій папці додайте новий клас з назвою LoggingConfiguration. Зробіть клас публічним та статичним, як показано тут:
+
+```cs
+namespace AutoLot.Services.Logging.Configuration;
+
+public static class LoggingConfiguration
+{
+}
+
+```
+Serilog використовує приймачі (sinks) для запису в різні цільові об'єкти журналювання. Завдяки цьому механізму один виклик SeriLog записуватиме дані в багато місць. Цільовими об'єктами, які ми використовуватимемо для ведення журналу в додатках ASP.NET Core, є текстовий файл, база даних і консоль. Для текстових файлів та приймачів бази даних потрібно налаштувати шаблон виводу для приймача текстових файлів та список полів для приймача бази даних. 
+Щоб налаштувати шаблон файлу, створіть наступний статичний рядок лише для читання:
+
+```cs
+    internal static readonly string OutputTemplate =
+        @"[{Timestamp:yy-MM-dd HH:mm:ss} {Level}]{ApplicationName}:{SourceContext}{NewLine}Message:{Message}{NewLine}in method {MemberName} at {FilePath}:{LineNumber}{NewLine}{Exception}{NewLine}"
+```
+
+Приймачу SQL Server потрібен список стовпців, ідентифікованих за допомогою типу SqlColumn. Додайте наступний код для налаштування стовпців бази даних:
+
+```cs
+    internal static readonly ColumnOptions ColumnOptions = new ColumnOptions
+    {
+        AdditionalColumns = new List<SqlColumn>
+        {
+            new SqlColumn {DataType = SqlDbType.VarChar, ColumnName = "ApplicationName"},
+            new SqlColumn {DataType = SqlDbType.VarChar, ColumnName = "MachineName"},
+            new SqlColumn {DataType = SqlDbType.VarChar, ColumnName = "MemberName"},
+            new SqlColumn {DataType = SqlDbType.VarChar, ColumnName = "FilePath"},
+            new SqlColumn {DataType = SqlDbType.Int, ColumnName = "LineNumber"},
+            new SqlColumn {DataType = SqlDbType.VarChar, ColumnName = "SourceContext"},
+            new SqlColumn {DataType = SqlDbType.VarChar, ColumnName = "RequestPath"},
+            new SqlColumn {DataType = SqlDbType.VarChar, ColumnName = "ActionName"},
+        }
+    };
+```
+
+Заміна логера за замовчуванням на Serilog — це триетапний процес. Перший — очистити існуючого провайдера, другий — додати Serilog до WebApplicationBuilder, а третій — завершити налаштування Serilog. Додайте новий метод під назвою ConfigureSerilog(), який є методом розширення для WebApplicationBuilder. Перший рядок очищає логери за замовчуванням, а останній рядок додає повністю налаштований фреймворк Serilog до фреймворку логування WebApplicationBuilder.
+
+```cs
+    public static void ConfigureSerilog(this WebApplicationBuilder builder)
+    {
+        builder.Logging.ClearProviders();
+
+        ConfigurationManager? config = builder.Configuration;
+        AppLoggingSettings? settings = config.GetSection(nameof(AppLoggingSettings)).Get<AppLoggingSettings>();
+        string? connectionStringName = settings.MSSqlServer.ConnectionStringName;
+        string? connectionString = config.GetConnectionString(connectionStringName);
+        string tableName = settings.MSSqlServer.TableName;
+        string schema = settings.MSSqlServer.Schema;
+        string restrictedToMinimumLevel = settings.General.RestrictedToMinimumLevel;
+
+        if (!Enum.TryParse<LogEventLevel>(restrictedToMinimumLevel, out var logLevel))
+        {
+            logLevel = LogEventLevel.Debug;
+        }
+        
+        var sqlOptions = new MSSqlServerSinkOptions
+        {
+            AutoCreateSqlTable = true,
+            SchemaName = schema,
+            TableName = tableName,
+        };
+
+        if (builder.Environment.IsDevelopment())
+        {
+            sqlOptions.BatchPeriod = new TimeSpan(0, 0, 0, 1);
+            sqlOptions.BatchPostingLimit = 1;
+        }
+
+        var log = new LoggerConfiguration()
+            .MinimumLevel.Is(logLevel)
+            .Enrich.FromLogContext()
+            .Enrich.With(new PropertyEnricher("ApplicationName", config.GetValue<string>("ApplicationName")))
+            .Enrich.WithMachineName()
+            .WriteTo.File(
+                path: builder.Environment.IsDevelopment()
+                    ? settings.File.FullLogPathAndFileName
+                    : settings.File.FileName,
+                rollingInterval: RollingInterval.Day,
+                restrictedToMinimumLevel: logLevel,
+                outputTemplate: OutputTemplate)
+            .WriteTo.Console(restrictedToMinimumLevel: logLevel)
+            .WriteTo.MSSqlServer(
+                connectionString: connectionString,
+                sqlOptions,
+                restrictedToMinimumLevel: logLevel,
+                columnOptions: ColumnOptions);
+
+        builder.Logging.AddSerilog(log.CreateLogger(), false);
+    }
+```
+Коли все готово, настав час створити фреймворк для логування, який використовуватиме Serilog.
+
+# Система реєстрації(Logging Framework) AutoLot
+
+Фреймворк логування AutoLot використовує вбудовані можливості логування ASP.NET Core для спрощення використання Serilog. Починається все з інтерфейсу IAppLogging.
+
+## Інтерфейс IAppLogging
+
+Інтерфейс IApplogging<T> містить методи ведення журналу для користувацької системи ведення журналу. Додайте новий каталог з назвою Interfaces до каталогу Logging у проекті AutoLot.Service. У цьому каталозі додайте новий інтерфейс з назвою IAppLogging<T>:
+
+```cs
+namespace AutoLot.Services.Logging.Interfaces;
+
+public interface IAppLogging<T>
+{
+    void LogAppError(Exception exception,
+    string message,
+    [CallerMemberName] string memberName = "",
+    [CallerFilePath] string sourceFilePath = "",
+    [CallerLineNumber] int sourceLineNumber = 0);
+
+    void LogAppError(string message,
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "",
+        [CallerLineNumber] int sourceLineNumber = 0);
+
+    void LogAppCritical(Exception exception,
+        string message,
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "",
+        [CallerLineNumber] int sourceLineNumber = 0);
+
+    void LogAppCritical(string message,
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "",
+        [CallerLineNumber] int sourceLineNumber = 0);
+
+    void LogAppDebug(string message,
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "",
+        [CallerLineNumber] int sourceLineNumber = 0);
+
+    void LogAppTrace(string message,
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "",
+        [CallerLineNumber] int sourceLineNumber = 0);
+
+    void LogAppInformation(string message,
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "",
+        [CallerLineNumber] int sourceLineNumber = 0);
+
+    void LogAppWarning(string message,
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "",
+        [CallerLineNumber] int sourceLineNumber = 0);
+}
+```
+Атрибути CallerMemberName, CallerFilePath і CallerLineNumber перевіряють стек викликів, щоб отримати значення, для яких вони названі з коду виклику. Наприклад, якщо рядок, який викликає LogAppError(), знаходиться у функції DoWork() у файлі з іменем MyClassFile.cs та знаходиться на рядку номер 36, тоді виклик:
+
+```cs
+_appLogger.LogAppError(ex, "ERROR!");
+```
+перетворюється на еквівалент цього:
+
+```cs
+_appLogger.LogAppError(ex,"ERROR","DoWork","c:/myfilepath/MyClassFile.cs",36);
+```
+Якщо у виклик методу передаються значення для будь-якого з атрибутованих параметрів, замість значень з атрибутів використовуються передані значення.
+
+Додайте наступний оператор using до файлу GlobalUsings.cs у проекті AutoLot.Services:
+
+```cs
+global using AutoLot.Services.Logging.Interfaces;
+```
+
+## Клас AppLogging
+
+Клас AppLogging реалізує інтерфейс IAppLogging. Додайте новий клас з назвою AppLogging до каталогу Logging. Зробіть клас публічним, реалізуйте IAppLogging<T> та додайте конструктор, який приймає екземпляр ILogger<T> та зберігає його у змінній рівня класу.
+
+```cs
+namespace AutoLot.Services.Logging;
+
+public class AppLogging<T> : IAppLogging<T>
+{
+    private readonly ILogger<T> _logger;
+
+    public AppLogging(ILogger<T> logger)
+    {
+        _logger = logger;
+    }
+}
+```
+Serilog дозволяє додавати додаткові властивості до стандартного процесу логування, передаючи їх у LogContext. Додайте внутрішній метод для реєстрації події з винятком та передачі властивостей MemberName, FilePath та LineNumber. Метод PushProperty() повертає IDisposable, тому метод видаляє все перед виходом з методу.
+
+```cs
+    internal static void LogWithException(string memberName,
+        string sourceFilePath, int sourceLineNumber, Exception ex, string message,
+        Action<Exception, string, object[]> logAction)
+    {
+        var list = new List<IDisposable>
+        {
+            LogContext.PushProperty("MemberName", memberName),
+            LogContext.PushProperty("FilePath", sourceFilePath),
+            LogContext.PushProperty("LineNumber", sourceLineNumber),
+        };
+        logAction(ex, message, null);
+        foreach (var item in list)
+        {
+            item.Dispose();
+        }
+    }
+```
+Повторіть процес для подій журналу, які не містять винятків:
+
+```cs
+    internal static void LogWithoutException(string memberName,
+        string sourceFilePath, int sourceLineNumber, string message,
+        Action<string, object[]> logAction)
+    {
+        var list = new List<IDisposable>
+        {
+            LogContext.PushProperty("MemberName", memberName),
+            LogContext.PushProperty("FilePath", sourceFilePath),
+            LogContext.PushProperty("LineNumber", sourceLineNumber),
+        };
+        logAction(message, null);
+        foreach (var item in list)
+        {
+            item.Dispose();
+        }
+    }
+
+```
+
+Для кожного типу події логування викличте відповідний допоміжний метод для запису в журнали:
+
+```cs
+
+    public void LogAppError(Exception exception, string message,
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "",
+        [CallerLineNumber] int sourceLineNumber = 0)
+    {
+        LogWithException(memberName, sourceFilePath, sourceLineNumber, exception, message, _logger.LogError);
+    }
+
+    public void LogAppError(string message,
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "",
+        [CallerLineNumber] int sourceLineNumber = 0)
+    {
+        LogWithoutException(memberName, sourceFilePath, sourceLineNumber, message, _logger.LogError);
+    }
+
+    public void LogAppCritical(Exception exception, string message,
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "",
+        [CallerLineNumber] int sourceLineNumber = 0)
+    {
+        LogWithException(memberName, sourceFilePath, sourceLineNumber, exception, message, _logger.LogCritical);
+    }
+
+    public void LogAppCritical(string message,
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "",
+        [CallerLineNumber] int sourceLineNumber = 0)
+    {
+        LogWithoutException(memberName, sourceFilePath, sourceLineNumber, message, _logger.LogCritical);
+    }
+
+    public void LogAppDebug(string message,
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "",
+        [CallerLineNumber] int sourceLineNumber = 0)
+    {
+        LogWithoutException(memberName, sourceFilePath, sourceLineNumber, message, _logger.LogDebug);
+    }
+
+    public void LogAppTrace(string message,
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "",
+        [CallerLineNumber] int sourceLineNumber = 0)
+    {
+        LogWithoutException(memberName, sourceFilePath, sourceLineNumber, message, _logger.LogTrace);
+    }
+
+    public void LogAppInformation(string message,
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "",
+        [CallerLineNumber] int sourceLineNumber = 0)
+    {
+        LogWithoutException(memberName, sourceFilePath, sourceLineNumber, message, _logger.LogInformation);
+    }
+
+    public void LogAppWarning(string message,
+        [CallerMemberName] string memberName = "",
+        [CallerFilePath] string sourceFilePath = "",
+        [CallerLineNumber] int sourceLineNumber = 0)
+    {
+        LogWithoutException(memberName, sourceFilePath, sourceLineNumber, message, _logger.LogWarning);
+    }
+
+```
+
+## Остаточна конфігурація
+
+Остаточна конфігурація полягає в додаванні інтерфейсу IAppLogging<> до контейнера DI та виклику методу розширення для додавання SeriLog до WebApplicationBuilder. Почніть зі створення нового методу розширення в класі LoggingConfiguration:
+
+```cs
+
+    public static IServiceCollection RegisterLoggingInterfaces(this IServiceCollection services)
+    {
+        services.AddScoped(typeof(IAppLogging<>), typeof(AppLogging<>));
+        return services;
+    }
+```
+Далі додайте наступний глобальний оператор using до файлу GlobalUsings.cs у кожному веб-проєкті:
+
+```cs
+global using AutoLot.Services.Logging.Configuration;
+global using AutoLot.Services.Logging.Interfaces;
+```
+Далі додайте обидва методи розширення до операторів верхнього рівня у файлі Program.cs. Зверніть увагу, що метод ConfigureSerilog() розширює WebAppBuilder (змінну builder), а метод RegisterLoggingInterfaces() розширює IServiceCollection:
+
+```cs
+//Configure logging
+builder.ConfigureSerilog();
+builder.Services.RegisterLoggingInterfaces();
+```
+
+## Додавання ведення журналу до служб даних
+
+Після встановлення Serilog та системи ведення журналу AutoLot настав час оновити служби даних, щоб додати можливості ведення журналу.
+
+## Оновлення базових класів
+
+Починаючи з класів ApiDataServiceBase та DalDataServiceBase, оновіть загальне визначення, щоб воно також приймало клас, що реалізує IDataServiceBase<TEntity>. Це дозволяє строго типізувати інтерфейс IAppLogging<TDataService> для кожного з похідних класів:
+
+```cs
+public abstract class ApiDataServiceBase<TEntity,TDataSerbice> : IDataServiceBase<TEntity>
+    where TEntity : BaseEntity, new()
+    where TDataSerbice : IDataServiceBase<TEntity>
+{
+    //...
+}
+```
+```cs
+public abstract class DalDataServiceBase<TEntity, TDataService> : IDataServiceBase<TEntity>
+    where TEntity : BaseEntity, new()
+    where TDataService : IDataServiceBase<TEntity>
+{
+    //...
+}
+```
+Далі оновіть кожен з конструкторів, щоб він приймав екземпляр IAppLogging<TDataService> та призначив його захищеному полю класу:
+
+```cs
+public abstract class ApiDataServiceBase<TEntity, TDataService> : IDataServiceBase<TEntity>
+    where TEntity : BaseEntity, new()
+    where TDataService : IDataServiceBase<TEntity>
+{
+    protected readonly IApiServiceWrapperBase<TEntity> ServiceWrapper;
+    protected readonly IAppLogging<TDataService> AppLoggingInstance;
+    protected ApiDataServiceBase(IAppLogging<TDataService> appLogging, IApiServiceWrapperBase<TEntity> serviceWrapperBase)
+    {
+        ServiceWrapper = serviceWrapperBase;
+        AppLoggingInstance = appLogging;
+    }
+    //...
+}
+```
+```cs
+public abstract class DalDataServiceBase<TEntity, TDataService> : IDataServiceBase<TEntity>
+    where TEntity : BaseEntity, new()
+    where TDataService : IDataServiceBase<TEntity>
+{
+    protected readonly IBaseRepo<TEntity> MainRepo;
+    protected readonly IAppLogging<TDataService> AppLoggingInstance;
+    protected DalDataServiceBase(IAppLogging<TDataService> appLogging, IBaseRepo<TEntity> mainRepo)
+    {
+        MainRepo = mainRepo;
+        AppLoggingInstance = appLogging;
+    }
+    //...
+}
+```
+## Оновлення класів служб даних, специфічних для сутностей
+
+Кожен із класів, специфічних для сутності, повинен змінити свою сигнатуру успадкування, щоб використовувати новий універсальний параметр, а також прийняти екземпляр IAppLogging у конструкторі та передати його базовому класу:
+
+```cs
+public class CarApiDataService : ApiDataServiceBase<Car, CarApiDataService>, ICarDataService
+{
+    public CarApiDataService(IAppLogging<CarApiDataService> appLogging, ICarApiServiceWrapper serviceWrapper) : base(appLogging, serviceWrapper)
+    {
+    }
+
+    //...
+}
+```
+```cs
+public class MakeApiDataService : ApiDataServiceBase<Make, MakeApiDataService>, IMakeDataService
+{
+    public MakeApiDataService(IAppLogging<MakeApiDataService> appLogging, IMakeApiServiceWrapper serviceWrapper):base(appLogging, serviceWrapper)
+    {
+    }
+}
+```
+```cs
+public class CarDalDataService : DalDataServiceBase<Car, CarDalDataService>,ICarDataService
+{
+    private readonly ICarRepo _repo;
+
+    public CarDalDataService(IAppLogging<CarDalDataService> appLogging, ICarRepo repo) : base(appLogging, repo)
+    {
+        _repo = repo;
+    }
+
+    //...
+}
+```
+```cs
+public class MakeDalDataService : DalDataServiceBase<Make, MakeDalDataService>, IMakeDataService
+{
+    public MakeDalDataService(IAppLogging<MakeDalDataService> appLogging, IMakeRepo mainRepo) : base(appLogging, mainRepo)
+    {
+    }
+}
+```
+
+## Тестування фреймворку ведення журналу
+
+На завершення розділу давайте протестуємо фреймворк логування. Першим кроком є ​​оновлення HomeController у проекті AutoLot.Mvc для використання нової системи ведення журналу. Замініть параметр ILogger<HomeController> на IAppLogging<HomeController> та оновіть тип поля ось так:
+
+```cs
+    public class HomeController : Controller
+    {
+        private readonly IAppLogging<HomeController> _logger;
+
+        public HomeController(IAppLogging<HomeController> logger)
+        {
+            _logger = logger;
+        }
+        //...
+    }
+```
+З урахуванням цього, запишіть помилку тесту в метод Index():
+
+```cs
+        public IActionResult Index([FromServices] IOptionsMonitor<DealerInfo> dealerMonitor)
+        {
+            _logger.LogAppError("My test error!!!");
+            DealerInfo? vm = dealerMonitor.CurrentValue;
+            return View(vm);
+        }
+```
+Запустіть проєкт AutoLot.Mvc. Після запуску програми запис буде збережено в таблиці SeriLogs, а також записано у файл з назвою log_AutoLotYYYYMMDD.txt.
+Коли ви відкриєте файл журналу, ви можете здивуватися, побачивши багато додаткових записів, які не надійшли від одного виклику логера. Це тому, що EF Core та ASP.NET Core створюють дуже детальне журналювання, коли рівень журналювання встановлено на Information. Щоб усунути шум, оновіть файли appsettings.Development.json у проектах AutoLot.Api, AutoLot,Mvc та AutoLot.Web, щоб рівень журналу був Warning, ось так:
+```json
+      "RestrictedToMinimumLevel": "Warning"
+```

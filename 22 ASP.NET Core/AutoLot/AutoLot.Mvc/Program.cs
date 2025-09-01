@@ -3,6 +3,12 @@ using AutoLot.Services.DataServices.Api.Examples;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+//Configure logging
+builder.ConfigureSerilog();
+builder.Services.RegisterLoggingInterfaces();
+
+
 builder.Services.AddControllersWithViews();
 
 var connectionString = builder.Configuration.GetConnectionString("AutoLot");

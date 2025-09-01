@@ -3,6 +3,11 @@ using AutoLot.Dal.Repos;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+//Configure logging
+builder.ConfigureSerilog();
+builder.Services.RegisterLoggingInterfaces();
+
 builder.Services.AddRazorPages();
 
 var connectionString = builder.Configuration.GetConnectionString("AutoLot");

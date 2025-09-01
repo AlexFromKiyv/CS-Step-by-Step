@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace AutoLot.Services.DataServices.Dal;
 
-public class CarDalDataService : DalDataServiceBase<Car>,ICarDataService
+public class CarDalDataService : DalDataServiceBase<Car, CarDalDataService>,ICarDataService
 {
     private readonly ICarRepo _repo;
 
-    public CarDalDataService(ICarRepo repo) : base(repo)
+    public CarDalDataService(IAppLogging<CarDalDataService> appLogging, ICarRepo repo) : base(appLogging, repo)
     {
         _repo = repo;
     }
