@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using NuGet.Protocol;
 
 namespace AutoLot.Web.Pages
 {
@@ -17,6 +18,7 @@ namespace AutoLot.Web.Pages
         public void OnGet([FromServices] IOptionsMonitor<DealerInfo> dealerOptions)
         {
             DealerInfoInstance = dealerOptions.CurrentValue;
+            //_logger.LogWarning(User.);
         }
     }
 }

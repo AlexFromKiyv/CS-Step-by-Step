@@ -7,7 +7,7 @@ namespace AutoLot.Mvc.Controllers
     public class HomeController : Controller
     {
         private readonly IAppLogging<HomeController> _logger;
-
+  
         public HomeController(IAppLogging<HomeController> logger)
         {
             _logger = logger;
@@ -15,9 +15,10 @@ namespace AutoLot.Mvc.Controllers
 
         public IActionResult Index([FromServices] IOptionsMonitor<DealerInfo> dealerMonitor)
         {
-            //_logger.LogAppError("My test error!!!");
+            //_logger.LogAppWarning("");
             DealerInfo? vm = dealerMonitor.CurrentValue;
             return View(vm);
+
         }
 
         public IActionResult Privacy()

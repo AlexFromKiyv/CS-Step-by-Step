@@ -6,3 +6,5 @@ global using AutoLot.Services.DataServices;
 
 global using AutoLot.Services.Logging.Configuration;
 global using AutoLot.Services.Logging.Interfaces;
+
+global using AutoLot.Services.Utilities;

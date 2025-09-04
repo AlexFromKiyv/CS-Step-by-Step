@@ -2121,3 +2121,32 @@ public class MakeDalDataService : DalDataServiceBase<Make, MakeDalDataService>, 
 ```json
       "RestrictedToMinimumLevel": "Warning"
 ```
+
+## Утиліти для роботи з рядками
+
+Нагадаємо, що одна з домовленостей в ASP.NET Core видаляє суфікс Controller з контролерів та суфікс Async з методів дій під час маршрутизації контролерів та дій. Під час ручного створення маршрутів часто доводиться видаляти суфікс через код. Хоча код легко писати, він може бути повторюваним. Щоб зменшити повторення коду маніпулювання рядками, наступним кроком буде створення двох методів розширення рядків.
+Додайте новий каталог з назвою Utilities у проекті AutoLot.Services, і в цьому каталозі створіть новий публічний статичний клас з назвою StringExtensions. У цьому класі додайте такі два методи розширення:
+
+```cs
+namespace AutoLot.Services.Utilities;
+
+public static class StringExtensions
+{
+    public static string RemoveControllerSuffix(this string original)
+    => original.Replace("Controller", "", StringComparison.OrdinalIgnoreCase);
+    public static string RemoveAsyncSuffix(this string original)
+        => original.Replace("Async", "", StringComparison.OrdinalIgnoreCase);
+    public static string RemoveModelSuffix(this string original)
+        => original.Replace("Model", "", StringComparison.OrdinalIgnoreCase);
+}
+
+```
+Далі додайте наступний оператор using до файлу GlobalUsings.cs у проекті AutoLot.Services та всіх трьох вебзастосунках:
+
+```cs
+global using AutoLot.Services.Utilities;
+```
+
+# Підсумки
+
+У цьому розділі заглибилися в нові функції, представлені в ASP.NET Core, і розпочався процес оновлення трьох програм ASP.NET Core. У наступному розділі ви завершите роботу над програмою AutoLot.Api.
