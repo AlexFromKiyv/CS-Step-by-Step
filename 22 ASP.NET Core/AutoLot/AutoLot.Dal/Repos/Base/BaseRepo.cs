@@ -1,4 +1,5 @@
-﻿namespace AutoLot.Dal.Repos.Base;
+﻿
+namespace AutoLot.Dal.Repos.Base;
 
 public abstract class BaseRepo<T> : BaseViewRepo<T>, IBaseRepo<T> where T : BaseEntity, new()
 {
@@ -26,7 +27,9 @@ public abstract class BaseRepo<T> : BaseViewRepo<T>, IBaseRepo<T> where T : Base
     }
     
     public virtual T? Find(int id) =>
-    Table.Find(id);
+        Table.Find(id);
+    public virtual async Task<T?> FindAsync(int id) =>
+        await Table.FindAsync(id);
     public virtual T? FindAsNoTracking(int id) =>
     Table.AsNoTrackingWithIdentityResolution()
     .FirstOrDefault(e => e.Id == id);
@@ -73,5 +76,6 @@ public abstract class BaseRepo<T> : BaseViewRepo<T>, IBaseRepo<T> where T : Base
         Context.Entry(entity).State = EntityState.Deleted;
         return persist ? SaveChanges() : 0;
     }
+
 
 }

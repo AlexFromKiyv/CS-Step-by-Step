@@ -11,6 +11,8 @@ public class BasicUsageWithIHttpClientFactory
     public async Task DoSomethingAsync()
     {
         var client = _httpClientFactory.CreateClient();
+        Console.WriteLine(client.BaseAddress);
+
         //do something interesting with the client
     }
 }

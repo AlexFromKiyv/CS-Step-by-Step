@@ -26,10 +26,12 @@ public static class LoggingConfiguration
 
         ConfigurationManager? config = builder.Configuration;
         AppLoggingSettings? settings = config.GetSection(nameof(AppLoggingSettings)).Get<AppLoggingSettings>();
+        
         string? connectionStringName = settings.MSSqlServer.ConnectionStringName;
         string? connectionString = config.GetConnectionString(connectionStringName);
         string tableName = settings.MSSqlServer.TableName;
         string schema = settings.MSSqlServer.Schema;
+        
         string restrictedToMinimumLevel = settings.General.RestrictedToMinimumLevel;
 
         if (!Enum.TryParse<LogEventLevel>(restrictedToMinimumLevel, out var logLevel))
@@ -55,19 +57,18 @@ public static class LoggingConfiguration
             .Enrich.FromLogContext()
             .Enrich.With(new PropertyEnricher("ApplicationName", config.GetValue<string>("ApplicationName")))
             .Enrich.WithMachineName()
-            //.WriteTo.File(
-            //    path: builder.Environment.IsDevelopment()
-            //        ? settings.File.FullLogPathAndFileName
-            //        : settings.File.FileName, 
-            //    rollingInterval: RollingInterval.Day,
-            //    restrictedToMinimumLevel: logLevel,
-            //    outputTemplate: OutputTemplate)
-            .WriteTo.Console(restrictedToMinimumLevel: logLevel)
-            //.WriteTo.MSSqlServer(connectionString,
-            //    sqlOptions,
-            //    restrictedToMinimumLevel: logLevel,
-            //    columnOptions: ColumnOptions)
-            ;
+            .WriteTo.File(
+                path: builder.Environment.IsDevelopment()
+                    ? settings.File.FullLogPathAndFileName
+                    : settings.File.FileName,
+                rollingInterval: RollingInterval.Day,
+                restrictedToMinimumLevel: logLevel,
+                outputTemplate: OutputTemplate)
+            .WriteTo.MSSqlServer(connectionString,
+                sqlOptions,
+                restrictedToMinimumLevel: logLevel,
+                columnOptions: ColumnOptions)
+            .WriteTo.Console(restrictedToMinimumLevel: logLevel);
 
         builder.Logging.AddSerilog(log.CreateLogger(), false);
     }

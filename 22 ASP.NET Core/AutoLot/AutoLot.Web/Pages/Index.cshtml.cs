@@ -18,7 +18,7 @@ namespace AutoLot.Web.Pages
         public void OnGet([FromServices] IOptionsMonitor<DealerInfo> dealerOptions)
         {
             DealerInfoInstance = dealerOptions.CurrentValue;
-            //_logger.LogWarning(User.);
+            //_logger.LogWarning(DealerInfoInstance.DealerName);
         }
     }
 }

@@ -8,12 +8,12 @@ public abstract class ApiDataServiceBase<TEntity, TDataService> : IDataServiceBa
     protected readonly IAppLogging<TDataService> AppLoggingInstance;
     protected ApiDataServiceBase(IAppLogging<TDataService> appLogging, IApiServiceWrapperBase<TEntity> serviceWrapperBase)
     {
-        ServiceWrapper = serviceWrapperBase;
         AppLoggingInstance = appLogging;
+        ServiceWrapper = serviceWrapperBase;
     }
     public async Task<IEnumerable<TEntity>> GetAllAsync()
         => await ServiceWrapper.GetAllEntitiesAsync();
-    public async Task<TEntity> FindAsync(int id)
+    public async Task<TEntity?> FindAsync(int id)
         => await ServiceWrapper.GetEntityAsync(id);
     public async Task<TEntity> AddAsync(TEntity entity, bool persist = true)
         => await ServiceWrapper.AddEntityAsync(entity);

@@ -3,6 +3,7 @@
 public interface IBaseRepo<T> : IBaseViewRepo<T> where T : BaseEntity, new()
 {
     T? Find(int id);
+    Task<T?> FindAsync(int id);
     T? FindAsNoTracking(int id);
     T? FindIgnoreQueryFilters(int id);
     void ExecuteParameterizedQuery(string sql, object[] sqlParametersObjects);
@@ -14,4 +15,5 @@ public interface IBaseRepo<T> : IBaseViewRepo<T> where T : BaseEntity, new()
     int Delete(T entity, bool persist = true);
     int DeleteRange(IEnumerable<T> entities, bool persist = true);
     int SaveChanges();
+
 }

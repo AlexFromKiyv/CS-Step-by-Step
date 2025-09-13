@@ -10,12 +10,6 @@ public class AppLoggingSettings
     {
         public string RestrictedToMinimumLevel { get; set; }
     }
-    public class SqlServerSettings
-    {
-        public string TableName { get; set; }
-        public string Schema { get; set; }
-        public string ConnectionStringName { get; set; }
-    }
 
     public class FileSettings
     {
@@ -24,5 +18,12 @@ public class AppLoggingSettings
         public string FileName { get; set; }
         public string FullLogPathAndFileName =>
             $"{Drive}{Path.VolumeSeparatorChar}{Path.DirectorySeparatorChar}{FilePath}{Path.DirectorySeparatorChar}{FileName}";
+    }
+
+    public class SqlServerSettings
+    {
+        public string TableName { get; set; }
+        public string Schema { get; set; }
+        public string ConnectionStringName { get; set; }
     }
 }

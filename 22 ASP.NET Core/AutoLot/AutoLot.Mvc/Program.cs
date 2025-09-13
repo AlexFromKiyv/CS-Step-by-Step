@@ -1,4 +1,3 @@
-using AutoLot.Services.DataServices.Api.Examples;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,7 +6,6 @@ var builder = WebApplication.CreateBuilder(args);
 //Configure logging
 builder.ConfigureSerilog();
 builder.Services.RegisterLoggingInterfaces();
-
 
 builder.Services.AddControllersWithViews();
 
@@ -22,6 +20,8 @@ builder.Services.AddDataServices(builder.Configuration);
 
 builder.Services.Configure<DealerInfo>(builder.Configuration.GetSection(nameof(DealerInfo)));
 
+builder.Services.AddHttpClient();
+
 builder.Services.ConfigureApiServiceWrapper(builder.Configuration);
 
 var app = builder.Build();
@@ -29,7 +29,7 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
-{
+{    
     app.UseDeveloperExceptionPage();
     //Initialize the database
     if (app.Configuration.GetValue<bool>("RebuildDataBase"))

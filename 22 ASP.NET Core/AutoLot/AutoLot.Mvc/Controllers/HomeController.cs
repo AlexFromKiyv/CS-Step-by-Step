@@ -1,24 +1,28 @@
+using AutoLot.Dal.Repos.Interfaces;
 using AutoLot.Mvc.Models;
+using AutoLot.Services.ApiWrapper.Models;
+using AutoLot.Services.DataServices.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using NuGet.Protocol;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace AutoLot.Mvc.Controllers
 {
     public class HomeController : Controller
     {
         private readonly IAppLogging<HomeController> _logger;
-  
         public HomeController(IAppLogging<HomeController> logger)
         {
             _logger = logger;
         }
 
-        public IActionResult Index([FromServices] IOptionsMonitor<DealerInfo> dealerMonitor)
+        public async Task<IActionResult> Index([FromServices] IOptionsMonitor<DealerInfo> dealerMonitor)
         {
-            //_logger.LogAppWarning("");
+            _logger.LogAppWarning("My test error!!!");
+
             DealerInfo? vm = dealerMonitor.CurrentValue;
             return View(vm);
-
         }
 
         public IActionResult Privacy()

@@ -1,6 +1,9 @@
 
 var builder = WebApplication.CreateBuilder(args);
 
+//var config = builder.Configuration;
+//Console.WriteLine(config.GetConnectionString("AutoLot"));
+
 // Add services to the container.
 
 //Configure logging
@@ -12,8 +15,6 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-//var config = builder.Configuration;
-//Console.WriteLine(config.GetConnectionString("AutoLot"));
 
 var connectionString = builder.Configuration.GetConnectionString("AutoLot");
 builder.Services.AddDbContextPool<ApplicationDbContext>(

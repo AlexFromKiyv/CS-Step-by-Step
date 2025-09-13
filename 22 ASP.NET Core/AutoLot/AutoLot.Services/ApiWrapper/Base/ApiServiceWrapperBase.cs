@@ -4,21 +4,23 @@ namespace AutoLot.Services.ApiWrapper.Base;
 public abstract class ApiServiceWrapperBase<TEntity> : IApiServiceWrapperBase<TEntity> where TEntity : BaseEntity, new()
 {
     protected readonly HttpClient Client;
-    private readonly string _endPoint;
     protected readonly ApiServiceSettings ApiSettings;
+    private readonly string _endPoint;
     protected readonly string ApiVersion;
 
     protected ApiServiceWrapperBase(HttpClient client, IOptionsMonitor<ApiServiceSettings> apiSettingsMonitor, string endPoint)
     {
         Client = client;
+        ApiSettings = apiSettingsMonitor.CurrentValue;
         _endPoint = endPoint;
+    
         Client.BaseAddress = new Uri(ApiSettings.Uri);
-        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         var authToken = Convert.ToBase64String(Encoding.UTF8.GetBytes(
             $"{apiSettingsMonitor.CurrentValue.UserName}" +
             $":{apiSettingsMonitor.CurrentValue.Password}"));
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("basic", authToken);
-        ApiSettings = apiSettingsMonitor.CurrentValue;
+        Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("basic", authToken);
+
         ApiVersion = ApiSettings.ApiVersion;
     }
 
@@ -50,7 +52,7 @@ public abstract class ApiServiceWrapperBase<TEntity> : IApiServiceWrapperBase<TE
         return result;
     }
 
-    public async Task<TEntity> GetEntityAsync(int id)
+    public async Task<TEntity?> GetEntityAsync(int id)
     {
         var response = await Client.GetAsync($"{ApiSettings.Uri}{_endPoint}/{id}?v={ApiVersion}");
         response.EnsureSuccessStatusCode();
