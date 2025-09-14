@@ -19,8 +19,6 @@ namespace AutoLot.Mvc.Controllers
 
         public async Task<IActionResult> Index([FromServices] IOptionsMonitor<DealerInfo> dealerMonitor)
         {
-            _logger.LogAppWarning("My test error!!!");
-
             DealerInfo? vm = dealerMonitor.CurrentValue;
             return View(vm);
         }

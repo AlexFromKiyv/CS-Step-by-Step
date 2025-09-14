@@ -1900,7 +1900,7 @@ Serilog використовує приймачі (sinks) для запису в
 
 ## Інтерфейс IAppLogging
 
-Інтерфейс IAppLogging\<T\> містить методи ведення журналу для спеціально системи ведення журналу. Додайте новий каталог з назвою Interfaces до каталогу Logging у проекті AutoLot.Service. У цьому каталозі додайте новий інтерфейс з назвою IAppLogging<T>:
+Інтерфейс IAppLogging\<T\> містить методи ведення журналу для кастомної системи ведення журналу. Додайте новий каталог з назвою Interfaces до каталогу Logging у проекті AutoLot.Service. У цьому каталозі додайте новий інтерфейс з назвою IAppLogging<T>:
 
 ```cs
 namespace AutoLot.Services.Logging.Interfaces;
@@ -2286,6 +2286,43 @@ public class MakeDalDataService : DalDataServiceBase<Make, MakeDalDataService>, 
 ```
 Після ціх змін не буде змін в текстовому файлі і БД.
 
+Провіримо систему логування Autolot. В HomeControler додамо виклик.
+
+```cs
+        public async Task<IActionResult> Index([FromServices] IOptionsMonitor<DealerInfo> dealerMonitor, [FromServices] ICarDataService carDalDataService )
+        {
+            var car = await carDalDataService.FindAsync(1);
+            Console.WriteLine(car);
+            car.Id = 1000000;
+            await carDalDataService.UpdateAsync(car);
+
+            DealerInfo? vm = dealerMonitor.CurrentValue;
+            return View(vm);
+        }
+```
+В класі DalDataServiceBase доджамо:
+
+```cs
+    public async Task<TEntity> UpdateAsync(TEntity entity, bool persist = true)
+    {
+        if (entity.Id == 1000000)
+        {
+            AppLoggingInstance.LogAppError("Bad Id");
+            return new();
+        }
+
+        MainRepo.Update(entity, persist);
+        return entity;        
+    }
+```
+Отримаємо:
+
+```cs
+Car entry Zippy was added from Database
+1       Zippy   Black
+[12:14:47 ERR] Bad Id
+```
+Видалимо тестовий код.
 
 ## Утиліти для роботи з рядками
 

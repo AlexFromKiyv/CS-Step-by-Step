@@ -17,4 +17,5 @@ public class CarDalDataService : DalDataServiceBase<Car, CarDalDataService>,ICar
 
     public async Task<IEnumerable<Car>> GetAllByMakeIdAsync(int? makeId) =>
         makeId.HasValue ? _repo.GetAllBy(makeId.Value) : MainRepo.GetAllIgnoreQueryFilters();
+
 }
