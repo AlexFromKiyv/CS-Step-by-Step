@@ -27,7 +27,7 @@ public partial class Car : BaseEntity
     [DisplayName("Pet Name")]
     public string PetName { get; set; } = null!;
     [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
-    public string Display { get; set; }
+    public string? Display { get; set; }
     public string? Price { get; set; }
     public DateTime? DateBuilt { get; set; }
 
@@ -39,10 +39,10 @@ public partial class Car : BaseEntity
 
     [ForeignKey("MakeId")]
     [InverseProperty(nameof(Make.Cars))]
-    public virtual Make MakeNavigation { get; set; } = null!;
+    public virtual Make? MakeNavigation { get; set; } = null!;
 
     [InverseProperty(nameof(Radio.CarNavigation))]
-    public virtual Radio RadioNavigation { get; set; } = null!;
+    public virtual Radio? RadioNavigation { get; set; } = null!;
 
     [InverseProperty(nameof(Order.CarNavigation))]
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();

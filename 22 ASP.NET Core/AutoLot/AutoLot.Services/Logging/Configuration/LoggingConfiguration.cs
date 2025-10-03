@@ -57,17 +57,17 @@ public static class LoggingConfiguration
             .Enrich.FromLogContext()
             .Enrich.With(new PropertyEnricher("ApplicationName", config.GetValue<string>("ApplicationName")))
             .Enrich.WithMachineName()
-            .WriteTo.File(
-                path: builder.Environment.IsDevelopment()
-                    ? settings.File.FullLogPathAndFileName
-                    : settings.File.FileName,
-                rollingInterval: RollingInterval.Day,
-                restrictedToMinimumLevel: logLevel,
-                outputTemplate: OutputTemplate)
-            .WriteTo.MSSqlServer(connectionString,
-                sqlOptions,
-                restrictedToMinimumLevel: logLevel,
-                columnOptions: ColumnOptions)
+            //.WriteTo.File(
+            //    path: builder.Environment.IsDevelopment()
+            //        ? settings.File.FullLogPathAndFileName
+            //        : settings.File.FileName,
+            //    rollingInterval: RollingInterval.Day,
+            //    restrictedToMinimumLevel: logLevel,
+            //    outputTemplate: OutputTemplate)
+            //.WriteTo.MSSqlServer(connectionString,
+            //    sqlOptions,
+            //    restrictedToMinimumLevel: logLevel,
+            //    columnOptions: ColumnOptions)
             .WriteTo.Console(restrictedToMinimumLevel: logLevel);
 
         builder.Logging.AddSerilog(log.CreateLogger(), false);
