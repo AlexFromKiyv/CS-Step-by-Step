@@ -42,6 +42,12 @@
     <ProjectReference Include="..\AutoLot.Dal\AutoLot.Dal.csproj" />
     <ProjectReference Include="..\AutoLot.Models\AutoLot.Models.csproj" />
     <ProjectReference Include="..\AutoLot.Services\AutoLot.Services.csproj" />
-  </ItemGroup>  
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="AutoLot.Api.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
   
 </Project>

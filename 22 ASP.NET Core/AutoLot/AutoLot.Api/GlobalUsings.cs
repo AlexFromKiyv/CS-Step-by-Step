@@ -30,7 +30,7 @@ global using AutoLot.Api.Swagger;
 global using AutoLot.Api.Swagger.Models;
 
 global using AutoLot.Dal.Exceptions;
-//global using AutoLot.Dal.Repos;
+global using AutoLot.Dal.Repos;
 global using AutoLot.Dal.Repos.Base;
 global using AutoLot.Dal.Repos.Interfaces;
 global using AutoLot.Models.Entities;
@@ -41,3 +41,15 @@ global using AutoLot.Api.Controllers.Base;
 global using Microsoft.AspNetCore.Mvc.Filters;
 
 global using AutoLot.Api.Filters;
+
+global using AutoLot.Services.ViewModels;
+
+global using Microsoft.AspNetCore.Authentication;
+global using Microsoft.AspNetCore.Authorization;
+global using System.Net.Http.Headers;
+global using System.Security.Claims;
+global using System.Text;
+global using System.Text.Encodings.Web;
+
+global using AutoLot.Api.Security;
+global using Microsoft.AspNetCore.Mvc.Authorization;

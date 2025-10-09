@@ -13,6 +13,10 @@ builder.Services.RegisterLoggingInterfaces();
 builder.Services.AddControllers(config =>
     {
         config.Filters.Add(new CustomExceptionFilterAttribute(builder.Environment));
+        var policy = new AuthorizationPolicyBuilder()
+            .RequireAuthenticatedUser()
+            .Build();
+        config.Filters.Add(new AuthorizeFilter(policy));
     })
     .AddJsonOptions(options =>
     {
@@ -40,6 +44,9 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddAuthentication("BasicAuthentication")
+    .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddAutoLotApiVersionConfiguration(new ApiVersion(1, 0));
@@ -48,9 +55,9 @@ builder.Services.AddAndConfigureSwagger(
     builder.Configuration,
     Path.Combine(AppContext.BaseDirectory, $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"),
     true);
-
 //builder.Services.AddSwaggerGen();
 
+builder.Services.Configure<SecuritySettings>(builder.Configuration.GetSection(nameof(SecuritySettings)));
 
 var connectionString = builder.Configuration.GetConnectionString("AutoLot");
 builder.Services.AddDbContextPool<ApplicationDbContext>(
@@ -93,6 +100,7 @@ app.UseHttpsRedirection();
 //Add CORS Policy
 app.UseCors("AllowAll");
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

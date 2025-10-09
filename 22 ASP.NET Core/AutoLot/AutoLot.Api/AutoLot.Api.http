@@ -1,6 +1,94 @@
-@AutoLot.Api_HostAddress = http://localhost:5267
+@Host = https://localhost:5011
 
-GET {{AutoLot.Api_HostAddress}}/weatherforecast/
+GET {{Host}}/weatherforecast/
 Accept: application/json
 
+### Values
+GET {{Host}}/api/values
+
 ###
+GET {{Host}}/api/values/123
+
+###
+GET {{Host}}/api/values?api-version=2.0
+
+###
+GET {{Host}}/api/v2/values
+
+###
+GET {{Host}}/api/values/123?api-version=2.0
+
+###
+GET {{Host}}/api/v2/values/123
+
+###
+GET {{Host}}/api/v2.0-Beta/values/0
+
+
+###  Autolot.Api
+
+###
+GET {{Host}}/api/cars
+Authorization : Basic QXV0b0xvdDpBdXRvMTIzTG90JA==
+
+###
+GET {{Host}}/api/cars/3
+Authorization : Basic QXV0b0xvdDpBdXRvMTIzTG90JA==
+
+
+###
+PUT {{Host}}/api/cars/3
+Authorization : Basic QXV0b0xvdDpBdXRvMTIzTG90JA==
+Content-Type: application/json
+
+{
+  "MakeId": 3,
+  "IsDrivable": true,
+  "Color": "Grey",
+  "PetName": "Max",
+  "Price": "300",
+  "Id": 3,
+  "TimeStamp": "AAAAAAAC5kA="
+}
+
+###
+POST {{Host}}/api/cars
+Authorization : Basic QXV0b0xvdDpBdXRvMTIzTG90JA==
+Content-Type: application/json
+
+{
+  "MakeId": 5,
+  "IsDrivable": true,
+  "Color": "Navy",
+  "PetName": "Newer",
+  "Price": "300.00",
+  "TimeStamp": ""
+}
+
+###
+https://localhost:5011/api/cars/11
+Authorization : Basic QXV0b0xvdDpBdXRvMTIzTG90JA==
+Content-Type: application/json
+
+###
+DELETE https://localhost:5011/api/cars/11
+Authorization : Basic QXV0b0xvdDpBdXRvMTIzTG90JA==
+Content-Type: application/json
+
+{
+  "Id": 11,
+  "TimeStamp": "AAAAAAADFTo="
+}
+
+### 
+GET https://localhost:5011/api/Cars/bymake/5
+Authorization : Basic QXV0b0xvdDpBdXRvMTIzTG90JA==
+
+### 
+GET https://localhost:5011/api/drivers
+Authorization : Basic QXV0b0xvdDpBdXRvMTIzTG90JA==
+
+### 
+GET https://localhost:5011/api/customers
+Authorization : Basic QXV0b0xvdDpBdXRvMTIzTG90JA==
+

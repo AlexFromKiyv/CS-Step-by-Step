@@ -57,11 +57,10 @@
             Sample body:
             <pre>
             {
-              "Id": 0,
-              "TimeStamp": "",
               "MakeId": 1,
               "Color": "Red",
               "PetName": "Ruddy"
+              "TimeStamp": "",
             }
             </pre>
             </remarks>

@@ -3,6 +3,7 @@
 [ApiController]
 [Route("api/[controller]")]
 [Route("api/v{version:apiVersion}/[controller]")]
+[Authorize]
 public abstract class BaseCrudController<TEntity, TController> : ControllerBase
     where TEntity : BaseEntity, new()
     where TController : class
@@ -88,7 +89,7 @@ public abstract class BaseCrudController<TEntity, TController> : ControllerBase
     [HttpGet("{id}")]
     public ActionResult<TEntity> GetOne(int id)
     {
-        var entity = MainRepo.Find(id);
+        var entity = MainRepo.FindIgnoreQueryFilters(id);
 
         if (entity == null)
         {
@@ -163,11 +164,10 @@ public abstract class BaseCrudController<TEntity, TController> : ControllerBase
     /// Sample body:
     /// <pre>
     /// {
-    ///   "Id": 0,
-    ///   "TimeStamp": "",
     ///   "MakeId": 1,
     ///   "Color": "Red",
     ///   "PetName": "Ruddy"
+    ///   "TimeStamp": "",
     /// }
     /// </pre>
     /// </remarks>

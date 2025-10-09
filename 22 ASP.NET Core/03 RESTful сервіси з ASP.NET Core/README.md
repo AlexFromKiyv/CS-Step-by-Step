@@ -7,7 +7,7 @@
 З самого початку, ASP.NET Web API був розроблений як сервісний фреймворк для створення RESTful (REpresentational State Transfer) сервісів. Він базується на фреймворку MVC без V (view), з оптимізаціями для створення сервісів без заголовків. Ці служби можуть бути викликані будь-якою технологією, а не лише тими, що належать Microsoft. Виклики до служби веб-API базуються на основних HTTP методах (Get, Put, Post, Delete) через універсальний ідентифікатор ресурсу (URI), наприклад, такий:
 
 ```http
-http://www.myshop.com:5001/api/cars
+http://www.myshop.com:5011/api/cars
 ```
 
 Якщо це схоже на універсальний локатор ресурсів (uniform resource locator URL), то це тому, що це так! URL — це просто URI, який вказує на фізичний ресурс у мережі. 
@@ -50,7 +50,7 @@ public class ValuesController : ControllerBase
 
 Якщо ви використовуєте Visual Studio, для контролерів існує будувальник за шаблоном. Щоб отримати доступ до цього, клацніть правою кнопкою миші папку Controllers у проекті AutoLot.Api та виберіть Add ➤ Controller. Виберіть Common ➤ API у лівій панелі, а потім API Controller – Empty.
 Цей код встановлює маршрут для контролера за допомогою літерала (api) та токена ([controller]). Цей шаблон маршруту відповідатиме URL-адресам, таким як www.myshop.com/api/values. Наступний атрибут (ApiController) підключає кілька функцій, специфічних для API, в ASP.NET Core (розглянуті в наступному розділі). Зрештою, контролер успадковується від ControllerBase. Як обговорювалося раніше, ASP.NET Core об'єднав усі різні типи контролерів, доступні в класичному ASP.NET, в один, під назвою Controller, з базовим класом ControllerBase. Клас Controller забезпечує функціональність, специфічну для перегляду (V у MVC), тоді як ControllerBase надає всю решту основної функціональності для застосунків у стилі MVC.
-Існує кілька способів повернути контент у форматі JSON з методу дії. Наведені нижче приклади повертають однаковий JSON разом із кодом стану 200. Відмінності здебільшого стилістичні. Відмінності здебільшого стилістичні. Додайте наступний код до класу ValuesController:
+Існує кілька способів повернути контент у форматі JSON з методу дії. Наведені нижче приклади повертають однаковий JSON разом із кодом стану 200. Відмінності здебільшого стилістичні. Додайте наступний код до класу ValuesController:
 
 ```cs
     [HttpGet]
@@ -83,7 +83,7 @@ public class ValuesController : ControllerBase
         return new JsonResult(new string[] { "value1", "value2" });
     }
 ```
-Щоб перевірити це, запустіть застосунок AutoLot.Api, і ви побачите всі методи з ValuesController, перелічені в інтерфейсі Swagger. Нагадаємо, що під час визначення маршрутів суфікс Controller пропускається з назви, тому кінцеві точки на ValuesController відображаються як Values, а не ValuesController. Щоб виконати один із методів, натисніть кнопку «Get», кнопку «Try it out», а потім кнопку «Execute». Ви побачите, що виконання кожного методу призводить до однакових результатів JSON.
+Щоб перевірити це, запустіть застосунок AutoLot.Api, і ви побачите всі методи з ValuesController, перелічені в інтерфейсі Swagger. Нагадаємо, що під час визначення маршрутів суфікс Controller пропускається з назви, тому кінцеві точки на ValuesController відображаються як Values, а не ValuesController. Щоб виконати один із методів, натисніть кнопку «Get», кнопку «Try it out», а потім кнопку «Execute». Ви побачите, що виконання кожного методу призводить до однакових результатів JSON. Закоментуйте три останні методи.
 
 ## Налаштування обробки JSON
 
@@ -133,7 +133,7 @@ builder.Services.AddControllers()
     });
 ```
 
-## Атрибут ApiController
+# Атрибут ApiController
 
 Атрибут ApiController надає специфічні для REST правила, домовленості та поведінку в поєднанні з класом ControllerBase. Ці домовленості та поведінка описані в наступних розділах. Важливо зазначити, що це також працює у сценаріях базового класу. Наприклад, якщо у вас є власний базовий клас, оздоблений атрибутом ApiController, будь-які похідні контролери поводитимуться так, ніби цей атрибут застосовується безпосередньо до них.
 
@@ -240,7 +240,7 @@ builder.Services.AddControllers()
 ```
 Коли ви запустите програму та виконаєте код BadBindingExample(), ви побачите, що відповідь містить той самий JSON, що й автоматично оброблена помилка.
 
-## Висновок параметра джерела зв'язування
+## Вимкненя висновків для параметра джерела зв'язування
 
 Механізм прив'язки моделі визначить, де отримуються значення, на основі домовленостей, перелічених у таблиці.
 
@@ -344,7 +344,6 @@ builder.Services.AddControllers()
     {
         //suppress automatic model state binding errors
         options.SuppressModelStateInvalidFilter = true;
-        
         options.ClientErrorMapping[StatusCodes.Status404NotFound].Link = "https://httpstatuses.com/404";
         options.ClientErrorMapping[StatusCodes.Status404NotFound].Title = "Invalid location";
     });
@@ -352,13 +351,13 @@ builder.Services.AddControllers()
 
 # Версіонування API
 
-Під час створення API важливо пам’ятати, що люди не взаємодіють з вашими кінцевими точками, а взаємодіють програми. Якщо змінюється інтерфейс користувача програми, люди зазвичай можуть зрозуміти зміни та продовжувати користуватися вашою програмою.Якщо змінюється інтерфейс користувача програми, люди зазвичай можуть зрозуміти зміни та продовжувати користуватися вашою програмою. Якщо змінюється API, клієнтська програма просто перестає працювати. Якщо ваш API є публічним, має більше одного клієнта або ви плануєте внести зміни, вам слід додати підтримку версій.
+Під час створення API важливо пам’ятати, що люди не взаємодіють з вашими кінцевими точками, а взаємодіють програми. Якщо змінюється інтерфейс користувача програми, люди зазвичай можуть зрозуміти зміни та продовжувати користуватися вашою програмою. Якщо змінюється API, клієнтська програма просто перестає працювати. Якщо ваш API є публічним, має більше одного клієнта або ви плануєте внести зміни, вам слід додати підтримку версій.
 
 ## Керівні принципи Microsoft щодо REST API
 
-Корпорація Майкрософт опублікувала рекомендації щодо REST API (пошуковий запит Microsoft Graph REST API Guidelines), і ці рекомендації містять розділ про керування версіями. Щоб відповідати цим рекомендаціям, API повинні підтримувати явне керування версіями. 
+Корпорація Майкрософт опублікувала рекомендації щодо REST API (пошуковий запит "Best practices for RESTful web API design"), і ці рекомендації містять розділ про керування версіями. Щоб відповідати цим рекомендаціям, API повинні підтримувати явне керування версіями. 
 Версії API складаються з основної та другорядної версій і повідомляються/запитуються як Major.Minor, наприклад, 1.0, 1.5 тощо. Якщо проміжна версія дорівнює нулю, її можна пропустити. Іншими словами, 1 те саме, що й 1.0. Окрім основної та проміжної версії, в кінець версії можна додати статус, щоб вказати, що версія ще не має виробничої якості, наприклад, 1.0-Beta або 1.0.Beta. Зверніть увагу, що статуси можна розділяти крапкою або тире. Коли версія має нульову проміжну версію та статус, тоді версію можна вказати як Major.Minor-Status (1.0-Beta) або Major-Status (1-Beta), використовуючи тире або крапку як роздільник статусу.
-Окрім версій Major.Minor-Status, існує також груповий формат, який є додатковою функцією та підтримується через версіонізацію сегментів, що не є URL-адресою. Формат групової версії визначається як РРРР-ММ-ДД. Груповий формат не повинен замінювати версійний формат Major.Minor-Status.
+Окрім версій Major.Minor-Status, існує також груповий формат, який є додатковою функцією та підтримується через версіонізацію сегментів, що не є URL-адресою. Формат групової версії визначається як YYYY-MM-DD. Груповий формат не повинен замінювати версійний формат Major.Minor-Status.
 Існує два варіанти вказати версію у виклику API: вбудовано в URL-адресу (в кінці кореневого каталогу сервісу) або як параметр рядка запиту в кінці URL-адреси. У наступних прикладах показано виклики API версії 1.0 для AutoLot.Api (за умови, що хостом є myshop.com):
 
 ```url
@@ -367,15 +366,22 @@ www.myshop.com/api/cars?api-version=1.0
 ```
 Хоча API можуть використовувати як вбудовування URL-адрес, так і параметри рядка запиту, рекомендації вимагають, щоб API були узгодженими. Іншими словами, не допускайте використання одних кінцевих точок рядками запитів та інших вбудовуванням URL-адрес. Допустимо, щоб усі кінцеві точки підтримували обидва методи.
 
-    Ці рекомендації безумовно варто прочитати під час створення RESTful-сервісів .NET Core.
+    Ці рекомендації безумовно варто прочитати під час створення RESTful-сервісів .NET Core. "Best practices for RESTful web API design"
 
 ## Додавання пакетів NuGet для керування версіями
 
-Щоб додати повну підтримку версій ASP.NET Core, до ваших API-проектів потрібно додати два пакети NuGet. Перший – це пакет Microsoft.AspNetCore.Mvc.Versioning, який надає атрибути версії, метод AddApiVersioning() та клас ApiVersion. Другий – це пакет Microsoft.AspNetCore.Mvc.Versioning.Explorer NuGet, який робить метод AddVersionedApiExplorer() доступним. Обидва ці пакети були додані до AutoLot.Api під час створення проектів та рішення.
+Щоб додати повну підтримку версій ASP.NET Core, до ваших API-проектів потрібно додати два пакети NuGet. 
+
+    Microsoft.AspNetCore.Mvc.Versioning
+    Microsoft.AspNetCore.Mvc.Versioning.Explorer
+
+
+Перший – це пакет Microsoft.AspNetCore.Mvc.Versioning, який надає атрибути версії, метод AddApiVersioning() та клас ApiVersion. Другий – це пакет Microsoft.AspNetCore.Mvc.Versioning.Explorer NuGet, який робить метод AddVersionedApiExplorer() доступним. Обидва ці пакети були додані до AutoLot.Api під час створення проектів та рішення.
 Додайте наступні оператори до GlobalUsings.cs
 
 ```cs
-
+global using Microsoft.AspNetCore.Mvc.ApiExplorer;
+global using Microsoft.AspNetCore.Mvc.Versioning;
 ```
 
 ## Клас ApiVersion.
@@ -543,13 +549,13 @@ builder.Services.AddAutoLotApiVersionConfiguration(new ApiVersion(1, 0));
 Важливо розуміти, що після ввімкнення керування версіями воно вмикається для всіх контролерів API. Якщо для контролера не вказано версію, він використовуватиме версію за замовчуванням (1.0 у поточній конфігурації). Щоб перевірити це, запустіть програму та виконайте наступні команди CURL, усі з яких дають однаковий результат (нагадаємо, що пропуск мінорної версії те саме, що й вказівка ​​нуля):
 
 ```console
-curl -G  https://localhost:5011/WeatherForecast
-curl -G  https://localhost:5011/WeatherForecast?api-version=1
-curl -G  https://localhost:5011/WeatherForecast?api-version=1.0
+curl -i  https://localhost:5011/WeatherForecast
+curl -i  https://localhost:5011/WeatherForecast?api-version=1
+curl -i  https://localhost:5011/WeatherForecast?api-version=1.0
 ```
 Тепер оновіть виклик до цього:
 ```console
-curl -G  https://localhost:5011/WeatherForecast?api-version=2.0
+curl -i  https://localhost:5011/WeatherForecast?api-version=2.0
 ```
 При запиті версії 2.0, повернене значення показує, що це непідтримувана версія:
 ```
@@ -670,7 +676,6 @@ curl -i https://localhost:5011/api/values
 curl -i https://localhost:5011/api/values/3?api-version=2
 ```
 
-
 Як обговорювалося в оновлених правилах іменування, базові маршрути обох контролерів визначені як /api/Values. Таке розділення не впливає на відкритий API, а лише забезпечує механізм очищення кодової бази.
 
 ## Запити Query String Version та маршрутизація
@@ -709,7 +714,7 @@ public class ValuesController : ControllerBase
     }
 }
 ```
-Хоча при компіляції буде помилка, і не буде працювати Swagger UI, запити будуть викликати відповідні методи. 
+Запити будуть викликати відповідні методи. 
 
 ```console
 curl -i https://localhost:5011/api/values
@@ -743,7 +748,7 @@ public class Values2Controller : ControllerBase
 
 ## Отримання версії API у запитах
 
-Під час використання чергування версій може бути важливим знати запитувану версію. На щастя, це просте завдання. Існує два методи отримання запитуваної версії. Перший – це виклик методу GetRequestedApiVersion() у HttpContext, а другий (введений в ASP.NET Core 3.0) – використання прив’язки моделі. Обидва показані тут в оновленому методі Get() у Values2Controller:
+Під час використання чергування версій може бути важливим знати запитувану версію. На щастя, це просте завдання. Існує два методи отримання запитуваної версії. Перший – це виклик методу GetRequestedApiVersion() у HttpContext, а другий – використання прив’язки моделі. Обидва показані тут в оновленому методі Get() у Values2Controller:
 
 ```cs
     [HttpGet("{id}")]
@@ -751,18 +756,16 @@ public class Values2Controller : ControllerBase
     {
         var versionFromContext = HttpContext.GetRequestedApiVersion();
 
-        return Ok(new[] { versionFromContext.ToString(), versionFromModelBinding.ToString() });
+        return Ok(new[] { id.ToString(), versionFromContext.ToString(), versionFromModelBinding.ToString() });
     }
 ```
 ```console
 HTTP/1.1 200 OK
 Content-Type: application/json; charset=utf-8; v=2.0
-Date: Wed, 24 Sep 2025 15:31:54 GMT
-Server: Kestrel
-Transfer-Encoding: chunked
 api-supported-versions: 1.0, 2.0
 
 [
+  "5"  
   "2.0",
   "2.0"
 ]
@@ -783,6 +786,7 @@ public class Values2Controller : ControllerBase
 ```
 ```console
 curl -i https://localhost:5011/api/v2/values/
+curl -i https://localhost:5011/api/v2/values/5
 ```
 Зверніть увагу, що в попередньому прикладі визначено два маршрути. Це необхідно для підтримки керування версіями сегментів URL-адрес та маршрутизації сегментів, що не пов'язані з URL-адресами. Якщо застосунок підтримуватиме лише керування версіями сегментів URL-адрес, атрибут [Route("api/[controller]")] можна видалити.
 Також аби методи з ValuesController були доступні з такими запитами потрібно оновити цей контролер.
@@ -794,7 +798,9 @@ curl -i https://localhost:5011/api/v2/values/
 [ApiController]
 public class ValuesController : ControllerBase
 ```
-
+```console
+curl -i https://localhost:5011/api/v1/values/
+```
 
 
 ## Версіонування сегментів URL-адрес та значення статусу версії
@@ -816,6 +822,7 @@ curl -i https://localhost:5011/api/values/1?api-version=2.0.Beta
 curl -i https://localhost:5011/api/v2.0-Beta/values/5
 curl -i https://localhost:5011/api/v2.0.Beta/values/5
 ```
+
 
 ## Застарілі версії
 
@@ -1256,7 +1263,7 @@ public class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
 
 ## Оновіть виклик SwaggerGen()
 
-Шаблон за замовчуванням називається просто AddSwaggerGen() у файлі Program.cs з операторами верхнього рівня, що додає дуже базову підтримку. Видаліть цей рядок з операторів верхнього рівня та додайте його до методу AddAndConfigureSwagger(). У наступному коді ввімкнено анотації, встановлено OperationFilter та додано XML-коментарі.Якщо безпека не ввімкнена, метод на цьому завершується. Якщо запитується безпека, решта методу додає підтримку базової автентифікації в інтерфейс Swagger.
+Шаблон за замовчуванням просто викликає AddSwaggerGen() у файлі Program.cs з операторами верхнього рівня, що додає дуже базову підтримку. Видаліть цей рядок з операторів верхнього рівня та додайте його до методу AddAndConfigureSwagger(). У наступному коді ввімкнено анотації, встановлено OperationFilter та додано XML-коментарі.Якщо безпека не ввімкнена, метод на цьому завершується. Якщо запитується безпека, решта методу додає підтримку базової автентифікації в інтерфейс Swagger.
 
 ```cs
         services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
@@ -1355,7 +1362,7 @@ https://localhost:5011/swagger/v2/swagger.json
 ```
 Перш ніж анотації Swagger будуть отримані та додані до згенерованої документації, їх необхідно ввімкнути. Вони вже були ввімкнені в методі AddAndConfigureSwagger(). Тепер, коли ви переглядатимете розділ відповідей інтерфейсу Swagger, ви побачите налаштовані повідомлення.
 
-# Стовреня функцій AutoLot.Api
+# Стоврення функцій AutoLot.Api
 ## Створення BaseCrudController
 
 Більшість функцій програми AutoLot.Api можна класифікувати як один із таких методів:
@@ -1528,11 +1535,10 @@ global using AutoLot.Api.Controllers.Base;
     /// <pre>
     /// {
     ///   "Id": 1,
-    ///   "TimeStamp": "AAAAAAAAB+E="
     ///   "MakeId": 1,
-    ///   "Color": "Black",
+    ///   "Color": "Red",
     ///   "PetName": "Zippy",
-    ///   "MakeColor": "VW (Black)",
+    ///   "TimeStamp": "AAAAAAAAB+E="
     /// }
     /// </pre>
     /// </remarks>
@@ -1581,7 +1587,7 @@ global using AutoLot.Api.Controllers.Base;
 
 ```
 
-Метод починається з встановлення маршруту як HttpPut запиту на основі маршруту похідного контролера з обов'язковим параметром маршруту id. Значення маршруту призначається параметру id (неявний [FromRoute]), а сутність призначається з тіла запиту (неявний [FromBody]). 
+Метод починається з встановлення маршруту як HttpPut запиту на основі маршруту похідного контролера з обов'язковим параметром маршруту id. Значення маршруту призначається параметру id (неявний [FromRoute]), а сутність призначається з тіла запиту (неявний [FromBody]).
 Метод перевіряє, чи збігається значення маршруту (id) з ідентифікатором у тілі. Якщо ні, повертається BadRequest. Якщо це так, використовується явна перевірка на достовірність ModelState. Якщо ModelState недійсний, клієнту буде повернуто код 400 (BadRequest). Пам’ятайте, що явна перевірка на достовірність ModelState не потрібна, якщо неявна перевірка ввімкнена за допомогою атрибута ApiController.
 Якщо до цього моменту все пройшло успішно, репозиторій використовується для оновлення запису. Якщо оновлення завершується невдачею з винятком, клієнту повертається код 400. Якщо все пройшло успішно, клієнту повертається код 200 (OK) з оновленим записом, що передається як тіло відповіді.
 Обробка винятків у цьому прикладі (як і в решті прикладів) вкрай неадекватна. У виробничих застосунках слід використовувати все, що ви вивчили до цього моменту, а також фільтри винятків (представлені пізніше в цьому розділі) для коректної обробки проблем відповідно до вимог.
@@ -1589,7 +1595,6 @@ global using AutoLot.Api.Controllers.Base;
 ### Метод AddOne
 
 Метод HTTP Post представляє вставку запису. Метод наведено тут з наступним поясненням: 
-
 
 ```cs
     /// <summary>
@@ -1599,12 +1604,10 @@ global using AutoLot.Api.Controllers.Base;
     /// Sample body:
     /// <pre>
     /// {
-    ///   "Id": 1,
-    ///   "TimeStamp": "AAAAAAAAB+E="
     ///   "MakeId": 1,
-    ///   "Color": "Black",
-    ///   "PetName": "Zippy",
-    ///   "MakeColor": "VW (Black)",
+    ///   "Color": "Red",
+    ///   "PetName": "Ruddy"
+    ///   "TimeStamp": "",
     /// }
     /// </pre>
     /// </remarks>
@@ -1806,6 +1809,7 @@ public class RadiosController : BaseCrudController<Radio, RadiosController>
 ```
 
 На цьому налаштування всіх контролерів завершено, і ви можете використовувати інтерфейс користувача Swagger для тестування всієї функціональності. Якщо ви збираєтеся додавати/оновлювати/видаляти записи, оновіть значення RebuildDataBase на true у файлі appsettings.development.json.
+
 При тестувані методів може виникнути помилка валідації. Це можна вирішити вказавши властивості сутності як не обов'язкві. Наприклад
 
 ```cs
@@ -1821,7 +1825,6 @@ public partial class Car : BaseEntity
 
 }
 ```
-
 
 # Фільтри винятків 
 
@@ -1851,7 +1854,7 @@ public class CustomExceptionFilterAttribute : ExceptionFilterAttribute
 }
 ```
 На відміну від більшості фільтрів в ASP.NET Core, які мають обробник подій «до» та «після», фільтри винятків мають лише один обробник: OnException() (або OnExceptionAsync()). Цей обробник має один параметр, ExceptionContext. Цей параметр надає доступ до ActionContext, а також до винятку, який був викликаний.
-Фільтри також беруть участь у впровадженні залежностей, дозволяючи доступ до будь-якого елемента контейнера в коді. У цьому прикладі нам потрібен екземпляр IWebHostEnvironment, вставлений у фільтр. Це буде використано для визначення середовища виконання. Якщо середовищем є «Розробка», відповідь також повинна містити трасування стека. Додайте змінну рівня класу для зберігання екземпляра IWebHostEnvironment та додайте конструктор, як показано тут:
+Фільтри також беруть участь у впровадженні залежностей, дозволяючи доступ до будь-якого елемента контейнера в коді. У цьому прикладі нам потрібен екземпляр IWebHostEnvironment, вставлений у фільтр. Це буде використано для визначення середовища виконання. Якщо середовищем є «Development», відповідь також повинна містити трасування стека. Додайте змінну рівня класу для зберігання екземпляра IWebHostEnvironment та додайте конструктор, як показано тут:
 
 ```cs
     private readonly IWebHostEnvironment _hostEnvironment;
@@ -1927,6 +1930,10 @@ builder.Services.AddControllers(config =>
 Щоб перевірити фільтр винятків, запустіть програму та скористайтеся одним із застарілих методів Get() (наприклад, /api/Car) за допомогою Swagger. Тіло відповіді в інтерфейсі Swagger має відповідати наступному:
 
 ```console
+curl -i https://localhost:5011/api/v0.5/cars
+```
+
+```console
 {
   "Error": "General Error.",
   "Message": "I said not to use this one",
@@ -1979,3 +1986,245 @@ app.UseHttpsRedirection();
 app.UseCors("AllowAll");
 
 ```
+
+# Базова автентифікація
+
+Базова автентифікація – це метод захисту HTTP-викликів за допомогою імені користувача та пароля. Ім’я користувача та пароль об’єднуються, розділяючись двокрапкою (username:password), а потім кодуються у форматі Base64. Ця комбінація розміщується в заголовку авторизації запиту у форматі Authorization Basic \<CominedAndEncodedCredentials\>. Важливо зауважити, що ім’я користувача та пароль не зашифровані, тому виклики з використанням базової автентифікації завжди повинні використовувати HTTP, а також додаткові механізми безпеки, як-от фільтрування IP-адрес. У цьому прикладі для ASP.NET Core застосунку є два основні атрибути, що стосуються безпеки. 
+Перший — це [Authorize], який вимагає автентифікації користувача для доступу до захищеного ресурсу. Атрибут можна застосувати на рівні контролера або дії. Якщо застосовується на рівні контролера, це застосовується до всіх методів дій у контролері. Наступний атрибут — [AllowAnonymous], який вимикає захист для декорованого ресурсу. Атрибут також можна застосовувати на рівні контролера або дії. 
+Важливо зазначити, що атрибут AllowAnonymous завжди перевизначає атрибут Authorize, навіть якщо атрибут AllowAnonymous застосовується на рівні контролера, а атрибут Authorize застосовується до дії цього контролера.
+
+    Цей розділ не призначений для надання готової до роботи авторизації, а для демонстрації того, як додати власну авторизацію до RESTful-сервісу ASP.NET Core. Для отримання додаткової інформації про безпеку зверніться до документації, починаючи з "ASP.NET Core security"
+
+## Додавання та налаштування інформації безпеки
+
+Для цієї демонстрації ми зробимо найменш безпечний варіант і збережемо ім'я користувача та пароль у файлі appsettings.Development.json. Знову ж таки, мета полягає в тому, щоб показати, як додати безпеку до API, а не слугувати посібником із захисту вашої програми. Почніть з додавання наступного розділу до файлу налаштувань:
+
+```json
+  "SecuritySettings": {
+    "UserName": "AutoLot",
+    "Password": "Auto123Lot$"
+```
+Далі надайте модель для використання зі шаблоном Options для отримання інформації про безпеку. Ця модель буде розміщена в проекті AutoLot.Services, щоб її можна було використовувати спільно з веб-застосунками ASP.NET Core. Додайте новий клас з назвою SecuritySettings до папки ViewModels та оновіть код відповідно до наступного:
+
+```cs
+namespace AutoLot.Services.ViewModels;
+public class SecuritySettings
+{
+    public string UserName { get; set; }
+    public string Password { get; set; }
+}
+```
+Додайте новий простір імен до файлу GlobalUsings.cs у проекті AutoLot.Api:
+
+```cs
+global using AutoLot.Services.ViewModels;
+```
+
+Додайте наступний код до операторів верхнього рівня у файлі Program.cs у проекті AutoLot.Api перед викликом builder.Build():
+
+```cs
+builder.Services.Configure<SecuritySettings>(builder.Configuration.GetSection(nameof(SecuritySettings)));
+
+```
+Перш ніж створювати базовий обробник автентифікації, додайте такі оператори до файлу GlobalUsings.cs:
+
+```cs
+global using Microsoft.AspNetCore.Authentication;
+global using Microsoft.AspNetCore.Authorization;
+global using System.Net.Http.Headers;
+global using System.Security.Claims;
+global using System.Text;
+global using System.Text.Encodings.Web;
+```
+
+## Створення базового обробника автентифікації
+
+Щоб створити базовий обробник автентифікації, почніть зі створення нової папки з назвою Security. У цій папці створіть новий публічний клас з назвою BasicAuthenticationHandler.cs, який успадковується від AuthenticationHandler<AuthenticationSchemeOptions>, ось так:
+
+
+```cs
+namespace AutoLot.Api.Security;
+
+public class BasicAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
+{
+    public BasicAuthenticationHandler(
+        IOptionsMonitor<AuthenticationSchemeOptions> options,
+        ILoggerFactory logger,
+        UrlEncoder encoder,
+        ISystemClock clock) : base(options, logger, encoder, clock)
+    {
+    }
+
+    protected override Task<AuthenticateResult> HandleAuthenticateAsync()
+    {
+        throw new NotImplementedException();
+    }
+}
+```
+
+Далі оновіть необхідний конструктор, щоб він приймав IOptionsMonitor для SecuritySettings застосунку. Призначте значення SecuritySettings змінній рівня класу:
+
+```cs
+    private readonly SecuritySettings _securitySettings;
+
+    public BasicAuthenticationHandler(
+        IOptionsMonitor<AuthenticationSchemeOptions> options,
+        ILoggerFactory logger,
+        UrlEncoder encoder,
+        ISystemClock clock,
+        IOptionsMonitor<SecuritySettings> securitySettingsMonitor) : base(options, logger, encoder, clock)
+    {
+        _securitySettings = securitySettingsMonitor.CurrentValue;
+    }
+```
+Існує один метод, який потрібно перевизначити, HandleAuthenticateAsync(). Перший крок – перевірити наявність атрибута AllowAnonymous, і якщо він знайдений, повернути AuthenticateResult.NoResult(), що фактично дозволяє доступ.
+
+```cs
+    protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
+    {
+        // skip authentication if endpoint has [AllowAnonymous] attribute
+        var endpoint = Context.GetEndpoint();
+        if (endpoint?.Metadata?.GetMetadata<IAllowAnonymous>() != null)
+        {
+            return AuthenticateResult.NoResult();
+        }
+    }
+```
+Далі перевірте наявність ключа заголовка авторизації, і якщо його не знайдено, проведіть автентифікацію невдало:
+
+```cs
+        if (!Request.Headers.ContainsKey("Authorization"))
+        {
+            return AuthenticateResult.Fail("Missing Authorization Header");
+        }
+```
+Решта методу наведена тут, з подальшим поясненням:
+
+```cs
+        try
+        {
+            AuthenticationHeaderValue authHeader = AuthenticationHeaderValue.Parse(Request.Headers["Authorization"]);
+            byte[] credentialBytes = Convert.FromBase64String(authHeader.Parameter);
+            string[] credentials = Encoding.UTF8.GetString(credentialBytes).Split(new[] { ':' }, 2);
+            string userName = credentials[0];
+            string password = credentials[1];
+            if (userName.Equals(_securitySettings.UserName, StringComparison.OrdinalIgnoreCase) &&
+                password.Equals(_securitySettings.Password, StringComparison.OrdinalIgnoreCase))
+            {
+                var claims = new[] {
+                    new Claim(ClaimTypes.NameIdentifier, userName),
+                    new Claim(ClaimTypes.Name, userName),
+                };
+                var identity = new ClaimsIdentity(claims, Scheme.Name);
+                var principal = new ClaimsPrincipal(identity);
+                var ticket = new AuthenticationTicket(principal, Scheme.Name);
+
+                return AuthenticateResult.Success(ticket);
+            }
+            return AuthenticateResult.Fail("Invalid Authorization Header");
+        }
+        catch
+        {
+            return AuthenticateResult.Fail("Invalid Authorization Header");
+        }
+```
+Перший крок – розібрати заголовок атрибута Authorization. Якщо це вдається, параметр знову змінюється на звичайний текст із кодування Base64, який, якщо значення правильно відформатовано, поверне рядок у форматі ім'я username:password.
+Далі ім'я користувача та пароль порівнюються зі значеннями у файлі налаштувань, і якщо вони збігаються, створюється новий ClaimsPrincipal. Процес авторизації повідомляє про успіх, фактично здійснюючи вхід нового користувача. Якщо ім'я користувача та пароль не збігаються або якщо десь на цьому шляху виникає виняток, автентифікація не вдається.
+Останній крок — додати новий простір імен до глобальних операторів using у GlobalUsings.cs:
+
+```cs
+global using AutoLot.Api.Security;
+```
+
+## Реєстрація базового обробника автентифікації та захист контролерів
+
+Останні кроки – реєстрація обробника, підписка на автентифікацію та захист контролерів. Почніть з додавання наступного коду до IServiceCollection у верхньому рівні інструкцій у Program.cs:
+
+```cs
+builder.Services.AddAuthentication("BasicAuthentication")
+    .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);
+```
+
+Далі, увімкніть автентифікацію для програми(перед рядком app.UseAuthorization();):
+
+```cs
+app.UseAuthentication();
+```
+Останній крок — додати Authorize до BaseCrudController, що також захистить усі похідні контролери:
+
+```cs
+[ApiController]
+[Route("api/[controller]")]
+[Route("api/v{version:apiVersion}/[controller]")]
+[Authorize]
+public abstract class BaseCrudController<TEntity, TController> : ControllerBase
+    where TEntity : BaseEntity, new()
+    where TController : class
+{
+    //...
+}
+```
+Якшо на данному єтапі запустити додадток і спробувати виконати будь-який затип без авторизації відповіть повернеться з кодом статусу 401(Unauthorized access attempted).
+
+Як альтернативу, ви можете налаштувати кожен контролер на вимогу авторизації, якщо він не має атрибута [AllowAnonymous]. Є кілька способів зробити це. Найпростіший спосіб – додати метод RequireAuthorization() до методу MapControllers():
+
+```cs
+app.MapControllers().RequireAuthorization();
+```
+Якщо вам потрібен більший контроль, ви можете створити політику та додати її як політику авторизації. У наступному прикладі створюється політика авторизації, яка вимагає авторизації всіх викликів (якщо не присутній атрибут [AllowAnonymous]). Додайте наступний оператор до файлу GlobalUsings.cs
+
+```cs
+using Microsoft.AspNetCore.Mvc.Authorization;
+```
+Створіть і додайте політику.
+
+```cs
+
+builder.Services.AddControllers(config =>
+    {
+        config.Filters.Add(new CustomExceptionFilterAttribute(builder.Environment));
+        var policy = new AuthorizationPolicyBuilder()
+            .RequireAuthenticatedUser()
+            .Build();
+        config.Filters.Add(new AuthorizeFilter(policy));
+    })
+    .AddJsonOptions(options =>
+    {
+        //...
+    }).ConfigureApiBehaviorOptions(options =>
+    {
+        //...
+    });
+```
+Щоб дозволити анонімний доступ до WeatherController та двох ValuesController, потрібно додати атрибут [AllowAnonymous] до цих контролерів:
+
+```cs
+[ApiVersion("0.5",Deprecated = true)]
+[ApiVersion("1.0")]
+[Route("api/[controller]")]
+[Route("api/v{version:apiVersion}/[controller]")]
+[ApiController]
+[AllowAnonymous]
+public class ValuesController : ControllerBase
+{
+    //...
+}
+```
+```cs
+    [ApiVersionNeutral]
+    [ApiController]
+    [Route("[controller]")]
+    [AllowAnonymous]
+    public class WeatherForecastController : ControllerBase
+    {
+        //...
+    }
+```
+Щоб протестувати нову систему безпеки, запустіть програму. Cпробуйте одну із захищених кінцевих точок. Ви побачите що запит повертається з помилкою 401.Натисніть кнопку «Authorize» та введіть облікові дані (AutoLot, Auto123Lot$) та нажміть Close. Виконуючи запити ви можете побачити заголовок Authorization в який передаються необхідні дані авторизованого користувача.
+
+
+# Підсумки
+
+У цьому розділі ми продовжили наше вивчення ASP.NET Core. Спочатку ми дізналися про повернення JSON з методів дій та налаштування формату JSON. Потім ми розглянули атрибут ApiController та його вплив на контролери API. Далі до програми було додано керування версіями, а загальну реалізацію Swashbuckle було оновлено, щоб включити XML-документацію програми, додаткову інформацію з атрибутів методів дій та допоміжні версії API.
+Далі було створено базовий контролер, який містить більшу частину функціональності програми. Після цього до проєкту було додано похідні, специфічні для сутностей контролери. Після встановлення контролерів було створено та додано до колекції фільтрів фільтр винятків для всієї програми, увімкнено підтримку запитів між джерелами, і, нарешті, до програми було додано базову автентифікацію.
+У наступному розділі ви повернетеся до веб-програми ASP.NET Core, використовуючи шаблон MVC, який вже було створено.
