@@ -2948,31 +2948,31 @@ SQLite це СУБД дозволяє зберігати структурова�
 Проста строка підключеня може виглядадти так 
 
 ```cs
-string connectionString = "Data Source=usersdata.db";
+string connectionString = "Data Source=Ware.db";
 ```
 
 Створимо підключання.
 
 ```cs
+using Microsoft.Data.Sqlite;
+
+string path = "DataSource=D:\\Temp\\Team.db";
+
 void ConnectionToDb()
 {
-    using SqliteConnection connection = new("DataSource=D:\\Temp\\users.db");
+    using SqliteConnection connection = new(path);
     connection.Open();
-    Console.WriteLine(connection.State);
-    Console.WriteLine(connection.Database);
-    Console.WriteLine(connection.DataSource);
-    Console.WriteLine(connection.ServerVersion);
+    Console.Write(connection.Database); Console.Write("\t");
+    Console.Write(connection.State); Console.Write("\t");
+    Console.Write(connection.DataSource); Console.Write("\t");
+    Console.Write(connection.ServerVersion); Console.Write("\t");
     Console.WriteLine(connection.DefaultTimeout);
     connection.Close();
 }
 ConnectionToDb();
 ```
 ```
-Open
-main
-D:\Temp\users.db
-3.41.2
-30
+main    Open    D:\Temp\Team.db 3.41.2  30
 ```
 Після цого на диску з'явится пуста БД.
 
@@ -2985,18 +2985,36 @@ D:\Temp\users.db
 ```cs
 void AddTable()
 {
-    using SqliteConnection connection = new("DataSource=D:\\Temp\\users.db");
+    if (TableExists("People"))
+    {
+        return;
+    }
+
+    using SqliteConnection connection = new(path);
     connection.Open();
 
     SqliteCommand command = new SqliteCommand();
     command.Connection = connection;
-    command.CommandText = "CREATE TABLE Users(_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, Name TEXT NOT NULL, Age INTEGER NOT NULL)";
+    command.CommandText = "CREATE TABLE People(Id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, Name TEXT NOT NULL, Age INTEGER NOT NULL)";
     command.ExecuteNonQuery();
 
     connection.Close();
 }
 AddTable();
 
+bool TableExists(string tableName)
+{
+    using SqliteConnection connection = new(path);
+    connection.Open();
+    
+    var command = connection.CreateCommand();
+        command.CommandText =@"SELECT name FROM sqlite_master WHERE type='table' AND name=$tableName";
+        command.Parameters.AddWithValue("$tableName", tableName);
+
+    using var reader = command.ExecuteReader();
+    
+    return reader.HasRows; // If a row is returned, the table exists
+}
 ```
 Співставлення даних в СУБД та C# можна знайти в документації по запиту SQLite Data types С#
 
@@ -3004,136 +3022,51 @@ AddTable();
 ### Додавання даних
 
 ```cs
-void AddUser()
+void AddPerson()
 {
-    using SqliteConnection connection = new("DataSource=D:\\Temp\\users.db");
+    using SqliteConnection connection = new(path);
     connection.Open();
 
     SqliteCommand command = new SqliteCommand();
     command.Connection = connection;
-    command.CommandText = "INSERT INTO Users (Name, Age) VALUES ('Julia', 36)";
+    command.CommandText = "INSERT INTO People (Name, Age) VALUES ('Julia', 36)";
     int number = command.ExecuteNonQuery();
 
     connection.Close();
 
-    Console.WriteLine($"Rows have been added to the Users table: {number}");
+    Console.WriteLine($"Rows have been added to the People table: {number}");
 }
-AddUser();
+AddPerson();
 ```
 ```
-Rows have been added to the Users table: 1
+Rows have been added to the People table: 1
 ```
 
 Можна додадти декілька рядків.
 
 ```cs
-void AddUsers()
+void AddPeople()
 {
-    using SqliteConnection connection = new("DataSource=D:\\Temp\\users.db");
-    
+    using SqliteConnection connection = new(path);
+
+    string sql = "INSERT INTO People (Name, Age) VALUES ('Alex', 34), ('Olga', 28)";
+
     connection.Open();
 
-    string sql = "INSERT INTO Users (Name, Age) VALUES ('Alex', 34), ('Olga', 28)";
     SqliteCommand command = new SqliteCommand(sql, connection);
     int number = command.ExecuteNonQuery();
 
     connection.Close();
 
-    Console.WriteLine($"Rows have been added to the Users table: {number}");
+    Console.WriteLine($"Rows have been added to the People table: {number}");
 }
-AddUsers();
-
+AddPeople();
 ```
 ```
-Rows have been added to the Users table: 2
+Rows have been added to the People table: 2
 ```
 Значення id останнього доданого рядка можна отримати запросом SELECT last_insert_rowid();
 
-
-### Оновлення даних 
-
-```cs
-void UpdateUser()
-{
-    using SqliteConnection connection = new("DataSource=D:\\Temp\\users.db");
-
-    string sql = "UPDATE Users SET Age=14 WHERE Name='Olga'";
-
-    connection.Open();
-
-    SqliteCommand command = new SqliteCommand(sql, connection);
-
-    int number = command.ExecuteNonQuery();
-
-    connection.Close();
-
-    Console.WriteLine($"Rows have been updated to the Users table: {number}");
-}
-UpdateUser();
-```
-```
-Rows have been updated to the Users table: 1
-```
-
-### Видаленя даних
-```cs
-void DeleteUser()
-{
-    using SqliteConnection connection = new("DataSource=D:\\Temp\\users.db");
-
-    string sql = "DELETE  FROM Users WHERE Age < 16";
-
-    connection.Open();
-
-    SqliteCommand command = new SqliteCommand(sql, connection);
-
-    int number = command.ExecuteNonQuery();
-
-    connection.Close();
-
-    Console.WriteLine($"Rows have been deleted to the Users table: {number}");
-}
-DeleteUser();
-```
-```
-Rows have been deleted to the Users table: 1
-```
-
-### Декілька операцій з даними
-
-Як видно всі операції з даними виконуються індентично. Різниця в sql- виразі. За одне підключена зробимо деквілька операцій.
-```cs
-void SomeDataChanges()
-{
-    using SqliteConnection connection = new("DataSource=D:\\Temp\\users.db");
-
-    connection.Open();
-
-    SqliteCommand command = new SqliteCommand();
-    command.Connection = connection;
-
-    command.CommandText = "INSERT INTO Users (Name, Age) VALUES ('Sara', 34), ('John', 28)";
-    int number = command.ExecuteNonQuery();
-    Console.WriteLine($"Rows have been added to the Users table: {number}");
-
-    command.CommandText = "UPDATE Users SET Age=44 WHERE Name='Sara'";
-    number = command.ExecuteNonQuery();
-    Console.WriteLine($"Rows have been updated to the Users table: {number}");
-
-    command.CommandText = "DELETE FROM Users WHERE Name='John'";
-    number = command.ExecuteNonQuery();
-    Console.WriteLine($"Rows have been deleted to the Users table: {number}");
-
-    connection.Close();
-
-}
-SomeDataChanges();
-```
-```
-Rows have been added to the Users table: 2
-Rows have been updated to the Users table: 1
-Rows have been deleted to the Users table: 1
-```
 
 ### Читання даних
 
@@ -3142,7 +3075,7 @@ Rows have been deleted to the Users table: 1
 ```cs
 void ReadFromDb()
 {
-    using SqliteConnection connection = new("DataSource=D:\\Temp\\users.db");
+    using SqliteConnection connection = new(path);
 
     connection.Open();
 
@@ -3158,10 +3091,9 @@ void ReadFromDb()
 
     Console.WriteLine($"{reader.GetValue(0)}\t{reader.GetValue(1)}\t{reader.GetValue(2)}");
 
-
     while (reader.Read())
     {
-        Console.WriteLine($"{reader["_id"]}\t{reader["Name"]}\t{reader["Age"]}");
+        Console.WriteLine($"{reader["Id"]}\t{reader["Name"]}\t{reader["Age"]}");
     }
 
     connection.Close();
@@ -3169,7 +3101,149 @@ void ReadFromDb()
 ReadFromDb();
 ```
 ```
-_id     Name    Age
+Id      Name    Age
+1       Julia   36
+2       Alex    34
+4       Sara    44
+```
+### Ініціалізація БД
+
+```cs
+void InitializationDb()
+{
+    ConnectionToDb();
+    if (!TableExists("People"))
+    {
+        AddTable();
+    }
+    else
+    {
+        ClearTableRecords("People");
+    }
+    AddPerson();
+    AddPeople();
+    ReadFromDb();
+}
+InitializationDb();
+
+void ClearTableRecords(string tableName)
+{
+    using SqliteConnection connection = new(path);
+
+    connection.Open();
+
+    var commandText = $"DELETE FROM {tableName};";
+
+    using var command = new SqliteCommand(commandText, connection);
+    command.ExecuteNonQuery();
+
+    command.CommandText = $"UPDATE sqlite_sequence SET seq = 0 WHERE name = 'People';";
+    command.ExecuteNonQuery();
+}
+
+```
+```
+main    Open    D:\Temp\Team.db 3.41.2  30
+Rows have been added to the People table: 1
+Rows have been added to the People table: 2
+Id      Name    Age
+1       Julia   36
+2       Alex    34
+3       Olga    28
+
+```
+
+### Оновлення даних 
+
+```cs
+void UpdatePerson()
+{
+    using SqliteConnection connection = new(path);
+
+    connection.Open();
+
+    string sql = "UPDATE People SET Age=14 WHERE Name='Olga'";
+    SqliteCommand command = new SqliteCommand(sql, connection);
+    int number = command.ExecuteNonQuery();
+
+    connection.Close();
+
+    Console.WriteLine($"Rows have been updated to the People table: {number}");
+    ReadFromDb();
+}
+UpdatePerson();
+```
+```
+Rows have been updated to the People table: 1
+Id      Name    Age
+1       Julia   36
+2       Alex    34
+3       Olga    14
+```
+
+
+### Видаленя даних
+```cs
+void DeletePerson()
+{
+    using SqliteConnection connection = new(path);
+
+    connection.Open();
+
+    string sql = "DELETE  FROM People WHERE Age < 16";
+    SqliteCommand command = new SqliteCommand(sql, connection);
+    int number = command.ExecuteNonQuery();
+
+    connection.Close();
+
+    Console.WriteLine($"Rows have been deleted to the Person table: {number}");
+    ReadFromDb();
+}
+DeletePerson();
+```
+```
+Rows have been deleted to the Person table: 1
+Id      Name    Age
+1       Julia   36
+2       Alex    34
+```
+
+### Декілька операцій з даними
+
+Отже всі операції з даними виконуються індентично. Різниця в sql- виразі. За одне підключена зробимо деквілька операцій.
+```cs
+void SomeDataChanges()
+{
+    using SqliteConnection connection = new(path);
+
+    connection.Open();
+
+    SqliteCommand command = new SqliteCommand();
+    command.Connection = connection;
+
+    command.CommandText = "INSERT INTO People (Name, Age) VALUES ('Sara', 34), ('John', 28)";
+    int number = command.ExecuteNonQuery();
+    Console.WriteLine($"Rows have been added to the People table: {number}");
+
+    command.CommandText = "UPDATE People SET Age=44 WHERE Name='Sara'";
+    number = command.ExecuteNonQuery();
+    Console.WriteLine($"Rows have been updated to the People table: {number}");
+
+    command.CommandText = "DELETE FROM People WHERE Name='John'";
+    number = command.ExecuteNonQuery();
+    Console.WriteLine($"Rows have been deleted to the People table: {number}");
+
+    ReadFromDb();
+
+    connection.Close();
+}
+SomeDataChanges();
+```
+```
+Rows have been added to the People table: 2
+Rows have been updated to the People table: 1
+Rows have been deleted to the People table: 1
+Id      Name    Age
 1       Julia   36
 2       Alex    34
 4       Sara    44
@@ -3182,11 +3256,11 @@ _id     Name    Age
 ```cs
 void CommandWithParameters()
 {
-    using SqliteConnection connection = new("DataSource=D:\\Temp\\users.db");
+    using SqliteConnection connection = new(path);
 
     connection.Open();
 
-    string sql = "INSERT INTO Users (Name, Age) VALUES (@name, @age)";
+    string sql = "INSERT INTO People (Name, Age) VALUES (@name, @age)";
 
     SqliteCommand command = new(sql, connection);
 
@@ -3198,7 +3272,7 @@ void CommandWithParameters()
     command.Parameters.Add(parameterAge);
 
     int number = command.ExecuteNonQuery();
-    Console.WriteLine($"Rows have been added to the Users table: {number}");
+    Console.WriteLine($"Rows have been added to the People table: {number}");
 
     connection.Close();
 
@@ -3207,8 +3281,8 @@ void CommandWithParameters()
 CommandWithParameters();
 ```
 ```
-Rows have been added to the Users table: 1
-_id     Name    Age
+Rows have been added to the People table: 1
+Id      Name    Age
 1       Julia   36
 2       Alex    34
 4       Sara    44
@@ -3221,16 +3295,18 @@ _id     Name    Age
 ```cs
 void RetrieveScalarValue()
 {
-    using SqliteConnection connection = new("DataSource=D:\\Temp\\users.db");
+    using SqliteConnection connection = new(path);
 
     connection.Open();
 
-    string sql = "SELECT AVG(Age) FROM Users";
+    ReadFromDb(); Console.WriteLine();
+
+    string sql = "SELECT AVG(Age) FROM People";
     SqliteCommand command = new(sql, connection);
     object? avgAge = command.ExecuteScalar();
     Console.WriteLine(avgAge);
 
-    command.CommandText = "SELECT COUNT(*) FROM Users";
+    command.CommandText = "SELECT COUNT(*) FROM People";
     object? countUsers = command.ExecuteScalar();
     Console.WriteLine(countUsers);
 
@@ -3239,6 +3315,12 @@ void RetrieveScalarValue()
 RetrieveScalarValue();
 ```
 ```
+Id      Name    Age
+1       Julia   36
+2       Alex    34
+4       Sara    44
+6       Tomy    37
+
 37,75
 4
 ```

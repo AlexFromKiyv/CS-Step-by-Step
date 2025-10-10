@@ -29,16 +29,16 @@ GET {{Host}}/api/v2.0-Beta/values/0
 
 ###
 GET {{Host}}/api/cars
-Authorization : Basic QXV0b0xvdDpBdXRvMTIzTG90JA==
+# Authorization : Basic токен
 
 ###
 GET {{Host}}/api/cars/3
-Authorization : Basic QXV0b0xvdDpBdXRvMTIzTG90JA==
+# Authorization : Basic токен
 
 
 ###
 PUT {{Host}}/api/cars/3
-Authorization : Basic QXV0b0xvdDpBdXRvMTIzTG90JA==
+# Authorization : Basic токен
 Content-Type: application/json
 
 {
@@ -53,7 +53,7 @@ Content-Type: application/json
 
 ###
 POST {{Host}}/api/cars
-Authorization : Basic QXV0b0xvdDpBdXRvMTIzTG90JA==
+# Authorization : Basic токен
 Content-Type: application/json
 
 {
@@ -67,12 +67,12 @@ Content-Type: application/json
 
 ###
 https://localhost:5011/api/cars/11
-Authorization : Basic QXV0b0xvdDpBdXRvMTIzTG90JA==
+# Authorization : Basic токен
 Content-Type: application/json
 
 ###
 DELETE https://localhost:5011/api/cars/11
-Authorization : Basic QXV0b0xvdDpBdXRvMTIzTG90JA==
+# Authorization : Basic токен
 Content-Type: application/json
 
 {
@@ -82,13 +82,13 @@ Content-Type: application/json
 
 ### 
 GET https://localhost:5011/api/Cars/bymake/5
-Authorization : Basic QXV0b0xvdDpBdXRvMTIzTG90JA==
+# Authorization : Basic токен
 
 ### 
 GET https://localhost:5011/api/drivers
-Authorization : Basic QXV0b0xvdDpBdXRvMTIzTG90JA==
+# Authorization : Basic токен
 
 ### 
 GET https://localhost:5011/api/customers
-Authorization : Basic QXV0b0xvdDpBdXRvMTIzTG90JA==
+# Authorization : Basic токен
 

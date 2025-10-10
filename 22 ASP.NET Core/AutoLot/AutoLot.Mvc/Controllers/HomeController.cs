@@ -22,6 +22,11 @@ namespace AutoLot.Mvc.Controllers
             DealerInfo? vm = dealerMonitor.CurrentValue;
             return View(vm);
         }
+        [HttpGet]
+        public async Task<IActionResult> RazorSyntaxAsync()
+        {
+            return View();
+        }
 
         public IActionResult Privacy()
         {
