@@ -1,4 +1,5 @@
-﻿namespace AutoLot.Dal.Repos;
+﻿
+namespace AutoLot.Dal.Repos;
 
 public class CarRepo : TemporalTableBaseRepo<Car>, ICarRepo
 {

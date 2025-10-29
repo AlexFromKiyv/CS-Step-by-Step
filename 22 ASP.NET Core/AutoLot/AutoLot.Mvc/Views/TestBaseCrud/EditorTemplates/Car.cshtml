@@ -1,0 +1,33 @@
+﻿@model Car
+@{
+    var timeStamp = (Model != null) ? Convert.ToBase64String(Model.TimeStamp) : " ";
+}
+
+<div asp-validation-summary="All" class="text-danger"></div>
+<div>
+    <label asp-for="MakeId" class="col-form-label"></label>
+    <select asp-for="MakeId" class="form-control" asp-items="@ViewBag.LookupValues"></select>
+    <span asp-validation-for="MakeId" class="text-danger"></span>
+</div>
+<div>
+    <label asp-for="Color" class="col-form-label"></label>
+    <input asp-for="Color" class="form-control" />
+    <span asp-validation-for="Color" class="text-danger"></span>
+</div>
+<div>
+    <label asp-for="PetName" class="col-form-label"></label>
+    <input asp-for="PetName" class="form-control" />
+    <span asp-validation-for="PetName" class="text-danger"></span>
+</div>
+<div>
+    <label asp-for="IsDrivable" class="col-form-label"></label>
+    <input asp-for="IsDrivable" />
+    <span asp-validation-for="IsDrivable" class="text-danger"></span>
+</div>
+<div>
+    <label asp-for="TimeStamp" class="col-form-label"></label>
+    <input asp-for="TimeStamp" value=@timeStamp />
+    <span asp-validation-for="TimeStamp" class="text-danger"></span>
+</div>
+
+

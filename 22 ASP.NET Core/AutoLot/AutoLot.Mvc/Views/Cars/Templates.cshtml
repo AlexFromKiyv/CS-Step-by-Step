@@ -1,0 +1,14 @@
+﻿@model AutoLot.Models.Entities.Car
+@{
+    Layout = "_MyCustomLayout";
+}
+
+@Html.DisplayForModel()
+<hr />
+@Html.DisplayForModel("CarWithColors")
+<hr />
+@Html.EditorForModel()
+
+@section Scripts {
+    <script src="~/lib/jquery-validation/dist/jquery.validate.js"></script>
+}

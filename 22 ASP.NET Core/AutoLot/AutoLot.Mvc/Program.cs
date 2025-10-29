@@ -9,6 +9,30 @@ builder.Services.RegisterLoggingInterfaces();
 
 builder.Services.AddControllersWithViews();
 
+builder.Services.TryAddSingleton<IActionContextAccessor, ActionContextAccessor>();
+
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddWebOptimizer(false, false);
+
+    //builder.Services.AddWebOptimizer(options =>
+    //{
+    //    options.MinifyCssFiles("AutoLot.Mvc.styles.css");
+    //    options.MinifyCssFiles("/css/site.css");
+    //    options.MinifyJsFiles("/js/site.js");
+    //});
+
+}
+else
+{
+    builder.Services.AddWebOptimizer(options =>
+    {
+        options.MinifyCssFiles("AutoLot.Mvc.styles.css");
+        options.MinifyCssFiles("cs/site.cs");
+        options.MinifyJsFiles("js/site.js");
+    });
+}
+
 var connectionString = builder.Configuration.GetConnectionString("AutoLot");
 builder.Services.AddDbContextPool<ApplicationDbContext>(
     options => options.UseSqlServer(connectionString,
@@ -48,14 +72,18 @@ else
 }
     
 app.UseHttpsRedirection();
+
+
+app.UseWebOptimizer();
 app.UseStaticFiles();
 
 app.UseRouting();
 
 app.UseAuthorization();
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+//app.MapControllerRoute(
+//    name: "default",
+//    pattern: "{controller=Home}/{action=Index}/{id?}");
+app.MapControllers();
 
 app.Run();

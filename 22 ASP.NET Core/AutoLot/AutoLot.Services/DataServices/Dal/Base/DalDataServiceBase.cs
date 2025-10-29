@@ -21,7 +21,7 @@ public abstract class DalDataServiceBase<TEntity, TDataService> : IDataServiceBa
     //public async Task<TEntity> FindAsync(int id) =>
     //    MainRepo.Find(id);
     public async Task<TEntity?> FindAsync(int id) =>
-       await MainRepo.FindAsync(id);
+        MainRepo.Find(id);
 
     public async Task<TEntity> AddAsync(TEntity entity, bool persist = true)
     {

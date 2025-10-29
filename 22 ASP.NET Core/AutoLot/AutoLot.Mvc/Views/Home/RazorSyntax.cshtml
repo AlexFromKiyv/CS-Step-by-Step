@@ -1,0 +1,111 @@
+﻿@model AutoLot.Models.Entities.Car
+@{
+    ViewData["Title"] = "RazorSyntax";
+}
+<h1>Razor Syntax</h1>
+
+<h3>
+@for (int i = 0; i < 13; i++)
+{
+    @i@:&nbsp; 
+}
+</h3>
+<br />
+
+@{
+    //Code Block
+    var foo = "Foo";
+    var bar = "Bar";
+    var htmlList = "<ul><li>one</li><li>two</li></ul>";
+}
+
+@foo<br />
+@htmlList<br />
+@foo.@bar<br />
+
+@foo.ToUpper()
+
+<br />
+@Html.Raw(htmlList)
+<br />
+<hr />
+
+@{
+    @:Straight Text
+    <div>Value:@Model.PetName</div>
+    <text>
+        Lines without HTML tag
+    </text>
+    <br />
+}
+<hr />
+
+Email Address Handling:
+<br />
+foo@foo.com
+<br />
+@@foo
+<br />
+test@foo
+<br />
+test@(foo)
+<br />
+
+@*
+    Multiline Comments
+    Hi.
+*@
+
+@functions {
+    public static IList<string> SortList(IList<string> strings)
+    {
+        var list = from s in strings orderby s select s;
+        return list.ToList();
+    }
+}
+
+@{
+    var myList = new List<string> { "C", "A", "Z", "F" };
+    var sortedList = SortList(myList);
+}
+@foreach (string s in sortedList)
+{
+    @s
+
+    @:&nbsp;
+}
+<hr />
+
+@{
+    Func<dynamic, object> b = @<strong>@item</strong>;
+}
+This will be bold: @b("Foo")
+
+<hr />
+
+The Car named @Model.PetName is a <span style=" color : @Model.Color ">@Model.Color</span> @Model.MakeNavigation.Name
+
+
+<hr />
+<label class="customer" asp-for="PetName">Pet Name:</label>
+<br />
+@Html.Label("PetName", "Pet Name:", new { @class = "customer" })
+<br />
+<form method="post">
+
+    <button type="submit" asp-controller="TestBaseCrud" asp-action="Create">Create</button>
+</form>
+<br />
+
+<a asp-controller="TestBaseCrud" asp-action="Details" asp-route-id="@Model.Id">@Model.PetName</a>
+<br />
+
+<select asp-for="MakeId" asp-items="@ViewBag.LookupValues"></select>
+
+<h1>HTML helpers</h1>
+
+@Html.DisplayFor(x => x.MakeNavigation)
+
+@Html.DisplayForModel()
+
+@Html.DisplayForModel("../Cars/DisplayTemplates/Car.cshtml")
