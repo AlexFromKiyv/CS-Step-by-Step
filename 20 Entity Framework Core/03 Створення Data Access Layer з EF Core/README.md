@@ -2486,6 +2486,13 @@ public class CarRepo : TemporalTableBaseRepo<Car>, ICarRepo
 ```
 Додайте перевизначення для GetAll() і GetAllIgnoreQueryFilters(), використовуючи базовий запит, щоб включити властивість MakeNavigation і порядок за значеннями PetName.
 
+```cs
+public override IEnumerable<Car> GetAll()
+    => BuildBaseQuery();
+public override IEnumerable<Car> GetAllIgnoreQueryFilters()
+    => BuildBaseQuery().IgnoreQueryFilters();
+```
+
 Реалізуйте метод GetAllBy(). Цей метод отримує всі записи Inventory з указаним MakeId
 
 ```cs

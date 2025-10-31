@@ -2446,7 +2446,7 @@ public class ItemCreateTagHelper : ItemLinkTagHelperBase
 
     public override void Process(TagHelperContext context, TagHelperOutput output)
     {
-        BuildContent(output, "text-success", "Create New", "plus");
+        BuildContent(output, "text-success", "Create", "plus");
     }
 }
 ```
@@ -2499,7 +2499,7 @@ public class ItemListTagHelper : ItemLinkTagHelperBase
 |-----------|------------|
 |Html.DisplayFor()|Відображає об'єкт, визначений виразом|
 |Html.DisplayForModel()|Відображає модель, використовуючи шаблон за замовчуванням або власний шаблон|
-|Html.DisplayNameFor()|Отримує відображуване ім'я, якщо воно існує, або ім'я властивості, якщо відображуване ім'я відсутнє.|
+|Html.DisplayNameFor()|Отримує "Display" ім'я, якщо воно існує, або ім'я властивості, якщо "Display" ім'я відсутнє.|
 |Html.EditorFor()|Відображає поле редагування для об'єкта, визначеного виразом|
 |Html.EditorForModel()|Відображає редактор для моделі, використовуючи шаблон за замовчуванням або власний шаблон|
 
@@ -2546,3 +2546,260 @@ public class ItemListTagHelper : ItemLinkTagHelperBase
 ## HTML хелпери EditorFor та EditorForModel
 
 Помічники EditorFor() та EditorForModel() функціонують так само, як і відповідні помічники відображення. Різниця полягає в тому, що пошук шаблонів здійснюється в каталозі EditorTemplates, а замість представлення об'єкта лише для читання відображаються HTML-редактори.
+
+# Представлення Car
+
+У цьому розділі завершується робота з відкладенимим переглядами та додаються решта переглядів для CarsController. Якщо встановити прапорець RebuildDatabase у appsettings.Development.json на значення true, то будь-які зміни, внесені під час тестування цих представлень, будуть скинуті під час наступного запуску програми.
+
+## Частковий перегляд списку автомобілів
+
+Для сторінки Index доступні два вигляди. Один показує весь облік автомобілів, а інший – список автомобілів за маркою. Оскільки інтерфейс користувача однаковий, списки будуть відображатися з використанням часткового представлення. Створіть новий каталог з назвою Partials у каталозі Views\Cars. У цьому каталозі додайте нове представлення з назвою _CarListPartial.cshtml та видаліть наявний код. Встановіть IEnumerable<Car> як тип (його не потрібно повністю кваліфікувати, оскільки ми додали простір імен AutoLot.Models.Entities до файлу _ViewImports.cshtml).
+
+```cshtml
+@model IEnumerable<Car>
+```
+Далі додайте блок Razor з набором логічних змінних, які вказують, чи слід відображати марки. Коли цей частковий перегляд використовується всім списком, повинні відображатися марки.Коли відображається лише одна марка, поле «Марка» має бути прихованим.
+
+```cshtml
+@{
+    var showMake = true;
+    if (bool.TryParse(ViewBag.ByMake?.ToString(), out bool byMake))
+    {
+        showMake = !byMake;
+    }
+}
+```
+У наступній розмітці використовується ItemCreateTagHelper для створення посилання на метод Create HTTP Get. Нагадуємо, що під час використання користувацьких допоміжних елементів тегів назва пишеться з малої літери кебаб. Це означає, що суфікс TagHelper відкидається, а потім кожне слово, що починається у великому регістрі Паскаля, переходить у нижній регістр і розділяється дефісом:
+
+```html
+<p>
+    <item-create></item-create>
+</p>
+```
+У заголовках таблиці використовується HTML-помічник Razor для отримання DisplayName для кожної властивості. DisplayNameFor вибере значення атрибута Display або DisplayName, і якщо жоден з них не встановлено, використовуватиметься назва властивості. У цьому розділі використовується блок Razor для відображення інформації Make на основі змінної рівня перегляду, встановленої раніше.
+
+```html
+
+<table class="table">
+    <thead>
+        <tr>
+            @if (showMake)
+            {
+                <th>@Html.DisplayNameFor(model => model.MakeId)</th>
+            }
+            <th>@Html.DisplayNameFor(model => model.Color)</th>
+            <th>@Html.DisplayNameFor(model => model.PetName)</th>
+            <th>@Html.DisplayNameFor(model => model.Price)</th>
+            <th>@Html.DisplayNameFor(model => model.DateBuilt)</th>
+            <th>@Html.DisplayNameFor(model => model.IsDrivable)</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+
+    </tbody>
+</table>
+```
+В останньому розділі перебираються записи та відображаються записи таблиці за допомогою HTML-помічника DisplayFor Razor. Цей помічник шукатиме назву шаблону DisplayTemplate, яка відповідає типу властивості, і, якщо її не знайдено, створить розмітку за замовчуванням. Наприклад, властивість DateBuilt використовуватиме шаблон відображення DateTime.cshtml, створений раніше в цьому розділі. Цей блок також використовує користувацькі тег-помічники item-edit, item-details та item-delete. Нагадуємо, що під час передачі значень до публічних властивостей у помічнику користувацьких тегів, назва властивості пишеться з малого регістру та додається до тегу як атрибут.
+
+```html
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                @if (showMake)
+                {
+                    <td>@Html.DisplayFor(modelItem => item.MakeNavigation.Name)</td>
+                }
+                <td>@Html.DisplayFor(modelItem => item.Color)</td>
+                <td>@Html.DisplayFor(modelItem => item.PetName)</td>
+                <td>@Html.DisplayFor(modelItem => item.Price)</td>
+                <td>@Html.DisplayFor(modelItem => item.DateBuilt)</td>
+                <td>@Html.DisplayFor(modelItem => item.IsDrivable)</td>
+                <td>
+                    <item-edit item-id="@item.Id"></item-edit> |
+                    <item-details item-id="@item.Id"></item-details> |
+                    <item-delete item-id="@item.Id"></item-delete>
+                </td>
+            </tr>
+        }
+    </tbody>
+```
+
+## Представлення Index
+
+З використанням часткового виразу _CarListPartial представлення Index досить мале, що демонструє перевагу використання часткових представлень для зменшення повторюваної розмітки. Створіть нове представлення з назвою Index.cshtml у каталозі Views\Cars. Видаліть будь-який згенерований код і додайте наступне:
+
+```html
+@model IEnumerable<Car>
+@{
+    ViewData["Title"] = "Cars";
+}
+<h1>Vehicle Inventory</h1>
+<partial name="Partials/_CarListPartial" model="@Model"/>
+```
+Частковий _CarListPartial викликається зі значенням моделі представлення, що його містить (IEnumerable<Car>), переданим разом з атрибутом model. Це встановлює модель часткового представлення на об'єкт, переданий у \<partial\> тег-помічник. Нагадаємо, що метод дії Index() BaseCrudController повертає всі записи для цього типу.
+
+Для того аби дані були послідовними первизначимо метод GetAllIgnoreQueryFilters в ...\AutoLot.Dal\Repos\CarRepo.cs 
+```cs
+    public override IEnumerable<Car> GetAllIgnoreQueryFilters() 
+        => Table.Include(c => c.MakeNavigation)
+        .OrderBy(c => c.Id)
+        .IgnoreQueryFilters();
+```
+Щоб побачити це представлення в дії, запустіть програму та перейдіть за адресою https://localhost:5001/Cars/Index, і ви побачите список.
+
+## Представлення ByMake
+
+Представлення ByMake схоже на Index, але частково налаштовано не відображати інформацію про марку, окрім як у заголовку сторінки. Створіть нове представлення з назвою ByMake.cshtml у каталозі Views\Cars.
+
+```html
+@model IEnumerable<Car>
+@{
+    ViewData["Title"] = $"By {@ViewBag.MakeName}";
+}
+<h1>Vehicle Inventory for @ViewBag.MakeName</h1>
+@{
+    var mode = new ViewDataDictionary(ViewData) {{"ByMake", true}};
+}
+<partial name="Partials/_CarListPartial" model="Model" view-data="@mode"/>
+```
+Існує дві чіткі відмінності. Перша полягає в тому, що створюється новий ViewDataDictionary, що містить властивість ByMake з ViewBag. Потім вона передається в частковий перегляд разом з моделлю, і обидва використовуються представленням _CarListPartial.
+
+Тепер, коли у вас є перегляд, запустіть програму та перейдіть за адресою https://localhost:5001/Cars/ByMake/5/BMW,
+
+## Представлення Details
+
+Створіть нове представлення з назвою Details.cshtml у каталозі Views\Cars.
+
+```html
+@model Car
+@{
+    ViewData["Title"] = "Details";
+}
+<h1>Details for @Model.PetName</h1>
+@Html.DisplayForModel()
+@*@Html.DisplayForModel("CarWithColors")*@
+<div>
+    <item-edit item-id="@Model.Id"></item-edit>
+    <item-delete item-id="@Model.Id"></item-delete>
+    <item-list></item-list>
+</div>
+```
+@Html.DisplayForModel() використовує шаблон відображення (Car.cshtml), створений раніше в цьому розділі, для відображення Car. Запустіть програму та перейдіть за адресою https://localhost:5001/Cars/Details/5
+
+## Представлення Create
+
+Представлення Create було розпочато раніше. Ось повний код завершеного перегляду:
+
+```html
+@model Car
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create a New Car</h1>
+<hr/>
+<form asp-controller="Cars" asp-action="Create">
+    <div class="row">
+        <div class="col-md-4">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            @Html.EditorForModel()
+        </div>
+    </div>
+    <div class="d-flex flex-row mt-3">
+        <button type="submit" class="btn btn-success">Create <i class="fas fa-plus"></i></button>&nbsp;&nbsp;|&nbsp;&nbsp;
+        <item-list></item-list>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial"/>
+}
+
+```
+Метод @Html.EditorForModel() використовує шаблон редактора (Car.cshtml), створений раніше в цьому розділі, для відображення екрана редагування Car. Цей вигляд також додає _ValidationScriptsPartial до секції Scripts. Нагадаємо, що в макеті ця секція з'являється після завантаження jQuery. Шаблон розділів допомагає забезпечити завантаження належних залежностей перед вмістом розділу. Форму створення можна переглянути за адресою https://localhost:5001/Cars/Create
+
+## Представлення Edit
+
+Створіть нове представлення з назвою Edit.cshtml у каталозі Views\Cars.
+
+```html
+@model Car
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+@if (ViewData["Error"] != null)
+{
+    <div class="alert alert-danger" role="alert">
+        @ViewData["Error"]
+    </div>
+}
+else
+{
+    <h1>Edit @Model.PetName</h1>
+    <hr/>
+    <form asp-area="" asp-controller="Cars" asp-action="Edit" asp-route-id="@Model.Id">
+        <div class="row">
+            <div class="col-md-4">
+                @Html.EditorForModel()
+            </div>
+        </div>
+        <div class="d-flex flex-row mt-3">
+            <input type="hidden" asp-for="Id"/>
+            <input type="hidden" asp-for="TimeStamp"/>
+            <button type="submit" class="btn btn-primary">Save <i class="fas fa-save"></i></button>&nbsp;&nbsp;|&nbsp;&nbsp;
+            <item-list></item-list>
+        </div>
+    </form>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial"/>
+}
+```
+Це представлення перевіряє, чи була передана помилка з контролера, і якщо так, відображає сповіщення та зупиняє обробку. В іншому випадку відображається форма редагування. Це представлення також використовує метод @Html.EditorForModel() та _ValidationScriptsPartial, але воно також містить два приховані вхідні дані для Id та TimeStamp. Вони будуть опубліковані разом з рештою даних форми, але не повинні редагуватися користувачами. Без ідентифікатора та позначки часу оновлення не можна було б зберегти. 
+Форму редагування можна переглянути за адресою https://localhost:5001/Cars/Edit/1
+
+## Представлення Delete 
+
+Створіть нове представлення з назвою Delete.cshtml у каталозі Views\Cars.
+
+```html
+@model Car
+
+@{
+    ViewData["Title"] = "Delete";
+}
+@if (ViewData["Error"] != null)
+{
+    <div class="alert alert-danger" role="alert">
+        @ViewData["Error"]
+    </div>
+}
+else
+{
+    <h1>Delete @Model.PetName</h1>
+
+    <h3>Are you sure you want to delete this car?</h3>
+    <div>
+        <div asp-validation-summary="All" class="text-danger"></div>
+        @Html.DisplayForModel()
+        <form asp-action="Delete">
+            <input type="hidden" asp-for="Id"/>
+            <input type="hidden" asp-for="TimeStamp"/>
+            <button type="submit" class="btn btn-danger">
+                Delete <i class="fas fa-trash"></i></button>&nbsp;&nbsp;|&nbsp;&nbsp;
+            <item-list></item-list>
+        </form>
+    </div>
+}
+```
+Цей перегляд також перевіряє наявність помилок і відображає сповіщення, якщо їх знайдено. В іншому випадку використовується метод @Html.DisplayForModel() та два приховані вхідні дані для Id та TimeStamp. Це будуть єдині поля, що відображатимуться як дані форми. Форму видалення можна переглянути за адресою https://localhost:5001/Cars/Delete/5
+
+Це завершує створення представлень для контролера сутності Car.
+
+## 

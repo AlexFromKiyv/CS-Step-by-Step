@@ -9,6 +9,6 @@ public class ItemCreateTagHelper : ItemLinkTagHelperBase
 
     public override void Process(TagHelperContext context, TagHelperOutput output)
     {
-        BuildContent(output, "text-success", "Create New", "plus");
+        BuildContent(output, "text-success", "Create", "plus");
     }
 }

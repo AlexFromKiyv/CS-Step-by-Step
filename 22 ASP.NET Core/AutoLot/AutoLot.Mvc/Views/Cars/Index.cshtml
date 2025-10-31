@@ -1,5 +1,6 @@
-﻿@model IEnumerable<Car> 
+﻿@model IEnumerable<Car>
 @{
+    ViewData["Title"] = "Cars";
 }
-
-@Html.DisplayForModel()
+<h1>Vehicle Inventory</h1>
+<partial name="Partials/_CarListPartial" model="@Model"/>

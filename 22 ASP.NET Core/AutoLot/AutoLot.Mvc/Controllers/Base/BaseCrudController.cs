@@ -61,7 +61,7 @@ public abstract class BaseCrudController<TEntity,TController> : Controller
         if (ModelState.IsValid)
         {
             await MainDataService.AddAsync(entity);
-            return RedirectToAction(nameof(DetailsAsync).RemoveAsyncSuffix(), new { id = entity.Id });
+            return RedirectToAction(nameof(IndexAsync).RemoveAsyncSuffix(), new { id = entity.Id });
 
         }
         ViewData["LookupValues"] = await GetLookupValuesAsync();
@@ -100,7 +100,7 @@ public abstract class BaseCrudController<TEntity,TController> : Controller
         if (ModelState.IsValid)
         {
             await MainDataService.UpdateAsync(entity);
-            return RedirectToAction(nameof(DetailsAsync).RemoveAsyncSuffix(), new { id });
+            return RedirectToAction(nameof(IndexAsync).RemoveAsyncSuffix(), new { id });
         }
         ViewData["LookupValues"] = await GetLookupValuesAsync();
         return View(entity);
