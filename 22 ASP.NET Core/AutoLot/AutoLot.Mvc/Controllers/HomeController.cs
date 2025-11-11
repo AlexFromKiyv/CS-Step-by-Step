@@ -58,4 +58,44 @@ public class HomeController : Controller
     {
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
+
+    [HttpGet]
+    public IActionResult Validation()
+    {
+        var vm = new AddToCartViewModel
+        {
+            Id = 1,
+            ItemId = 1,
+            StockQuantity = 2,
+            Quantity = 0
+        };
+        return View(vm);
+    }
+
+    [HttpPost]
+    public IActionResult Validation(AddToCartViewModel viewModel)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(viewModel);
+        }
+        return RedirectToAction(nameof(Validation));
+    }
+
+    [HttpGet]
+    public IActionResult GrantConsent()
+    {
+        HttpContext.Features.Get<ITrackingConsentFeature>().GrantConsent();
+        return RedirectToAction(nameof(Index), nameof(HomeController).RemoveControllerSuffix(),
+            new { area = "" });
+    }
+
+    [HttpGet]
+    public IActionResult WithdrawConsent()
+    {
+        HttpContext.Features.Get<ITrackingConsentFeature>().WithdrawConsent();
+        return RedirectToAction(nameof(Index), nameof(HomeController).RemoveControllerSuffix(),
+            new { area = "" });
+    }
+
 }

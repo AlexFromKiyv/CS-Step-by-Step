@@ -110,7 +110,7 @@ CS0618: 'HorseAndBuggy' is obsolete: 'Use another vehicle!'
 ```cs
 namespace AttributedCarLibrary;
 
-public sealed class VehicleDescriptionAttribute :Attribute
+public sealed class VehicleDescriptionAttribute : Attribute
 {
     public string? Description { get; set; }
 
@@ -122,7 +122,7 @@ public sealed class VehicleDescriptionAttribute :Attribute
     public VehicleDescriptionAttribute(){}
 }
 ```
-VehicleDescriptionAttribute зберігає частину рядкових даних за допомогою автоматичної властивості (Description).Крім того, що цей клас походить від System.Attribute, у цьому визначенні класу немає нічого унікального. З міркувань безпеки вважається найкращою практикою .NET розробляти всі спеціальні атрибути як sealed (запечатаний). 
+VehicleDescriptionAttribute зберігає частину рядкових даних за допомогою автоматичної властивості (Description). Крім того, що цей клас походить від System.Attribute, у цьому визначенні класу немає нічого унікального. З міркувань безпеки вважається найкращою практикою .NET розробляти всі спеціальні атрибути як sealed (запечатаний). 
 
 Тепер коли ми маємо клас власного атрібути ми можемо використовувати його роблячи аннотації інших класів. 
 
@@ -359,7 +359,7 @@ public  class Winnebago
 ```
 Існує підступ, оскільки таким чином можна використовувати лише однорядкові атрибути параметрів. Це стосується властивостей, які можна встановити на вкладці «Package» у властивостях проекту.
 
-Встановимо деякі властивості (наприклад, Authors, Description), клацнувши правою кнопкою миші  проект у провіднику рішень, вибравши «Properties,», а потім клацнувши «Package».
+Встановимо деякі властивості (наприклад, Authors, Description), клацнувши правою кнопкою миші  проект у провіднику рішень, вибравши «Properties», а потім клацнувши «Package».
 
 Файл проекту вигляджатиме.
 ```
@@ -462,8 +462,6 @@ void ReflectAttributesUsingLateBinding()
         Type[] types = assembly.GetTypes();
 		foreach (Type type in types)
 		{
-			if (vehicleDesctiption == null) { return;}
-
 			object[] objects = type.GetCustomAttributes(vehicleDesctiption, false);
 			foreach (object obj in objects)
 			{

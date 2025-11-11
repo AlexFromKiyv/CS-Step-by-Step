@@ -2802,4 +2802,689 @@ else
 
 Це завершує створення представлень для контролера сутності Car.
 
-## 
+# Компоненти представлення
+
+Компоненти представлення поєднують переваги часткових представлень з дочірніми діями для відображення частин інтерфейсу користувача. Як і часткові представлення, вони викликаються з іншого представлення, але на відміну від самих часткових представлень, компоненти представлення також мають серверний компонент. Таке поєднання робить їх чудовим вибором для таких функцій, як створення динамічних меню (як показано пізніше), панелей входу, контенту бічної панелі або будь-чого, що потребує виконання серверного коду, але не може бути окремим представленням.
+Для AutoLot компонент view динамічно створюватиме меню на основі марок, що є в базі даних. Меню видно на кожній сторінці, тому логічне місце для нього — у _Layout.cshtml. Але _Layout.cshtml не має серверного компонента (на відміну від представлень), тому кожна дія в додатку повинна буде надавати дані до _Layout.cshtml. Це можна зробити в обробнику події OnActionExecuting контролера, а записи помістити в ViewBag, але це може бути складно в обслуговуванні. Поєднання можливостей серверної частини та інкапсуляції інтерфейсу користувача робить цей сценарій ідеальним варіантом використання для компонентів представлення.
+
+
+## Код на стороні сервера
+
+Створіть нову папку з назвою ViewComponents у кореневому каталозі проекту AutoLot.Mvc. Додайте новий файл класу з назвою MenuViewComponent.cs до цієї папки. Домовленість полягає в тому, щоб називати класи компонентів представлення суфіксом ViewComponent, як і контролери. І, як і контролери, суфікс ViewComponent відкидається під час виклику компонентів представлення.
+Змініть клас на public та успадкуйте від ViewComponent. Компоненти View не обов'язково повинні успадковуватися від базового класу ViewComponent, але, як і у випадку з базовим класом Controller, успадкування від ViewComponent значно спрощує роботу. Створіть конструктор, який приймає екземпляр інтерфейсу IMakeDataService та призначає його полю рівня класу.
+
+```cs
+namespace AutoLot.Mvc.ViewComponents;
+
+public class MenuViewComponent : ViewComponent
+{
+    private readonly IMakeDataService _dataService;
+
+    public MenuViewComponent(IMakeDataService dataService)
+    {
+        _dataService = dataService;
+    }
+}
+```
+Для компонентів представлення доступні два методи: Invoke() та InvokeAsync(). Один з них має бути реалізований, і оскільки IMakeDataService здійснює лише асинхронні виклики, додайте метод InvokeAsync() ось так:
+
+```cs
+    public async Task<IViewComponentResult> InvokeAsync()
+    {
+
+    }
+```
+Коли компонент представлення відтворюється з представлення, викликається публічний метод Invoke()/InvokeAsync(). Цей метод повертає IViewComponentResult, який концептуально схожий на PartialViewResult, але набагато спрощений. У методі Invoke() отримати список об'єктів Make зі служби даних і, якщо це вдасться, повернути ViewViewComponentResult, використовуючи список об'єктів Make як модель представлення. Якщо виклик для отримання записів Make не вдається, поверніть ContentViewComponentResult із повідомленням про помилку.
+
+```cs
+
+```
+Допоміжний метод View з базового класу ViewComponent схожий на допоміжний метод класу Controller з такою ж назвою, з кількома ключовими відмінностями. Перша відмінність полягає в тому, що ім'я файлу представлення за замовчуванням — Default.cshtml, а не ім'я методу. Однак, як і у випадку з допоміжним методом контролера представлення, назва представлення може бути будь-якою, якщо її передавати у виклик методу (без розширення .cshtml). Друга відмінність полягає в тому, що розташування представлення має бути одним із цих трьох каталогів:
+
+```
+Views/< controller>/Components/<view_component_name>/<view_name>
+Views/Shared/Components/<view_component_name>/<view_name>
+Pages/Shared/Components/<view_component_name>/<view_name>
+```
+Клас C# може знаходитися будь-де (навіть в іншій збірці), але \<viewname\>.cshtml має бути в одному з каталогів, перелічених раніше.
+
+## Створення часткового представлення
+
+Часткове представлення, що відображається компонентом MenuViewComponent, перебиратиме записи Make, додаючи кожен як елемент списку для відображення в меню Bootstrap. Елемент меню «All» додається першим як жорстко закодоване значення.
+Створіть нову папку з назвою Components у папці Views\Shared. У цій новій папці створіть ще одну нову папку з назвою Menu. Назва цієї папки має збігатися з назвою класу компонента подання, створеного раніше, за вирахуванням суфікса ViewComponent. У цій папці створіть часткове подання з назвою MenuView.cshtml.
+
+## Виклик компонентів представлення
+
+Компоненти представлення зазвичай відображаються з представлення (хоча їх також можна відображати з методу дії контролера). Синтаксис простий: Component.Invoke(\<view component name\>) або @await Component.InvokeAsync(\<view component name\>). Як і у випадку з контролерами, суфікс ViewComponent необхідно видалити під час виклику компонента перегляду.
+
+```cshtml
+@await Component.InvokeAsync("Menu") //async version
+@Component.Invoke("Menu") //non-async version
+```
+Компоненти представлення можна викликати за допомогою синтаксису тег-хелперів. Замість використання Component.InvokeAsync()/Component.Invoke(), просто викличте компонент представлення ось так:
+
+```html
+<vc:menu></vc:menu>
+```
+Щоб використовувати цей метод виклику компонентів представлення, ваша програма повинна ввімкнути їх використання. Це робиться шляхом додавання команди @addTagHelper з назвою збірки, що містить компонент перегляду. Наступний рядок потрібно додати до файлу _ViewImports.cshtml, який вже було додано для помічників користувацьких тегів:
+
+```cshtml
+@addTagHelper *, AutoLot.Mvc
+```
+
+## Оновлення меню
+
+Оновлення меню
+Відкрийте фрагмент _Menu.cshtml та перейдіть до елемента одразу після блоку \<li\>\</li\>, який відповідає методу дії Home/Index. Скопіюйте наступну розмітку до фрагмента:
+
+```html
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle text-dark" data-bs-toggle="dropdown">Inventory <i class="fa fa-car"></i></a>
+                    <vc:menu></vc:menu>
+                </li>
+```
+Це створює випадаюче меню Bootstrap, і MenuViewComponent відображатиметься всередині цього випадаючого меню. Тепер, коли ви запустите програму, ви побачите меню «Inventory» з брендами, переліченими як пункти підменю.
+
+# Кастомні атрібути валідації
+
+ASP.NET Core та EF Core містять значну кількість анотацій даних та атрибутів перевірки, які можна застосовувати до моделей (і моделей представлень). Як ви бачили, ці атрибути забезпечують перевірку на стороні клієнта та сервера. Коли ввімкнено перевірку на стороні клієнта, дані перевіряються перед надсиланням запиту на сервер, і разом із тег-хелперами перевірки повідомляють про помилки користувачеві. Серверна перевірка відбувається, якщо JavaScript увімкнено (або бібліотеки jQuery Validation та jQuery Validation Unobstructive не завантажено), виконується серверна перевірка та оновлюється ModelState. Як ви вже бачили, якщо ModelState недійсний, методи дій повертають дані та помилки назад до представлення, що призводить до того ж ефекту, що й під час перевірки на стороні клієнта.
+Бувають випадки, коли вбудованих валідацій недостатньо, і для задоволення потреб бізнесу потрібна власна валідація. Хоча ви можете писати власний код C# (для перевірки на стороні сервера) та JavaScript (для перевірки на стороні клієнта) щоразу, коли це потрібно, це може призвести до великої кількості повторюваного коду. Краще інкапсулювати код перевірки в компоненті багаторазового використання, який можна додати до моделі у вигляді атрибута анотації даних. Краще інкапсулювати код перевірки в компоненті багаторазового використання, який можна додати до моделі у вигляді атрибута анотації даних.
+Для AutoLot нам потрібні два власні атрибути перевірки. Перший вимагатиме, щоб значення було більше за нуль, а другий – щоб значення на моделі було менше або дорівнювало іншій властивості на моделі.
+
+## Підготовка
+
+Перш ніж створювати атрибути перевірки, нам потрібно створити вигляд, модель вигляду та метод дії.
+
+### ViewModel
+
+Поширеною практикою є перевірка, чи кількість вибраних товарів більша за нуль і менша або дорівнює доступній кількості, перш ніж товар можна буде додати до кошика. З огляду на це, створіть новий клас з назвою AddToCartViewModel у папці ViewModels проекту AutoLot.Services:
+
+```cs
+namespace AutoLot.Services.ViewModels;
+
+public class AddToCartViewModel
+{
+    public int Id { get; set; }
+    public int StockQuantity { get; set; }
+    public int ItemId { get; set; }
+    public int Quantity { get; set; }
+}
+```
+Додайте такі глобальні оператори using до файлу GlobalUsings.cs у проекті AutoLot.Services:
+
+```cs
+global using System.ComponentModel;
+global using System.ComponentModel.DataAnnotations;
+global using System.Reflection;
+```
+### View
+
+Додайте нове пусте представлення Razor з назвою Validation.cshtml у папці Views\Home проекту AutoLot.Mvc. Оновіть розмітку до наступного:
+
+```cshtml
+@model AddToCartViewModel
+
+@{
+    ViewData["Title"] = "Validation";
+}
+
+<h1>Validation</h1>
+
+<h4>Add To Cart</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Validation">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div>
+                <label asp-for="Id" class="col-form-label"></label>
+                <input asp-for="Id" class="form-control" />
+                <span asp-validation-for="Id" class="text-danger"></span>
+            </div>
+            <div>
+                <label asp-for="StockQuantity" class="col-form-label"></label>
+                <input asp-for="StockQuantity" class="form-control" />
+                <span asp-validation-for="StockQuantity" class="text-danger"></span>
+            </div>
+            <div>
+                <label asp-for="ItemId" class="col-form-label"></label>
+                <input asp-for="ItemId" class="form-control" />
+                <span asp-validation-for="ItemId" class="text-danger"></span>
+            </div>
+            <div>
+                <label asp-for="Quantity" class="col-form-label"></label>
+                <input asp-for="Quantity" class="form-control" />
+                <span asp-validation-for="Quantity" class="text-danger"></span>
+            </div>
+            <div style="margin-top:5px">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+```
+
+### Методи дій перевірки
+
+Серверний код для цього прикладу дуже простий: метод HTTP get для повернення представлення з новим екземпляром моделі представлення та метод HTTP post для перевірки даних, отриманих від користувача. Додайте такі методи дій до HomeController:
+
+```cs
+    [HttpGet]
+    public IActionResult Validation()
+    {
+        var vm = new AddToCartViewModel
+        {
+            Id = 1,
+            ItemId = 1,
+            StockQuantity = 2,
+            Quantity = 0
+        };
+        return View(vm);
+    }
+
+    [HttpPost]
+    public IActionResult Validation(AddToCartViewModel viewModel)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(viewModel);
+        }
+        return RedirectToAction(nameof(Validation));
+    }
+```
+
+### Елемент меню «Validation»
+
+Останнє налаштування перед додаванням атрибутів перевірки полягає в додаванні елемента меню для переходу до перевірки. Додайте наступний код у кінець списку меню :
+
+```html
+                <li class="nav-item">
+                    <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Validation" title="Validation Example">Validation <i class="fas fa-check"></i></a>
+                </li>
+```
+
+## Серверна перевірка
+
+Хоча більшість сучасних веб-сайтів вимагають увімкнення JavaScript, вважається найкращою практикою додавати перевірку на стороні сервера до всіх ваших власних атрибутів перевірки.
+
+## Атрибут перевірки MustBeGreaterThanZero
+
+Додайте новий каталог з назвою Validation до проекту AutoLot.Services, а в цьому каталозі додайте новий клас з назвою MustBeGreaterThanZeroAttribute. Зробіть клас публічним та успадковуватиметься від ValidationAttribute, а потім налаштуйте цей атрибут лише як властивість:
+
+```cs
+
+namespace AutoLot.Services.Validation;
+
+[AttributeUsage(AttributeTargets.Property)]
+public class MustBeGreaterThanZeroAttribute : ValidationAttribute
+{
+}
+
+```
+Атрибути перевірки мають вбудоване повідомлення, але також надають можливість використовувати власне повідомлення. Такий самий шаблон очікується і для користувацьких атрибутів перевірки. Додайте два конструктори. Один, який надає повідомлення за замовчуванням, та інший, який дозволяє створювати власне повідомлення.
+
+```cs
+    public MustBeGreaterThanZeroAttribute() : this("{0} must be greater than 0")
+    {
+    }
+
+    public MustBeGreaterThanZeroAttribute(string errorMessage) : base(errorMessage)
+    {
+    }
+```
+
+Зверніть увагу на рядок форматування у повідомленні за замовчуванням. Він використовується базовим методом FormatErrorMessage, який потрібно перевизначити:
+
+```cs
+    public override string FormatErrorMessage(string name)
+    {
+        return string.Format(ErrorMessageString, name);
+    }
+```
+Серверна перевірка виконується за допомогою віртуального базового методу IsValid(). Якщо метод повертає ValidationResult.Success, то властивість вважається дійсною. Якщо повертається ValidationResult, який містить повідомлення, повідомлення додається до ModelState, а властивість позначається як Invalid. Перевірка цієї логіки досить проста: якщо значення властивості (передане як об'єкт) є null, не є цілим числом або менше чи дорівнює нулю, перевірка не проходить. В іншому випадку поверніть ValidationResult.Success. Зверніть увагу, що екземпляр ValidationContext надає властивість DisplayName, яка повертає значення DisplayName або Display(Name=''), якщо таке налаштовано.
+
+```cs
+    protected override ValidationResult IsValid(object value, ValidationContext validationContext)
+    {
+        if (!int.TryParse(value.ToString(), out int result))
+        {
+            return new ValidationResult(FormatErrorMessage(validationContext.DisplayName));
+        }
+
+        return result > 0 ? ValidationResult.Success : new ValidationResult(FormatErrorMessage(validationContext.DisplayName));
+    }
+```
+Далі додайте атрибут до моделі перегляду (зверніть увагу, що суфікс атрибута видалено):
+
+```cs
+    [MustBeGreaterThanZero]
+    public int Quantity { get; set; }
+```
+Після цього запустіть програму, перейдіть на сторінку перевірки та натисніть кнопку «Save» (встановивши для поля «Quantity» значення нуль або від’ємне число), і ви побачите повідомлення про перевірку. Це працює сервісна частина валідації.
+Якщо ви очистите будь-які значення з полів «Quantity» і натиснете «Save», ви побачите повідомлення про те, що значення обов'язкове. Це працює клієнська частина валідації.
+
+## Атрибут перевірки MustNotBeGreaterThan
+
+Цей користувацький атрибут порівнює властивість, що перевіряється, з іншою властивістю моделі. У каталозі Validation додайте новий клас з назвою MustNotBeGreaterThanAttribute. Зробіть клас публічним та успадкуйте його від ValidationAttribute. Цей атрибут можна додати до однієї властивості кілька разів, тому його потрібно налаштувати для багаторазового використання:
+
+```cs
+namespace AutoLot.Services.Validation;
+
+[AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]
+public class MustNotBeGreaterThanAttribute : ValidationAttribute
+{
+}
+```
+Атрибут повинен знати іншу властивість для порівняння, а повідомлення перевірки повинно посилатися на іншу властивість, щоб бути зрозумілим для користувача. Також інша властивість може мати префікс зв'язування. Це буде необхідно для захоплення даних для перевірки на стороні клієнта. Створіть конструктор, який надає повідомлення та префікс за замовчуванням, а також інший, який дозволяє використовувати власне повідомлення та необов'язковий префікс. Призначте іншу назву властивості та префікс полям рівня класу:
+
+```cs
+    readonly string _otherPropertyName;
+    readonly string _prefix;
+
+    public MustNotBeGreaterThanAttribute(string otherPropertyName, string prefix = "")
+        : this(otherPropertyName, "{0} must not be greater than {1}", prefix)
+    {
+    }
+    public MustNotBeGreaterThanAttribute(string otherPropertyName, string errorMessage, string prefix = "")
+      : base(errorMessage)
+    {
+        _otherPropertyName = otherPropertyName;
+        _prefix = prefix;
+    }
+```
+Атрибут MustBeGreaterThanZero показав отримання відображеного імені цільової властивості з ValidationContext. Щоб отримати відображуване ім'я іншої властивості, потрібно використовувати рефлексію. Створіть метод під назвою SetOtherPropertyName(), який отримує відображуване ім'я з атрибута Display або DisplayName та призначає його полю рівня класу:
+
+```cs
+
+    readonly string _otherPropertyName;
+    string _otherPropertyDisplayName;
+    readonly string _prefix;
+
+    //...
+
+    internal void SetOtherPropertyName(PropertyInfo otherPropertyInfo)
+    {
+        var displayAttribute =
+            otherPropertyInfo.GetCustomAttributes<DisplayAttribute>().FirstOrDefault();
+        if (displayAttribute != null)
+        {
+            _otherPropertyDisplayName = displayAttribute.Name;
+            return;
+        }
+
+        var displayNameAttribute =
+            otherPropertyInfo.GetCustomAttributes<DisplayNameAttribute>().FirstOrDefault();
+        if (displayNameAttribute != null)
+        {
+            _otherPropertyDisplayName = displayNameAttribute.DisplayName;
+            return;
+        }
+
+        _otherPropertyDisplayName = _otherPropertyName;
+    }
+
+```
+
+Після налаштування іншого відображуваного імені властивості перевизначте метод FormatErrorMessage():
+
+```cs
+    public override string FormatErrorMessage(string name)
+    {
+        return string.Format(ErrorMessageString, name, _otherPropertyDisplayName);
+    }
+```
+Перевизначення IsValid() повертає Success, якщо значення дорівнює null, оскільки воно не може бути більшим за будь-яке інше значення, якщо воно дорівнює null. Потім він перевіряє, чи можна розібрати значення в ціле число, і якщо ні, перевірка не проходить. Якщо це можливо, і значення дорівнює нулю, перевірка проходить успішно. Далі, за допомогою рефлексії, отримуємо значення іншої властивості, і якщо інше значення є null або не числовим, перевірка не вдається. Зрештою, він порівнює ці значення, і якщо цільова властивість більша за властивість, з якою порівнюється, перевірка завершується невдачею:
+
+```cs
+    protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
+    {
+        if (value is null)
+        {
+            return ValidationResult.Success;
+        }
+        if (!int.TryParse(value.ToString(), out int toValidate))
+        {
+            return new ValidationResult($"{validationContext.DisplayName} must be numeric.");
+        }
+        if (toValidate == 0)
+        {
+            return ValidationResult.Success;
+        }
+
+        var otherPropertyInfo = validationContext.ObjectType.GetProperty(_otherPropertyName);
+        SetOtherPropertyName(otherPropertyInfo);
+        var otherValue = otherPropertyInfo.GetValue(validationContext.ObjectInstance, null);
+        if (otherValue is null)
+        {
+            return new ValidationResult($"{_otherPropertyDisplayName} must not be null.");
+        }
+        if (!int.TryParse(otherValue.ToString(), out int toCompare))
+        {
+            return new ValidationResult($"{_otherPropertyDisplayName} must be numeric.");
+        }
+
+        return toValidate > toCompare
+            ? new ValidationResult(FormatErrorMessage(validationContext.DisplayName))
+            : ValidationResult.Success;
+    }
+
+```
+Далі додайте атрибут до моделі перегляду:
+
+```cs
+    [MustBeGreaterThanZero]
+    [MustNotBeGreaterThan(nameof(StockQuantity))]
+    public int Quantity { get; set; }
+```
+Після цього запустіть програму, перейдіть на сторінку Validation та натисніть Save, встановивши для поля Quantity число, більше за Stock Quantity, і ви побачите повідомлення про перевірку.
+
+
+## Перевірка на стороні клієнта
+
+Підтримка перевірки на стороні клієнта додається до користувацького атрибута шляхом реалізації інтерфейсу IClientValidator та написання власного JavaScript, який працює з бібліотеками перевірки jQuery. Почніть з додавання наступного оператора до GlobalUsings.cs у AutoLot.Services:
+
+```cs
+global using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+```
+
+### Форматування помилок на стороні клієнта
+
+Перш ніж завершити налаштування атрибутів валідації, ми додамо деякі власні стилі до процесу валідації jQuery. Додайте новий каталог з назвою validations у каталозі wwwroot\js у проекті AutoLot.Mvc. Додайте новий файл з назвою errorFormatting.js у новий каталог та оновіть код до наступного:
+
+```js
+$.validator.setDefaults({
+    highlight: function (element, errorClass, validClass) {
+        if (element.type === "radio") {
+            this.findByName(element.name).addClass(errorClass).removeClass(validClass);
+        } else {
+            $(element).addClass(errorClass).removeClass(validClass);
+            $(element).closest('div').addClass('has-error'); 
+        }
+    },
+    unhighlight: function (element, errorClass, validClass) {
+        if (element.type === "radio") {
+            this.findByName(element.name).removeClass(errorClass).addClass(validClass);
+        } else {
+            $(element).removeClass(errorClass).addClass(validClass);
+            $(element).closest('div').removeClass('has-error');  
+        }
+    }
+});
+```
+Основна частина методу повторює те, що вже є в jQuery-Validate. Два рядки, виділені жирним шрифтом, додають власний стиль до найближчого тегу <div> до елемента з помилкою. Останнім кроком є ​​додавання власного стилю до файлу site.css:
+
+```css
+.has-error {
+    border: 3px solid red;
+    padding: 0px 5px;
+    margin: 5px 0;
+}
+```
+Це створює червону рамку навколо підпису та елемента керування з помилкою.
+
+### Атрибут перевірки MustBeGreaterThanZero
+
+Оновіть клас MustBeGreaterThanZeroAttribute, щоб реалізувати інтерфейс IClientValidator та метод AddValidation(): 
+
+```cs
+public class MustBeGreaterThanZeroAttribute : ValidationAttribute, IClientModelValidator
+{
+    //...
+    public void AddValidation(ClientModelValidationContext context)
+    {
+        throw new NotImplementedException();
+    }
+}
+```
+ClientModelValidationContext використовується для додавання атрибутів data-val у стилі HTML5 до розмітки. Формат атрибута: data-val-[functiontoexecute]="error message". У цьому атрибуті повідомлення має бути правильно відформатовано з цільовими властивостями DisplayName (якщо призначено) або назвою властивості (якщо DisplayName не призначено) та повідомленням про помилку. Оновіть метод AddValidation() до наступного:
+
+```cs
+    public void AddValidation(ClientModelValidationContext context)
+    {
+        string propertyDisplayName =
+            context.ModelMetadata.DisplayName ?? context.ModelMetadata.PropertyName;
+        string errorMessage = FormatErrorMessage(propertyDisplayName);
+        context.Attributes.Add("data-val-greaterthanzero", errorMessage);
+    }
+```
+
+З урахуванням цього, відображений input змінюється на такий:
+
+```html
+<input class="form-control valid" type="number" data-val="true" data-val-greaterthanzero="Quantity must be greater than 0" data-val-required="The Quantity field is required." id="Quantity" name="Quantity" value="0" aria-describedby="Quantity-error" aria-invalid="false">
+```
+Далі потрібно додати метод greaterthanzero() до системи валідації jQuery за допомогою функції addMethod() на об'єкті validator. Створіть новий файл з назвою validators.js у каталозі js\validations проєкту AutoLot.Mvc. Оновіть код до наступного:
+
+```js
+$.validator.addMethod("greaterthanzero", function (value, element, params) {
+    return value > 0;
+});
+```
+Тепер, коли атрибути data-val аналізуються, атрибут data-val-greaterthanzero призведе до виконання методу та поверне значення true, якщо значення більше за нуль. Якщо ні, повертається значення false, а елемент керування позначається як недійсний.
+Останній крок – встановити правила та повідомлення для перевірки. Це перевірка одного елемента керування, тому властивість rules просто встановлюється на значення true (щоб увімкнути перевірку), а повідомлення отримується з атрибута data-val-greaterthanzero:
+
+```js
+$.validator.unobtrusive.adapters.add("greaterthanzero", function (options) {
+    options.rules["greaterthanzero"] = true;
+    options.messages["greaterthanzero"] = options.message;
+});
+```
+
+### Атрибут перевірки MustNotBeGreaterThan
+
+Оновіть клас MustNotBeGreaterThanAttribute, щоб реалізувати інтерфейс IClientValidator та метод AddValidation():
+
+```cs
+public class MustNotBeGreaterThanAttribute : ValidationAttribute, IClientModelValidator
+{
+    //...
+ 
+    public void AddValidation(ClientModelValidationContext context)
+    {
+        throw new NotImplementedException();
+    }
+}
+```
+JavaScript та налаштування цього атрибута трохи складніші, ніж для MustBeGreaterThanZeroAttribute, оскільки йому потрібен доступ до іншої властивості у HTML-формі. Перший крок — отримати відображуване ім'я іншої властивості та відформатоване повідомлення про помилку й призначити їх атрибуту data-val-notgreaterthan:
+
+```cs
+    public void AddValidation(ClientModelValidationContext context)
+    {
+        string propertyDisplayName = context.ModelMetadata.GetDisplayName();
+        var propertyInfo = context.ModelMetadata.ContainerType.GetProperty(_otherPropertyName);
+        SetOtherPropertyName(propertyInfo);
+        string errorMessage = FormatErrorMessage(propertyDisplayName);
+        context.Attributes.Add("data-val-notgreaterthan", errorMessage);
+    }
+```
+Додаткові дані можна додати до процесу перевірки, розширивши атрибут data-val-. У цьому випадку потрібно додати назву іншої властивості та префікс:
+
+```cs
+    public void AddValidation(ClientModelValidationContext context)
+    {
+        //...
+        context.Attributes.Add("data-val-notgreaterthan-otherpropertyname", _otherPropertyName);
+        context.Attributes.Add("data-val-notgreaterthan-prefix", _prefix);
+    }
+```
+З урахуванням цього, відображений input змінюється на такий:
+
+```html
+<input class="form-control valid" type="number" data-val="true" data-val-greaterthanzero="Quantity must be greater than 0" data-val-notgreaterthan="Quantity must not be greater than StockQuantity" data-val-notgreaterthan-otherpropertyname="StockQuantity" data-val-notgreaterthan-prefix="" data-val-required="The Quantity field is required." id="Quantity" name="Quantity" value="0" aria-describedby="Quantity-error" aria-invalid="false">
+```
+Наступний крок – встановити правила та повідомлення для перевірки. Властивість rules встановлюється на повний HTML id іншої властивості. Додаткові значення атрибутів (prefix, otherpropertyname) отримуються через параметр options. Повідомлення отримується з атрибута data-val-notgreaterthan. Додайте наступний код до файлу validators.js:
+
+```js
+$.validator.unobtrusive.adapters.add("notgreaterthan", ["otherpropertyname", "prefix"], function (options) {
+    options.rules["notgreaterthan"] = "#" + options.params.prefix + options.params.otherpropertyname;
+    options.messages["notgreaterthan"] = options.message;
+});
+```
+Нарешті, додайте метод notgreaterthan() до системи валідації jQuery. HTML id іншої властивості доступний з параметра params:
+
+```js
+$.validator.addMethod("notgreaterthan", function (value, element, params) {
+    return +value <= +$(params).val();
+});
+```
+### Оновлення  Validation Scripts Partial
+Перш ніж додавати нові файли JavaScript до часткового представлення _ValidationScriptsPartial, оновіть виклик AddWebOptimizer() в операторах верхнього рівня Program.cs, щоб об'єднати нові файли:
+
+```cs
+    builder.Services.AddWebOptimizer(options =>
+    {
+        //...
+        options.AddJavaScriptBundle("/js/validationCode.js", "js/validations/validators.js", "js/validations/errorFormatting.js");
+    });
+```
+Далі оновіть  _ValidationScriptsPartial, щоб включити файли в блок розробки, а зв'язані/мінифіковані файли — в блок, що не є блоком розробки:
+
+```cs
+<environment include="Development">
+
+     <script src="~/js/validationCode.js"></script>
+</environment>
+<environment exclude="Development">
+    <script src="~/js/validationCode.js"></script>
+
+</environment>
+```
+Таким чином перевірка буде виконуватися на стороні клієнта в браузері.
+
+# Підтримка загального регламенту про захист даних
+
+Загальний регламент про захист даних (GDPR) був прийнятий Європейським Союзом для захисту користувачів інтернету. Цей регламент містить кілька положень, зокрема вимогу до користувача надати згоду на використання будь-яких файлів cookie для відстеження. Хоча це правило ЄС, воно застосовується до будь-якого вебсайту, до якого може отримати доступ громадянин ЄС, навіть якщо цей вебсайт не знаходиться в ЄС.
+
+    Ці правила задокументовано за адресою https://ec.europa.eu/info/law/law-topic/data-protection/reform/what-does-general-data-protection-regulation-gdpr-govern_en. Ми охоплюємо лише підтримку ASP.NET Core для надання файлів cookie та сторінки політики конфіденційності, це не гарантує дотримання нормативних вимог. Будь ласка, зверніться до юрисконсульта для отримання повної інформації про відповідність вимогам.
+
+ASP.NET Core додав підтримку API для положень про файли cookie відстеження у версії 2.1, а також сторінку політики конфіденційності. Поточний шаблон містить лише сторінку конфіденційності, і саме там потрібно розмістити політику конфіденційності та використання файлів cookie вашого веб-сайту.
+
+## Додавання підтримки політики щодо файлів cookie
+
+Частина політики полягає в тому, що користувачі повинні погодитися на використання файлів cookie на вашому сайті, і якщо вони цього не зроблять, необов'язкові файли cookie не зможуть використовуватися. Щоб увімкнути функцію згоди на використання файлів cookie за замовчуванням, почніть із додавання налаштованих CookiePolicyOptions до колекції служб.Додайте наступний код до операторів верхнього рівня у файлі Program.cs у проекті AutoLot.Mvc:
+
+```cs
+builder.Services.Configure<CookiePolicyOptions>(options =>
+{
+    // This lambda determines whether user consent for non-essential cookies is
+    // needed for a given request.
+    options.CheckConsentNeeded = context => true;
+    options.MinimumSameSitePolicy = SameSiteMode.None;
+});
+```
+За замовчуванням файли cookie сесії та TempData не вважаються обов’язковими. Щоб змінити їх за необхідності, додайте наступні два рядки коду одразу після налаштування CookiePolicyOptions:
+
+```cs
+// The TempData provider cookie is not essential. Make it essential
+// so TempData is functional when tracking is disabled.
+builder.Services.Configure<CookieTempDataProviderOptions>(options => { options.Cookie.IsEssential = true; });
+builder.Services.AddSession(options => { options.Cookie.IsEssential = true; });
+```
+Остання зміна в операторах верхнього рівня полягає у додаванні підтримки політики файлів cookie до HTTP-конвеєра:
+
+```cs
+app.UseStaticFiles();
+app.UseCookiePolicy();
+```
+
+## Часткове представлення підтримки файлів cookie
+
+Наступним кроком є ​​надання інтерфейсу користувача, який дозволить користувачам погодитися на використання файлів cookie, якщо вони ще цього не зробили. Створіть нове пусте представлення з назвою _CookieConsentPartial.cshtml у каталозі Views\Shared.
+Якщо користувач дав згоду, не показуйте банер інтерфейсу користувача. У верхній частині вікна додайте блок Razor, щоб перевірити ITrackingConsentFeature, чи користувач вже дав згоду, і якщо так, не показуйте банер. Нарешті, скористайтеся функцією згоди, щоб створити рядок cookie:
+
+```cshtml
+@{
+    var consentFeature = Context.Features.Get<ITrackingConsentFeature>();
+    var showBanner = !consentFeature?.CanTrack ?? false;
+    var cookieString = consentFeature?.CreateConsentCookie();
+}
+```
+Далі, якщо користувач не надав згоди, покажіть банер, який відображає політику щодо файлів cookie для сайту та надає кнопку для надання згоди. Якщо це так, функція JavaScript додасть файл cookie до браузера, що вкаже на згоду користувача:
+
+```cshtml
+@if (showBanner)
+{
+    <div id="cookieConsent" class="alert alert-info alert-dismissible fade show" role="alert">
+        Use this space to summarize your privacy and cookie use policy. <a asp-area="" asp-controller="Home" asp-action="Privacy">Learn More</a>.
+        <button type="button" class="accept-policy close" data-dismiss="alert" aria-label="Close" data-cookie-string="@cookieString">
+            <span aria-hidden="true">Accept</span>
+        </button>
+    </div>
+    <script>
+        (function () {
+            var button = document.querySelector("#cookieConsent button[data-cookie-string]");
+            button.addEventListener("click", function (event) {
+                document.cookie = button.dataset.cookieString;
+                window.location = '@Url.Action(nameof(HomeController.Index), nameof(HomeController).RemoveControllerSuffix())';
+            }, false);
+        })();
+    </script>
+}
+```
+Нарешті, додайте частковий елемент до часткового елемента _Layout:
+
+```html
+    <div class="container">
+        <partial name="_CookieConsentPartial" />
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+```
+Якщо це налаштовано, під час запуску програми ви побачите банер згоди на використання файлів cookie.
+Якщо користувач натискає кнопку Accept, створюється файл cookie .AspNet.Content. Під час наступного завантаження сайту банер не відображатиметься.
+
+## Підтримка меню для прийняття/відкликання згоди на використання політики використання файлів cookie
+
+Останньою зміною в застосунку є додавання підтримки меню для надання або відкликання згоди. Додайте до HomeController два наступні методи дій. Кожен метод використовував ITrackingConsentFeature для надання або відкликання згоди, а потім перенаправляв користувача до подання індексу:
+
+```cs
+    [HttpGet]
+    public IActionResult GrantConsent()
+    {
+        HttpContext.Features.Get<ITrackingConsentFeature>().GrantConsent();
+        return RedirectToAction(nameof(Index), nameof(HomeController).RemoveControllerSuffix(),
+            new { area = "" });
+    }
+
+    [HttpGet]
+    public IActionResult WithdrawConsent()
+    {
+        HttpContext.Features.Get<ITrackingConsentFeature>().WithdrawConsent();
+        return RedirectToAction(nameof(Index), nameof(HomeController).RemoveControllerSuffix(),
+            new { area = "" });
+    }
+
+```
+
+Відкрийте частковий перегляд _Menu.cshtml та додайте блок Razor, щоб перевірити, чи користувач надав згоду:
+
+```cshtml
+@{
+    var consentFeature = Context.Features.Get<ITrackingConsentFeature>();
+    var showBanner = !consentFeature?.CanTrack ?? false;
+}
+```
+Якщо банер відображається (користувач не надав згоди), тоді відобразіть посилання меню для користувача, щоб прийняти політику щодо файлів cookie. Якщо вони надали згоду, тоді відобразіть посилання меню для відкликання згоди. Наступне також оновлює посилання Privacy , додаючи значок шрифту awesome для секрету:
+
+```cshtml
+                @if (showBanner)
+                {
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" asp-controller="Home" asp-action="GrantConsent" title="Accept Cookie Policy">Accept Cookie Policy <i class="fas fa-cookie-bite"></i></a>
+                    </li>
+                }
+                else
+                {
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" asp-controller="Home" asp-action="WithdrawConsent" title="Revoke Cookie Policy">Revoke Cookie Policy <i class="fas fa-cookie"></i></a>
+                    </li>
+                }
+```
+Після цього ви можете побачити два пункти меню.
+

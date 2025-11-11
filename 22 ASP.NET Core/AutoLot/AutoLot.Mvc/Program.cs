@@ -8,20 +8,32 @@ builder.ConfigureSerilog();
 builder.Services.RegisterLoggingInterfaces();
 
 builder.Services.AddControllersWithViews();
+builder.Services.Configure<CookiePolicyOptions>(options =>
+{
+    // This lambda determines whether user consent for non-essential cookies is
+    // needed for a given request.
+    options.CheckConsentNeeded = context => true;
+    options.MinimumSameSitePolicy = SameSiteMode.None;
+});
+// The TempData provider cookie is not essential. Make it essential
+// so TempData is functional when tracking is disabled.
+builder.Services.Configure<CookieTempDataProviderOptions>(options => { options.Cookie.IsEssential = true; });
+builder.Services.AddSession(options => { options.Cookie.IsEssential = true; });
 
 builder.Services.TryAddSingleton<IActionContextAccessor, ActionContextAccessor>();
 
 if (builder.Environment.IsDevelopment())
 {
-    builder.Services.AddWebOptimizer(false, false);
+    //builder.Services.AddWebOptimizer(false,false);
+    builder.Services.AddWebOptimizer(options =>
+    {
+        options.MinifyCssFiles("AutoLot.Mvc.styles.css");
+        options.MinifyCssFiles("/css/site.css");
+        options.MinifyJsFiles("/js/site.js");
 
-    //builder.Services.AddWebOptimizer(options =>
-    //{
-    //    options.MinifyCssFiles("AutoLot.Mvc.styles.css");
-    //    options.MinifyCssFiles("/css/site.css");
-    //    options.MinifyJsFiles("/js/site.js");
-    //});
-
+        //options.AddJavaScriptBundle("/js/validationCode.js", "/js/validations/**/*.js");
+        options.AddJavaScriptBundle("/js/validationCode.js", "js/validations/validators.js", "js/validations/errorFormatting.js");
+    });
 }
 else
 {
@@ -76,6 +88,7 @@ app.UseHttpsRedirection();
 
 app.UseWebOptimizer();
 app.UseStaticFiles();
+app.UseCookiePolicy();
 
 app.UseRouting();
 

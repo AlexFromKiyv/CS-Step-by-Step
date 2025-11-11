@@ -15,8 +15,6 @@ void ReflectAttributesUsingLateBinding()
         Type[] types = assembly.GetTypes();
 		foreach (Type type in types)
 		{
-			if (vehicleDesctiption == null) { return;}
-
 			object[] objects = type.GetCustomAttributes(vehicleDesctiption, false);
 			foreach (object obj in objects)
 			{
