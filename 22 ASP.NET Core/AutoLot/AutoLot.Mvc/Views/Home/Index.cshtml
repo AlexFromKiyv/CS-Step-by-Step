@@ -6,10 +6,11 @@
 <div class="text-center">
     <h1 class="display-4">Welcome to @Model.DealerName</h1>
     <p class="lead">Located in @Model.City, @Model.State</p>
-
+    <a class="link-info" asp-area="" asp-controller="Sample" asp-action="SampleAction">SampleAction</a>
+    <br />
     <a class="link-info" asp-area="" asp-controller="Home" asp-action="RazorSyntax">RazorSyntax</a>
     <br/>
-    <a class="link-info" asp-area="" asp-controller="Cars" asp-action="Templates">Car templates</a>
+    <a class="link-info" asp-area="" asp-controller="Cars" asp-action="Templates">DisplayTemplates EditTemplates</a>
     <br />
     <vc:makes></vc:makes>
     <vc:car-count></vc:car-count>

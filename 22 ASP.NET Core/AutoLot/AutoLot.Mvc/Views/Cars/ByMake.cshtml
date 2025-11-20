@@ -6,4 +6,4 @@
 @{
     var mode = new ViewDataDictionary(ViewData) {{"ByMake", true}};
 }
-<partial name="Partials/_CarListPartial" model="Model" view-data="@mode"/>
+<partial name="Partials/_CarListPartial" model="@Model" view-data="@mode"/>

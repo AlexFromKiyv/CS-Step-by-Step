@@ -4,27 +4,8 @@
     ViewData["Title"] = "Test of BaseCrudControler";
 }
 
-<h6>Test Details</h6>
-<a href="https://localhost:5001/TestBaseCrud/Details/5">https://localhost:5001/TestBaseCrud/Details/5</a>
-<br />
-<a href="https://localhost:5001/TestBaseCrud/Details/">https://localhost:5001/TestBaseCrud/Details/</a>
-<br />
-<a href="https://localhost:5001/TestBaseCrud/Details/215">https://localhost:5001/TestBaseCrud/Details/215</a>
-
-<h6>Test Create</h6>
-<a href="https://localhost:5001/TestBaseCrud/Create">https://localhost:5001/TestBaseCrud/Create</a>
-
-<h6>Test Edit</h6>
-<a href="https://localhost:5001/TestBaseCrud/Edit/1">https://localhost:5001/TestBaseCrud/Edit/1</a>
-<br />
-<a href="https://localhost:5001/TestBaseCrud/Edit/">https://localhost:5001/TestBaseCrud/Edit/</a>
-<br />
-<a href="https://localhost:5001/TestBaseCrud/Edit/303">https://localhost:5001/TestBaseCrud/Edit/303</a>
-
-<h6>Test Delete</h6>
-<a href="https://localhost:5001/TestBaseCrud/Delete/1">https://localhost:5001/TestBaseCrud/Delete/1</a>
-<hr />
 <h6>Test of method Index</h6>
+
 @foreach (var item in Model)
 {
     <h6>
@@ -36,8 +17,30 @@
     </h6>
 }
 
-<h1>Tag Helpers</h1>
+<h6>Test Details</h6>
+<a href="https://localhost:5001/TestBaseCrud/Details/5"> .../Details/5</a>&nbsp;
+<a href="https://localhost:5001/TestBaseCrud/Details/"> .../Details/</a>&nbsp;
+<a href="https://localhost:5001/TestBaseCrud/Details/215"> .../Details/215</a>&nbsp;
+<br />
+<br />
+
+<h6>Test Create</h6>
+<a href="https://localhost:5001/TestBaseCrud/Create"> .../Create</a>
+<br />
+<br />
+
+<h6>Test Edit</h6>
+<a href="https://localhost:5001/TestBaseCrud/Edit/1"> .../Edit/1</a>
+<a href="https://localhost:5001/TestBaseCrud/Edit/"> .../Edit/</a>
+<a href="https://localhost:5001/TestBaseCrud/Edit/303"> .../Edit/303</a>
+<br />
+<br />
+
+<h6>Test Delete</h6>
+<a href="https://localhost:5001/TestBaseCrud/Delete/1"> .../Delete/1</a>
 <hr />
+
+<h1>Custom Tag helpers</h1>
 
 <item-details item-id="1"></item-details>
 <item-delete item-id="1"></item-delete>

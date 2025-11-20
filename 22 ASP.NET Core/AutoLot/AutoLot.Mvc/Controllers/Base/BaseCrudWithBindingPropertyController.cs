@@ -22,15 +22,11 @@ public abstract class BaseCrudWithBindingPropertyController<TEntity, TController
 
     protected abstract Task<SelectList> GetLookupValuesAsync();
 
-    //Index
-
     [HttpGet]
     [Route("/[controller]")]
     [Route("/[controller]/[action]")]
     public virtual async Task<IActionResult> IndexAsync()
         => View(await MainDataService.GetAllAsync());
-
-    //Details
 
     [HttpGet("{id?}")]
     public virtual async Task<IActionResult> DetailsAsync(int? id)
@@ -47,8 +43,6 @@ public abstract class BaseCrudWithBindingPropertyController<TEntity, TController
         }
         return View(entity);
     }
-
-    //Create
 
     [HttpGet]
     public virtual async Task<IActionResult> CreateAsync()

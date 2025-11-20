@@ -7,8 +7,6 @@ public class MustNotBeGreaterThanAttribute : ValidationAttribute, IClientModelVa
     string _otherPropertyDisplayName;
     readonly string _prefix;
 
-
-
     public MustNotBeGreaterThanAttribute(string otherPropertyName, string prefix = "")
         : this(otherPropertyName, "{0} must not be greater than {1}", prefix)
     {

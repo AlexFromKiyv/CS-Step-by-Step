@@ -14,7 +14,7 @@ public class CarsController : BaseCrudController<Car, CarsController>
     [HttpGet]
     public async Task<IActionResult> Templates([FromServices] ICarDataService dataService)
     {
-        Car? car = await dataService.FindAsync(2);
+        Car? car = await dataService.FindAsync(7);
   
         return View(car);
     }

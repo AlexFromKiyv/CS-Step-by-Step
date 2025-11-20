@@ -8,6 +8,7 @@
     <div class="alert alert-danger" role="alert">
         @ViewData["Error"]
     </div>
+    <a asp-controller="TestBaseCrud" asp-action="Index">Back</a>
 }
 else
 {
@@ -24,6 +25,7 @@ else
             <button type="submit" class="btn btn-success">Edit</button>
         </div>
     </form>
+    <a asp-controller="TestBaseCrud" asp-action="Index">Back</a>
 
     @section Scripts {
         <partial name="_ValidationScriptsPartial" />

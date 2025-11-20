@@ -15,6 +15,8 @@ public class HomeController : Controller
         {
           new SelectListItem { Value = "1", Text = "VW" },
           new SelectListItem { Value = "2", Text = "BMW" },
+          new SelectListItem { Value = "3", Text = "ZAZ" },
+          new SelectListItem { Value = "4", Text = "Ford" },
         };
 
     public HomeController(IAppLogging<HomeController> logger)
@@ -41,10 +43,10 @@ public class HomeController : Controller
         //    Color = "Blue",
         //    PetName = "Snoopy",
         //    DateBuilt = DateTime.Now
-        //}; 
-    
-    ViewData["LookupValues"] = Makes;
-    var car = await dataService.FindAsync(7);
+        //};
+
+        ViewData["LookupValues"] = Makes;
+        var car = await dataService.FindAsync(7);
         return View(car);
     }
     [HttpGet]
@@ -58,6 +60,7 @@ public class HomeController : Controller
     {
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
+
 
     [HttpGet]
     public IActionResult Validation()

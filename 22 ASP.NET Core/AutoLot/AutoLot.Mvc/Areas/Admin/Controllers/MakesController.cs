@@ -11,7 +11,7 @@ public class MakesController : BaseCrudController<Make, MakesController>
     }
 
     protected override async Task<SelectList> GetLookupValuesAsync()
-        => await Task.FromResult<SelectList>(new(default, "", ""));
+        => await Task.FromResult<SelectList>(null);
 
     [Route("/Admin")]
     [Route("/Admin/[controller]")]

@@ -14,12 +14,15 @@ public abstract class BaseCrudController<TEntity,TController> : Controller
         MainDataService = mainDataService;
     }
 
+    /// <summary>
+    /// Get Entity of type TEntity by id.
+    /// </summary>
+    /// <param name="id">int id</param>
+    /// <returns>Return instance of TEntity with proprly id or null</returns>
     protected async Task<TEntity?> GetOneEntityAsync(int id) =>
         await MainDataService.FindAsync(id);
 
     protected abstract Task<SelectList> GetLookupValuesAsync();
-
-    //Index
 
     [HttpGet]
     [Route("/[controller]")]
@@ -27,7 +30,6 @@ public abstract class BaseCrudController<TEntity,TController> : Controller
     public virtual async Task<IActionResult> IndexAsync()
         => View(await MainDataService.GetAllAsync());
 
-    //Details
 
     [HttpGet("{id?}")]
     public virtual async Task<IActionResult> DetailsAsync(int? id)
@@ -45,8 +47,6 @@ public abstract class BaseCrudController<TEntity,TController> : Controller
         return View(entity);
     }
 
-    //Create
-
     [HttpGet]
     public virtual async Task<IActionResult> CreateAsync()
     {
@@ -61,8 +61,7 @@ public abstract class BaseCrudController<TEntity,TController> : Controller
         if (ModelState.IsValid)
         {
             await MainDataService.AddAsync(entity);
-            return RedirectToAction(nameof(IndexAsync).RemoveAsyncSuffix(), new { id = entity.Id });
-
+            return RedirectToAction(nameof(DetailsAsync).RemoveAsyncSuffix(), new { id = entity.Id });
         }
         ViewData["LookupValues"] = await GetLookupValuesAsync();
         return View();
@@ -86,8 +85,6 @@ public abstract class BaseCrudController<TEntity,TController> : Controller
         return View(entity);
     }
 
-    //Edit
-
     [HttpPost("{id}")]
     [ValidateAntiForgeryToken]
     public virtual async Task<IActionResult> EditAsync(int? id, TEntity entity)
@@ -100,7 +97,7 @@ public abstract class BaseCrudController<TEntity,TController> : Controller
         if (ModelState.IsValid)
         {
             await MainDataService.UpdateAsync(entity);
-            return RedirectToAction(nameof(IndexAsync).RemoveAsyncSuffix(), new { id });
+            return RedirectToAction(nameof(DetailsAsync).RemoveAsyncSuffix(), new { id });
         }
         ViewData["LookupValues"] = await GetLookupValuesAsync();
         return View(entity);
