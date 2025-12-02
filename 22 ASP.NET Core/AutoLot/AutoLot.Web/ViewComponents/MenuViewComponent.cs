@@ -16,8 +16,6 @@ public class MenuViewComponent : ViewComponent
         {
             return new ContentViewComponentResult("Unable to get the makes");
         }
-
         return View("MenuView", makes);
     }
-
 }

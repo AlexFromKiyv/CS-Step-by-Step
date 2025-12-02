@@ -1,6 +1,7 @@
 ﻿@page
 @model AutoLot.Web.Pages.RazorSyntaxModel
 @{
+    DateTime dateTime = DateTime.Now;
     // ViewData["Title"] = "Razor Syntax";
     ViewData["LookupValues"] = new List<SelectListItem>
     {
@@ -9,10 +10,9 @@
         new SelectListItem { Value = "3", Text = "ZAZ" },
         new SelectListItem { Value = "4", Text = "Ford" },
     };
-
-    DateTime dateTime = DateTime.Now;
 }
 <h1>Razor Syntax</h1>
+<hr />
 <form asp-page="RazorSyntaxModel">
     <input type="hidden" asp-for="@Model.Entity.Id" />
     <input type="hidden" asp-for="@Model.Entity.TimeStamp" />
@@ -117,11 +117,12 @@ The Car named @Model.Entity.PetName is a <span style="color:@Model.Entity.Color"
 <hr />
 @dateTime
 <hr />
+<h3>Templates</h3>
 @Html.DisplayFor(c => c.Entity, "Cars/DisplayTemplates/Car.cshtml")
 <hr />
 @Html.DisplayFor(c => c.Entity, "Cars/DisplayTemplates/CarWithColors.cshtml")
 <hr />
 @Html.EditorFor(c => c.Entity, "Cars/EditorTemplates/Car.cshtml")
 
-<h1>Tag helpers</h1>
+<h3>Tag helpers</h3>
 <a asp-page="Cars/Details" asp-route-id="@Model.Entity.Id">@Model.Entity.PetName</a>

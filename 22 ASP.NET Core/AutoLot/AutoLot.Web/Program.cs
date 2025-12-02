@@ -15,6 +15,18 @@ if (!builder.Environment.IsDevelopment())
 
 builder.Services.AddRazorPages();
 
+builder.Services.Configure<CookiePolicyOptions>(options =>
+{
+    // This lambda determines whether user consent for non-essential cookies is
+    // needed for a given request.
+    options.CheckConsentNeeded = context => true;
+    options.MinimumSameSitePolicy = SameSiteMode.None;
+});
+// The TempData provider cookie is not essential. Make it essential
+// so TempData is functional when tracking is disabled.
+builder.Services.Configure<CookieTempDataProviderOptions>(options => { options.Cookie.IsEssential = true; });
+builder.Services.AddSession(options => { options.Cookie.IsEssential = true; });
+
 builder.Services.TryAddSingleton<IActionContextAccessor, ActionContextAccessor>();
 
 if (builder.Environment.IsDevelopment() || builder.Environment.IsEnvironment("Local"))
@@ -92,6 +104,8 @@ else
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();
+
+app.UseCookiePolicy();
 
 app.UseRouting();
 

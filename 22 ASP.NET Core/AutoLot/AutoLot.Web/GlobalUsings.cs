@@ -35,3 +35,5 @@ global using AutoLot.Models.Entities.Base;
 global using AutoLot.Web.Pages.Base;
 
 global using Microsoft.AspNetCore.Mvc.ViewComponents;
+
+global using Microsoft.AspNetCore.Http.Features;

@@ -2,7 +2,8 @@ namespace AutoLot.Web.Pages.Cars;
 
 public class DetailsModel : BasePageModel<Car, DetailsModel>
 {
-    public DetailsModel(IAppLogging<DetailsModel> appLogging,
+    public DetailsModel(
+        IAppLogging<DetailsModel> appLogging,
         ICarDataService dataService) : base(appLogging, dataService, "Details")
     {
     }

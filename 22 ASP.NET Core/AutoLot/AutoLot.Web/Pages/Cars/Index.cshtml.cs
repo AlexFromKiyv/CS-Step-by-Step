@@ -4,7 +4,10 @@ public class IndexModel : BasePageModel<Car, IndexModel>
     public string MakeName { get; set; }
     public int? MakeId { get; set; }
     public IEnumerable<Car> CarRecords { get; set; }
-    public IndexModel(IAppLogging<IndexModel> appLogging, ICarDataService dataService) : base(appLogging, dataService, "Index")
+
+    public IndexModel(
+        IAppLogging<IndexModel> appLogging, 
+        ICarDataService dataService) : base(appLogging, dataService, "Cars")
     {
     }
 

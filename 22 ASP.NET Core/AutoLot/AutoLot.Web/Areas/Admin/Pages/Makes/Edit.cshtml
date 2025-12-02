@@ -1,5 +1,5 @@
 ﻿@page "{id?}"
-@model AutoLot.Web.Pages.Cars.EditModel
+@model AutoLot.Web.Areas.Admin.Pages.Makes.EditModel
 @if (!string.IsNullOrEmpty(Model.Error))
 {
     <div class="alert alert-danger" role="alert">
@@ -8,12 +8,12 @@
 }
 else
 {
-    <h1>Edit @Model.Entity.PetName</h1>
+    <h1>Edit @Model.Entity.Name</h1>
     <form asp-page="Edit" asp-route-id="@Model.Entity.Id">
         <div class="row">
             <div class="col-md-4">
                 <div asp-validation-summary="ModelOnly"></div>
-                @Html.EditorFor(x => x.Entity, new { LookupValues = Model.LookupValues })
+                @Html.EditorFor(x => x.Entity)
                 <input type="hidden" asp-for="Entity.Id" />
                 <input type="hidden" asp-for="Entity.TimeStamp" />
             </div>
@@ -23,8 +23,7 @@ else
             <item-list></item-list>
         </div>
     </form>
-
     @section Scripts {
-        <partial name='_ValidationScriptsPartial' />
+        <partial name="_ValidationScriptsPartial"/>
     }
 }

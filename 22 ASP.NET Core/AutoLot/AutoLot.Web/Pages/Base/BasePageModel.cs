@@ -9,20 +9,23 @@ public abstract class BasePageModel<TEntity,TPageModel> : PageModel
     protected readonly IAppLogging<TPageModel> AppLoggingInstance;
     protected readonly IDataServiceBase<TEntity> DataService;
 
+    [BindProperty]
+    public TEntity Entity { get; set; }
+    public SelectList LookupValues { get; set; }
+    public string Error { get; set; }
+
     [ViewData]
     public string Title { get; init; }
 
-    protected BasePageModel(IAppLogging<TPageModel> appLogging, IDataServiceBase<TEntity> dataService, string pageTitle)
+    protected BasePageModel(
+        IAppLogging<TPageModel> appLogging, 
+        IDataServiceBase<TEntity> dataService, 
+        string pageTitle)
     {
         AppLoggingInstance = appLogging;
         DataService = dataService;
         Title = pageTitle;
     }
-
-    [BindProperty]
-    public TEntity Entity { get; set; }
-    public SelectList LookupValues { get; set; }
-    public string Error { get; set; }
 
     protected async Task GetLookupValuesAsync<TLookupEntity>(
     IDataServiceBase<TLookupEntity> lookupService, string lookupKey, string lookupDisplay)
@@ -74,7 +77,9 @@ public abstract class BasePageModel<TEntity,TPageModel> : PageModel
 
     protected virtual async Task<IActionResult> SaveWithLookupAsync<TLookupEntity>(
         Func<TEntity, bool, Task<TEntity>> persistenceTask,
-        IDataServiceBase<TLookupEntity> lookupService, string lookupKey, string lookupDisplay)
+        IDataServiceBase<TLookupEntity> lookupService, 
+        string lookupKey, 
+        string lookupDisplay)
         where TLookupEntity : BaseEntity, new()
     {
         if (!ModelState.IsValid)
