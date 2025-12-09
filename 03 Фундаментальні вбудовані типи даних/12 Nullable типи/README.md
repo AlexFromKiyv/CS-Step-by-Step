@@ -7,7 +7,6 @@
 Коли поле або об'єкт не визначенно і ми їx використовуем неналежним чином среда виконання викидує NullReferenceException і програма закінчує роботу. Оскільки виправлення помилок іноді дуже дороге задоволення було вирішено вже коли створюється код нагадувати розробнику що в цьому місті може виникнути преблема. В prodaction коді для всіх мість де винакає вірогідність винятку треба додавати код перевірки. 
 
 ```cs
-CrashWithNull();
 static void CrashWithNull()
 {
 
@@ -28,6 +27,7 @@ static void CrashWithNull()
         p.Age++; // Exeption thrown if p == null
     }
 }
+CrashWithNull();
 
 
 class Person
@@ -37,6 +37,14 @@ class Person
     public void Display() => Console.WriteLine($"Name:{Name} Age:{Age} IsNull:{this is null}");
 }
 ```
+```
+Name: Age:1 IsNull:False
+Unhandled exception. System.NullReferenceException: Object reference not set to an instance of an object.
+   at Program.<<Main>$>g__AgePlusOne|0_1(Person p) in D:\Temp\MySolution\MyProject\Program.cs:line 18
+   at Program.<<Main>$>g__CrashWithNull|0_0() in D:\Temp\MySolution\MyProject\Program.cs:line 10
+   at Program.<Main>$(String[] args) in D:\Temp\MySolution\MyProject\Program.cs:line 21
+```
+
 Як ми бачимо з прикладу синтаксичний аналізатор показує де в коді можуть винукнути проблеми. Для того і було створено nullable-контекс в усіх файлах проекту за замовченням.
 
 
@@ -50,8 +58,6 @@ int weight = null; // don't work //Cannot convert null to int because it is not-
 
 Можно зробити так щоб тип крім множини всіх своїх значень примав ще і значення null.
 ```cs
-AssignNull();
-
 static void AssignNull()
 {
     //int weight = null; // don't work //Cannot convert null to int because it is not-nullable value type.
@@ -71,27 +77,27 @@ static void AssignNull()
     
     Console.WriteLine($"{title} {age} {married}");
 
-
     static bool? GetMarriedFromDB()
     {
         return null;
     }
-
     static int? GetAgeFromDB()
     {
         return null;
     }
 }
+AssignNull();
+```
+```
+User:
 ```
 
 Коли ви визначили тип nullable bool (bool?) то змінна може приймати значеня true, false, null. І це важливо при отримані данних з бази данних. Іншого зручного способу представлення bool та числових данних без значення немає. Зверніть увагу шо сінтаксіческий аналізатор не видає ніяких попереджень.
 
 При використані ? використовуеться структура загальної структури System.Nullable<T>. 
 ```cs
-StructSystemNullable();
 static void StructSystemNullable()
 {
-
     Nullable<bool> merried = null; 
     Nullable<int> age = null;
     Console.WriteLine("merried = null, age = null");
@@ -114,6 +120,7 @@ static void StructSystemNullable()
 
     //Nullable<Person> person = null; // Person must be non-nullable value type.
 }
+StructSystemNullable();
 
 class Person
 {
@@ -144,8 +151,6 @@ age.Value : 25
 Функціональність структури Nullable<T> можна використовувати при отримані данних від БД. 
 
 ```cs
-
-UsingNullablesValueType();
 static void UsingNullablesValueType()
 {
     
@@ -194,6 +199,8 @@ static void UsingNullablesValueType()
         Console.WriteLine(result);
     }
 }
+UsingNullablesValueType();
+
 
 class UserDatabaseSimulator
 {
@@ -221,21 +228,23 @@ class UserDatabaseSimulator
     }
 }
 ```
+```
+Id:1 Name:Julia Merried: undefined Age: undefined
+Id:2 Name:Hanna Merried:True Age:35
+Id:3 Name:Alex Merried: undefined Age:30
+Id:4 Name:Jhon Merried:True Age: undefined
+```
 
 Оскільки для необовязкових полів БД ми можемо получити як встановлені так і не встановленні значення за допомогю властивості HasValue та != null ми можимо корректно обробити данні. Також існує корисний метод GetValueOrDefault() якій при відсутності значення вертає default. Треба зазначити шо синтаксичний аналізатор не дає попереджень і тобто ми можемо бути більш впевнені внашому коді. Крім того з прикладу видно шо прі різних комбінаціях визначенності та не визначенності данних метод GetUserInfo обробляє данні корректно і не викидає виняткових ситуацій. 
 
 
-
-## Nullable reference типи.
+# Nullable reference типи.
 
 Reference тип теж може бути nullable. Як було показано раніше в методі CrashWithNull() де використвоуються змінни NoNullable типу і зволікалися зауваженя аналізатора коду програма закінчувала роботу викинувши виняток. Використовуючи Nullable і обробити випадки коли значення не визначено можно бути більше впевненому в надійності колу.  
 
 ```cs
-
-UsingNullableReferenceType();
 static void UsingNullableReferenceType()
 {
-
     Person? girl;
 
     girl = GetPersonFromDb(IsItDefinet: true);
@@ -255,7 +264,6 @@ static void UsingNullableReferenceType()
         {
             Console.WriteLine("Person undefined");
         }
-        
     }
 
     static Person? GetPersonFromDb(bool IsItDefinet)
@@ -264,16 +272,14 @@ static void UsingNullableReferenceType()
     }
 
 }
-
+UsingNullableReferenceType();
 
 class Person
 {
     public string? Name { get; set; }
     public int Age { get; set; }
 
-    public Person()
-    {
-    }
+    public Person() {}
 
     public Person(string name, int age)
     {
@@ -283,6 +289,10 @@ class Person
 
     public void Display() => Console.WriteLine($"Name:{Name} Age:{Age}");
 }
+```
+```
+Name:SomeOne Age:30
+Person undefined
 ```
 Як ми бачимо синтаксішний аналізатор не дає поппереджень і тому винятків не виникне.
 Nullable reference типи можна визначати в nullable-контексті. За замовченям від .Net 6 це весі шаблоши. Це визначаеться в файлі проекту.
@@ -306,7 +316,6 @@ Nullable reference типи можна визначати в nullable-конте
 Для визначення становиша nullable змінних є декілька корисних операторів.
 
 ```cs
-UsingNullCoalescing();
 static void UsingNullCoalescing()
 {
     UserDatabaseSimulator girlJulia = new UserDatabaseSimulator(1, "Julia");
@@ -331,10 +340,8 @@ static void UsingNullCoalescing()
     girlAge ??= 85;
     Console.WriteLine(girlAge);
 } 
-
+UsingNullCoalescing();
 ```
-
-Результат
 ```
 Is age null: True
 35
@@ -345,15 +352,13 @@ Is age null: True
 Оператор ?? може мати більше 2 операндів. Він вичисляє їх доки в цьому є резон.
 
 ## Оператор object?
+
 Перед тим як використовувати об'єкт класу ви провіряете чи не дорівнює він null.
 
 ```cs
-UsingNullConditional();
-
 static void UsingNullConditional()
 {
     //Exapmle1
-
     ArrayLength(null);
     ArrayLength(new string[] { "good", "better", "best" });
 
@@ -371,20 +376,16 @@ static void UsingNullConditional()
 
         //With operator ?
         Console.WriteLine(args?.Length ?? 0);
-
     }
 
 
     //Example2
-
     Person? boy;
-
     boy = null;
     Action(boy);
 
     boy = new Person("John",30);
     Action(boy);    
-
 
     static void Action(Person? person)
     {
@@ -400,15 +401,14 @@ static void UsingNullConditional()
         person?.Display();
     }
 }
+UsingNullConditional();
 
 class Person
 {
     public string? Name { get; set; }
     public int Age { get; set; }
 
-    public Person()
-    {
-    }
+    public Person() {}
 
     public Person(string name, int age)
     {
@@ -418,8 +418,18 @@ class Person
 
     public void Display() => Console.WriteLine($"Name:{Name} Age:{Age}");
 }
-
 ```
+```
+0
+0
+3
+3
+
+John
+John
+Name:John Age:30
+```
+
 Як бачите цей опреатор спрощує перевірку на null. Також він корисний для подій та делегатів.
 
 ## Кращі спопоби перевірки на null
@@ -441,7 +451,6 @@ class Person
 Коли функція отримує аргументи їх можна первірити на null.
 
 ```cs
-ValidationOfFunctionArguments();
 void ValidationOfFunctionArguments()
 {
     try
@@ -474,6 +483,7 @@ void ValidationOfFunctionArguments()
 
     }
 }
+ValidationOfFunctionArguments();
 ```
 ```
 Value cannot be null. (Parameter 'account')

@@ -4,8 +4,6 @@
 
 Тип dynamic дозволяє зберігати дані будь якого типу.
 ```cs
-UsingDynamic();
-
 void UsingDynamic()
 {
     dynamic something = "Ira";
@@ -18,5 +16,14 @@ void UsingDynamic()
     System.Console.WriteLine(something);
     System.Console.WriteLine(something.Length);
 }
+UsingDynamic();
 ```
-Це працює але за рахунок втрати продуктивності. Так само як з System.Object перед виконанням певних дій требе виконувати перетворення типу якє зменьшую продуктивність.
+```
+Ira
+3
+35
+System.Int32[]
+3
+
+```
+Це працює але за рахунок втрати продуктивності. Так само як з System.Object перед виконанням певних дій требе виконувати перетворення типу яке зменьшую продуктивність.

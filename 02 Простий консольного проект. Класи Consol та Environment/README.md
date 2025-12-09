@@ -1,4 +1,5 @@
 # Простий консольний проект
+
 Створимо простий проект.
 1. Створіть папку. (Наприклад D:\Manual\Chapter02)  
 2. Запустити Visual Studio.
@@ -65,7 +66,7 @@ Console.WriteLine("Hello, World!");
 
 Хоча тут немае визначення класу Program і методу Main при компіляції строки коди обгортаються в метод і клас неявно системою. Тут залишили тілки самі важливи дії викинувши рутинну навкого визначення повторюючихся речей. Працюючи з опреторами Top-level треба притримуватися правил:
 
-- Top-level statamens модна використовувати в одному файлі
+- Top-level statamens мождна використовувати в одному файлі
 - Програма не може мати точки входу
 - Їх не можна вкладати в простір імен
 - Вони можуть обробляти вхідні данні (string[] args)
@@ -179,6 +180,7 @@ else
 Таку можливість можна використовувати в тестуванні.
 
 # Можливості класу Console
+
 Доступ до класу забезпечуе global using global::System; Тобто ми можемо звертатися до класу Consol де забадаемо.
 
 Додамо в рішеня проект UsingSystemConsole типу Console App.
@@ -187,11 +189,9 @@ else
 
 Додамо в проект метод який показує можливості ввода вивода тексту
 ```cs
-UsingConsoleForInputOutputString();
 static void UsingConsoleForInputOutputString()
 {
     // Input string
- 
     Console.Write("Enter name:");
     string? name = Console.ReadLine();
     Console.Write("What do you like?:");
@@ -200,12 +200,11 @@ static void UsingConsoleForInputOutputString()
     Console.Clear();
 
     //Output string
-
     Console.WriteLine("Hi {0}! {0} like {1}.", name, interests);
     Console.WriteLine("Hi {1}! {1} like {0}.", interests, name );
     Console.WriteLine($"Hi {name}! {name} like {interests}.");
-
 }
+UsingConsoleForInputOutputString();
 ```
 
 Закоментуемо виклик методу.
@@ -215,7 +214,6 @@ static void UsingConsoleForInputOutputString()
 
 Додамо метод роботи з кольором.
 ```cs
-UsingConsoleColor();
 static void UsingConsoleColor()
 {
     ConsoleColor beginColor = Console.ForegroundColor;
@@ -227,15 +225,13 @@ static void UsingConsoleColor()
     Console.Beep();
     Console.ForegroundColor = beginColor;
 }
-
+UsingConsoleColor();
 ``` 
 Закоментуемо виклик попереднього методу.
 
 Метод WriteLine дозволяє форматувати числові данні для виводу в консоль. 
 Додамо метод форматування чисел.
 ```cs
-UsingNumericalFormatingForConsole();
-
 static void UsingNumericalFormatingForConsole()
 {
     Console.WriteLine($"For money C: {10000.00023:C}"); // гривня покаже ?
@@ -250,23 +246,20 @@ static void UsingNumericalFormatingForConsole()
     Console.WriteLine($"For numerical format N: {1000000:N}");
     Console.WriteLine($"Hexadecimal format X:{1000000:X}");
 }
+UsingNumericalFormatingForConsole();
 ```
-
 Форматування можна виконувати над текстом не тільки для консолі.
 ```cs
-UsingFormattingToGetStringObject();
 static void UsingFormattingToGetStringObject()
 {
     string summ = string.Format($"{1000000:N} $");
 
     Console.WriteLine(summ);
 }
+UsingFormattingToGetStringObject();
 ```
 
-Пошуковий запит:
-```
-.Net C# how formatting numeric
-```
+Пошуковий запит ".Net C# how formatting numeric"
 
 
 ## Можливості класу System.Environment

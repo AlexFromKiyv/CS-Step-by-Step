@@ -7,21 +7,34 @@
 Щоб створити змінну треба вказати тип і назву. Краще зразу присвоїти значеня або вказати default.
 
 ```cs
-CreateVarable();
-
 static void CreateVarable()
 {
     string name = "";
     decimal price = default;
     bool electric = false, forChildren = false;
-    double weight = default, height=default;
+    double weight = default, height = default;
 
     name = "ВЕЛОСИПЕД 20 DOROZHNIK ONYX 2022";
     weight = 14.23;
-    price = 12853; 
-    
-    Console.WriteLine($"{nameof(name)}: {name}\n{nameof(price)}: {price}\n{nameof(weight)}: {weight} ");
-} 
+    price = 12853;
+
+    Console.WriteLine($"" +
+        $"{nameof(name)}: {name}\n" +
+        $"{nameof(price)}: {price}\n" +
+        $"{nameof(weight)}: {weight}\n" +
+        $"{nameof(height)}: {height}\n" +
+        $"Is electric: {electric}\n" +
+        $"For children: {forChildren}");
+}
+CreateVarable(); 
+```
+```
+name: ВЕЛОСИПЕД 20 DOROZHNIK ONYX 2022
+price: 12853
+weight: 14,23
+height: 0
+Is electric: False
+For children: False
 ```
 
 Дозволено в одній строчці визначати декількох змінних одного типу. Літерал default дозволяє присвоїти змінній значення для типу за замовченням. 
@@ -31,7 +44,6 @@ static void CreateVarable()
 Назви змінних зазвичай прописують в "Camel case". Наприклад: weight, orderDetail, dateStart. Для приватних властивостей дехто любить додавати _ . Наприклад: _height.
 
 ```cs
-UsingNew();
 static void UsingNew()
 {
     int myInt = new int();
@@ -45,13 +57,21 @@ static void UsingNew()
     Console.WriteLine($"bool:{myBool}");
     Console.WriteLine($"DataTime:{myDateTime}");
 }
+UsingNew();
 ```
+```
+By default
+int:0
+double:0
+bool:False
+DataTime:01.01.0001 0:00:00
+```
+
 # Неявна типізація 
 
 В C# є можливість замість типу вказати ключеве слово var. Компілятор на основі даних що ініціалізують змінну визначає її тип.
 
 ```cs
-ImplicitDeclarations();
 static void ImplicitDeclarations()
 {
     var code = "025441";
@@ -61,10 +81,14 @@ static void ImplicitDeclarations()
    
     //var something; //must be initialized
 
-
     Console.WriteLine($"{code} {name} {weight} {inStock}");
     Console.WriteLine($"{code.GetType()} {name.GetType()} {weight.GetType()} {inStock.GetType()}");
 }
+ImplicitDeclarations();
+```
+```
+025441 Bicycle 14,23 True
+System.String System.String System.Double System.Boolean
 ```
 
 Зміну з var треба ініціалізувати і не значенням null. Але коли змінна вже ініціалызована reference типом їй можна присваювать значення null.
@@ -86,7 +110,7 @@ static string GetVarString(string enterString)
 }
 
 ```
-Дозволено повернати неявно визначену зміну ящо її тип співпадае з зазначеним у методі.
+Дозволено поверnати неявно визначену зміну ящо її тип співпадае з зазначеним у методі.
 Змінна визначена за допомогою var по суті строго типізована і інколи скорочуе ввод тексту. Під час копіляції тип визначаеться. Компілятор не дозволить змінній типа string ,оголошеный неявно, призначити int.
 
 # Коли корисно використовувати var.
@@ -116,8 +140,6 @@ static string GetVarString(string enterString)
 Var дійсно корисний коли тип даних складно прописати при визначенні запитів LINQ.
 
 ```cs
-UsinVarForLinq();
-
 static void UsinVarForLinq()
 {
     int[] temperaturs = { 5, 12, 4, 15, 10, 8, 17 };
@@ -131,13 +153,8 @@ static void UsinVarForLinq()
 
     Console.WriteLine(normal.GetType().Name);
 }
+UsinVarForLinq();
 ```
 Як ви бачите normal не масив int. На щастя, при практичному використанні LINQ немає потреби точно вказувати тип який повертає запит. 
 
 В інших випадках використання var може зробити код нечитабельним і привести до неправільного використання.
-
-
-
-
-
-

@@ -29,13 +29,24 @@ static void ExplorationOfNumbers_1()
     var number8 = 7 / 3.0;
     Console.WriteLine($"{number8.GetType()} : {number8}");
 }
+ExplorationOfNumbers_1()
 ```
-Ви бачите типи які були використані під час виконання для відповідних літералів. Але можливо стиль за допомогою якого визначені ці змвні не дасть користі ні вам ні тому хто буде розбиратись з вашим кодом. При можливості замість ключового слова var краше вказувати конкретний тип.
+```
+System.Int32 : 100
+System.Int64 : 100000000000000
+System.Double : 100,1
+System.Double : 1E-14
+System.Int32 : 2
+System.Double : 2
+System.Double : 2,3333333333333335
+System.Double : 2,3333333333333335
+```
+
+Ви бачите типи які були використані під час виконання для відповідних літералів. Але можливо стиль за допомогою якого визначені ці зміні не дасть користі ні вам, ні тому хто буде розбиратись з вашим кодом. При можливості замість ключового слова var краше вказувати конкретний тип.
 
 ## Створення
 
 ```cs
-ExplorationOfNumbers_2();
 static void ExplorationOfNumbers_2()
 {
     int number1 = 100;
@@ -56,13 +67,20 @@ static void ExplorationOfNumbers_2()
     double number5 = a / b; 
     Console.WriteLine($"{number5.GetType()} : {number5}");
 }
+ExplorationOfNumbers_2();
+```
+```
+System.Int32 : 100
+System.Int64 : 100000000000000
+System.Double : 100,1
+System.Double : 1E-14
+System.Double : 2,3333333333333335
 ```
 
 ## Діапазони типів
 Кожен числовий тип має свої межи. Подивимось які.
 
 ```cs
-ExplorationOfNumbers_3();
 static void ExplorationOfNumbers_3()
 {
     Console.WriteLine("int --------------");
@@ -103,14 +121,42 @@ static void ExplorationOfNumbers_3()
     Console.WriteLine("Max: " + decimal.MaxValue);
 
 }
+ExplorationOfNumbers_3();
 ```
+```
+int --------------
+1000
+System.Int32
+Min: -2147483648
+Max: 2147483647
+long --------------
+100000000000
+System.Int64
+Min: -9223372036854775808
+Max: 9223372036854775807
+float -------------
+100000,125
+System.Single
+Min: -3,4028235E+38
+Max: 3,4028235E+38
+double -------------
+100000,12345
+System.Double
+Min: -1,7976931348623157E+308
+Max: 1,7976931348623157E+308
+?
+-?
+decimal -------------
+100000,12345
+System.Decimal
+Min: -79228162514264337593543950335
+Max: 79228162514264337593543950335
+```
+
 Треба зазначити що для типів  int, double для відповідних літералів не треба суфіксів. Для long потрібен L, для float - F, для decimal - M
 
 В просторі імен System.Numerics; існуе типи для наукових розрахунків BigInteger який не обмежений.
 ```cs
-
-UsingBigInteger();
-
 static void UsingBigInteger()
 {
     BigInteger myBigInt_1;
@@ -125,12 +171,18 @@ static void UsingBigInteger()
 
     Console.WriteLine($"Is ValueType?:{myBigInt_1 is ValueType}");
 }
-
+UsingBigInteger();
 ``` 
+```
+1111111111111111111111111111111111111111111111111111111
+2222222222222222222222222222222222222222222222222222222
+2469135802469135802469135802469135802469135802469135801975308641975308641975308641975308641975308641975308642
+Is ValueType?:True
+```
+
 ## Використання var
 
 ```cs
-UsingVar();
 static void UsingVar()
 {
     var myInt = 100;
@@ -145,12 +197,20 @@ static void UsingVar()
     Console.WriteLine($"{myFloat} : {myFloat.GetType()}");
     Console.WriteLine($"{myDecimal} : {myDecimal.GetType()}");
 }
+UsingVar();
 ```
-## Операціїї
+```
+100 : System.Int32
+100 : System.Int64
+100 : System.Double
+100 : System.Single
+100,00 : System.Decimal
+```
+# Операції
 
 ## Особливості унарної операції ++
-```
-IncremetAndAssign();
+
+```cs
 void IncremetAndAssign()
 {
     int x;
@@ -171,6 +231,7 @@ void IncremetAndAssign()
     Console.WriteLine($"y = x;");
     Console.WriteLine($"x:{x}  y:{y}");
 }
+IncremetAndAssign();
 ```
 
 ```
@@ -186,7 +247,6 @@ x:2  y:2
 ```
 ## Бінарні операції.
 ```cs
-BinaryOperations();
 void BinaryOperations()
 {
     int a = 11;
@@ -200,8 +260,8 @@ void BinaryOperations()
 
     double c = 11.0;
     Console.WriteLine($"{c} / {b}={c/b}");
-
 }
+BinaryOperations();
 ```
 
 ```
@@ -214,7 +274,6 @@ void BinaryOperations()
 ```
 ## Присваювання.
 ```cs
-AssignmentOperators();
 void AssignmentOperators()
 {
     int a = 2;
@@ -232,6 +291,7 @@ void AssignmentOperators()
     a /= 2;
     Console.WriteLine(a);
 }
+AssignmentOperators();
 ```
 ```
 2
@@ -240,14 +300,12 @@ void AssignmentOperators()
 4
 2
 ```
-
 
 ## Метод Parse, TryParse
 
 З строки можно отримати змінну типу.
 
 ```cs
-UsingParse();
 static void UsingParse()
 {
     int myInt = int.Parse("100");
@@ -258,12 +316,16 @@ static void UsingParse()
     Console.WriteLine($"{myDouble} {myDouble.GetType()}");
     Console.WriteLine($"{myDecimal} {myDecimal.GetType()}");
 }
+UsingParse();
 ```
-
+```
+100 System.Int32
+100,23 System.Double
+1001000000100,293 System.Decimal
+```
 Але рядок може не відповідає типу. Для того щоб в консоль не викинувся виняток існуе метод TryParse
 
 ```cs
-UsingTryParse();
 static void UsingTryParse()
 {
     string myString = "83 kg";
@@ -271,19 +333,21 @@ static void UsingTryParse()
 
     Console.WriteLine($"Was parsing \"{myString}\" well?:{resultParsing} {myInt1}");
 
-
     myString = "83";
     resultParsing = int.TryParse(myString, out int myInt2);
 
     Console.WriteLine($"Was parsing \"{myString}\" well?:{resultParsing} {myInt2}");
 }
+UsingTryParse();
+```
+```
+Was parsing "83 kg" well?:False 0
+Was parsing "83" well?:True 83
 ```
 
 ## Перетворення типів. 
 
 ```cs
-ImplicitlyCastShortToInt();
-
 static void ImplicitlyCastShortToInt()
 {
     Console.WriteLine(short.MaxValue);
@@ -308,15 +372,22 @@ static void ImplicitlyCastShortToInt()
         return a*a;
     }
 }
+ImplicitlyCastShortToInt();
 ```
-Оскілкі любе значення short без проблем може бути доповнене до int в процесі виконання відбуваеться неявне претвореня short в int. Прицьому дані претворюються безопасно без втрати. Можна сказати short підмножина int. Також при передачі методу якій очікує int змінної типа short також відбувается неявне претворення і помилки не виникає. Кажуть змінна myShort розширюється до int. В звороньому напрямку претворення неявно не выдбудеться ы компылятор сповыстить про це. Хоча 1 можно зберігти в типі short тип int неавно не перетворюеться(не звужуеться). Розмір int виходить за межи (overflow) short. Компілятор не пропускає всі неявні звужуючи перетворення. 
+```
+32767
+2147483647
+
+100
+10000
+```
+Оскілкі любе значення short без проблем може бути доповнене до int в процесі виконання відбуваеться неявне претвореня short в int. Прицьому дані претворюються безопасно без втрати. Можна сказати short підмножина int. Також при передачі методу якій очікує int змінної типа short також відбувается неявне претворення і помилки не виникає. Кажуть змінна myShort розширюється до int. В звороньому напрямку претворення неявно не выдбудеться і компілятор сповістить про це. Хоча 1 можно зберігти в типі short тип int неавно не перетворюеться(не звужуеться). Розмір int виходить за межи (overflow) short. Компілятор не пропускає всі неявні звужуючи перетворення. 
 
 ## Переповнення
 
 Компілятору можно вказати явно про звуження типу але при цьому можна втратити данні.
 
 ```cs
-ExplicitlyCastIntToShort();
 static void ExplicitlyCastIntToShort()
 {
     Console.WriteLine(short.MaxValue);
@@ -332,15 +403,20 @@ static void ExplicitlyCastIntToShort()
     myShort = (short)myInt;
     Console.WriteLine($"{myShort} = {myInt}");
 }
+ExplicitlyCastIntToShort();
 ```
+```
+32767
+
+10000 = 10000
+-32766 = 32770
+```
+
 Код компилюється виконуеться але данні стають некоректними. Коли скорочується місце де зберігаються дані частина данних відсікається. При цьому нема сповіщень про якісь помилки. Якшо примусово компілятору вказуеться операцію приведеня треба додадково потурбуватися що вона пройде без втрати данних.
 
 Оскільки при операції приведеня процесс може пройти як успішно так і з помилкою надаеться можливість контролювати цей процес як на рівні додадку так і на рівні частини коду.
 
 ```cs
-
-UsingChacked();
-
 static void UsingChacked()
 {
     int myInt = 10_000;
@@ -369,8 +445,12 @@ static void UsingChacked()
         Console.WriteLine(ex.Message);
     }
 }
+UsingChacked();
 ```
-
+```
+10000 = 10000
+Arithmetic operation resulted in an overflow.
+```
 При використані checked перевіряеться чи не було переповнення і видаеться сповіщеня шо було переповнення.  
 
 ## Перевірка переповнення 
@@ -398,8 +478,6 @@ static void UsingChacked()
 
 Зазвичай для цілих чисел вибирають int, але можна вибрати враховуючи діапазон.
 ```cs
-RangeOfWhole();
-
 void RangeOfWhole()
 {
 
@@ -412,7 +490,7 @@ void RangeOfWhole()
     Console.WriteLine($"long   {long.MinValue}   {long.MaxValue} byte:{sizeof(long)}");
     Console.WriteLine($"ulong   {ulong.MinValue}   {ulong.MaxValue} byte:{sizeof(ulong)}");
 }
-
+RangeOfWhole();
 ```
 ```
 sbyte  -128  127 byte:1
@@ -429,16 +507,16 @@ ulong   0   18446744073709551615 byte:8
 При зберіганні реальних чисел вони перетворюються в бінарну систему обчисленяя і тому 
 в випадку з float або double не повністю точно співпадають с аналогом в 10 системі счислення. Тому треба звертати увагу як буде використовуватися змінна і наскільки важлива точність розрахунків.
 
-Розглянемо особливості типу double i decimal.
+## Особливості типу double i decimal.
 
 Діапазони типів різні.
 ```cs
-RangeOfDoubleAndDecimal();
 void RangeOfDoubleAndDecimal()
 {
     Console.WriteLine($"double   {double.MinValue}   {double.MaxValue} byte:{sizeof(double)}");
     Console.WriteLine($"decimal   {decimal.MinValue}   {decimal.MaxValue} byte:{sizeof(decimal)}");
 }
+RangeOfDoubleAndDecimal();
 ```
 ```
 double   -1,7976931348623157E+308   1,7976931348623157E+308 byte:8
@@ -446,7 +524,6 @@ decimal   -79228162514264337593543950335   79228162514264337593543950335 byte:16
 ```
 Хоча double займає меньше місця і має більший діапазон але в деяких випадках не відповідає вимогам точності.
 ```cs
-DoubleOrDecimal();
 void DoubleOrDecimal()
 {
     double doubleA = 0.3;
@@ -464,6 +541,7 @@ void DoubleOrDecimal()
     Console.WriteLine($"DecimalA - DecimalB = 0.1 ?:{(decimalA - decimalB) == 0.1M}");
     Console.WriteLine($"DecimalA - DecimalB:{decimalA - decimalB}");
 }
+DoubleOrDecimal();
 ```
 ```
 DoubleA:0,3 DoubleB:0,2
@@ -482,13 +560,12 @@ DecimalA - DecimalB:0,1
 
 ## Особливості округлення
 ```cs
-RoundingRuleDefault();
-
 void RoundingRuleDefault()
 {
     Console.WriteLine(Math.Round(3.5));
     Console.WriteLine(Math.Round(4.5));
 }
+RoundingRuleDefault();
 ```
 ```
 4
@@ -499,16 +576,14 @@ void RoundingRuleDefault()
 Процес округлення можна контролювати.
 
 ```cs
-RoundingRuleAwayFromZero();
-
 void RoundingRuleAwayFromZero()
 {
     Console.WriteLine(Math.Round(3.5,0,MidpointRounding.AwayFromZero));
     Console.WriteLine(Math.Round(4.5,0, MidpointRounding.AwayFromZero));
 }
+RoundingRuleAwayFromZero();
 ```
 ```
 4
 5
 ```
-

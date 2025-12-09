@@ -4,8 +4,6 @@
 Отже варто розглянути його методи. Додамо в рішення проект BaseClasses і додамо метод.  
 
 ```cs
-ExploringSystemObject();
-
 static void ExploringSystemObject()
 {
     System.Object obj = new System.Object();
@@ -37,17 +35,38 @@ static void ExploringSystemObject()
     Console.WriteLine(myString.GetType());
     Console.WriteLine(myString.GetHashCode());
     Console.WriteLine($"string is ValueType: {myString is ValueType}");
+}
+ExploringSystemObject();
+```
+```
+obj-------------------
+System.Object
+False
+System.Object
+35342034
+
+int myInt = 100;----
+100
+True
+System.Int32
+100
+int is ValueType: True
+
+string myString = "Hi girl";---
+Hi girl
+False
+System.String
+-2028483897
+string is ValueType: False
 ```
 
-Як бачимо int є скороченням типу System.Int32. Крім того ми бачимо шо int є нашадком System.ValueType. Це означае що змінні такогу типу при виконанні програми розміщуються в стеку.В стеку, відповідно до типу, виділяеться необхідна кількість памяті і при використяні зміної туди записуеться значення.  Коли відробила та частину коду де створено змінну частина пам'яті в стеку де була змінна звільняється.
+Як бачимо int є скороченням типу System.Int32. Крім того ми бачимо шо int є нашадком System.ValueType. Це означае що змінні такогу типу при виконанні програми розміщуються в стеку. В стеку, відповідно до типу, виділяеться необхідна кількість памяті і при використяні зміної туди записуеться значення.  Коли відробила та частину коду де створено змінну частина пам'яті в стеку де була змінна звільняється.
 Таким чином змінні типу ValueType швидкі і єффективні.
 
 В той же час тип string не є ValueType і тому в стеку зберігаеться посиланя на об`ект строки в heap.
 
 Не варто використовувати object будь де.
 ```cs
-ItIsNoGoodUsingObject();
-
 void ItIsNoGoodUsingObject()
 {
     object weight = 69;
@@ -58,13 +77,11 @@ void ItIsNoGoodUsingObject()
     Console.WriteLine(((string)name).Length);
     Console.WriteLine((int)weight+1);
 }
+ItIsNoGoodUsingObject();
 ```
-Хоча object можна використовувати для різних типів ця гнучкість потребу операцій приведеня до конкретного типу і тому поступає у продуктивності. Тому головне призначення object ,бути основою для всіх інших типів. Гарну гнучкість і продуктивність представляють generics(узагальнення).
-
-
-
-
-
-
-
-
+```
+Hanna weight 69 kg
+5
+70
+```
+Хоча object можна використовувати для різних типів ця гнучкість потребує операцій приведеня до конкретного типу і тому поступає у продуктивності. Тому головне призначення object ,бути основою для всіх інших типів. Гарну гнучкість і продуктивність представляють generics(узагальнення).

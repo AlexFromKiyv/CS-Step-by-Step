@@ -24,4 +24,16 @@ static void ExplorationOfChar()
     myChar = '>';
     Console.WriteLine($"Is {myChar}  punctuation :{char.IsPunctuation(myChar)}");
 }
+ExplorationOfChar();
+```
+```
+1
+Is 1  digit :True
+Is 1  letter :False
+Is H  letter :True
+Is H  whitespace :False
+Is    whitespace :True
+Is third whitespace :True
+Is !  punctuation :True
+Is >  punctuation :False
 ```

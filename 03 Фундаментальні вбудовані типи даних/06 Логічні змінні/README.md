@@ -3,8 +3,6 @@
 System.Boolean скорочено bool допомогає працювати з логічними змінними. Додамо проект Boolean з методом.
 
 ```cs
-ExplorationOfBooleanType();
-
 static void ExplorationOfBooleanType()
 {
     bool myBool = default;
@@ -12,6 +10,12 @@ static void ExplorationOfBooleanType()
     Console.WriteLine($"Type in: {myBool.GetType()}");
     Console.WriteLine($"Representation to string: {bool.TrueString}, {bool.FalseString} ");
 }
+ExplorationOfBooleanType();
+```
+```
+Default: False
+Type in: System.Boolean
+Representation to string: True, False
 ```
 
 Змінна типу <em>bool</em> може мати значення або False або True. В класі System.Boolean є строкове представлення ціх значень.    
@@ -92,8 +96,6 @@ Im Working.  False || TrueReturn :True
 З строки можно отримати змінну типу.
 
 ```cs
-UsingParse();
-
 static void UsingParse()
 {
     bool myBool = bool.Parse("True");
@@ -110,14 +112,19 @@ static void UsingParse()
     //myBool = bool.Parse("");
     //myBool =bool.Parse(null);
 }
-
-UsingTryParse();
+UsingParse();
 ```
+```
+True
+True
+False
+False
+
+```
+
 Але рядок може не відповідає типу. Для того щоб в консоль не викинувся виняток існуе метод TryParse
 
 ```cs
-UsingTryParse();
-
 static void UsingTryParse()
 {
     string myString = "False";
@@ -139,4 +146,8 @@ static void UsingTryParse()
         Console.WriteLine($"Cannot convert \"{myString}\" to bool.");
     }
 }
+UsingTryParse();
 ```
+Was parsing "False" well?:True False
+Was parsing "Hi girl" well?:False False
+Cannot convert "Hi girl" to bool.

@@ -24,7 +24,7 @@
 dotnet --info
 ```
 
-.NET SDK можна завантажити з <a href="https://dotnet.microsoft.com/download">dotnet.microsoft.com/download</a>
+.NET SDK можна завантажити за мережевим запитом "Download .NET"
 
 Щоб побачити наявны на машині середовиша виконання коду:
 

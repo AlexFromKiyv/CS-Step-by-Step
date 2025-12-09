@@ -3,8 +3,6 @@
 Структури добре підходять для моделювання математичних, геометричних і атомарних сутностей. Структури можуть реалізовувати інтерфейси але не можна успадковувати і бути основою класа. Структури можуть містити поля даних та медоди роботи з ними.
 Проект Structs
 ```cs
-UsingSimpleStructure();
-
 static void UsingSimpleStructure()
 {
     Point point;
@@ -32,6 +30,7 @@ static void UsingSimpleStructure()
     Console.WriteLine(point.GetType());
     Console.WriteLine(point.ToString());
 }
+UsingSimpleStructure();
 
 struct Point
 {
@@ -66,6 +65,17 @@ struct Point
 
 }
 ```
+```
+X:1 Y:2
+X:2 Y:3
+X:3 Y:4
+X:2 Y:3
+X:1 Y:2
+Point
+Point
+Point
+```
+
 У цьому прикладі визначена структура з двома загально досупними полями і методами. Модіфікатор public дозволяе мати доступ до поля змінної. Але робити поля напряму загальнодоступними пагана практика. Краще для цього використовувати властивості, а поля робити приватним.
 
 
@@ -74,7 +84,6 @@ struct Point
 Як видно із прикладу перед тим як змінну типа струтура використовувати вона повина бути проініціалізована. Тобта всі поля повини мати значення. Ви можете створити змінну структури використовуючи new, який виключе конструктор за замовчуванням. 
 
 ```cs
-UsingStructureConstructor();
 static void UsingStructureConstructor()
 {
     Point point = new Point();
@@ -83,7 +92,7 @@ static void UsingStructureConstructor()
     Point point1 = new Point(1, 1);
     point1.Display();
 }
-
+UsingStructureConstructor();
 
 struct Point
 {
@@ -120,8 +129,11 @@ struct Point
     {
         Console.WriteLine($"X:{X} Y:{Y}");
     }
-
 }
+```
+```
+X:0 Y:0
+X:1 Y:1
 ```
 Всі поля після цого заповнюються значеннями за замовчуванням (default).
 
@@ -130,13 +142,12 @@ struct Point
 Структури можна ініціалізувати при декларуванні.
 
 ```cs
-UsingInizializersStructure();
-
 static void UsingInizializersStructure()
 {
     Coordinates coordinates = new Coordinates();
     coordinates.Display();
 }
+UsingInizializersStructure();
 
 struct Coordinates
 {
@@ -153,9 +164,15 @@ struct Coordinates
     }
 }
 ```
+```
+1:1
+```
+
+
 ## Read-only структури
 
-Структури можуть бути тіки для читання і це означає шо вони незмінні. Вони можуть бути більш продуктивними. 
+Структури можуть бути тільки для читання і це означає шо вони незмінні. Вони можуть бути більш продуктивними. 
+
 ```cs
 static void UsingReadonlyStructure()
 {
@@ -166,6 +183,7 @@ static void UsingReadonlyStructure()
     myApartment.Display();
 
 }
+UsingReadonlyStructure()
 
 readonly struct ApartmentSquare
 {
@@ -181,6 +199,9 @@ readonly struct ApartmentSquare
         Console.WriteLine(Square);
     }
 }
+```
+```
+59
 ```
 Незмінні поля можна встановити при створенні.
 
@@ -216,10 +237,15 @@ struct ApartmentWithPeople
     }
 }
 ```
+```
+Apartment :7 Square:48 Number of residents:2
+Apartment :7 Square:48 Number of residents:3
+```
 
 Типи int,double,decimal та інші це структури.
 
 ## Структури з властивостями.
+
 Розглянемо Point_v1.cs
 ```cs
     struct Point_v1
@@ -256,4 +282,3 @@ void UsingStructureWithProperties()
 [0,0]
 ```
 Цей приклад аналогічний інкапсуляції в класах. 
-

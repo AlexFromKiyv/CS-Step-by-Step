@@ -7,7 +7,6 @@
 Коли ми робимо систему в якій враховуеться стан води простіше оперувати словами Ice, Snow, Liquid, Par ніж 0,1,2,3
 
 ```cs
-SimpleEnum();
 static void SimpleEnum()
 {
     WaterStateEnum myEnum = WaterStateEnum.Ice;
@@ -17,6 +16,7 @@ static void SimpleEnum()
     Console.WriteLine(myEnum == WaterStateEnum.Ice);
     Console.WriteLine(myEnum == WaterStateEnum.Liquid);
 }
+SimpleEnum();
 
 enum WaterStateEnum
 {
@@ -26,6 +26,12 @@ enum WaterStateEnum
     Par     //3
 }
 ```
+```
+Ice
+True
+False
+```
+
 Для читабільності в кінці добаляють суфікс Enum. В top-lavel operators визначення типів повино бути в кінці файлу за операторами. 
 
 Іменовні константи в перерахуванні відповідають числа з 0 з подальшою прогрессією n+1. Це можна змінити.
@@ -67,11 +73,8 @@ enum WaterState3Enum : byte
 ## Використання
 
 ```cs
-UsingEnum();
 static void UsingEnum()
 {
-    
-
     WaterStateEnum  enumNow = WaterStateEnum.Liquid;
 
     Console.WriteLine(enumNow);
@@ -107,6 +110,7 @@ static void UsingEnum()
     }
 
 }
+UsingEnum();
 
 enum WaterStateEnum
 {
@@ -116,13 +120,20 @@ enum WaterStateEnum
     Par     //3
 }
 ```
+```
+Liquid
+2
+No. It is'nt.
+Yes. It's cold
+True
 
-Як бачите використорування именованих значень робить код читабільнішим.Для отримання числового значеня зміну можно привети до базового типу перерахування. 
+```
+
+Як бачите використорування именованих значень робить код читабільнішим. Для отримання числового значеня зміну можно привети до базового типу перерахування. 
 
 Клас System.Enum має метод для визначення типу в якому зберігаються значення змінної та інше. 
 
 ```cs
-UsingSystemEnum();
 static void UsingSystemEnum()
 {
 
@@ -147,7 +158,37 @@ static void UsingSystemEnum()
         Console.WriteLine();
     }
 }
+UsingSystemEnum();
 ```
+```
+Tuesday - 2
+Wednesday - 3
+Thursday - 4
+Friday - 5
+Saturday - 6
+
+Red
+Type:System.ConsoleColor
+Is enum:True
+Underlying type:System.Int32
+Black - 0
+DarkBlue - 1
+DarkGreen - 2
+DarkCyan - 3
+DarkRed - 4
+DarkMagenta - 5
+DarkYellow - 6
+Gray - 7
+DarkGray - 8
+Blue - 9
+Green - 10
+Cyan - 11
+Red - 12
+Magenta - 13
+Yellow - 14
+White - 15
+```
+
 В прикладі використовуеться флаг форматування :D.
 
 ## Побітові операції і Enum
@@ -182,7 +223,6 @@ Int.MaxValue =  1111111111111111111111111111111
 Побітові оператори швидкий механізм. Разом з Enum можна рішати деякі завдання.
 
 ```cs
-UsingBitwiseOperationsWithEnum();
 static void UsingBitwiseOperationsWithEnum()
 {
     ContactPreferenceEnum contactsJulia = ContactPreferenceEnum.Email | ContactPreferenceEnum.Phone;
@@ -195,7 +235,7 @@ static void UsingBitwiseOperationsWithEnum()
     Console.WriteLine("Phone - {0}", (contactsJulia | ContactPreferenceEnum.Phone) == contactsJulia);
     Console.WriteLine("Ukrposhta - {0}", (contactsJulia | ContactPreferenceEnum.Ukrposhta) == contactsJulia);
 }
-
+UsingBitwiseOperationsWithEnum();
 
 [Flags]
 enum ContactPreferenceEnum
@@ -214,8 +254,6 @@ Email - True
 Phone - True
 Ukrposhta - False
 ```
-
-
 Ше один приклад використання Enum.
 
 Types.cs
@@ -254,6 +292,3 @@ void UsingEnumForPerson()
 Vikotry is training Monday, Wednesday, Friday
 ```
 Робіть тип enum похідним від byte коли кількість варіантів не бульше 8, ushort для 16, uint для 32, ulong для 64.
-
-
-
