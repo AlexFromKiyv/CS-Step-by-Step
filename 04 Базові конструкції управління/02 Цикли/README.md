@@ -1,9 +1,10 @@
+# Цикли
+
 Додамо в рішення проект Loops
 
 # For
 
 ```cs
-UsingFor();
 static void UsingFor()
 {
 	int length = 10;
@@ -14,14 +15,13 @@ static void UsingFor()
 
 	//Console.WriteLine(i); //does not exit in context
 }
+BadCode();
 ```
 Якщо відомо яку фіксовану кількість ітерацій треба зробити for швидкий і простий варіант.
 
 # Foreach
 
 ```cs
-UsingForeach();
-
 static void UsingForeach()
 {
 	string[] myTools = { "Pliers", "Hammer", "Screwdriver", "Wrench" };
@@ -38,11 +38,11 @@ static void UsingForeach()
 		Console.WriteLine(weight);
 	}
 }
+UsingForeach();
 ```
 Цей варіанти підходить коли вам треба в колекції пройтись по всім єлементам один за одоним без всаких трюків. Коллекцією може бути клас який реалізовує інтерфейс IEnumerable (перелічуваний).
 
 ```cs
-UsinForeachWithVar();
 static void UsinForeachWithVar()
 {
     int[] temperaturs = { 5, 12, 4, 15, 10, 8, 17 };
@@ -54,14 +54,14 @@ static void UsinForeachWithVar()
         Console.WriteLine(item);
     }
 }
+UsinForeachWithVar();
 ```
-В циклі можна використовувати неявну типізацію єлементів.
+В циклі можна використовувати неявну типізацію елементів.
 
 
 # While
 
 ```cs
-UsingWhile();
 static void UsingWhile()
 {
 	string enteredString = "";
@@ -74,12 +74,12 @@ static void UsingWhile()
 
     }
 }
+UsingWhile();
 ```
 
 Цикл while корсиний коли треба виконати блок коду поки не буде виконана умова. Для того щоб цикл колись закінчився треба переконатися що умова рано чи пізно можлива.
 
 ```cs
-UsingDoWhile();
 static void UsingDoWhile()
 {
     string enteredString = "";
@@ -92,6 +92,7 @@ static void UsingDoWhile()
     } while (enteredString.ToLower() != "y");
 	
 }
+UsingDoWhile();
 ```
 Особливости циклу do/while то що тіло циклу виконуяться перш ніж перевіряеться умова. Тобто тіло хочаб один раз буде виконано.
 

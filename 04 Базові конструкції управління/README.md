@@ -1,2 +1,0 @@
-Додамо рішеня BasicСonstructionsForControl з проектом BlocksOfCode
-Розглянемо теми

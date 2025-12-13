@@ -1,10 +1,10 @@
+# Умовні конструкції
+
 Додамо проект під назвою If
 
 ## Логічні опертори та вирази.
 
-```CS
-LogicalExpression();
-
+```cs
 static void LogicalExpression()
 {
     int weight = 70;
@@ -40,15 +40,38 @@ static void LogicalExpression()
 
     Console.WriteLine($"false || true && true || true && false || true : {false || true && true || true && false || true }");
 }
+LogicalExpression();
 ```
 Оператори && || не перевіряють вираз до кінця якшо результат визначен. Аби превірити весь вираз існують  & |. 
 
+```
+weight = 70
+weight == 70 : True
+weight != 70 : False
+weight > 70  : False
+weight < 70  : False
+weight >= 70  : True
+weight <= 70  : True
+------------------------------
+ true && true   : True
+ true && false  : False
+ false && true  : False
+ false && false : False
+------------------------------
+ true || true   : True
+ true || false  : True
+ false || true  : True
+ false || false : False
+------------------------------
+ !true  : False
+ !false : True
+------------------------------
+false || true && true || true && false || true : True
+```
 
-## IF/ELSE
+## if then else
 
 ```cs
-SimpleIf();
-
 static void SimpleIf()
 {
     bool logicalExpression = true;
@@ -58,9 +81,7 @@ static void SimpleIf()
     }
 
 }
-
-
-SimpleIfElse();
+SimpleIf();
 
 static void SimpleIfElse()
 {
@@ -74,11 +95,17 @@ static void SimpleIfElse()
         Console.WriteLine("Logical expression is false");
     }
 }
+SimpleIfElse();
+
 ```
-## IS
+Logical expression is true
+Logical expression is false
+```
+
+```
+## is
 
 ```cs
-UsingIs();
 static void UsingIs()
 {
     string myVariable1 = "Hi";
@@ -94,6 +121,11 @@ static void UsingIs()
         Console.WriteLine(newInt);
     }
 }
+UsingIs();
+```
+```
+Hi
+70
 ```
 
 В цьому прикладі перевіряеться тип об'єкту і якщо умова виконується присваюється новій змінній для того шоб потім використовувати.
@@ -103,7 +135,6 @@ static void UsingIs()
 ## Matching patterns.
 
 ```cs
-PatternMatchingWithIf();
 void PatternMatchingWithIf()
 {
     Console.WriteLine(GetSquare(10));
@@ -121,11 +152,14 @@ void PatternMatchingWithIf()
         }
     }
 }
+PatternMatchingWithIf();
+```
+```
+100
+-1
 ```
 
-
 ```cs
-UsingTypePattern();
 static void UsingTypePattern()
 {
     Type myType = typeof(short);
@@ -134,13 +168,15 @@ static void UsingTypePattern()
     {
         Console.WriteLine($"{myType} is type.");
     }
-
 }
+UsingTypePattern();
+```
+```
+System.Int16 is type.
 ```
 Перевірка чи є зміна тип.
 
 ```cs
-UsingParenthesizedPattern();
 static void UsingParenthesizedPattern()
 {
     char myChar = 'y';
@@ -150,10 +186,8 @@ static void UsingParenthesizedPattern()
         Console.WriteLine($"{myChar} is a character or separator");
     }
 }
-```
+UsingParenthesizedPattern();
 
-```cs
-UsingRelationalConjuctiveDisjunctivePattern();
 static void UsingRelationalConjuctiveDisjunctivePattern()
 {
     char myChar = 'y';
@@ -163,9 +197,14 @@ static void UsingRelationalConjuctiveDisjunctivePattern()
         Console.WriteLine($"{myChar} is a character");
     };
 }
+UsingRelationalConjuctiveDisjunctivePattern();
 ```
+```
+y is a character or separator
+y is a character
+```
+
 ```cs
-UsingNegativePattern();
 static void UsingNegativePattern()
 {
     object myObject = 0;
@@ -179,13 +218,16 @@ static void UsingNegativePattern()
         Console.WriteLine($"{myObject} not null");
     }
 }
+UsingNegativePattern();
+```
+```
+0 not string
+0 not null
 ```
 
 ## Оператор ?
 
 ```cs
-UsingConditionalOperator();
-
 static void UsingConditionalOperator()
 {
     int weight = 95;
@@ -197,13 +239,15 @@ static void UsingConditionalOperator()
     // do not work
     //(weight < 72) ? Console.WriteLine("It's good") : Console.WriteLine("It's no good");
 }
-
+UsingConditionalOperator();
 ```
+```
+It's no good
+```
+
 Для виразності цього оператору я логічний вираз поміщаю в дужки. Якшо умова виконується виконується код за ? , інакше виконується код за : .
 
 ```cs
-UsingConditionalOperatorWithRef();
-
 static void UsingConditionalOperatorWithRef()
 {
     int[] smallArray = new int[] { 1, 2, 3, 4, 5 };
@@ -218,19 +262,16 @@ static void UsingConditionalOperatorWithRef()
     index = 2;
     ((index < 5) ? ref smallArray[index] : ref largeArray[index - 5]) = 100;
     Console.WriteLine(string.Join(" ", smallArray));
-
 }
-
+UsingConditionalOperatorWithRef();
 ```
-В цьому прикладі резульатом роботи оператору є посилання на єлемент масиву. І це посилання можно використовувати не зберігаючи в окремій змінній. 
+В цьому прикладі резульатом роботи оператору є посилання на елемент масиву. І це посилання можно використовувати не зберігаючи в окремій змінній. 
 
 # Switch у простому варіанті.
 
 Додамо проект під назвою Switch
 
 ```cs
-
-SimpleSwitch();
 static void SimpleSwitch()
 {
     Console.WriteLine("Choose: ");
@@ -257,13 +298,20 @@ static void SimpleSwitch()
     }
     Console.WriteLine(result);
 }
-
+SimpleSwitch();
+```
+```
+Choose:
+1. tea
+2. coffee
+3. water
+Enter your varient:1
+I'm making tea
 ```
 
 Кожен case має закінчуватися breake, return або go to. Інакше він буде преходити до наступного case.
 
 ```cs
-SimpleSwitchWithString();
 static void SimpleSwitchWithString()
 {
     Console.WriteLine("Choose: ");
@@ -292,15 +340,22 @@ static void SimpleSwitchWithString()
     }
     Console.WriteLine(result);
 }
+SimpleSwitchWithString();
+```
+```
+Choose:
+tea
+coffee
+water
+Enter your varient:coffee
+I'm making coffee
 ```
 Можна використовувати return
 
 ```cs
-SwitchWithReturn();
-
 void SwitchWithReturn()
 {
-    Console.WriteLine(DoAction(1,1,1));
+    Console.WriteLine(DoAction(3, 2, 1));
 
     int DoAction(int actionCode, int a, int b)
     {
@@ -313,12 +368,14 @@ void SwitchWithReturn()
         }
     }
 }
+SwitchWithReturn();
 ```
-
+```
+2
+```
 Оператор switch може порівнювати типи char, string, bool, int, long, та enum. 
 
 ```cs
-SwitchWithEnum();
 static void SwitchWithEnum()
 {
     Console.Write("Enter day of the week:");
@@ -366,7 +423,13 @@ static void SwitchWithEnum()
     }
     Console.WriteLine(result);
 }
+SwitchWithEnum();
 ```
+```
+Enter day of the week:Wednesday
+Morning exercise only
+```
+
 Так можна використовувати Enum
 
 ```cs
@@ -383,7 +446,6 @@ static void SwitchWithEnum()
 У простому варіанті switch співставляє значення з константами і називають constant pattern (шаблон констант). Але оператор може оцінювати тип (type pattern) і case не обмежується постійними значеннями.
 
 ```cs
-PatternMatchingInSwitch();
 static void PatternMatchingInSwitch()
 {
     object inputHeight;
@@ -392,7 +454,6 @@ static void PatternMatchingInSwitch()
     //inputHeight = 176;
     //inputHeight = 176M;
     inputHeight = 176.5;
-
 
     switch (inputHeight)
     {
@@ -414,17 +475,18 @@ static void PatternMatchingInSwitch()
     {
         return (height / 100) * (height / 100) * 24.9;
     }
-
 }
+PatternMatchingInSwitch();
 ```
-
+```
+77,56910249999999
+```
 У данному випадку switch зіставляє тип отриманого значення з типом case. Крім того змінній відповідного типу присваюється значення і додадково превіряеться (when). Але ця змінна недосяжна за оператором case.
 В випадку type pattern порядок case має значення. Визначеня  case double doubeHeight: прекриває інши варіанти з when.
 
 ## Switch expression
 
 ```cs
-UsingSwitchExpression();
 static void UsingSwitchExpression()
 {
     string stringColor = "Green";
@@ -438,13 +500,15 @@ static void UsingSwitchExpression()
     };
 
     Console.WriteLine(color);
-} 
+}
+UsingSwitchExpression(); 
+```
+```
+#00FF00
 ```
 Switch вираз досить зрозуміло і компактно.
 
 ```cs
-UsingSwitchExpressionWithTuple();
-
 static void UsingSwitchExpressionWithTuple()
 {
     string result = (1,1) switch
@@ -457,6 +521,10 @@ static void UsingSwitchExpressionWithTuple()
 
     Console.WriteLine(result);
 }
+UsingSwitchExpressionWithTuple();
+```
+```
+ON
 ```
 Так можна використовувати в switch кортежі.
 

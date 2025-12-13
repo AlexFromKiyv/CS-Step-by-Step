@@ -4,8 +4,7 @@
 
 ## Створення
 
-
-При створенні методів вказуеться модіфікатор доступу, тип поверненя, та параметри. Методи які повертають значення називають функціями.
+При створенні методів вказуеться модіфікатор доступу, тип поверненя, та параметри. Методи які повертають значення зазвичай називають функціями.
 
 ```
 (Модіфікатор доступу) (Тип поверненя) (Назва) (Параметри)
@@ -13,17 +12,12 @@
   складові дії методу
 }  
 
-static  void MyMethod (string[] args)
+static void MyMethod (string[] args)
 {
    // do something
-
 }
-
 ```
-Назви змінних зазвичай прописують в "Title case". Наприклад: DoIt, ReverseList.
-
 ```cs
-SimpleMethod();
 static void SimpleMethod()
 {
     double height = 176;
@@ -38,30 +32,30 @@ static void SimpleMethod()
         return (height / 100) * (height / 100) * 24.9;
     }
 }
+SimpleMethod();
+```
+```
+77,13023999999999
 ```
 
 ## Лямбда вирази.
 
 ```cs
-SimpleMethodWithLambda();
-
 static void SimpleMethodWithLambda()
 {
     Console.WriteLine(MaxGoodWeight(176));
 
     static double MaxGoodWeight(double height) => (height / 100) * (height / 100) * 24.9;
 }
-
+SimpleMethodWithLambda();
 ```
-Після => вказуеться що повертає функція. Лямбда вирази корисні коли треба виконати невелике завдання.
+Після => вказуеться що повертає функція. Лямбда вирази корисні коли треба виконати невелике завдання. Лямбда-вирази будут детально розгянуті в іншій главі.
 
 ## Локальні функції
 
-Функцію яка задекларована в іншій функції називають локальною. Вана має бути або private або static.
-Для локальних функцій не підтримується перезавантаження.
+Функцію яка задекларована в іншій функції називають локальною. Якшо ви створите локальну функцію компілятор підкаже вам що її можна зробити static. Для локальних функцій не підтримується перезавантаження.
 
 ```cs
-SimpleMethodWithValidation();
 static void SimpleMethodWithValidation()
 {
     for (int height = 164; height < 192; height+=2)
@@ -85,15 +79,30 @@ static void SimpleMethodWithValidation()
 
         // Local function
         static double MaxGoodWeight(double height) => (height/100)*(height/100)*24.9;
-        
     }
 }
+SimpleMethodWithValidation();
 ```
-Локальні функції досяжні в межах іншої функції де вони створені. Локальним функціям можна додавати атрібути наприклад #nullable enable
-lenght
-```cs
-BadNoStaticLocalFunction();
+```
+Max good weight for 164 cm is 66,97103999999999
+Max good weight for 166 cm is 68,61443999999999
+Max good weight for 168 cm is 70,27775999999999
+Max good weight for 170 cm is 71,96099999999998
+Max good weight for 172 cm is 73,66415999999998
+Max good weight for 174 cm is 75,38723999999999
+Max good weight for 176 cm is 77,13023999999999
+Max good weight for 178 cm is 78,89316
+Max good weight for 180 cm is 80,676
+Max good weight for 182 cm is 82,47876
+Max good weight for 184 cm is 84,30144
+Max good weight for 186 cm is 86,14404
+Max good weight for 188 cm is 88,00656
+Max good weight for 190 cm is 89,889
+```
 
+Локальні функції досяжні в межах іншої функції де вони створені. Локальним функціям можна додавати атрібути наприклад #nullable enable
+
+```cs
 static void BadNoStaticLocalFunction()
 {
     PrintQuadrate(1);
@@ -109,13 +118,14 @@ static void BadNoStaticLocalFunction()
         }
     }
 }
-
+BadNoStaticLocalFunction();
 ```
-
-Якшо потрібно щоб локальна функція не змінювала параметрів головної функції напряму її треба робити статичною.
+```
+4
+```
+Якшо потрібно щоб локальна функція не змінювала параметрів головної функції напряму її треба робити статичною. 
 
 ```cs
-StaticLocalFunction();
 static void StaticLocalFunction()
 {
     PrintQuadrate(1);
@@ -125,74 +135,86 @@ static void StaticLocalFunction()
         Console.WriteLine(Quadrate(length));
 
         static double Quadrate(double l) => l * l; 
-  
     }
 }
+StaticLocalFunction();
+```
+```
+1
 ```
 
-## Параметри 
+# Параметри 
 
-Параметри це данні яку передаються методу. Якшо параметр не має модіфікаторів то за замовченням в метод надсилаеться копія данних. В залежності від модіфікаторів парамтери можуть обробляться методами по різному. Значення які предаюця в метод називають аргументами або фактичними параметрами.
+Параметри це данні яку передаються методу. Якшо параметр не має модіфікаторів то за замовченням в метод надсилаеться копія данних. В залежності від модіфікаторів парамтери можуть обробляться методами по різному. Значення які передаюця в метод називають аргументами або фактичними параметрами.
 
 ## Параметри без модіфікаторів. 
 
 Якшо параметр value type і не має модіфікаторів то в метод передаеться копія данних.
 
 ```cs
-ValueTypeWithoutModifier();
-
 static void ValueTypeWithoutModifier()
 {
     int length = 2;
 
     Console.WriteLine(Quadrate(length));
 
+    Console.WriteLine(length);
+
     static int Quadrate(int l)
     {
         Console.WriteLine(l is ValueType);
-       
+
         int result = l * l;
-        
+
         return result;
     }
-
 }
-
+ValueTypeWithoutModifier();
+```
+```
+True
+4
+2
 ```
 Оскільки int параметр l є ValueType при виконанні для нього в стеку функції створюєця місце куди записуеться значеня з яким визиваеться функція. Тобто переписується значеня яке храниться в length. Коли функія відпрацювала місце в стеку звільняєця. Функція ні як не впливає на зовнішню змінну length.
 
 ## out параметри.
 
 ```cs
-UsingOutModifier_1();
 static void UsingOutModifier_1()
 {
     int enterlength = 10;
-
     Quadrate(enterlength, out int quadrate);
+    Console.WriteLine($"{enterlength} * {enterlength} = {quadrate}");
+
+    int newQuadrate;
+    Quadrate(enterlength, out newQuadrate);
+    Console.WriteLine(newQuadrate);
 
     static void Quadrate(int length, out int result)
     {
         result = length * length;
     }
-
-
-    Console.WriteLine($"{enterlength} * {enterlength} = {quadrate}");
-
-
-    int newQuadrate;
-
-    Quadrate(enterlength, out newQuadrate);
-
-    Console.WriteLine(newQuadrate);
 }
+UsingOutModifier_1();
+```
+```
+10 * 10 = 100
+100
 ```
 Змінну в якості параметра можна створювати при визові функції. В тілі функції обовязково треба присоїти їй значення. При передачі існуючої змінної треба використовувати out і її значення після визову змінеться. 
+
 ```cs
-UsingOutModifier_2();
 static void UsingOutModifier_2()
 {
     int enterlength = 10;
+
+    QuadrateAndVolume(enterlength, out bool isPositive, out int quadrate, out int volume);
+
+    Console.WriteLine($"{enterlength} isPositive:{isPositive} quadrate:{quadrate}, volume:{volume}");
+
+    QuadrateAndVolume(5, out _, out _, out int newVolume);
+    Console.WriteLine(newVolume);
 
     static void QuadrateAndVolume(int length,out bool isPositive , out int quadrate, out int volume)
     {
@@ -200,58 +222,43 @@ static void UsingOutModifier_2()
         quadrate = length * length;
         volume = length * length * length;
     }
-
-    QuadrateAndVolume(enterlength, out bool isPositive, out int quadrate, out int volume);
-
-    Console.WriteLine($"{enterlength} isPositive:{isPositive} quadrate:{quadrate}, volume:{volume}");
-
-    QuadrateAndVolume(5, out _, out _, out int newVolume);
-
-    Console.WriteLine(newVolume);
-
 }
+UsingOutModifier_2();
 ```
+```
+10 isPositive:True quadrate:100, volume:1000
+125
+```
+
 Дійсна користь від оператора полягає шо він дозволяє одній функції вертати декілька параметрів. Якшо вам не потрібні деякі значення ви можете відкинути ЇЇ за допомогою out _. _ - це фіктивна змінна яка навмисно не використовується.
+
 
 ## ref параметри.
 
 ```cs
-
-UsingRefModifier();
-
 static void UsingRefModifier()
 {
-    int x = 5;
-    int y = 8;
+    int x = 5, y = 8;
 
     Console.WriteLine($"Before:  x:{x} y:{y}");
-
-    SwapInt(ref x,ref y);
-
-    Console.WriteLine($"After:   x:{x} y:{y}");
-
     SwapInt(ref x, ref y);
-
+    Console.WriteLine($"After:   x:{x} y:{y}");
+    SwapInt(ref x, ref y);
     Console.WriteLine($"After:   x:{x} y:{y}");
 
     static void SwapInt(ref int a, ref int b)
     {
-        if (a < b)
-        {   int t = b;
-            b = a;
-            a = t;
-        }
+        int t = b;
+        b = a;
+        a = t;
     }
 
     string str1 = "Bye";
     string str2 = "Hi";
 
     Console.WriteLine("Before: " + str1 + " " + str2);
-
     SwapStr(ref str1, ref str2);
-    
     Console.WriteLine("After: " + str1 + " " + str2);
-
     static void SwapStr(ref string a, ref string b)
     {
         string stringTemp = b;
@@ -259,8 +266,15 @@ static void UsingRefModifier()
         a = stringTemp;
     }
 }
+UsingRefModifier();
 ```
-
+```
+Before:  x:5 y:8
+After:   x:8 y:5
+After:   x:5 y:8
+Before: Bye Hi
+After: Hi Bye
+```
 При використовувані ref модіфікатора параметри повині бути ініціалізовані до визову функції. Функція впливає на зміні шо за її межами і параметри передаються як посилання на існуючу в пам'яті змінну.
 
 ## Посилання як результат методу.
@@ -268,8 +282,7 @@ static void UsingRefModifier()
 ```cs
 void ReferenceAsResult()
 {
-    int[] ints = { 3, 4, 5, 6 };
-
+    int[] ints = [3, 4, 5, 6];
 
     ref int referenceOfItem = ref Find(5, ints);
 
@@ -289,11 +302,9 @@ void ReferenceAsResult()
                 return ref numbers[i];
             }
         }
-        throw new ArgumentException("Invalid input parameter.");
+        throw new ArgumentException("Not Found.");
     }
-
 }
-
 ReferenceAsResult();
 ```
 ```
@@ -308,11 +319,9 @@ ReferenceAsResult();
 ## in параметри.
 
 Модіфікатор in для параметрів передае значення за посиланям і не дозволяє методу його змінювати.
-Цей модіфікатор корисний коли в якості параметра передається наприклад велика структура яку не треба змінювати і коли копіювання без модіфікатора затримує процесс. Крім того при передачі reference типів ви можете змінити данні в методі і модіфікатор in рішає цю проблему.
+Цей модіфікатор корисний коли в якості параметра передається наприклад велика структура яку не треба змінювати і коли копіювання без модіфікатора затримує процесс. Крім того при передачі reference типів ви можете змінити данні в методі і модіфікатор in рішає цю проблему і не дозволяє це робити.
 
 ```cs
-UsingInModifier();
-
 static void UsingInModifier()
 {
     string greeting = "Welcome to paradise!";
@@ -340,54 +349,59 @@ static void UsingInModifier()
         Console.WriteLine(greetingStreeng.Length);
     }
 }
+UsingInModifier();
+```
+```
+False
+Before:Welcome to paradise!
+After:Welcome to paradise!
+Before:Welcome to paradise!
+20
+After:Welcome to paradise!
 ```
 Хоча тип string не є ValueType в методи без модіфікаторів предається значення. Вказуючи модіфікатор in ви даєте зрозуміти шо цей параметр не буде змінюватися.
 
-# params модіфікатор.
+## params модіфікатор.
 
 Цей модіфікатор дозволяє передати в метод змінну кількість параметрів одного типу як одне ціле.
-
 ```cs
-UsingParamsModifier();
-
 static void UsingParamsModifier()
 {
     Console.WriteLine(GetSum());
-
     Console.WriteLine(GetSum(1));
+    Console.WriteLine(GetSum(1, 2, 3, 4));
 
-    Console.WriteLine(GetSum(1,2,3,4));
-
-    double d = 7.34; 
-
-    Console.WriteLine(GetSum(1.2,3.3,4.5,d));
-
-    double[] myDoubleArray = new double[] {4,5,6.7};
-
+    double d = 7.34;
+    Console.WriteLine(GetSum(1.2, 3.3, 4.5, d));
+    double[] myDoubleArray = new double[] { 4, 5, 6.7 };
     Console.WriteLine(GetSum(myDoubleArray));
 
 
     static double GetSum(params double[] values)
     {
         double sum = 0;
-
-        if (values.Length > 0)
+        for (int i = 0; i < values.Length; i++)
         {
-            for (int i = 0; i < values.Length; i++)
-            {
-                sum += values[i];
-            }
+            sum += values[i];
         }
         return sum;
     }
 }
+UsingParamsModifier();
 ```
+```
+0
+1
+10
+16,34
+15,7
+```
+
 При попадані всі параиетри предані в метод потрапляють в массив. Щоб уникнути неоднозначність праметр з модіфікатором params повиниен бути тільки один і у кінці всіх інших.
 
 ## Необов'язкові параметри.
 
 ```cs
-UsingOptionalPatameters();
 static void UsingOptionalPatameters()
 {
     Console.WriteLine(GetStringTemperature(20));
@@ -406,25 +420,26 @@ static void UsingOptionalPatameters()
     //}
 
 }
+UsingOptionalPatameters();
+```
+```
+20°C
+68°F
 ```
 Параметри за замовчуванням повині бути визначені під час компіляції. 
 
 ## Іменовані параметри.
 
 ```cs
-UsingNamedParameters();
 static void UsingNamedParameters()
 {
-
     Volume(length: 1, height: 3, width: 2);
-
 
     static void Volume(int length, int width , int height)
     {
         Console.WriteLine($"Lenght:{length} Width:{width} Height:{height}" );
         Console.WriteLine(length*width*height);    
     }
-
   
     Console.WriteLine(GetStringTemperature(temperature:20));
   
@@ -433,15 +448,20 @@ static void UsingNamedParameters()
         return temperature.ToString() + "°" + scale;
     }
 }
+UsingNamedParameters();
+```
+```
+Lenght:1 Width:2 Height:3
+6
+20°C
 ```
 Таким чином не об'язково дотримуватися порядку параметрів у методі при визові. Оператор : присваює значення необхідному параметру. Змішаний варіант виклику потребує аби позиційні параматри були перед іменованими або знаходилися в правільному місті.
 
-## Перезавантаженя методів (method overloading)
+# Перезавантаженя методів (method overloading)
 
 Є можливість створити декілька методів з однією назвою але з різною кількістю або типом параметрів. Таким чином перезавантажуються методи. Локальни функції не підтримують презавантаженя.
 
 ```cs
-UsingOverload();
 static void UsingOverload()
 {
     int myInt = 10;
@@ -457,8 +477,8 @@ static void UsingOverload()
     Console.WriteLine(Quadrate.GetQuadrate(myDecimal,2));
     Console.WriteLine(Quadrate.GetQuadrate(myFloat));
     Console.WriteLine(Quadrate.GetQuadrate(myLong)); 
-
 }
+UsingOverload();
 
 static class Quadrate
 {
@@ -494,8 +514,24 @@ static class Quadrate
         Console.WriteLine("I choose method 6");
         return GetQuadrate((decimal)lenght);
     }
-
 }
+```
+```
+I choose method 1
+100
+I choose method 2
+27,352900000000005
+I choose method 4
+27,35
+I choose method 3
+1000471,25550736
+I choose method 5
+1000471,26
+I choose method 2
+10024,014949975593
+I choose method 6
+I choose method 3
+10000000000000000
 ```
 Використовуючи превантаження ви можете використови одне і теж ім'я для методів які роблять одне й тесаме але для параметрів різних типів. Якшо методи відрізняються лише типом повертання то цього не достньо для превантаженя методу. 
 
@@ -510,43 +546,59 @@ string GetQuadrate(out int lenght) //
 
 string GetQuadrate(ref int lenght) // work
 string GetQuadrate(int lenght)     // 
-
 ```
 
 ## Перевірка на null
 
 Коли метод отримує параметр типу reference то він може бути null. 
 ```cs
-CheckParameterForNull();
-
 static void CheckParameterForNull()
 {
     //SendMessageBad(null);
     //SendMessageLargeCheck(null);
-    SendMessageShortSheck(null);
+    //SendMessageShortCheck(null);
+    SendMessageGoodCheck(null);
 
 
-    static void SendMessageBad(string message)
+    static void SendMessageBad(string? message)
     {
         Console.WriteLine(message.Length);
     }
 
-    static void SendMessageLargeCheck(string message)
+    static void SendMessageLargeCheck(string? message)
     {
         if (message == null)
         {
             throw new ArgumentNullException(message);
         }
-        Console.WriteLine("Send:"+message);
+        Console.WriteLine("Send:" + message);
     }
 
-    static void SendMessageShortSheck(string message)
+    static void SendMessageShortCheck(string? message)
     {
         ArgumentNullException.ThrowIfNull(message);
         Console.WriteLine("Send:" + message);
+    }
 
+    static void SendMessageGoodCheck(string? message)
+    {
+        try
+        {
+            ArgumentNullException.ThrowIfNull(message);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+        Console.WriteLine("Send:" + message);
     }
 }
+CheckParameterForNull();
+```
+```
+Value cannot be null. (Parameter 'message')
+Send:
+
 ```
 
 ## Документування методу.
@@ -587,4 +639,3 @@ void Documenting()
 }
 ```
 Зверніть увагу що при наведені курсора на функції з'являеться підказка.
-

@@ -1,2 +1,0 @@
-Додамо рішеня BasicConstructionsForData з проектом Array
-Розглянемо теми

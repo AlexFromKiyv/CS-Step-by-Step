@@ -6,9 +6,6 @@
 
 Кортежі корисні коли декілька полів данних треба передати або отримати як одне ціле
 ```cs
-
-
-CreateTuples();
 void CreateTuples()
 {
     var temperatures = (-2, -1, 0, 1, -1);
@@ -37,6 +34,19 @@ void CreateTuples()
     var otherTerminator = (terminator.Model, terminator.Power);
     Console.WriteLine(otherTerminator);
 }
+CreateTuples();
+```
+```
+(-2, -1, 0, 1, -1)
+(Julia, 65)
+Julia
+Weight:65
+(John, 13)
+John
+John
+Jerry
+(Kira, (90, 60, 90))
+(101, 2800)
 ```
 Значення в кортежі не обов'язково повинні бути однакового типу.
 Поля кортежів додадково неперевірені(not validated) і ви не можете для них зробити додадкові методи. Тобто вони слугуюдь тільки як механізм передачі данних.
@@ -44,8 +54,6 @@ void CreateTuples()
 ## Порівняння кортежів
 
 ```cs
-
-ComparationTuples();
 void ComparationTuples()
 {
     (int? a, int? b) tuple1 = (160, 60);
@@ -60,6 +68,7 @@ void ComparationTuples()
     var tuple5 = (35, (90, 60, 90));
     Console.WriteLine(tuple4 == tuple5);
 }
+ComparationTuples();
 ```
 ```
 True
@@ -70,13 +79,11 @@ True
 
 ## Кортеж як значення шо повертає метод.
 
-Для використання классів і структур для того шоб метод повернув декілька значень потрібно дододково розроляти їх. Крім того меньш єфективно пертворювати кілька значень в об'єкт а потім знову і значення. Для цілей транспортування декількох данних гарно підходить кортеж. 
+Для використання классів і структур для того шоб метод повернув декілька значень потрібно дододково створювати їх. Крім того меньш єфективно пертворювати кілька значень в об'єкт а потім знову і значення. Для цілей транспортування декількох данних гарно підходить кортеж. 
 
 ```cs
-UsingTuples();
 void UsingTuples()
 {
-
     var result1 = GetPersonCharacteristic(10);
 
     Console.WriteLine(result1);
@@ -94,6 +101,7 @@ void UsingTuples()
         return (Id, "Jerry", 170, 85);
     }
 }
+UsingTuples();
 ```
 ```
 (10, Jerry, 170, 85)
@@ -106,7 +114,6 @@ Jerry
 ## Кортежі в виразах switch
 
 ```cs
-UsingTupleInSwitch();
 void UsingTupleInSwitch()
 {
     string result = GetNaturalConditions(("high", "low"));
@@ -131,6 +138,7 @@ void UsingTupleInSwitch()
         };
     }
 }
+UsingTupleInSwitch();
 ```
 
 ```
@@ -143,7 +151,6 @@ Did not understand the data
 ## Розділення кортежу на складові (Deconstructing)
 
 ```cs
-DeconstructingTuple();
 void DeconstructingTuple(){
 
     (string Name, int? Height, int? Weight) girl = ("Olga", 180, 80);
@@ -162,13 +169,17 @@ void DeconstructingTuple(){
 
     Console.WriteLine($"{yourName} {yourHeight}");
 }
-
+DeconstructingTuple();
+```
+```
+(Olga, 180, 80)
+Olga 180 80
+Olga 180
 ```
 
 Крім того можна використовувати структури.
 
 ```cs
-DeconstructingTupleWithStruct();
 void DeconstructingTupleWithStruct()
 {
     Point point = new Point(10, 5);
@@ -202,5 +213,10 @@ struct Point
         y = Y;
     }
 }
+DeconstructingTupleWithStruct();
 ```
-Тут для структури point можно явно визвати метод Deconstruct який повертає кортеж, а можемо виконати неявно (c1, c2) = point; тоді з струттури буде визан метод з параметрами out.
+```
+10 5
+10 5
+```
+Тут для структури point можно явно визвати метод Deconstruct який повертає кортеж, а можемо виконати неявно (c1, c2) = point; тоді буде викликано метод з параметрами out.

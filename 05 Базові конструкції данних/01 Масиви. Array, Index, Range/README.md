@@ -1,3 +1,7 @@
+#  Масиви. Array, Index, Range
+
+Додамо рішеня BasicConstructionsForData з проектом Array
+
 # Array
 
 ## Створення
@@ -5,9 +9,6 @@
 Масив це набір єлементів одного типу з доступом через числові індекси.
 
 ```cs
-
-UsingSimpleArray();
-
 static void UsingSimpleArray()
 {
     int[] myIntArray = new int[3]; // declaring
@@ -29,6 +30,22 @@ static void UsingSimpleArray()
         Console.WriteLine(item);
     }
 }
+UsingSimpleArray();
+```
+```
+1
+2
+3
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
 ```
 Треба зауважити new int[3] означає що загальна кількість єлементів 3. Індексація починаеться з 0. Коли ви задекларували масив память виділяеться і він заповнюється значеннями default. В цьому прикладі 0-ми. 
 
@@ -37,9 +54,6 @@ static void UsingSimpleArray()
 Масив можна задекларувати і одразу задати значення єлементам. 
 
 ```cs
-
-ArrayInitialization();
-
 static void ArrayInitialization()
 {
     string[] myStringArray = new string[] { "good", "better", "best" };
@@ -54,14 +68,22 @@ static void ArrayInitialization()
     Console.WriteLine(myIntArray.Length);
     Console.WriteLine(string.Join(", ", myIntArray));
 }
+ArrayInitialization();
 ```
+```
+System.String[]
+3
+good < better < best
+System.Int32[]
+3
+10, 15, 20
+```
+
 При ініціалізації не потрібно вказувати розмір массиву. Також можна опустити new type[]
 
 ## Неявна типізація
 
 ```cs
-UsingVarForArray();
-
 static void UsingVarForArray()
 {
     var myIntArray = new[] { 1, 2, 3 };
@@ -74,12 +96,16 @@ static void UsingVarForArray()
     Console.WriteLine(myString);
     Console.WriteLine(myDoubleArray);
 }
-
+UsingVarForArray();
+```
+```
+System.Int32[]
+System.String[]
+System.Double[]
 ```
 Тип визначае компілятор і його можна побачити у редакторі.
 
 ```cs
-UsingObjectForArray();
 static void UsingObjectForArray()
 {
     object[] myArray = new object[] { 1, "Hi", true };
@@ -89,13 +115,18 @@ static void UsingObjectForArray()
         Console.WriteLine(item);
     }
 }
+UsingObjectForArray();
 ```
-Оскільки object є тип від якого походять інщі базові вдудовагі типи це працює.
+```
+1
+Hi
+True
+```
+Оскільки object є тип від якого походять інщі базові типи це працює.
 
 ## Багатовимірні масиви
 
 ```cs
-UsingRectangularArray();
 static void UsingRectangularArray()
 {
     int[,] myArray = new int[3, 4];
@@ -110,11 +141,15 @@ static void UsingRectangularArray()
         Console.WriteLine();
     }
 }
+UsingRectangularArray();
+```
+```
+0 1 2 3
+1 2 3 4
+2 3 4 5
 ```
 
 ```cs
-UsingJaggedArray();
-
 static void UsingJaggedArray()
 {
     int[][] myArray = new int[3][];
@@ -133,38 +168,32 @@ static void UsingJaggedArray()
         Console.WriteLine();
     }
 }
+UsingJaggedArray();
 ```
+```
+0 0
+0 0 0
+0 0 0 0
+```
+
 ## Основні можливості классу System.Array
 
 ```cs
-ArrayFunctionality();
-
 static void ArrayFunctionality()
 {
     string[] myArray = new string[] { "good", "better", "best" };
 
     PrintArray(myArray);
-
     Console.WriteLine(myArray.Rank); 
-
     Console.WriteLine(myArray.Length);
-
     Array.Reverse(myArray);
-
     PrintArray(myArray);
-
     Array.Clear(myArray,2,1);
-
     PrintArray(myArray);
-
     Array.Clear(myArray);
-
     PopulateArray(myArray);
-
     PrintArray(myArray);
-
     Array.Sort(myArray);
-
     PrintArray(myArray);
 
 
@@ -187,7 +216,19 @@ static void ArrayFunctionality()
     }
 
 }
+ArrayFunctionality();
 ```
+```
+good better best
+1
+3
+best better good
+best better
+10 9 8
+10 8 9
+
+```
+
 System.Array має багато статичних методів для роботи з масивами. Як бачите сортування залежить від типу.
 
 ## Index, Rang 
@@ -195,8 +236,6 @@ System.Array має багато статичних методів для роб
 Представляє індекс в послідовності.
 
 ```cs
-UsingIndex();
-
 static void UsingIndex()
 {
     int[] myArray = new int[] { 10, 20, 30 };
@@ -214,11 +253,14 @@ static void UsingIndex()
         Console.Write(myArray[index].ToString() + " ");
     }
 }
+UsingIndex();
+```
+```
+10 20 30
+30 20 10
 ```
 
-
 ```cs
-UsingRang();
 static void UsingRang()
 {
     int[] myArray = new int[] { 10, 20, 30 };
@@ -274,4 +316,15 @@ static void UsingRang()
     int myInt = myArray.ElementAt(^1);
     Console.WriteLine(myInt);
 }
+UsingRang();
+```
+```
+10 20
+10 20
+10 20
+10 20 30
+10 20
+10 20 30
+10
+30
 ```

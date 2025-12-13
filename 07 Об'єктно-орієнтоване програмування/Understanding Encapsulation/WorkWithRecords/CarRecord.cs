@@ -8,9 +8,9 @@ namespace WorkWithRecords;
 
 record CarRecord
 {
-    public string Make { get; init; } = null!;
-    public string Model { get; init; } = null!;
-    public string Color { get; init; } = null!;
+    public string Make { get; init; }
+    public string Model { get; init; }
+    public string Color { get; init; }
 
     public CarRecord()
     {

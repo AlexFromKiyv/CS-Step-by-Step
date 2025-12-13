@@ -45,4 +45,4 @@ void DeconstructingRecordStructs()
     point2.Deconstruct(out double x2, out double y2, out double z2);
     Console.WriteLine($"{x2} {y2} {z2}");
 }
-DeconstructingRecordStructs();
+//DeconstructingRecordStructs();

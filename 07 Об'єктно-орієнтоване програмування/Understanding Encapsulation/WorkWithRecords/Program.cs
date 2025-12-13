@@ -93,6 +93,7 @@ void ValueEqualityWithRecord()
     Console.WriteLine($"CarRecords are the same? {carRecord1.Equals(carRecord2)}");
     Console.WriteLine($"CarRecords are the same reference? " +
         $"{ReferenceEquals(carRecord1,carRecord2)}");
+
     Console.WriteLine($"CarRecords are the same?{carRecord1 == carRecord2}");
     Console.WriteLine($"CarRecords are not the same?{carRecord1 != carRecord2}");
 }
@@ -116,4 +117,4 @@ void CopyingRecordUsingWithExpressions()
         $"{ReferenceEquals(carRecord1, carRecord3)}");
 
 }
-CopyingRecordUsingWithExpressions();
+//CopyingRecordUsingWithExpressions();
