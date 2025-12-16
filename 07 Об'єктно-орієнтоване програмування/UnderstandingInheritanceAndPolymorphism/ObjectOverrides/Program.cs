@@ -74,5 +74,5 @@ void StaticMemebersSystemObject()
     Console.WriteLine(Equals(person1,person2));
     Console.WriteLine(ReferenceEquals(person1,person2));
 }
-StaticMemebersSystemObject();
+//StaticMemebersSystemObject();
 

@@ -11,6 +11,9 @@ partial class Employee7
 {
     // Mathods
 
+    // Expose certain benefit behaviors of object.
+    public double GetBenefitCost() => EmpBenefits.ComputePayDeduction();
+
     //public void GiveBonus(float amount)
     //{
     //    Pay = this switch
@@ -45,6 +48,5 @@ partial class Employee7
         Console.WriteLine($"SSN:\t{SSN}");
     }
 
-    // Expose certain benefit behaviors of object.
-    public double GetBenefitCost() => employeeBenefits.ComputePayDeduction();
+
 }

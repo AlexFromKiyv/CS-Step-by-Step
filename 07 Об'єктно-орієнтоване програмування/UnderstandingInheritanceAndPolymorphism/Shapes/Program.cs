@@ -10,11 +10,25 @@ void UsingVirualMethodInAbstractClass()
 }
 //UsingVirualMethodInAbstractClass();
 
+void UsingVirualMethodInAbstractClass1()
+{
+    Hexagon1 hexagon = new Hexagon1("Beth");
+    hexagon.Draw();
+
+    Circle1 circle = new Circle1("Cindy");
+    circle.Draw();
+}
+//UsingVirualMethodInAbstractClass1();
+
+
+
 void UsingPolymorphism()
 {
     Shape1[] shapes = {
-        new Hexagon1(), new Circle1(),
-        new Hexagon1("Mick"), new Circle1("Beth"),
+        new Hexagon1(),
+        new Circle1(),
+        new Hexagon1("Mick"), 
+        new Circle1("Beth"),
         };
 
     foreach (Shape1 shape in shapes)
@@ -31,4 +45,4 @@ void UsingNew()
 
    ((Circle1)circle).Draw();
 }
-UsingNew();
+//UsingNew();

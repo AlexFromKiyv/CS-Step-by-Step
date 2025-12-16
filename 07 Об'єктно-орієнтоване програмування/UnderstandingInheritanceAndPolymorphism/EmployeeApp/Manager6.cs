@@ -4,15 +4,7 @@ namespace EmployeeApp;
 class Manager6 :Employee6
 {
     public int StockOptions { get; set; }
-    public Manager6(int id, string name, float pay, int age, string ssn, 
-         int stockOptions) 
-        : base(id, name, pay, age, ssn, EmployeePayTypeEnum.Salaried)
-    {
-        StockOptions = stockOptions;
-    }
-    public Manager6()
-    {
-    }
+
 
     //public Manager6(int id, string name, float pay, int age, string ssn, 
     //    EmployeePayTypeEnum payType, int stockOptions )
@@ -34,11 +26,13 @@ class Manager6 :Employee6
 
 
 
-
-
-
-
-
-
-
+    public Manager6(int id, string name, float pay, int age, string ssn, 
+         int stockOptions) 
+        : base(id, name, pay, age, ssn, EmployeePayTypeEnum.Salaried)
+    {
+        StockOptions = stockOptions;
+    }
+    public Manager6()
+    {
+    }
 }

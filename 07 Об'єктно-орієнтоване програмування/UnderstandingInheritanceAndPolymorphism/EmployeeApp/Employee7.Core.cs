@@ -4,7 +4,7 @@ abstract partial class Employee7
     // Field data
     protected string name = null!;
     protected string ssn = null!;
-    protected BenefitPackage employeeBenefits = new();
+    protected BenefitPackage EmpBenefits = new();
 
 
 
@@ -32,8 +32,8 @@ abstract partial class Employee7
 
     public BenefitPackage Benefits 
     { 
-        get => employeeBenefits; 
-        set => employeeBenefits = value; 
+        get => EmpBenefits; 
+        set => EmpBenefits = value; 
     }
 
     // Class member

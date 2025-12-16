@@ -15,8 +15,10 @@ void UsingSalesPerson6()
 {
     SalesPerson6 salesPerson = new()
     {
+        Id = 125,
         Name = "Fred",
         Age = 31,
+        Pay =1000,
         SalesNumber = 50
     };
 
@@ -79,7 +81,12 @@ void CastingExample1()
     Employee7 moonUnit = new Manager7(10, "MoonUnit Zappa", 30000, 35, "111-12-1234", 3);
 
     SalesPerson7 jill = new SalesPerson7(12, "Jill", 10000, 25, "234-23-4335", 30);
+
+    Console.WriteLine(frank);
+    Console.WriteLine(moonUnit);
+    Console.WriteLine(jill);
 }
+//CastingExample1();
 
 static void GivePromotion(Employee7 employee)
 {

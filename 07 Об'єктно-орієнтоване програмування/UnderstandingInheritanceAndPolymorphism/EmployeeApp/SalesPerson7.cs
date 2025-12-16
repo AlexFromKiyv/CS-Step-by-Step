@@ -44,6 +44,7 @@ class SalesPerson7 : Employee7
     public override void DisplayStatus()
     {
         base.DisplayStatus();
+        Console.WriteLine($"SalesNumber:\t{SalesNumber}");
     }
 
     public override string? ToString()
