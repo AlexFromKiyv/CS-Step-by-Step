@@ -3,7 +3,7 @@
 class ThreeDCircle1 : Circle1 ,IDraw3D
 {
     // Hide the PetName property above me.
-    public new string PetName { get; set; } = null!;
+    public new string PetName { get; set; }
 
     // Hide any Draw() implementation above me.
     public new void Draw()
@@ -13,6 +13,6 @@ class ThreeDCircle1 : Circle1 ,IDraw3D
 
     public void Draw3D()
     {
-        Console.WriteLine("Drawing Circle in 3D");
+        Console.WriteLine($"Drawing {PetName} Circle in 3D");
     }
 }

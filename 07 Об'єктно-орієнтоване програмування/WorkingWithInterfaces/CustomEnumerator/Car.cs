@@ -27,31 +27,4 @@ class Car
         // Delegate request to inner object.
         _radio.TurnOn(state);
     }
-    //Change current speed.
-    public void Accelerate(int delta)
-    {
-        if (_carIsDead)
-        {
-            Console.WriteLine($"{PetName} is out of order...");
-        }
-        else
-        {
-            CurrentSpeed += delta;
-            if (CurrentSpeed > MaxSpeed)
-            {
-                CurrentSpeed = 0;
-                _carIsDead = true;
-                throw new Exception($"{PetName} has overheated!")
-                {
-                    Data =
-                    {
-                        {"Timestamp",DateTime.Now},
-                        {"Cause","You have a lead foot." }
-                    }
-                };
-
-            }
-            Console.WriteLine($"\tCurrentSpeed = {CurrentSpeed}");
-        }
-    }
 }

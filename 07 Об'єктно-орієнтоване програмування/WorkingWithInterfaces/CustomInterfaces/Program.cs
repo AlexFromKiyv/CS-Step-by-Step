@@ -112,6 +112,8 @@ void DefaultImplementations2()
         square.Draw();
     }
     Console.WriteLine($"Perimeter: {pointy.Perimeter}");
+
+    //Console.WriteLine(pointy.PetName);
 }
 //DefaultImplementations2();
 
@@ -139,7 +141,6 @@ void InterfaceAsParameter()
     // I'll draw anyone supporting IDraw3D.
     void DrawIn3D(IDraw3D shapeWith3D)
     {
-        Console.WriteLine($"Drawing 3D shape");
         shapeWith3D.Draw3D();
     }
 }
@@ -147,8 +148,12 @@ void InterfaceAsParameter()
 
 void InterfacesAsReturnValues()
 {
-    Shape1[] shapes = { new Hexagon1(),new Circle1(),
-        new Triangle1(),new ThreeDCircle1() };
+    Shape1[] shapes = {
+        new Circle1(),
+        new Hexagon1(),
+        new Triangle1(),
+        new ThreeDCircle1() 
+    };
 
     Console.WriteLine(FindFirstPointyShape(shapes));
 
@@ -170,12 +175,17 @@ void InterfacesAsReturnValues()
 
 void ArraysOfInterfaceTypes()
 {
-    IPointy[] pointies = {new Hexagon1(), new Knife(),
-        new Triangle1(), new Fork(), new PitchFork()};
+    IPointy[] pointies = {
+        new Hexagon1(),
+        new Knife(),
+        new Triangle1(),
+        new Fork(),
+        new PitchFork()
+        };
 
     foreach (var pointy in pointies)
     {
         Console.WriteLine(pointy.Points+"\t"+pointy);
     }
 }
-ArraysOfInterfaceTypes();
+//ArraysOfInterfaceTypes();

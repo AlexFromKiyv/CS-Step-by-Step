@@ -7,11 +7,9 @@ class Car : IComparable
     public const int MaxSpeed = 100;
 
     // Properties.
-    public int CarId { get; set; }
     public int CurrentSpeed { get; set; }
     public string PetName { get; set; } = "No-name";
-    private bool _carIsDead;
-    private readonly Radio _radio = new Radio();
+    public int CarId { get; set; }
 
     // Property to return the PetNameComparer.
     public static IComparer SortByPetName => new PetNameComparer();
@@ -30,38 +28,6 @@ class Car : IComparable
         CarId = carId;
     }
 
-    public void CrankTunes(bool state)
-    {
-        // Delegate request to inner object.
-        _radio.TurnOn(state);
-    }
-    //Change current speed.
-    public void Accelerate(int delta)
-    {
-        if (_carIsDead)
-        {
-            Console.WriteLine($"{PetName} is out of order...");
-        }
-        else
-        {
-            CurrentSpeed += delta;
-            if (CurrentSpeed > MaxSpeed)
-            {
-                CurrentSpeed = 0;
-                _carIsDead = true;
-                throw new Exception($"{PetName} has overheated!")
-                {
-                    Data =
-                    {
-                        {"Timestamp",DateTime.Now},
-                        {"Cause","You have a lead foot." }
-                    }
-                };
-
-            }
-            Console.WriteLine($"\tCurrentSpeed = {CurrentSpeed}");
-        }
-    }
 
     //public int CompareTo(object? obj)
     //{

@@ -35,4 +35,4 @@ void ExplicitInterfaceImplementation2()
         printerOctagon1.Draw();
     }
 }
-ExplicitInterfaceImplementation2();
+//ExplicitInterfaceImplementation2();

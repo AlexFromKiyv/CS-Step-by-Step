@@ -38,4 +38,4 @@ void InterfaceHierarchiesWithDefaultImplementations1()
     Console.WriteLine(((IDrawable)image).TimeToDraw());
     Console.WriteLine(((IAdvancedDraw)image).TimeToDraw());
 }
-InterfaceHierarchiesWithDefaultImplementations1();
+//InterfaceHierarchiesWithDefaultImplementations1();

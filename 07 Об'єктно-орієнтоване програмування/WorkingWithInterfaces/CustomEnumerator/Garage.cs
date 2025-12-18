@@ -13,7 +13,6 @@ class Garage : IEnumerable
         carArray[2] = new Car("Zippy", 30);
         carArray[3] = new Car("Fred", 30);
     }
-
     //public IEnumerator GetEnumerator() => carArray.GetEnumerator();
 
     IEnumerator IEnumerable.GetEnumerator() => carArray.GetEnumerator();
