@@ -22,4 +22,4 @@ static void UsingLazy()
     _ = mediaPlayer.GetAllTracks();
     Console.WriteLine(GC.GetTotalMemory(false));
 }
-UsingLazy();
+//UsingLazy();

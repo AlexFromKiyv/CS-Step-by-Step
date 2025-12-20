@@ -13,6 +13,7 @@ static void UsingDisposeAndFinalizer()
         using MyResourceWrapper resource1 = new();
 
         Console.WriteLine("Use the members of resource.");
+        resource1.Work();
     }
 
     static void UsingFinalizer()
@@ -24,6 +25,7 @@ static void UsingDisposeAndFinalizer()
         static void CreateObject()
         {
             MyResourceWrapper resource2 = new();
+            resource2.Work();
         }
     }
 }

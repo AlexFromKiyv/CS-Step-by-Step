@@ -9,7 +9,7 @@ static void UsingDisposalPatern()
     {
 
         using MyResourceWrapper resource1 = new();
-
+        resource1.Work();
         Console.WriteLine("Use the members of resource.");
     }
 
@@ -21,7 +21,8 @@ static void UsingDisposalPatern()
 
         static void CreateObject()
         {
-            MyResourceWrapper resource = new();
+            MyResourceWrapper resource2 = new();
+            resource2.Work();
         }
     }
 }

@@ -29,6 +29,12 @@ public class MyResourceWrapper : IDisposable
         Console.Beep();
         CleanUp(false);
     }
+
+    public void Work()
+    {
+        Console.WriteLine("I'm object MyResourceWrapper. I'm working with unmanaged resources");
+    }
+
     public void Dispose()
     {
         // Call our helper method.

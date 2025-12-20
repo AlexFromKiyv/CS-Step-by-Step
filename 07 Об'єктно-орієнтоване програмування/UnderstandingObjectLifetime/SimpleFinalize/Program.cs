@@ -21,6 +21,6 @@ void FinalizerExecutes()
         //tonsOfObjects = null;
     }
 }
-FinalizerExecutes();
+//FinalizerExecutes();
 
 

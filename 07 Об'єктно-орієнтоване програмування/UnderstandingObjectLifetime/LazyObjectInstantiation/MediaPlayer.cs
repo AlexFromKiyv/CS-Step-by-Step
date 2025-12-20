@@ -17,15 +17,15 @@ class MediaPlayer
 
     //private Lazy<AllTracks> _allTracks = new Lazy<AllTracks>();
 
+    private Lazy<AllTracks> _allTracks = new Lazy<AllTracks>(() =>
+    {
+        Console.WriteLine("Creating AllTracks object!");
+        return new AllTracks();
+    });
+
     public AllTracks GetAllTracks()
     {
         // Return all of the songs.
         return _allTracks.Value;
     }
-
-    private Lazy<AllTracks> _allTracks = new Lazy<AllTracks>( () =>
-    {
-        Console.WriteLine("Creating AllTracks object!");
-        return new AllTracks();
-    });
 }

@@ -5,6 +5,7 @@ static void InvokeDispose()
     // Create a disposable object and call Dispose()
     // to free any internal resources.
     MyResourceWrapper myResource = new();
+    myResource.Work();
     myResource.Dispose();
 }
 //InvokeDispose();
@@ -48,7 +49,7 @@ static void KeywordUsing1()
     // Dispose() is called automatically when the using scope exits.
     using (MyResourceWrapper resource = new())
     {
-        Console.WriteLine("Use the members of resource.");
+        resource.Work();
     }
 }
 //KeywordUsing1();
@@ -58,8 +59,8 @@ static void KeywordUsing2()
     // Use a comma-delimited list to declare multiple objects to dispose.
     using (MyResourceWrapper resource1 = new MyResourceWrapper(),resource2 = new() )
     {
-        Console.WriteLine("Use the members of resource1.");
-        Console.WriteLine("Use the members of resource2.");
+        resource1.Work();
+        resource2.Work();
     }
 }
 //KeywordUsing2();
@@ -68,6 +69,6 @@ static void UsingDeclaration()
 {
     using MyResourceWrapper resource = new();
 
-    Console.WriteLine("Use the members of resource.");
+    resource.Work();
 }
-UsingDeclaration();
+//UsingDeclaration();
