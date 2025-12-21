@@ -1,17 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace CustomException;
+﻿namespace CustomException;
 
 public class CarIsDeadException3 : ApplicationException
 {
     public DateTime ErrorTimeStamp { get; set; }
     public string CauseOfError { get; set; } = null!;
 
+    public CarIsDeadException3() { }
     public CarIsDeadException3(DateTime time, string cause) 
         : this(string.Empty, time, cause, null)
     {
@@ -25,8 +19,5 @@ public class CarIsDeadException3 : ApplicationException
     {
         ErrorTimeStamp = time;
         CauseOfError = cause;
-    }
-    public CarIsDeadException3()
-    {
     }
 }

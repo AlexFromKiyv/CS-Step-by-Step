@@ -46,7 +46,10 @@ class Car
                 _carIsDead = true;
 
                 throw new CarIsDeadException3(
-                    $"{PetName} has overheated!",DateTime.Now, "You have a lead foot");
+                    $"{PetName} has overheated!",
+                    DateTime.Now, 
+                    "You have a lead foot"
+                    );
             }
             Console.WriteLine($"\tCurrentSpeed = {CurrentSpeed}");
         }

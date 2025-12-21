@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SimpleException;
+﻿namespace SimpleException;
 
 class Car1
 {
@@ -60,7 +53,6 @@ class Car1
                         {"Cause","You have a lead foot." }
                     }
                 };
-                
             }
             Console.WriteLine($"\tCurrentSpeed = {CurrentSpeed}");
         }
