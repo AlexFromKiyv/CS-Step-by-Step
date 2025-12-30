@@ -37,7 +37,7 @@
 ```
 4. Build > Rebuild MyLibrary.
 5. В проекті ProjectWihtMyLibrary на папці Dependencies правиц клік > Add Project Reference > MyLybrary > OK
-6. Для використання змінемо клас Program.cs
+6. Для використання змінемо Program.cs
 ```cs
 using MyLibrary;
 
@@ -122,12 +122,11 @@ void UsingClassBus()
 17. dotnet run
 
 ```cs
-Nissan  Leaf    2005
 Undefined       Undefined
 ```
 ## Сумістність бібліотеки.
 
-Якшо ви відкриєте файл проекту MyLibrary ви зможете побачити строку
+Якшо ви відкриєте файл проекту MyLibrary ви зможете побачити строку наприклад
 
 ```xml
     <TargetFramework>net7.0</TargetFramework>
