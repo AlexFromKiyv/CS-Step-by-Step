@@ -36,4 +36,4 @@ void ShowCarArray1()
         Console.WriteLine(car);
     }
 }
-ShowCarArray1();
+//ShowCarArray1();

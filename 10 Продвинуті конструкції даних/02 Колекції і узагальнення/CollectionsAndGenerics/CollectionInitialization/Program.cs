@@ -40,11 +40,15 @@ void InitializingListOfRectangles()
     List<Rectangle> myListOfRects = new List<Rectangle>
 {
   new Rectangle {
-    Height = 90, Width = 90,
-    Location = new Point { X = 10, Y = 10 }},
+    Height = 90, 
+    Width = 90,
+    Location = new Point { X = 10, Y = 10 }
+  },
   new Rectangle {
-    Height = 50,Width = 50,
-    Location = new Point { X = 2, Y = 2 }},
+    Height = 50,
+    Width = 50,
+    Location = new Point { X = 2, Y = 2 }
+  },
 };
     foreach (var r in myListOfRects)
     {

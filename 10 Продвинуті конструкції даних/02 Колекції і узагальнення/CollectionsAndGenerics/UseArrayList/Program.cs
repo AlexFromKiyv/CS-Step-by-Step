@@ -14,6 +14,10 @@ void UsingArrayList()
     Console.WriteLine($"This collection has {strArray.Count} items.");
     Console.WriteLine();
 
+    strArray.RemoveAt(1);
+    Console.WriteLine("I removed one item.");
+    Console.WriteLine();
+
     // Display contents.
     foreach (string s in strArray)
     {

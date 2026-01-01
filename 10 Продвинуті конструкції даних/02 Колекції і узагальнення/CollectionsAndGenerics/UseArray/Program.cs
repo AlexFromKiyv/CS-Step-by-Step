@@ -20,6 +20,7 @@
         Console.WriteLine($"Array Entry: {s}");
     }
 
+
 }
 //UsingArray1();
 

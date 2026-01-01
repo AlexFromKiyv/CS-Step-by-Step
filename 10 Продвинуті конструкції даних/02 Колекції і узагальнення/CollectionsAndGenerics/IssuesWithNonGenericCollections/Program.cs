@@ -77,4 +77,4 @@ static void UseGenericList()
     // to a list of ints!
     //moreInts.Add(new Person());
 }
-UseGenericList();
+//UseGenericList();
