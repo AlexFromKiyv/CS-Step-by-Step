@@ -104,4 +104,4 @@ static void AnonymousTypesContainingAnonymousTypes()
     ReflectOverAnonymousType(purchaseItem);
     ReflectOverAnonymousType(purchaseItem.ItemBought);
 }
-AnonymousTypesContainingAnonymousTypes();
+//AnonymousTypesContainingAnonymousTypes();

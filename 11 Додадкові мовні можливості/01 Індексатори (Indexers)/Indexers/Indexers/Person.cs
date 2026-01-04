@@ -19,6 +19,10 @@ public class Person
         Age = age;
     }
 
+    public Person()
+    {
+    }
+
     public override string? ToString()
     {
         return $"{FirstName}\t{LastName}\t{Age}";

@@ -12,7 +12,7 @@ static class AnnoyingExtensions
     {
         foreach (var item in collection)
         {
-            Console.WriteLine(item);
+            Console.Write($"{item} ");
             Console.Beep();
         }
     }

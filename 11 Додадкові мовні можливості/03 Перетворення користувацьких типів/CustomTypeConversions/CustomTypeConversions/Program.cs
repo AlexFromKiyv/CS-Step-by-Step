@@ -4,7 +4,7 @@ using CustomTypeConversions;
 static void NumericConversions()
 {
     int a = 123;
-    long b = a;       // Implicit conversion from int to long.
+    long b = a;      // Implicit conversion from int to long.
     int c = (int)b;  // Explicit conversion from long to int.
     Console.WriteLine(c);
 }
@@ -67,4 +67,4 @@ static void Conversions()
     rectangle = (Rectangle)square;
     Console.WriteLine($"rectangle = {rectangle}");
 }
-Conversions();
+//Conversions();

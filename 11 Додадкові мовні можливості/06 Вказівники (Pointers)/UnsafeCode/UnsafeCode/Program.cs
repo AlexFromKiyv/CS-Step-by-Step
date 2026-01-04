@@ -1,5 +1,6 @@
 ﻿using UnsafeCode;
 
+
 static unsafe void PrintValueAndAddress()
 {
     int myInt;
@@ -15,10 +16,10 @@ static unsafe void PrintValueAndAddress()
     Console.WriteLine($"Value of myInt {myInt}");
     Console.WriteLine($"Address of myInt {(int)&ptrToMyInt:X}");
 }
-unsafe
-{
-    PrintValueAndAddress();
-}
+//unsafe
+//{
+//    PrintValueAndAddress();
+//}
 
 unsafe static void UnsafeSwap(int* i, int* j)
 {
@@ -51,7 +52,7 @@ static void CallingSwaps()
 
     Console.WriteLine($"Values after unsafe swap: i = {i}, j = {j}");
 }
-//CallingSwaps();
+CallingSwaps();
 
 static unsafe void UsePointerToPoint()
 {
@@ -98,4 +99,4 @@ static void UseSizeOfOperator()
     Console.WriteLine("The size of long is {0}.", sizeof(long));
     unsafe { Console.WriteLine("The size of Point is {0}.", sizeof(Point)); }
 }
-UseSizeOfOperator();
+//UseSizeOfOperator();

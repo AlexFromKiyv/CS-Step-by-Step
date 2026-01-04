@@ -13,9 +13,9 @@ static class MyExtensions
     // it is defined in.
     public static void DisplayDefiningAssembly(this object obj)
     {
-        Console.WriteLine("{0} lives here: => {1}\n",
-          obj.GetType().Name,
-          Assembly.GetAssembly(obj.GetType()).GetName().Name);
+        Console.WriteLine($"" +
+            $"{obj.GetType().Name} lives here: => " +
+            $"{Assembly.GetAssembly(obj.GetType()).GetName().Name}\n");
     }
 
     // This method allows any integer to reverse its digits.

@@ -79,7 +79,7 @@ static unsafe void SquareIntPointer(int* myIntPointer)
 Конфігурація вашого методу вимагає, щоб викликаюча сторона викликала SquareIntPointer() наступним чином:
 
 ```cs
-unsafe
+  unsafe
   {
     int myInt = 10;
     // OK, because we are in an unsafe context.

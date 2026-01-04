@@ -37,8 +37,9 @@ static void UsingPersonCollection()
     // Now obtain and display each item using indexer.
     for (int i = 0; i < myPeople.Count; i++)
     {
-        Console.WriteLine(myPeople[i]);
+        Console.WriteLine($"{i}\t{myPeople[i]}");
     }
+    Console.WriteLine($"\nCount of people :{myPeople.Count}");
 }
 //UsingPersonCollection();
 
@@ -54,7 +55,7 @@ static void UsingGenericListOfPeople()
     // Now obtain and display each item using indexer.
     for (int i = 0; i < myPeople.Count; i++)
     {
-        Console.WriteLine(myPeople[i]);
+        Console.WriteLine($"{i}\t{myPeople[i]}");
     }
 }
 //UsingGenericListOfPeople();
@@ -89,4 +90,4 @@ static void MultiIndexerWithDataTable()
     Console.WriteLine($"Last Name: {myTable.Rows[0][1]}");
     Console.WriteLine($"Age : {myTable.Rows[0][2]}");
 }
-MultiIndexerWithDataTable();
+//MultiIndexerWithDataTable();

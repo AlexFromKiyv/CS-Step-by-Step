@@ -12,7 +12,7 @@ static void InvokingExtensionMethods()
     d.DisplayDefiningAssembly();
 
     // Use new integer functionality.
-    Console.WriteLine("Value of myInt: {myInt}");
+    Console.WriteLine($"Value of myInt: {myInt}");
     Console.WriteLine($"Reversed digits of myInt: {myInt.ReverseDigits()}");
 }
 InvokingExtensionMethods();
