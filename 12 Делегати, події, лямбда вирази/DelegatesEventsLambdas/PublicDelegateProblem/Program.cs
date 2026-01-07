@@ -5,7 +5,7 @@ static void CallWhenExploded(string message)
 {
     Console.WriteLine(message);
 }
-static void CallHereToo(String message)
+static void CallHereToo(string message)
 {
     Console.WriteLine(message);
 }

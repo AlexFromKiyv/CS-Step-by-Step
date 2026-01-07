@@ -9,6 +9,7 @@ static void UsingDelegate()
 
     // Invoke Add() method indirectly using delegate object.
     Console.WriteLine(myAdd(10,10));
+
     Console.WriteLine(myAdd.Invoke(10,20));
 
     // Compile Error
@@ -20,10 +21,10 @@ static void DisplayDelegateInfo(Delegate delObj)
 {
     // Print the names of each member in the
     // delegate's invocation list.
-    foreach (Delegate @delegate in delObj.GetInvocationList())
+    foreach (Delegate deleg in delObj.GetInvocationList())
     {
-        Console.WriteLine($"Method Name: {@delegate.Method}");
-        Console.WriteLine($"Type Name: {@delegate.Target}");
+        Console.WriteLine($"Method Name: {deleg.Method}");
+        Console.WriteLine($"Type Name: {deleg.Target}");
     }
 }
 static void InvestigatingADelegateObject()
@@ -35,7 +36,7 @@ static void InvestigatingADelegateObject()
     BinaryOp bop1 = new(simpleMath.otherAdd);
     DisplayDelegateInfo(bop1);
 }
-InvestigatingADelegateObject();
+//InvestigatingADelegateObject();
 
 
 

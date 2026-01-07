@@ -38,4 +38,4 @@ static void UsingFuncDelegate()
     Func<int, int, string> funcSumString = SumToString;
     Console.WriteLine( funcSumString(1, 2) is String);
 }
-UsingFuncDelegate();
+//UsingFuncDelegate();

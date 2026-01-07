@@ -52,7 +52,7 @@ static void CallingSwaps()
 
     Console.WriteLine($"Values after unsafe swap: i = {i}, j = {j}");
 }
-CallingSwaps();
+//CallingSwaps();
 
 static unsafe void UsePointerToPoint()
 {

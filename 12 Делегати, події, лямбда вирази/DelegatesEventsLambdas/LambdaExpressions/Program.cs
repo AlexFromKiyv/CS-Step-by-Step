@@ -33,7 +33,6 @@ static void AnonymousMethodSyntax()
     {
         Console.Write(number + "\t");
     }
-
 }
 //AnonymousMethodSyntax();
 

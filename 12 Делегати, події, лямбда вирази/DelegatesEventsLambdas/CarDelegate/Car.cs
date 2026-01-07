@@ -3,7 +3,7 @@ namespace CarDelegate;
 
 class Car
 {
-    // Internal state data.
+    // State data.
     public int CurrentSpeed { get; set; }
     public int MaxSpeed { get; set; } = 100;
     public string PetName { get; set; } = string.Empty;
@@ -70,5 +70,4 @@ class Car
             }
         }
     }
-
 }

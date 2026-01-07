@@ -20,7 +20,7 @@ static void UsingEvents()
 {
     Car car1 = new("SlugBug",100,10);
 
-    car1.AboutToBlow += CarIsAlmostDoomed;
+    //car1.AboutToBlow += CarIsAlmostDoomed;
     //car1.AboutToBlow += CarAboutToBlow;
 
     Car.CarEngineHandler d = CarExploded;
@@ -34,13 +34,13 @@ static void UsingEvents()
 
     // Remove CarExploded method
     // from invocation list.
-    car1.Exploded -= d;
+    //car1.Exploded -= d;
 
-    Console.WriteLine("***** Speeding up *****");
-    for (int i = 0; i < 6; i++)
-    {
-        car1.Accelerate(20);
-    }
+    //Console.WriteLine("***** Speeding up *****");
+    //for (int i = 0; i < 6; i++)
+    //{
+    //    car1.Accelerate(20);
+    //}
 }
 //UsingEvents();
 
@@ -59,7 +59,7 @@ static void UsingCarEventArgs()
 {
     Car1 car = new("SlugBug", 100, 10);
 
-    car.AboutToBlow += Car1_AboutToBlow;
+    //car.AboutToBlow += Car1_AboutToBlow;
     car.Exploded += Car1_Exploded;
 
     Console.WriteLine("***** Speeding up *****");
@@ -94,7 +94,7 @@ static void UsingEventHandler()
 {
     Car2 car = new("SlugBug", 100, 10);
 
-    car.AboutToBlow += Car2_AboutToBlow;
+    //car.AboutToBlow += Car2_AboutToBlow;
     car.Exploded += Car2_Exploded;
 
     Console.WriteLine("***** Speeding up *****");
