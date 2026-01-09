@@ -78,5 +78,4 @@ void UseAnonymousType()
     Console.WriteLine(purchaseItem.GetType());
     Console.WriteLine(purchaseItem.ItemBought.Color);
 }
-
-UseAnonymousType();
+//UseAnonymousType();

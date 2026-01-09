@@ -30,17 +30,16 @@ void QueryStringWithOretators()
     var subset =
         from game in games
         where game.Contains(" ")
+        orderby game
         select game;
 
     CollectionToConsoleInLine(subset);      
-
 }
-QueryStringWithOretators();
+//QueryStringWithOretators();
 
 void QueryStringWithEnumerableAndLambdas()
 {
     string[] games = { "Morrowind", "Uncharted 2", "Fallout 3", "Daxter", "System Shock 2" };
-    CollectionToConsoleInLine(games);
 
     var subset = games
         .Where(game => game.Contains(" "))

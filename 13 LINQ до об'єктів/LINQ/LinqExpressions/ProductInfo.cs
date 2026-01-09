@@ -10,7 +10,7 @@ namespace LinqExpressions
     {
         public string Name { get; set; } = "";
         public string Description { get; set; } = "";
-        public int NumberInStock { get; set; } = 0;
+        public int NumberInStock { get; set; }
         public override string? ToString()
         {
             return string.Format("{0,-30}{1,-30}{2,-20}", Name, Description, NumberInStock);

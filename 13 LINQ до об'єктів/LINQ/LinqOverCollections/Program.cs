@@ -1,5 +1,4 @@
 ﻿using LinqOverCollections;
-using System;
 using System.Collections;
 
 List<Car> myCars = new()
@@ -32,7 +31,6 @@ void UseLinqForComplexObject()
         CollectionToConsole(queryFastCars);
     }
 }
-
 //UseLinqForComplexObject();
 
 void UseLinqForComplexObjectWithComplexCriteria()

@@ -23,7 +23,6 @@ void CollectionToConsole<T>(IEnumerable<T>? collection)
     }
     Console.WriteLine();
 }
-
 //CollectionToConsole(itemsInStock);
 
 void SelectAllContainer()
@@ -85,7 +84,6 @@ void UseOperatorWhereWithComplexClause()
         CollectionToConsole(overstock);
     }
 }
-
 //UseOperatorWhereWithComplexClause();
 
 void UseWhereForComplexObject()
@@ -127,7 +125,6 @@ void UseTake()
         CollectionToConsole(result);
     }
 }
-
 //UseTake();
 
 void UseTakeWhile()
@@ -144,7 +141,6 @@ void UseTakeWhile()
         CollectionToConsole(result);
     }
 }
-
 //UseTakeWhile();
 
 void UseTakeLast()
@@ -311,7 +307,6 @@ void ProjectingNewDataType()
         Console.WriteLine("\n"+prodeuctNameAndDescription.GetType());
     }
 }
-
 //ProjectingNewDataType();
 
 void ReturnProjection()
@@ -381,7 +376,6 @@ void UseLet()
 //UseLet();
 
 
-
 void UseEnumerableMethodCount()
 {
     string[] games = { "Morrowind", "Uncharted 2", "Fallout 3", "Daxter", "System Shock 2" };
@@ -391,15 +385,19 @@ void UseEnumerableMethodCount()
         where g.Length > 6
         select g;
 
-    Console.WriteLine(GetCount(queryNameBigerThan6));
+    CollectionToConsole(games);
+    Console.WriteLine("\n");
 
+    CollectionToConsole(queryNameBigerThan6);
+    Console.WriteLine("\n");
+
+    Console.WriteLine(GetCount(queryNameBigerThan6));
 
     int GetCount<T>(IEnumerable<T> collection)
     {
         return collection.Count();
     }
 }
-
 //UseEnumerableMethodCount();
 
 void UseTryGetNonEnumeratedCount()
@@ -421,7 +419,6 @@ void UseTryGetNonEnumeratedCount()
     }
 
 }
-
 //UseTryGetNonEnumeratedCount();
 
 void NoWorkTryGetNonEnumeratedCount()
@@ -482,8 +479,6 @@ void UseOrderByName()
 
     CollectionToConsole(SelectWithOrderby(itemsInStock));
 
-
-
     IEnumerable<ProductInfo> SelectWithOrderby(ProductInfo[] products)
     {
        var queryForAllWithSorting =
@@ -507,7 +502,6 @@ void UseOrderByNameDescending()
     CollectionToConsole(SelectWithOrderby(itemsInStock));
 
 
-
     IEnumerable<ProductInfo> SelectWithOrderby(ProductInfo[] products)
     {
         var queryForAllWithSorting =
@@ -518,7 +512,6 @@ void UseOrderByNameDescending()
         return queryForAllWithSorting;
     }
 }
-
 //UseOrderByNameDescending();
 
 List<string> myCars = new List<string> { "Yugo", "Aztec", "BMW" };
@@ -800,7 +793,6 @@ void UseGroupBy()
     // same with method
     var carGroupByMethod = garage.GroupBy(c => c.Manufacturer);
 }
-
 //UseGroupBy();
 
 void GroupingWithNewObjects()
@@ -1102,5 +1094,4 @@ void UseFirstAndFirstOrDefault()
     Console.WriteLine(people.First(p => p.Age == 40));
 
 }
-
-UseFirstAndFirstOrDefault();
+//UseFirstAndFirstOrDefault();

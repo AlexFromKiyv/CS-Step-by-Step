@@ -6,17 +6,17 @@
     }
 }
 
+string[] games =
+{
+    "Morrowind",
+    "Uncharted 2",
+    "Fallout 3",
+    "Daxter",
+    "System Shock 2"
+};
+
 void QuryesOverStringsArray()
 {
-    string[] games =
-    {
-        "Morrowind",
-        "Uncharted 2",
-        "Fallout 3",
-        "Daxter",
-        "System Shock 2"
-    };
-
     // Build a query expression to find the items in the array
     // that have an embedded space.
 
@@ -28,19 +28,10 @@ void QuryesOverStringsArray()
 
     CollectionToConsole(longNames);
 }
-
 //QuryesOverStringsArray();
 
 void QuryesOverStringsArrayWithExtentionMethods()
 {
-    string[] games =
-    {
-        "Morrowind",
-        "Uncharted 2",
-        "Fallout 3",
-        "Daxter",
-        "System Shock 2"
-    };
 
     IEnumerable<string> longNames =
         games.Where(ng => ng.Contains(" ")).OrderBy(ng => ng).Select(ng => ng);
@@ -52,15 +43,6 @@ void QuryesOverStringsArrayWithExtentionMethods()
 
 void QueryOverStringsWithoutLINQ()
 {
-    string[] games =
-{
-        "Morrowind",
-        "Uncharted 2",
-        "Fallout 3",
-        "Daxter",
-        "System Shock 2"
-    };
-
     string[] gamesWithSpace = new string[5];
 
     // Selection
@@ -84,7 +66,6 @@ void QueryOverStringsWithoutLINQ()
         }
     }
 }
-
 //QueryOverStringsWithoutLINQ();
 
 
@@ -97,15 +78,6 @@ void ReflectOverQueryResult(object resultSet, string queryType = "Query Expressi
 
 void ExploreResultSetQueryExpression()
 {
-    string[] games =
-{
-        "Morrowind",
-        "Uncharted 2",
-        "Fallout 3",
-        "Daxter",
-        "System Shock 2"
-    };
-
     IEnumerable<string> longNames =
         from ng in games
         where ng.Contains(" ")
@@ -114,20 +86,10 @@ void ExploreResultSetQueryExpression()
 
     ReflectOverQueryResult(longNames);
 }
-
 //ExploreResultSetQueryExpression();
 
 void ExploreResultSetExtensionMethods()
 {
-    string[] games =
-{
-        "Morrowind",
-        "Uncharted 2",
-        "Fallout 3",
-        "Daxter",
-        "System Shock 2"
-    };
-
     IEnumerable<string> longNames =
         games
         .Where(ng => ng.Contains(" "))
@@ -136,13 +98,11 @@ void ExploreResultSetExtensionMethods()
 
     ReflectOverQueryResult(longNames,"Extension Methods.");
 }
-
 //ExploreResultSetExtensionMethods();
 
+int[] ints = { 10, 20, 30, 40, 1, 2, 3, 8 };
 void QueryOverInts()
 {
-    int[] ints = { 10, 20, 30, 40, 1, 2, 3, 8 };
-
     IEnumerable<int> intsLeesThan10 =
         from i in ints
         where i < 10
@@ -155,29 +115,22 @@ void QueryOverInts()
 
     ReflectOverQueryResult(intsLeesThan10);
 }
-
 //QueryOverInts();
 
 void QueryOverIntsUseImplicitlyTypedLocalVariables()
 {
-    int[] ints = { 10, 20, 30, 40, 1, 2, 3, 8 };
-
     var intsLeesThan10 =
         from i in ints
         where i < 10
         select i;
 
     CollectionToConsole(intsLeesThan10);
-
 }
-
 //QueryOverIntsUseImplicitlyTypedLocalVariables();
 
 void DeferredExecution()
 {
     Console.WriteLine("Use query expression.");
-
-    int[] ints = { 10, 20, 30, 40, 1, 2, 3, 8 };
 
     var result = from i in ints where i < 10 select i;
 
@@ -202,7 +155,6 @@ void DeferredExecution()
     CollectionToConsole(result1);
 
 }
-
 //DeferredExecution();
 
 void UseDefaultIfEmpty()
@@ -312,5 +264,4 @@ void LinqReturnValuesAfterExecution()
         return query.ToArray();
     }
 }
-
-LinqReturnValuesAfterExecution();
+//LinqReturnValuesAfterExecution();
