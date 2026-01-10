@@ -116,21 +116,22 @@ static void StartAndKillProcess()
         Console.WriteLine(ex.Message);
     }
 }
-StartAndKillProcess();
+//StartAndKillProcess();
 
 void UseApplicationVerbs()
 {
-    ProcessStartInfo processStartInfo = new(@"D:\TheLetter.txt");
+    ProcessStartInfo processStartInfo = new(@"D:\Hi.txt");
 
     int i = 0;
     foreach (string? verb in processStartInfo.Verbs)
     {
         Console.WriteLine($"  {i++}. {verb}");
     }
+    Console.ReadLine();
 
     processStartInfo.WindowStyle = ProcessWindowStyle.Maximized;
     processStartInfo.Verb = "open";
     processStartInfo.UseShellExecute = true;
     Process.Start(processStartInfo);
 }
-UseApplicationVerbs();
+//UseApplicationVerbs();

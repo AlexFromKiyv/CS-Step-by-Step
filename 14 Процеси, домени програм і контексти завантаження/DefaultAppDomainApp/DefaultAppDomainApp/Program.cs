@@ -25,7 +25,7 @@ static void ListAllAssembliesInAppDomain()
 
     // Now get all loaded assemblies in the default AppDomain.
     //var loadedAssemblies = defaultAD.GetAssemblies();
-    var loadedAssemblies = defaultAD.GetAssemblies().OrderBy(x => x.GetName().Name);
+    var loadedAssemblies = defaultAD.GetAssemblies().OrderBy(a => a.GetName().Name);
     
     Console.WriteLine($"***** Here are the assemblies loaded in {defaultAD.FriendlyName} *****\n");
     foreach (Assembly a in loadedAssemblies)
@@ -33,7 +33,7 @@ static void ListAllAssembliesInAppDomain()
         Console.WriteLine($"\t{a.GetName().Name}:{a.GetName().Version}");
     }
 }
-//ListAllAssembliesInAppDomain();
+ListAllAssembliesInAppDomain();
 
 static void LoadAdditionalAssembliesDifferentContexts()
 {
@@ -66,5 +66,5 @@ static void LoadAdditionalAssembliesSameContext()
     Console.WriteLine($"Class1.Equals(Class2) {c1.Equals(c2)}");
     Console.WriteLine($"Class1 == Class2 {c1 == c2}");
 }
-LoadAdditionalAssembliesSameContext();
+//LoadAdditionalAssembliesSameContext();
 
