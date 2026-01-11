@@ -14,7 +14,6 @@ static void ListAllRunningProcesses()
         string info = $"PID: {p.Id}\tName: {p.ProcessName}";
         Console.WriteLine(info);
     }
-    Console.WriteLine("************************************\n");
 }
 //ListAllRunningProcesses();
 
@@ -34,7 +33,6 @@ static void GetSpecificProcess()
 //GetSpecificProcess();
 
 
-
 static void EnumThreadsForProcess(Process theProc)
 {
 
@@ -48,7 +46,6 @@ static void EnumThreadsForProcess(Process theProc)
             $"-> Thread ID: {pt.Id}\tStart Time: {pt.StartTime.ToShortTimeString()}\tPriority: {pt.PriorityLevel}";
         Console.WriteLine(info);
     }
-    Console.WriteLine("************************************\n");
 }
 
 static void EnumThreads()

@@ -33,7 +33,7 @@ static void ListAllAssembliesInAppDomain()
         Console.WriteLine($"\t{a.GetName().Name}:{a.GetName().Version}");
     }
 }
-ListAllAssembliesInAppDomain();
+//ListAllAssembliesInAppDomain();
 
 static void LoadAdditionalAssembliesDifferentContexts()
 {
