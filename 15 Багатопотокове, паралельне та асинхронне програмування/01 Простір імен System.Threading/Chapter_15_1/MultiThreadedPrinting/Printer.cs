@@ -14,7 +14,7 @@ public class Printer
     {
         lock (threadLock)
         {
-            //    // Display Thread info.
+            // Display Thread info.
             Console.WriteLine($"\t{Thread.CurrentThread.Name} is executing PrintNumbers()");
 
             // Print out numbers.

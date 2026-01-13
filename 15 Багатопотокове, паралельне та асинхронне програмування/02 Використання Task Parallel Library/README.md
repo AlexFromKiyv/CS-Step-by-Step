@@ -5,7 +5,7 @@
 
 ## Простір імен System.Threading.Tasks 
 
-Разом типи System.Threading.Tasks називаються бібліотекою паралельного виконання завдань Task Parallel Library (TPL). TPL автоматично розподілятиме робоче навантаження вашої програми між доступними процесорами динамічно, використовуючи пул потоків середовища виконання. TPL обробляє розподіл роботи, планування потоків, керування станом та інші низькорівневі деталі. В результаті ви можете максимізувати продуктивність своїх .NET Core-застосунків, одночасно захищаючись від багатьох складнощів безпосередньої роботи з потоками.
+Разом типи System.Threading.Tasks називаються бібліотекою паралельного виконання завдань Task Parallel Library (TPL). TPL автоматично розподілятиме робоче навантаження вашої програми між доступними процесорами динамічно, використовуючи пул потоків середовища виконання. TPL обробляє розподіл роботи, планування потоків, керування станом та інші низькорівневі деталі. В результаті ви можете максимізувати продуктивність своїх .NET -застосунків, одночасно захищаючись від багатьох складнощів безпосередньої роботи з потоками.
 
 # Класс Task
 
@@ -13,9 +13,8 @@
 
 ## Створення і запуск завдання
 
-Завдання можно створити і запустити декількома способами:
+Створимо метод який імітує виконання вказаний час одиницю роботи (UsingTask\Programm.cs):
 
-UsingTask\Programm.cs
 ```cs
 void DoWork(int time, int taskId)
 {
@@ -32,8 +31,32 @@ void DoWork(int time, int taskId)
     Console.WriteLine(threadInfo);
 
     int id = Thread.CurrentThread.ManagedThreadId;
-    Console.WriteLine($"Task {taskId} in thread:{id} finished.\n");
+    Console.WriteLine($"\nTask {taskId} in thread:{id} finished.");
 }
+```
+
+Створимо і запуцстимо завдання:
+```cs
+void RunTask()
+{
+    Task task = Task.Run(()=>DoWork(2000,1));
+
+    Console.ReadLine();
+}
+RunTask();
+```
+```
+
+        ManagedThreadId: 6              IsBackground: True      IsAlive:True    ThreadState:Background
+
+Task 1 in thread:6 finished.
+
+```
+Оскільки завдання виконується в фоновому потоці без Console.ReadLine(); ви нічого не побачите при виконані бо фоновий потік закінчить роботу коли зауінчиться первинний потік.
+
+Завдання можно створити і запустити декількома способами:
+
+```cs
 
 void RunTasks()
 {
@@ -41,7 +64,6 @@ void RunTasks()
     task1.Start();
 
     Task task2 = Task.Factory.StartNew(() => DoWork(2000,2));
-
     Task task3 = Task.Run(() => DoWork(1000,3));
 
     Console.WriteLine($"All tasks are working.");
@@ -56,17 +78,18 @@ RunTasks();
 All tasks are working.
 
         ManagedThreadId: 8              IsBackground: True      IsAlive:True    ThreadState:Background
+
 Task 3 in thread:8 finished.
 
+        ManagedThreadId: 6              IsBackground: True      IsAlive:True    ThreadState:Background
 
         ManagedThreadId: 7              IsBackground: True      IsAlive:True    ThreadState:Background
 
-        ManagedThreadId: 6              IsBackground: True      IsAlive:True    ThreadState:Background
 Task 1 in thread:6 finished.
 
 Task 2 in thread:7 finished.
 ```
-Як бачите конструктор типу Task приймає тип делегата Action без параметрів. В ціх викликах в окремому фоновому виконується метод на який вказує делегат. Виконання ведеться асінхронно. Перше завдання виконується те шо меньше займає часу.  Якшо не використовувати метод Wait завдання основного потоку закінчитися бистріше аніж виконається завдання окремих потоків бо потоки фонові. Цей метод блокує поток в якому викликається завданя поки вона не виконається. Спробуйте закоментувати ці рядки.
+Як бачите конструктор типу Task приймає тип делегата Action без параметрів. В ціх викликах в окремому фоновому потоці виконується метод на який вказує делегат. Виконання ведеться асінхронно. Перше завдання виконується те шо меньше займає часу.  Якшо не використовувати метод Wait завдання основного потоку закінчитися бистріше аніж виконається завдання окремих потоків бо потоки фонові. Цей метод блокує поток в якому викликається завданя поки вона не виконається. Спробуйте закоментувати ці рядки.
 
 ```
 All tasks are working.
@@ -76,33 +99,27 @@ All tasks are working.
 Класс Task має певні властивості.
 
 ```cs
+void TaskInfo(Task task)
+{
+    Console.WriteLine($"Id: {task.Id}");
+    Console.WriteLine($"IsCompleted: {task.IsCompleted}");
+    Console.WriteLine($"IsFaulted: {task.IsFaulted}");
+    Console.WriteLine($"IsCanceled: {task.IsCanceled}");
+    Console.WriteLine($"Status: {task.Status}");
+    Console.WriteLine($"IsCompletedSuccessfully:{task.IsCompletedSuccessfully}");
+}
+
 void PropertyOfTask()
 {
-
     Task task = new(() =>
     {
-        //Console.WriteLine($"Task Id: {Task.CurrentId}");
-        //Thread.Sleep(2000);
         DoWork(2000, 2);
     });
     task.Start();
-
-    Console.WriteLine($"Id: {task.Id}");
-    Console.WriteLine($"IsCompleted: {task.IsCompleted}");
-    Console.WriteLine($"IsFaulted: {task.IsFaulted}");
-    Console.WriteLine($"IsCanceled: {task.IsCanceled}");
-    Console.WriteLine($"Status: {task.Status}");
-    Console.WriteLine($"IsCompletedSuccessfully:{task.IsCompletedSuccessfully}");
+    TaskInfo(task);
 
     task.Wait();
-
-    Console.WriteLine($"Id: {task.Id}");
-    Console.WriteLine($"IsCompleted: {task.IsCompleted}");
-    Console.WriteLine($"IsFaulted: {task.IsFaulted}");
-    Console.WriteLine($"IsCanceled: {task.IsCanceled}");
-    Console.WriteLine($"Status: {task.Status}");
-    Console.WriteLine($"IsCompletedSuccessfully:{task.IsCompletedSuccessfully}");
-
+    TaskInfo(task);
 }
 PropertyOfTask();
 ```
@@ -115,8 +132,8 @@ Status: Running
 IsCompletedSuccessfully:False
 
         ManagedThreadId: 6              IsBackground: True      IsAlive:True    ThreadState:Background
-Task 2 in thread:6 finished.
 
+Task 2 in thread:6 finished.
 Id: 1
 IsCompleted: True
 IsFaulted: False
@@ -158,8 +175,8 @@ Outer task starting.
 Inner task starting.
 
         ManagedThreadId: 6              IsBackground: True      IsAlive:True    ThreadState:Background
-Task 2 in thread:6 finished.
 
+Task 2 in thread:6 finished.
 Inner task finished.
 Outer task finished.
 End main
@@ -205,8 +222,8 @@ Outer task finished.
 Inner task starting.
 
         ManagedThreadId: 7              IsBackground: True      IsAlive:True    ThreadState:Background
-Task 2 in thread:7 finished.
 
+Task 2 in thread:7 finished.
 Inner task finished.
 End main
 ```
@@ -239,15 +256,16 @@ ArrayOfTasks();
 All tasks are working.
 
         ManagedThreadId: 6              IsBackground: True      IsAlive:True    ThreadState:Background
-Task 1 in thread:6 finished.
-
-
-        ManagedThreadId: 8              IsBackground: True      IsAlive:True    ThreadState:Background
-Task 3 in thread:8 finished.
-
 
         ManagedThreadId: 7              IsBackground: True      IsAlive:True    ThreadState:Background
+
 Task 2 in thread:7 finished.
+
+Task 1 in thread:6 finished.
+
+        ManagedThreadId: 8              IsBackground: True      IsAlive:True    ThreadState:Background
+
+Task 3 in thread:8 finished.
 ```
 В синхронному виклику навантаженя потребувало б в три рази більше часу. Крім того існує метод Task.WaitAny який затримує основний потік докі не закінчить виконання будь якє завдання.
 
@@ -270,7 +288,7 @@ void ObtainingTheResultOfTheTask()
 
     Task<int> squareTask = new(() =>
     {
-        Console.WriteLine($"Thread:{Thread.CurrentThread.ManagedThreadId}");
+        Console.WriteLine($"Task in thread:{Thread.CurrentThread.ManagedThreadId}");
         return SlowlyGetSquare(x);
     });
 
@@ -284,16 +302,11 @@ ObtainingTheResultOfTheTask();
 ```
 При звернені до власитвості task.Result поточний потік призупиняється і чекає виконання завданя в якому буде визначено результат.
 ```
-Primary thread:1
+Primary thread:2
 Enter number :5
-Thread:6
-
-        ManagedThreadId: 6              IsBackground: True      IsAlive:True    ThreadState:Background
-Task 1 in thread:6 finished.
-
+Task in thread:6
 Result:25
 ```
-
 
 ## Завдання на продовження.
 
@@ -302,12 +315,11 @@ Result:25
 ```cs
 void ContinuationTask()
 {
-    Task firstTask = new Task(() => Console.WriteLine($"Task Id:{Task.CurrentId}") );
+    Task firstTask = new Task(() => Console.WriteLine($"Task Id:{Task.CurrentId}"));
 
     Task nextTask = firstTask.ContinueWith(AboutTask);
 
     firstTask.Start();
-
     firstTask.Wait();
 
     void AboutTask(Task task)
@@ -330,35 +342,30 @@ Previous Task Id:1
 ```cs
 void ContinuationTaskWithValue()
 {
-    int t = 5000;
+    int x = 5;
 
     Task<int> squareTask = new(() =>
     {
         Console.WriteLine($"Task {Task.CurrentId} says: I'm starting");
-        Thread.Sleep(t);
-        return t;
+        return SlowlyGetSquare(x);
     });
 
-    Task nextTask = squareTask.ContinueWith(task => PrintResult(task.Result));
+    Task nextTask = squareTask.ContinueWith(t => PrintResult(t.Result));
 
     squareTask.Start();
 
-    Console.ReadLine();
+    squareTask.Wait();
 
     void PrintResult(int result)
     {
-        Console.WriteLine($"Task {Task.CurrentId} says: I waited {result} ");
+        Console.WriteLine($"Task {Task.CurrentId} says: I waited with result {result} ");
     }
 }
 ContinuationTaskWithValue();
 ```
 ```
 Task 1 says: I'm starting
-
-        ManagedThreadId: 6              IsBackground: True      IsAlive:True    ThreadState:Background
-Task 1 in thread:6 finished.
-
-Task 2 says: I waited 25
+Task 2 says: I waited with result 25
 ```
 Маючи таку можливість можна побудувати ланцюг завдань.
 
@@ -398,7 +405,7 @@ void CancellationWitoutThrow()
 
     Task task = new(() =>
     {
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < 30; i++)
         {
             if (cancellationToken.IsCancellationRequested)
             {
@@ -406,12 +413,12 @@ void CancellationWitoutThrow()
                 return;
             }
             Console.Write($"{i} ");
-            Thread.Sleep(500);
+            Thread.Sleep(100);
         }
     }, cancellationToken);
     task.Start();
 
-    Thread.Sleep(3000);
+    Thread.Sleep(2000);
 
     cancellationTokenSource.Cancel();
 
@@ -420,7 +427,7 @@ void CancellationWitoutThrow()
 CancellationWitoutThrow();
 ```
 ```
-0 1 2 3 4 5 Task canceled
+0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 Task canceled
 ```
 Для обробки скасування спочатку створюється об'єкт CancellationTokenSource який керує та відсилає повідомлення про скасування. В конструктор завдання надсилаеться властивість цього об'єкта CancellationTokenSource.Token. Коли поза завданням викликаеться метод CancellationTokenSource.Cancel() відсилаеться повідомленя про скасування і властивість в стуктурі cancellationToken.IsCancellationRequested примає значення true. В процесі проходження циклу можна перевірити чи не будо відмінено завдання.
 
@@ -433,12 +440,11 @@ void CancellationWithThrow()
 
     Task task = new(() =>
     {
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < 30; i++)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
+            cancellationToken.ThrowIfCancellationRequested(); //!!!
             Console.Write($"{i} ");
-            Thread.Sleep(500);
+            Thread.Sleep(100);
         }
 
     }, cancellationToken);
@@ -446,7 +452,7 @@ void CancellationWithThrow()
     try
     {
         task.Start();
-        Thread.Sleep(3000);
+        Thread.Sleep(2000);
         cancellationTokenSource.Cancel();
         task.Wait();
     }
@@ -465,7 +471,7 @@ void CancellationWithThrow()
 CancellationWithThrow();
 ```
 ```
-0 1 2 3 4 5 Task canceled
+0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 Task canceled
 Task status:Canceled
 ```
 
@@ -493,15 +499,16 @@ SimpleUsingInvoke_1();
 Hi
 
         ManagedThreadId: 8              IsBackground: True      IsAlive:True    ThreadState:Background
+
 Task 2 in thread:8 finished.
 
+        ManagedThreadId: 2              IsBackground: False     IsAlive:True    ThreadState:Running
+
+Task 1 in thread:2 finished.
 
         ManagedThreadId: 4              IsBackground: True      IsAlive:True    ThreadState:Background
 
-        ManagedThreadId: 1              IsBackground: False     IsAlive:True    ThreadState:Running
 Task 3 in thread:4 finished.
-
-Task 1 in thread:1 finished.
 ```
 В якості параметру метод Invoke отримує params Action[]. Таким чином ми можемо передати методи яки середовище буде виконувати паралельно. Але виконання методу Invoke відбувається в сінхронному контексі і основний потік чекає виконання всіх завдань.
 
@@ -537,32 +544,32 @@ SimpleUsingInvoke_2();
 ```
 Hi
 
-        ManagedThreadId: 8              IsBackground: True      IsAlive:True    ThreadState:Background
-Task 2 in thread:8 finished.
-
-
         ManagedThreadId: 4              IsBackground: True      IsAlive:True    ThreadState:Background
-Task 3 in thread:4 finished.
 
+Task 2 in thread:4 finished.
 
-        ManagedThreadId: 1              IsBackground: False     IsAlive:True    ThreadState:Running
-Task 1 in thread:1 finished.
+        ManagedThreadId: 8              IsBackground: True      IsAlive:True    ThreadState:Background
 
-        Time: 3048
+Task 3 in thread:8 finished.
 
-        ManagedThreadId: 1              IsBackground: False     IsAlive:True    ThreadState:Running
-Task 1 in thread:1 finished.
+        ManagedThreadId: 2              IsBackground: False     IsAlive:True    ThreadState:Running
 
+Task 1 in thread:2 finished.
+        Time: 3035
 
-        ManagedThreadId: 1              IsBackground: False     IsAlive:True    ThreadState:Running
-Task 2 in thread:1 finished.
+        ManagedThreadId: 2              IsBackground: False     IsAlive:True    ThreadState:Running
 
+Task 1 in thread:2 finished.
 
-        ManagedThreadId: 1              IsBackground: False     IsAlive:True    ThreadState:Running
-Task 3 in thread:1 finished.
+        ManagedThreadId: 2              IsBackground: False     IsAlive:True    ThreadState:Running
 
+Task 2 in thread:2 finished.
+
+        ManagedThreadId: 2              IsBackground: False     IsAlive:True    ThreadState:Running
+
+Task 3 in thread:2 finished.
 Hi
-        Time: 8029
+        Time: 7035
 ```
 Як бачимо виконання в одному потоці проходить довше ніж в параллельних потоках.
 
@@ -655,7 +662,7 @@ using System.IO;
         }
 
 ```
-Додайте обробник зображень. Відповідно в папці D:\Temp\Pictures
+Додайте обробник зображень.
 
 ```cs
         private void ProcessFiles()
@@ -692,8 +699,8 @@ using System.IO;
 
 ## Робота циклу паралелльно
 
-Щоб обробити файли на якомога більшій кількості процесорів, ви можете переписати поточний цикл foreach для використання Parallel.ForEach(). Цей метод неодноразово перевантажувався; однак, у найпростішій формі, необхідно вказати об'єкт, сумісний з IEnumerable<T>, який містить елементи для обробки (це буде масив рядків files), та делегат Action<T>, який вказує на метод, що виконуватиме цю роботу.
-Ось відповідне оновлення, яке використовує лямбда-оператор C# замість літерального об’єкта делегату Action<T>.
+Щоб обробити файли на якомога більшій кількості процесорів, ви можете переписати поточний цикл foreach для використання Parallel.ForEach(). Цей метод неодноразово перевантажувався; однак, у найпростішій формі, необхідно вказати об'єкт, сумісний з IEnumerable\<T\>, який містить елементи для обробки (це буде масив рядків files), та делегат Action\<T\>, який вказує на метод, що виконуватиме цю роботу.
+Ось відповідне оновлення, яке використовує лямбда-оператор C# замість літерального об’єкта делегату Action\<T\>.
 
 Доджамо кнопку і обробник.
 
@@ -817,7 +824,7 @@ Processing on thread: 1 file: 11. Закат.jpg
             Dispatcher?.Invoke(() => { Title = $"Processing Complete. Time: {watch.ElapsedMilliseconds}"; });
         }
 ```
-Властивість Factory класу Task повертає об'єкт TaskFactory. Коли ви викликаєте його метод StartNew(), ви передаєте делегат Action<T> (тут прихований за допомогою відповідного лямбда-виразу), який вказує на метод, який потрібно викликати асинхронно. З цим оновленням ви побачите, що заголовок вікна показуватиме, який потік з пулу потоків обробляє певний файл, а ще краще те, що текстова область зможе отримувати вхідні дані, оскільки потік інтерфейсу користувача більше не блокується. Об'єкт Dispatcher є екземпляром батьківського класу WPF. Він дозволяє визвати метод що оновить інтерфейс користувача. 
+Властивість Factory класу Task повертає об'єкт TaskFactory. Коли ви викликаєте його метод StartNew(), ви передаєте делегат Action\<T\> (тут прихований за допомогою відповідного лямбда-виразу), який вказує на метод, який потрібно викликати асинхронно. З цим оновленням ви побачите, що заголовок вікна показуватиме, який потік з пулу потоків обробляє певний файл, а ще краще те, що текстова область зможе отримувати вхідні дані, оскільки потік інтерфейсу користувача більше не блокується. Об'єкт Dispatcher є екземпляром батьківського класу WPF. Він дозволяє визвати метод що оновить інтерфейс користувача. 
 Таким чином основний потік виконується без зупинок і асінхронно в вторинному виконується обробка файлів.
 Таким чином важливо зрозуміти шо завдання викликається в окремомому потоці асінхронно і це не блокує основний потік. В данному випадку завдання виконуєтьс в фоновому режимі і влаштовує.
 
@@ -1094,7 +1101,7 @@ Work done.
 
 # Паралельні запити LINQ (PLINQ)
 
-TPL пропонує ще один спосіб інтеграції паралельних завдань у ваші програми .NET Core. Ви можете використовувати набір методів розширення, які дозволяють створювати запити LINQ, що виконуватимуть своє робоче навантаження паралельно (якщо це можливо). Відповідно, запити LINQ, розроблені для паралельного виконання, називаються запитами PLINQ.
+TPL пропонує ще один спосіб інтеграції паралельних завдань у ваші програми .NET. Ви можете використовувати набір методів розширення, які дозволяють створювати запити LINQ, що виконуватимуть своє робоче навантаження паралельно (якщо це можливо). Відповідно, запити LINQ, розроблені для паралельного виконання, називаються запитами PLINQ.
 Як і паралельний код, створений за допомогою класу Parallel, PLINQ має можливість ігнорувати ваш запит на паралельну обробку колекції, якщо це необхідно. Фреймворк PLINQ був оптимізований багатьма способами, включаючи визначення того, чи справді запит виконуватиметься швидше синхронно.
 Під час виконання PLINQ аналізує загальну структуру запиту, і якщо запит ймовірно виграє від паралелізації, він виконуватиметься паралельно. Однак, якщо паралелізація запиту негативно впливає на продуктивність, PLINQ просто виконує запит послідовно. Якщо PLINQ має вибір між потенційно дорогим паралельним алгоритмом або недорогим послідовним алгоритмом, він за замовчуванням вибирає послідовний алгоритм.
 Необхідні методи розширення знаходяться в класі ParallelEnumerable простору імен System.Linq.
@@ -1266,4 +1273,4 @@ The query has been canceled via the token supplied to WithCancellation.
         }
 ```
 
-Закінчуючи розділ слід зрозумітинаступне. За допомогою Task можно виконати завдання в вторинному фоновому потоці. Завдання можуть мати внутрішні і мати завдання на продовження. Масив завдань асінхронно виконується бистріше аніж свнхрона послідовність визовів. Завдання можуть повертати результат але це блокує основний потік. Класс Parallel можна використати щоб паралельно виконувати одиниці роботи. Цей клас дозволяє разпаралелити обробку колекцій даних. До колекцій можна використовувати методи розширення які будуть працюівати параллельно.   
+Закінчуючи розділ слід зрозуміти наступне. За допомогою Task можно виконати завдання в вторинному фоновому потоці. Завдання можуть мати внутрішні і мати завдання на продовження. Масив завдань асінхронно виконується бистріше аніж сінхрона послідовність визовів. Завдання можуть повертати результат але це блокує основний потік. Класс Parallel можна використати щоб паралельно виконувати одиниці роботи. Цей клас дозволяє разпаралелити обробку колекцій даних. До колекцій можна використовувати методи розширення які будуть працюівати параллельно.   

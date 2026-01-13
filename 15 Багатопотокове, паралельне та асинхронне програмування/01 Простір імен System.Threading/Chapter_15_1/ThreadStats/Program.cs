@@ -2,7 +2,7 @@
 {
     // Obtain and name the current thread.
     Thread primaryThread = Thread.CurrentThread;
-    primaryThread.Name = "ThePrimaryThread";
+    primaryThread.Name = "Primary";
 
     // Print out some stats about this thread.
     Console.WriteLine($"ID of current thread: {primaryThread.ManagedThreadId}");

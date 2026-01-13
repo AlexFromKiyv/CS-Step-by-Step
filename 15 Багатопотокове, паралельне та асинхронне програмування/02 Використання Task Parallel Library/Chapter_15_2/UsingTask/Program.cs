@@ -2,9 +2,8 @@
 using System.Threading;
 
 void DoWork(int time, int taskId)
-{
+{   
     Thread.Sleep(time);
-
     Thread thread = Thread.CurrentThread;
 
     string threadInfo = "\n"+
@@ -16,17 +15,26 @@ void DoWork(int time, int taskId)
     Console.WriteLine(threadInfo);
 
     int id = Thread.CurrentThread.ManagedThreadId;
-    Console.WriteLine($"Task {taskId} in thread:{id} finished.\n");
+    Console.WriteLine($"\nTask {taskId} in thread:{id} finished.");
 }
+
+void RunTask()
+{
+    Task task = Task.Run(()=>DoWork(2000,1));
+
+    Console.ReadLine();
+}
+//RunTask();
+
+
 
 void RunTasks()
 {
     Task task1 = new Task(() => DoWork(2000,1));
     task1.Start();
 
-    Task task2 = Task.Factory.StartNew(() => DoWork(2000,2));
-
-    Task task3 = Task.Run(() => DoWork(1000,3));
+    Task task2 = Task.Factory.StartNew(() => DoWork(2000, 2));
+    Task task3 = Task.Run(() => DoWork(1000, 3));
 
     Console.WriteLine($"All tasks are working.");
 
@@ -36,33 +44,28 @@ void RunTasks()
 }
 //RunTasks();
 
+
+void TaskInfo(Task task)
+{
+    Console.WriteLine($"Id: {task.Id}");
+    Console.WriteLine($"IsCompleted: {task.IsCompleted}");
+    Console.WriteLine($"IsFaulted: {task.IsFaulted}");
+    Console.WriteLine($"IsCanceled: {task.IsCanceled}");
+    Console.WriteLine($"Status: {task.Status}");
+    Console.WriteLine($"IsCompletedSuccessfully:{task.IsCompletedSuccessfully}");
+}
+
 void PropertyOfTask()
 {
-
     Task task = new(() =>
     {
-        //Console.WriteLine($"Task Id: {Task.CurrentId}");
-        //Thread.Sleep(2000);
         DoWork(2000, 2);
     });
     task.Start();
-
-    Console.WriteLine($"Id: {task.Id}");
-    Console.WriteLine($"IsCompleted: {task.IsCompleted}");
-    Console.WriteLine($"IsFaulted: {task.IsFaulted}");
-    Console.WriteLine($"IsCanceled: {task.IsCanceled}");
-    Console.WriteLine($"Status: {task.Status}");
-    Console.WriteLine($"IsCompletedSuccessfully:{task.IsCompletedSuccessfully}");
+    TaskInfo(task);
 
     task.Wait();
-
-    Console.WriteLine($"Id: {task.Id}");
-    Console.WriteLine($"IsCompleted: {task.IsCompleted}");
-    Console.WriteLine($"IsFaulted: {task.IsFaulted}");
-    Console.WriteLine($"IsCanceled: {task.IsCanceled}");
-    Console.WriteLine($"Status: {task.Status}");
-    Console.WriteLine($"IsCompletedSuccessfully:{task.IsCompletedSuccessfully}");
-
+    TaskInfo(task);
 }
 //PropertyOfTask();
 
@@ -79,7 +82,7 @@ void InnerTask()
             DoWork(1000, 2);
             Console.WriteLine("Inner task finished.");
         });
-        //inner.Wait();
+        inner.Wait();
         Console.WriteLine("Outer task finished.");
     });
     outer.Wait();
@@ -128,7 +131,7 @@ void ArrayOfTasks()
 
 int SlowlyGetSquare(int x)
 {
-    DoWork(2000, 1);
+    Thread.Sleep(2000);
     return x*x;
 }
 
@@ -140,7 +143,7 @@ void ObtainingTheResultOfTheTask()
 
     Task<int> squareTask = new(() =>
     {
-        Console.WriteLine($"Thread:{Thread.CurrentThread.ManagedThreadId}");
+        Console.WriteLine($"Task in thread:{Thread.CurrentThread.ManagedThreadId}");
         return SlowlyGetSquare(x);
     });
 
@@ -180,7 +183,7 @@ void ContinuationTaskWithValue()
         return SlowlyGetSquare(x);
     });
 
-    Task nextTask = squareTask.ContinueWith(task => PrintResult(task.Result));
+    Task nextTask = squareTask.ContinueWith(t => PrintResult(t.Result));
 
     squareTask.Start();
 
@@ -188,7 +191,7 @@ void ContinuationTaskWithValue()
 
     void PrintResult(int result)
     {
-        Console.WriteLine($"Task {Task.CurrentId} says: I waited {result} ");
+        Console.WriteLine($"Task {Task.CurrentId} says: I waited with result {result} ");
     }
 }
 //ContinuationTaskWithValue();
@@ -217,7 +220,7 @@ void CancellationWitoutThrow()
 
     Task task = new(() =>
     {
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < 30; i++)
         {
             if (cancellationToken.IsCancellationRequested)
             {
@@ -225,12 +228,12 @@ void CancellationWitoutThrow()
                 return;
             }
             Console.Write($"{i} ");
-            Thread.Sleep(500);
+            Thread.Sleep(100);
         }
     }, cancellationToken);
     task.Start();
 
-    Thread.Sleep(3000);
+    Thread.Sleep(2000);
 
     cancellationTokenSource.Cancel();
 
@@ -245,20 +248,18 @@ void CancellationWithThrow()
 
     Task task = new(() =>
     {
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < 30; i++)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
+            cancellationToken.ThrowIfCancellationRequested(); //!!!
             Console.Write($"{i} ");
-            Thread.Sleep(500);
+            Thread.Sleep(100);
         }
-
     }, cancellationToken);
 
     try
     {
         task.Start();
-        Thread.Sleep(3000);
+        Thread.Sleep(2000);
         cancellationTokenSource.Cancel();
         task.Wait();
     }
@@ -294,7 +295,7 @@ void SimpleUsingInvoke_2()
 
     Parallel.Invoke(
         () => DoWork(3000, 1),
-        () => DoWork(2000, 2),
+        () => DoWork(1000, 2),
         () => DoWork(3000, 3),
         () => Console.WriteLine("Hi")
         );
@@ -305,11 +306,11 @@ void SimpleUsingInvoke_2()
     watch = Stopwatch.StartNew();
 
     DoWork(3000, 1);
-    DoWork(2000, 2);
+    DoWork(1000, 2);
     DoWork(3000, 3);
     Console.WriteLine("Hi");
 
     watch.Stop();
     Console.WriteLine($"\tTime: {watch.ElapsedMilliseconds}");
 }
-//SimpleUsingInvoke_2();
+SimpleUsingInvoke_2();

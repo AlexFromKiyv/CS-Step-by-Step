@@ -35,7 +35,7 @@ void UseParameterizedThreadStartWithAutoResetEvent()
     thread.Start(ap);
 
     //Wait for the wait handle to complete
-    //_waitHandle.WaitOne();
+    _waitHandle.WaitOne();
     Console.WriteLine(thread.ThreadState);
 
 
@@ -55,6 +55,6 @@ void UseParameterizedThreadStartWithAutoResetEvent()
         }
     }
 }
-UseParameterizedThreadStartWithAutoResetEvent();
+//UseParameterizedThreadStartWithAutoResetEvent();
 
 

@@ -28,11 +28,10 @@ static void Run()
             backgroundThread.Start();
             break;
         default:
-            Console.WriteLine("I don't know what you want...you get 1 thread.");
             goto case "1";
     }
     // Do some additional work.
-    Console.WriteLine("\tThis is on the main thread, and we are finished.");
+    Console.WriteLine("\tThis is on the main thread, and we are on the finish. ");
     Console.ReadLine();
 }
 Run();

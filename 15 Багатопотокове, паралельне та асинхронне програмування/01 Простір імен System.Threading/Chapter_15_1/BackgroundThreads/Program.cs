@@ -1,5 +1,4 @@
-﻿
-using BackgroundThreads;
+﻿using BackgroundThreads;
 
 Printer p = new Printer();
 

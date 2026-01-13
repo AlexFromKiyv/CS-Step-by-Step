@@ -1,5 +1,5 @@
 ﻿void DoWork(int delay) 
-{ 
+{
     Thread.Sleep(delay);
 }
 
@@ -21,6 +21,7 @@ void Run()
     thread.Name = "Secondary";
     thread.IsBackground = true;
     thread.Start();
+    Console.WriteLine("I'm done all in primary thread.");
 
     Console.ReadLine();
 }
