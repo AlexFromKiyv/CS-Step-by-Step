@@ -3,7 +3,8 @@ using Microsoft.VisualStudio.Threading;
 static string GetThreadInfo()
 {
     Thread thread = Thread.CurrentThread;
-    return $"\tThreadId:{thread.ManagedThreadId}" +
+    return 
+        $"\tThreadId:{thread.ManagedThreadId}" +
         $"\tIsBackground:{thread.IsBackground}" +
         $"\tThreadState:{thread.ThreadState}";
 }

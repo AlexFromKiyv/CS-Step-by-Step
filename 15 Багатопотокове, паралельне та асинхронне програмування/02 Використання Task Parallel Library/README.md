@@ -33,26 +33,33 @@ void DoWork(int time, int taskId)
     int id = Thread.CurrentThread.ManagedThreadId;
     Console.WriteLine($"\nTask {taskId} in thread:{id} finished.");
 }
+DoWork(1000,1);
+```
 ```
 
-Створимо і запуцстимо завдання:
+        Thread Id: 2            IsBackground: False     IsAlive:True    ThreadState:Running
+
+Task 1 in thread:2 finished.
+```
+Створимо і запустимо завдання:
 ```cs
 void RunTask()
 {
     Task task = Task.Run(()=>DoWork(2000,1));
-
+    Console.WriteLine("I'm ready to finish. You can press Enter.");
     Console.ReadLine();
 }
 RunTask();
 ```
 ```
+I'm ready to finish. You can press Enter.
 
-        ManagedThreadId: 6              IsBackground: True      IsAlive:True    ThreadState:Background
+        Thread Id: 6            IsBackground: True      IsAlive:True    ThreadState:Background
 
 Task 1 in thread:6 finished.
 
 ```
-Оскільки завдання виконується в фоновому потоці без Console.ReadLine(); ви нічого не побачите при виконані бо фоновий потік закінчить роботу коли зауінчиться первинний потік.
+Оскільки завдання виконується в фоновому потоці без Console.ReadLine(); ви нічого не побачите при виконані бо фоновий потік закінчить роботу коли первинний потік виконався.
 
 Завдання можно створити і запустити декількома способами:
 
@@ -521,7 +528,7 @@ void SimpleUsingInvoke_2()
 
     Parallel.Invoke(
         () => DoWork(3000, 1),
-        () => DoWork(2000, 2),
+        () => DoWork(1000, 2),
         () => DoWork(3000, 3),
         () => Console.WriteLine("Hi")
         );
@@ -532,7 +539,7 @@ void SimpleUsingInvoke_2()
     watch = Stopwatch.StartNew();
 
     DoWork(3000, 1);
-    DoWork(2000, 2);
+    DoWork(1000, 2);
     DoWork(3000, 3);
     Console.WriteLine("Hi");
 

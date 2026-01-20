@@ -664,7 +664,11 @@ lock(myLockToken)
 Ви можете спростити свій код за допомогою статичного методу Interlocked.Increment(). Просто передайте змінну для збільшення за посиланням. Зверніть увагу, що метод Increment() не лише коригує значення вхідного параметра, але й повертає нове значення.
 
 ```cs
+int intVal = 5;
 intVal = Interlocked.Increment(ref intVal);
+```
+```
+6
 ```
 Окрім Increment() та Decrement(), тип Interlocked дозволяє атомарно присвоювати числові та об'єктні дані. Наприклад, якщо ви хочете присвоїти значення змінної-члена значенню, ви можете уникнути необхідності використовувати явний оператор блокування (або явну логіку Monitor) та використовувати метод Interlocked.Exchange() ось так:
 
@@ -673,10 +677,18 @@ var myInt = 27;
 Interlocked.Exchange(ref myInt, 83);
 Console.WriteLine(myInt);
 ```
+```
+83
+```
 Зрештою, якщо ви хочете перевірити два значення на рівність та змінити точку порівняння потокобезпечним способом, ви можете скористатися методом Interlocked.CompareExchange() наступним чином:
 ```cs
+var myInt = 83;
 // If the value of i is currently 83, change myInt  to 99.
 Interlocked.CompareExchange(ref myInt, 99, 83);
+Console.WriteLine(myInt);
+```
+```
+99
 ```
 
 # Програмування з використанням Timer Callbacks
