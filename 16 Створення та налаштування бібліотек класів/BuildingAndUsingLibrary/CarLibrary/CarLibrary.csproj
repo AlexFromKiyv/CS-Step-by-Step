@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <Copyright>Copyright 2026</Copyright>
+    <Authors>Alex Po</Authors>
+    <Company>BusinessSoft</Company>
+    <Product>My look at C#</Product>
+    <PackageId>CarLibrary</PackageId>
+    <Description>This is an awesome library for cars.</Description>
+    <AssemblyVersion>1.0.0.1</AssemblyVersion>
+    <Version>1.0.4</Version>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>CSharpCarClient</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+</Project>
