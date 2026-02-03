@@ -1,5 +1,4 @@
-﻿
-using CarLibrary;
+﻿using CarLibrary;
 using ExamineTypeClass;
 using System.Reflection;
 
@@ -16,13 +15,12 @@ void ObtainTypeUseObjectGetType()
 
 void ObtainTypeUseTypeOf()
 {
-    SportCar sportCar = new();
-    Type type =typeof(SportCar);
+    Type type = typeof(SportCar);
 
     Console.WriteLine(type);
     Console.WriteLine(type.GetType());
 }
-//ObtainTypeUseTypeOf();
+ObtainTypeUseTypeOf();
 
 void ObtainTypeUseTypeGetType()
 {
@@ -81,4 +79,4 @@ void GetOneMember()
         Console.WriteLine($"{member.DeclaringType}   {member.MemberType}   {member.Name}");
     }
 }
-GetOneMember();
+//GetOneMember();

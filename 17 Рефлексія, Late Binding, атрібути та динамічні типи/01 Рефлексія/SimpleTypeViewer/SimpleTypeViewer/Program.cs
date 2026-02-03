@@ -1,5 +1,7 @@
 ﻿using System.Collections;
+using System.Globalization;
 using System.Reflection;
+using System.Xml;
 
 void StartViewer()
 {
@@ -9,7 +11,6 @@ void StartViewer()
         Console.Clear();
         Console.Write("Enter Type or q:");
 		enteredType = Console.ReadLine()!;
-
 		if (enteredType.Equals("Q",StringComparison.OrdinalIgnoreCase))
 		{
 			break;
@@ -19,7 +20,7 @@ void StartViewer()
         Console.ReadKey();
     } while (true);
 }
-StartViewer();
+//StartViewer();
 
 
 void InvestigateTheType(string typeName)
@@ -75,6 +76,7 @@ void ListProperties(Type type)
     }
 }
 
+
 void ListMethods(Type type)
 {
     Console.WriteLine("Methods");
@@ -82,12 +84,21 @@ void ListMethods(Type type)
     var methods =from t in type.GetMethods()
                  orderby t.Name
                  select t;
-    
-    foreach (MethodInfo methodInfo in methods)
-    {
-        //AboutMethod(methodInfo);
-        Console.WriteLine("\t" + methodInfo);
-    }
+
+    //// Example 1
+
+    //foreach (MethodInfo method in methods)
+    //{
+    //    Console.WriteLine($"\t{method.Name}");
+    //}
+
+    //// Example 2
+
+    //foreach (MethodInfo methodInfo in methods)
+    //{
+    //    //AboutMethod(methodInfo);
+    //    Console.WriteLine("\t" + methodInfo);
+    //}
 }
 
 void AboutMethod(MethodInfo methodInfo)
@@ -117,6 +128,14 @@ void ListInterfaces(Type type)
     }
 }
 
+void HowGetStaticType()
+{
+    Type type = typeof(Console);
+    Console.WriteLine($"We want to investigate the type:{type}");
+    ReflectionOfType(type);
+}
+//HowGetStaticType();
+
 void ReflectionOfType(Type type)
 {
     AboutType(type);
@@ -125,11 +144,3 @@ void ReflectionOfType(Type type)
     ListMethods(type);
     ListInterfaces(type);
 }
-void HowGetSystemConsoleAsType()
-{
-    Type type = typeof(Console);
-    Console.WriteLine($"We want to investigate the type:System.Console");
-    ReflectionOfType(type);
-}
-//HowGetSystemConsoleAsType();
-
