@@ -44,7 +44,7 @@ Antoni Gaudi
 ```
 Отже для доступу до властивостей потрібна явне приведеня об'єкта
 
-## Створення змінної з допомогою dynamic .
+## Створення змінної з допомогою dynamic
 
 На високому рівні ви можете вважати ключове слово dynamic спеціалізованою формою System.Object, у якій будь-яке значення можна призначити динамічному типу даних. На перший погляд це може здатися жахливо заплутаним, оскільки здається, що тепер у вас є три способи визначення даних, базовий тип яких прямо не вказано у вашій базі коду.
 
@@ -348,7 +348,6 @@ public class SimpleMath
         return a + b;
     }
 }
-
 ```
 В файл проекут додамо 
 
@@ -444,8 +443,6 @@ void CreateDynamicObject()
     //method
     girl.IncreaseAge = (Action<int>)(a =>  girl.Age += a);
 
-
-
     //invoke
     girl.IncreaseAge(2);
 
@@ -470,13 +467,6 @@ Lucy 33
 Цей клас також дозаоляє створювати динамічні об'єкти але з посиленим контролем. Для використаня треба створити клас нашадок від DynamicObject та реалізувати низьку методів.
 
 ```cs
-using System;
-using System.Collections.Generic;
-using System.Dynamic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace UsingDynamicObject;
 
 internal class Person : DynamicObject
@@ -533,7 +523,6 @@ void TestOurClass()
     Func<int,int> increaseAge  = (int y) => { person.Age += y; return person.Age; };
     person.IncreaseAge = increaseAge;
 
-
     person.IncreaseAge(10); // invoked TryInvokeMember
 
     Console.WriteLine($"{person.Name} {person.Age}"); // invoked TryGetMember
@@ -546,7 +535,7 @@ TestOurClass();
 
 ### Запуск скрипта на Python.
 
-Існують сфери в який використаня динамічних язиків програмуваня корисно. Наприклад написання клієнських сценарієв. Крім того інуючи бібіліотеки на Phayton які мають функціонал якого нема в .Net.
+Існують сфери в який використаня динамічних язиків програмуваня корисно. Наприклад написання клієнських сценарієв. Крім того існуючи бібіліотеки на Phayton які мають функціонал якого нема в .Net.
 
 Створемо проект UsingIronPython і додамо пакети DynamicLanguageRuntime та IronPython (правий клік на Dependencies > Manage NuGet Packages >)
 

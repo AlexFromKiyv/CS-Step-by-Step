@@ -2,12 +2,14 @@
 // and create an object using late binding.
 using System.Reflection;
 
+
+//Example 1
 void Run()
 {
     Assembly? assembly = null;
     try
     {
-        assembly = Assembly.LoadFrom(@"D:\CarLibrary");
+        assembly = Assembly.LoadFrom(@"D:\Temp\CarLibrary");
     }
     catch (Exception ex)
     {
@@ -30,14 +32,14 @@ void Run()
                 // Create object
                 obj = Activator.CreateInstance(typeMiniVan);
                 Console.WriteLine($"Created a {obj} using late binding!");
-
+                
                 //Invoke method without parameters
                 MethodInfo? methodInfoTurboBoost = typeMiniVan.GetMethod("TurboBoost");
                 methodInfoTurboBoost?.Invoke(obj, null);
 
                 //Invoke method with parameters
                 MethodInfo? methodInfoTurnOnRadio = typeMiniVan.GetMethod("TurnOnRadio");
-                methodInfoTurnOnRadio?.Invoke(obj, new object[] {true,2});
+                methodInfoTurnOnRadio?.Invoke(obj, new object[] { true, 2 });
 
             }
         }

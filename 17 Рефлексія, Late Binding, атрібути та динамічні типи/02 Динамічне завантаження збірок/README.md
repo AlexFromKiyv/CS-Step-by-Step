@@ -3,39 +3,17 @@
 Бувають випадки, коли вам потрібно буде програмно завантажити збірки під час виконання. Акт завантаження зовнішніх збірок за потребою відомий як динамічне завантаження(dynamic load).
 System.Reflection визначає клас під назвою Assembly. Використовуючи цей клас, ви можете динамічно завантажувати збірку, а також відкривати властивості самої збірки. Клас Assembly надає методи, які дозволяють вам програмно завантажувати збірки.
 
-
 ExternalAssemblyReflector\Program.cs
 ```cs
 using System.Reflection;
 
-void Start()
+const string FILEPATH = @"D:\Temp\CarLibrary";
+void Run()
 {
-    string? assemblyName = "";
-    Assembly? assembly = null;
-    do
-    {
-        Console.Clear();
-        Console.Write("Enter the name of the assembly to evaluate: ");
-        assemblyName = Console.ReadLine();
-
-        if (assemblyName == null) assemblyName = "";
-
-        try
-        {
-
-            assembly = Assembly.LoadFrom(assemblyName);
-            WriteTypesInAssembly(assembly);
-
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-            Console.ReadKey();
-        }
-
-    } while (true);
+    Assembly assembly = Assembly.LoadFrom(FILEPATH);
+    WriteTypesInAssembly(assembly);
 }
-Start();
+Run();
 
 void WriteTypesInAssembly(Assembly assembly)
 {
@@ -46,14 +24,10 @@ void WriteTypesInAssembly(Assembly assembly)
     {
         Console.WriteLine(type);
     }
-
-    Console.ReadKey();
 }
-
 ```
-Для тестування скопіюємо файл CarLibrary.dll на D:\
+Для тестування скопіюємо файл CarLibrary.dll на D:\Temp\
 ```
-Enter the name of the assembly to evaluate: D:\CarLibrary
 Assembly name:CarLibrary, Version=1.0.0.1, Culture=neutral, PublicKeyToken=null
 CarLibrary.Car
 CarLibrary.EngineStateEnum
@@ -69,6 +43,8 @@ CarLibrary.SportCar
 Крім метода LoadFrom в класі Аssembly є метод Load який має декілька перезавантажень. Один варіант дозволяє вказати значення культури (для локалізованих збірок), а також номер версії та значення токена відкритого ключа (для збірок каркаса). У сукупності набір елементів, що ідентифікують збірку, називається відображуваним іменем.Формат відображуваного імені — це розділений комами рядок пар ім’я-значення, який починається зі зрозумілої назви збірки, за якою слідують необов’язкові кваліфікатори (які можуть з’являтися в будь-якому порядку). Ось шаблон, якого слід дотримуватися (необов’язкові елементи вказано в дужках):
 
 Name (,Version = major.minor.build.revision) (,Culture = culture token) (,PublicKeyToken= public key token)
+
+Щоб цей код працював потрібно шоб в проекті було посилянна на проект бібліотеки.
 
 ExternalAssemblyReflector\Program.cs
 ```cs
@@ -86,8 +62,6 @@ void UseAsseblyLoad()
 }
 UseAsseblyLoad();
 ```
-Щоб цей код працював потрібно шоб в проекті було посилянна на проект бібліотеки.
-
 ```
 Assembly name:CarLibrary, Version=1.0.0.1, Culture=neutral, PublicKeyToken=null
 CarLibrary.Car
@@ -165,7 +139,7 @@ Microsoft.EntityFrameworkCore.DbContextOptionsBuilder
 Microsoft.EntityFrameworkCore.DbContextOptionsBuilder`1[TContext]
 Microsoft.EntityFrameworkCore.DbContextOptions`1[TContext]
 Microsoft.EntityFrameworkCore.DbFunctions
-
+...
 ```
 Коли ви посилаєтеся на іншу збірку, копія цієї збірки копіюється в вихідний каталог проекту, на який посилається.
 Вам, швидше за все, не потрібно буде створювати власні браузери об’єктів часто (якщо взагалі буде). Однак служби відображення є основою для багатьох поширених дій програмування, включаючи пізнє зв’язування.

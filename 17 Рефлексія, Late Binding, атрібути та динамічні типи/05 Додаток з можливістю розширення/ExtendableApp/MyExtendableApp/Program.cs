@@ -1,83 +1,76 @@
-﻿using CommonSnappableTypes;
-using System.Reflection;
+﻿using System.Reflection;
+using CommonSnappableTypes;
 
-static void Run()
+string? typeName = "";
+do
 {
-    string typeName = string.Empty;
-    do
-    {
-        Console.WriteLine("\tResearch your type.\n");
-        Console.Write("Enter a spanin to load:");
-        typeName = Console.ReadLine()!;
+    Console.Write("\nEnter a snapin to load:");
+    // Get name of type.
+    typeName = Console.ReadLine();
+    Console.Clear();
 
-        try
-        {
-            LoadExternalModule(typeName);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-        }
-        Console.Clear();
-    } while (true);
-}
-Run();
-
-static void LoadExternalModule(string assemblyName)
-{
-    Console.Write($"\nFinding and loading the assembly {assemblyName}. ");
-    Assembly? snapInAssembly = null;
+    // Try to display type.
     try
     {
-        snapInAssembly = Assembly.LoadFrom(assemblyName);
+        LoadExternalModule(typeName);
     }
     catch (Exception ex)
     {
-        Console.WriteLine(ex.Message);
+        Console.WriteLine("Sorry, can't find snapin");
     }
-    if (snapInAssembly != null)
+
+} while (true);
+
+void LoadExternalModule(string? assemblyName)
+{
+    Console.WriteLine($"\tI use {assemblyName}");
+
+    Assembly theSnapInAsm = null!;
+
+    try
     {
-        Console.WriteLine("Ok. The assembly found.");
+        // Dynamically load the selected assembly.
+        theSnapInAsm = Assembly.LoadFrom(assemblyName);
+        Console.WriteLine($"\tI loded assembly: {theSnapInAsm}"  );
+
+        // Get all IAppFunctionality compatible classes in assembly.
+        var theClassTypes =
+            theSnapInAsm.GetTypes()
+            .Where(t => t.IsClass && (t.GetInterface("IAppFunctionality") != null))
+            .ToList();
+        if (!theClassTypes.Any())
+        {
+            Console.WriteLine("Nothing implements IAppFunctionality!");
+        }
+        // Now, create the object and call DoIt() method.
+        foreach (var type in theClassTypes)
+        {
+            Console.WriteLine($"\tI find class {type}");
+            // Use late binding to create the type.
+            IAppFunctionality itfApp = (IAppFunctionality)theSnapInAsm.CreateInstance(type.FullName, true);
+            itfApp?.DoIt();
+
+            // Show company info.
+            DisplayCompanyData(type);
+        }
     }
-    else
+    catch (Exception ex)
     {
-        Console.WriteLine("Assembly is null");
-        Console.ReadKey();
+        Console.WriteLine($"An error occurred loading the snapin: {ex.Message}");
         return;
     }
-
-    Console.WriteLine("\nGet all IAppFunctionality compatible classes in assembly");
-
-    List<Type> iAppFuncClasses = snapInAssembly
-        .GetTypes()
-        .Where(t => t.IsClass && t.GetInterface("IAppFunctionality") != null)
-        .ToList();
-
-    if (!iAppFuncClasses.Any())
-    {
-        Console.WriteLine("Nothing implements IAppFunctionality!");
-        Console.ReadKey();
-        return;
-    }
-
-    foreach (var type in iAppFuncClasses)
-    {
-        Console.WriteLine($"Here is type:{type}");
-        // Use late binding to create the type.
-        IAppFunctionality appFunc = (IAppFunctionality)snapInAssembly.CreateInstance(type.FullName!, true)!;
-        appFunc.DoIt();
-        DisplayCompanyData(type);
-    }
-
-    Console.ReadKey();
 }
 
-static void DisplayCompanyData(Type type)
+void DisplayCompanyData(Type type)
 {
-    var companyInfos = type.GetCustomAttributes(false)
+    // Get [CompanyInfo] data.
+    var compInfo = type
+        .GetCustomAttributes(false)
         .Where(ci => (ci is CompanyInfoAttribute));
-    foreach (CompanyInfoAttribute ci in companyInfos)
+
+    // Show data.
+    foreach (CompanyInfoAttribute c in compInfo)
     {
-        Console.WriteLine($"\nCompany {ci.CompanyName} {ci.CompanyUrl}" );
+        Console.WriteLine($"More info about {c.CompanyName} can be found at {c.CompanyUrl}");
     }
 }

@@ -1,5 +1,5 @@
-﻿
+﻿global using System.Text.Json.Serialization;
+global using System.Xml.Serialization;
 using ApplyingAttributes;
 
-HorseAndBuggy horseAndBuggy = new();
-// CS0618: 'HorseAndBuggy' is obsolete: 'Use another vehicle!'
+HorseAndBuggy mule = new HorseAndBuggy();

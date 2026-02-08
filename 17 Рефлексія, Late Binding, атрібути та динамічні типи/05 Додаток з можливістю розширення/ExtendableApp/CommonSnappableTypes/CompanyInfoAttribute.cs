@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-
-namespace CommonSnappableTypes;
+﻿namespace CommonSnappableTypes;
 
 [AttributeUsage(AttributeTargets.Class)]
-public class CompanyInfoAttribute : Attribute
+public sealed class CompanyInfoAttribute : Attribute
 {
-    public string CompanyName { get; set; } = string.Empty;
-    public string CompanyUrl { get; set; } = string.Empty;
+    public string CompanyName { get; set; } = null!;
+    public string CompanyUrl { get; set; } = null!;
 }

@@ -5,17 +5,20 @@
 
 ## Клас System.Activator
 
+Клас System.Activator є ключем до процесу пізнього зв'язування .NET. 
+
 ```cs
 // This program will load an external library,
 // and create an object using late binding.
 using System.Reflection;
 
+//Example 1
 void Run()
 {
     Assembly? assembly = null;
     try
     {
-        assembly = Assembly.LoadFrom(@"D:\CarLibrary");
+        assembly = Assembly.LoadFrom(@"D:\Temp\CarLibrary");
     }
     catch (Exception ex)
     {

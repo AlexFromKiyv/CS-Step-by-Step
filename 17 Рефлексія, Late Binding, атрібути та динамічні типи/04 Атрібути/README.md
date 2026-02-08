@@ -1,70 +1,91 @@
 # Атрібути
 
-Для початку зрозумійте шо метадані це дані, що характеризують або пояснюють інші дані. Однією з функцій компілятора .NET є генерація описів метаданих для всіх визначених і посилальних типів. На додаток до цих стандартних метаданих, що містяться в будь-якій збірці, платформа .NET надає програмістам можливість вбудовувати додаткові метадані в збірку за допомогою атрибутів. Атрибути — це не що інше, як анотації коду, які можна застосувати до заданого типу (класу, інтерфейсу, структури тощо), члена (властивості, методу тощо), збірки чи модуля.
+Як показано на початку цієї глави, однією з ролей компілятора .NET є генерування описів метаданих для всіх визначених та згаданих типів. Окрім цих стандартних метаданих, що містяться в будь-якій збірці, платформа .NET надає програмістам можливість вбудовувати додаткові метадані в збірку за допомогою атрибутів. Коротко кажучи, атрибути — це не що інше, як додадкова анотації складу коду, які можна застосувати до заданого типу (клас, інтерфейс, структура тощо), члена (властивість, метод тощо), збірки або модуля.
+Атрибути .NET – це типи класів, що розширюють абстрактний базовий клас System.Attribute. Досліджуючи простори імен .NET, ви знайдете багато попередньо визначених атрибутів, які можна використовувати у своїх застосунках. Крім того, ви можете створювати власні атрибути для подальшої кваліфікації поведінки ваших типів, створюючи новий тип, похідний від Attribute. Бібліотека базових класів .NET надає атрибути в різних просторах імен.
 
-Атрибути .NET — це типи класів, які розширюють абстрактний базовий клас System.Attribute. Досліджуючи простори імен .NET, ви знайдете багато попередньо визначених атрибутів, які можна використовувати у своїх програмах. Крім того, ви можете створювати власні атрибути для подальшої кваліфікації поведінки ваших типів, створюючи новий тип, похідний від Attribute. Бібліотека базових класів .NET надає атрибути в різних просторах імен.
+Приклад атрибутів
 
-Приклади вбудованих атрибутів.
+|Атрібут|Опис|
+|-------|----|
+|[CLSCompliant]|Забезпечує відповідність анотованого елемента правилам Специфікації загальної мови програмування (CLS). Нагадаємо, що типи, сумісні з CLS, гарантовано використовуватимуться безперешкодно в усіх мовах програмування .NET.|
+|[DllImport]|Дозволяє коду .NET здійснювати виклики до будь-якої некерованої бібліотеки коду на основі C або C++, включаючи API базової операційної системи.|
+|[Obsolete]|Позначає застарілий тип або член. Якщо інші програмісти спробують використати такий елемент, вони отримають попередження компілятора з описом помилки їхніх дій.|
 
-[CLSCompliant] : Забезпечує відповідність анотованого елемента правилам загальномовної специфікації (CLS). Пам’ятайте, що CLS-сумісні типи гарантовано безпроблемно використовуватимуться в усіх мовах програмування .NET.
+Зрозумійте, що коли ви застосовуєте атрибути у своєму коді, вбудовані метадані по суті марні, доки інший програмний продукт явно не зробить рефлексію і викоритстає цю інформацію. Якщо це не так, то анотація метаданих, вбудована в збірку, ігнорується та є абсолютно нешкідливою.
 
-[DllImport] : Дозволяє коду .NET здійснювати виклики до будь-якої некерованої бібліотеки коду на основі C або C++, включаючи API основної операційної системи.
+## Споживачі атрибутів
 
-[Obsolete] : Позначає застарілий тип або член. Якщо інші програмісти спробують використати такий елемент, вони отримають попередження компілятора з описом помилки своїх шляхів.
+Споживачі атрибутів
+Як ви могли здогадатися, .NET постачається з численними утилітами, які дійсно шукають різні атрибути. Сам компілятор C# (csc.exe) був попередньо запрограмований на виявлення наявності різних атрибутів під час циклу компіляції. Наприклад, якщо компілятор C# виявляє атрибут [CLSCompliant], він автоматично перевіряє елемент з атрибутом, щоб переконатися, що він надає доступ лише до конструкцій, сумісних з CLS. Іншим прикладом, якщо компілятор C# виявляє елемент з атрибутом [Obsolete], він відображатиме попередження компілятора.
+Окрім інструментів розробки, численні методи в бібліотеках базових класів .NET попередньо запрограмовані для відображення певних атрибутів. У наступній главі представлено серіалізацію XML та JSON, обидві з яких використовують атрибути для керування процесом серіалізації.
+Зрештою, ви можете вільно створювати застосунки, запрограмовані на врахування ваших власних атрибутів, а також будь-яких атрибутів у бібліотеках базових класів .NET. Роблячи це, ви по суті можете створити набір «ключових слів», які розуміються певним набором збірок.
 
-Коли ви застосовуєте атрибути у своєму коді, вбудовані метадані, по суті, марні, доки інша частина програмного забезпечення явно не відобразить інформацію. Якщо це не так, анотація метаданих, вбудованих у збірку, ігнорується та є абсолютно нешкідливим.
+# Застосування атрибутів у C#
 
-### Що використовує атрібути.
-
-Як ви здогадалися, .NET Framework постачається з численними утилітами, які справді шукають різні атрибути. Сам компілятор C# (csc.exe) був попередньо запрограмований на виявлення наявності різних атрибутів під час циклу компіляції. Наприклад, якщо компілятор C# зустрічає атрибут [CLSCompliant], він автоматично перевіряє атрибутований елемент, щоб переконатися, що він надає лише CLS-сумісні конструкції. Як інший приклад, якщо компілятор C# виявляє елемент, якому присвоєно атрибут [Obsolete], він відобразить попередження компілятора.
-На додаток до засобів розробки, численні методи в бібліотеках базових класів .NET попередньо запрограмовані для відображення конкретних атрибутів. В наступних розділах представлено серіалізацію XML і JSON, обидва з яких використовують атрибути для керування процесом серіалізації.
-Ви можете створювати програми, які запрограмовані на відображення ваших власних атрибутів, а також будь-яких атрибутів у бібліотеках базових класів .NET. Роблячи це, ви, по суті, можете створити набір «ключових слів», які розуміються певним набором збірок.
- 
-## Застосування атрибутів.
-
-Створемо проект та додамо пакет NuGet System.Text.Json.  Припустімо, ви хочете створити клас під назвою Motorcycle які можна зберегти у форматі JSON. Якщо у вас є поле, яке не слід експортувати в JSON, ви можете застосувати атрибут [JsonIgnore].
-
-ApplyingAttributes\Motorcycle.cs
+Щоб проілюструвати процес застосування атрибутів у C#, створіть новий проект консольної програми з назвою ApplyingAttributes та додайте посилання на пакет System.Text.Json NuGet. Оновіть файл Program.cs, включивши до нього такі глобальні оператори using:
 
 ```cs
-internal class Motorcycle
+global using System.Text.Json.Serialization;
+global using System.Xml.Serialization;
+```
+Припустимо, ви хочете створити клас з назвою Motorcycle, який можна зберігати у форматі JSON. Якщо у вас є поле, яке не слід експортувати у JSON, ви можете застосувати атрибут [JsonIgnore].
+
+```cs
+namespace ApplyingAttributes;
+
+public class Motorcycle
 {
     [JsonIgnore]
-    public float weightOfCurrentPassengers; // This fild is unserializable
+    public float weightOfCurrentPassengers;
     // These fields are still serializable.
     public bool hasRadioSystem;
     public bool hasHeadSet;
     public bool hasSissyBar;
 }
-
 ```
-Атрибут застосовується до конкретного наступного елемента. Коли ви хочете застосувати атрибут, ім’я атрибута береться в квадратні дужки.
-Один елемент може мати кілька атрибутів. Припустімо, що у вас є застарілий тип класу C# (HorseAndBuggy), якому було приписано власний простір імен XML. База коду змінювалася з часом, і тепер клас вважається застарілим для поточної розробки. Замість того, щоб видаляти визначення класу з бази коду (і ризикувати зламати існуюче програмне забезпечення), ви можете позначити клас атрибутом [Obsolete]. Щоб застосувати кілька атрибутів до одного елемента, просто використовуйте список, розділений комами або один над одним.
+    Атрибут застосовується до «наступного» елемента.
 
-AttributedCarLibrary\HorseAndBuggy.cs
+На цьому етапі не варто турбуватися про сам процес серіалізації об'єктів (знову ж таки, деталі розглядаються в іншій главі). Просто зверніть увагу, що коли ви хочете застосувати атрибут, ім'я атрибута затиснуте в квадратних дужках.
+Як ви можете здогадатися, одному елементу можна приписати кілька атрибутів. Припустимо, у вас є застарілий тип класу C# (HorseAndBuggy), якому було присвоєно власний простір імен XML. Кодова база з часом змінилася, і тепер клас вважається застарілим для поточної розробки. Замість того, щоб видаляти визначення класу з вашої кодової бази (і ризикувати зламати існуюче програмне забезпечення), ви можете позначити клас атрибутом [Obsolete]. Щоб застосувати кілька атрибутів до одного елемента, просто використовуйте список, розділений комами, ось так:
+
 ```cs
-//[XmlRoot(Namespace = "http://www.MyCompany.com"), Obsolete("Use another vehicle!")]
-[XmlRoot(Namespace = "http://www.MyCompany.com")]
-[Obsolete("Use another vehicle!")]
-internal class HorseAndBuggy
+namespace ApplyingAttributes;
+
+[XmlRoot(Namespace = "http://www.MyCompany.com"), Obsolete("Use another vehicle!")]
+public class HorseAndBuggy
 {
-    //...
+    // ...
 }
 ```
-Якщо ви переглядали документацію .NET, ви могли помітити, що фактичне ім’я класу атрибута [Obsolete] є ObsoleteAttribute, а не Obsolete. Відповідно до домовленості про найменування, усі атрибути .NET суфіксуються маркером Attribute. Однак, щоб спростити процес застосування атрибутів, мова C# не вимагає від вас введення суфікса Attribute. Враховуючи це, наступна ітерація типу HorseAndBuggy ідентична попередньому прикладу 
+Як альтернативу, ви також можете застосувати кілька атрибутів до одного елемента, об'єднавши кожен атрибут наступним чином:
+
+```cs
+namespace ApplyingAttributes;
+
+[XmlRoot(Namespace = "http://www.MyCompany.com")]
+[Obsolete("Use another vehicle!")]
+public class HorseAndBuggy
+{
+    // ...
+}
+```
+## Скорочена нотація атрибутів у C#
+
+Якщо ви переглядали документацію .NET, ви могли помітити, що фактична назва класу атрибута [Obsolete] — ObsoleteAttribute, а не Obsolete. Згідно з домовленістю про іменування, всі атрибути .NET (включно з користувацькими атрибутами, які ви можете створити самостійно) мають суфікс токена Attribute. Однак, щоб спростити процес застосування атрибутів, мова C# не вимагає введення суфікса Attribute. З огляду на це, наступна ітерація типу HorseAndBuggy ідентична попередньому прикладу (вона лише включає кілька додаткових натискань клавіш):
 
 ```cs
 [XmlRootAttribute(Namespace = "http://www.MyCompany.com")]
 [ObsoleteAttribute("Use another vehicle!")]
-internal class HorseAndBuggy
+public class HorseAndBuggy
 {
-    //...
+  // ...
 }
 ```
+Майте на увазі, що це люб'язність, надана C#. Не всі мови .NET підтримують цей скорочений синтаксис атрибутів.
 
-### Параметри атрибутів. 
+## Визначення параметрів конструктора для атрибутів
 
-Зверніть увагу, що атрибут [Obsolete] може приймати те, що виявляється параметром конструктора. Якщо ви переглянете формальне визначення атрибута [Obsolete], то побачите, що цей клас справді надає конструктор, який отримує System.String
+Зверніть увагу, що атрибут [Obsolete] може приймати те, що виглядає як параметр конструктора. Якщо ви переглянете формальне визначення атрибута [Obsolete], то побачите, що цей клас справді надає конструктор, який отримує System.String.
 
 ```cs
 public sealed class ObsoleteAttribute : Attribute
@@ -78,60 +99,65 @@ public sealed class ObsoleteAttribute : Attribute
   public string UrlFormat { get; set; }
 }
 ```
-Коли ви надаєте параметри конструктора атрибуту, атрибут не виділяється в пам’ять, доки параметри не будуть відображені іншим типом або зовнішнім інструментом. Рядкові дані, визначені на рівні атрибутів, просто зберігаються в збірці як анотація метаданих.
+Зрозумійте, що коли ви надаєте атрибуту параметри конструктора, атрибут не виділяється в пам'яті, доки параметри не будуть оброблені іншим типом або зовнішнім інструментом. Рядкові дані, визначені на рівні атрибутів, просто зберігаються в збірці як анотація метаданих.
 
-### Атрібут [Obsolete] в дії.
+## Атрибут Obsolete у дії
 
-Спробуємо створити примірник класу HorseAndBuggy який визначчений атрибутом [Obsolete].
+Тепер, коли HorseAndBuggy позначено як застарілий, якщо ви виділите екземпляр цього типу:
 
-AttributedCarLibrary\Program.cs
 ```cs
-HorseAndBuggy horseAndBuggy = new();
+using ApplyingAttributes;
+
+HorseAndBuggy mule = new HorseAndBuggy();
 ```
-Коли ви створете екземпляр класу компілятор виделить його з попередженням. 
+ви побачите, що видається попередження компілятора. Попередження стосується конкретно CS0618, і повідомлення містить інформацію, передану в атрибут. 
+Visual Studio та Visual Studio Code також допомагають з IntelliSense, яка отримує інформацію через рефлексію.
 
-```
-CS0618: 'HorseAndBuggy' is obsolete: 'Use another vehicle!'
-```
+В ідеалі, на цьому етапі ви повинні розуміти такі ключові моменти щодо атрибутів .NET:
 
-Таким чином.
+    Атрибути – це класи, що походять від System.Attribute.
+    Атрибути призводять до вбудованих метаданих.
+    Атрибути фактично марні, доки інший агент (включаючи IDE) не використає їх.
+    Атрибути застосовуються в C# за допомогою квадратних дужок.
 
-Атрибути — це класи, які походять від System.Attribute.
-Результатом атрибутів є вбудовані метадані класів або їх членів.
-Атрибути застосовуються в C# за допомогою квадратних дужок.
-Атрибути в основному марні, поки інший агент (включаючи IDE) не відобразить їх.
+Далі давайте розглянемо, як можна створювати власні атрибути та програмне забезпечення, яке відображає вбудовані метадані.
 
-## Створення власних атрибутів.
+# Створення власних атрибутів
 
-При створені спеціального атрібуту створюється клас похідний від System.Attribute.
-
-Стовримо проект AttributedCarLibrary. Ця збірка визначатиме кілька транспортних засобів, кожна з яких описана за допомогою спеціального атрибута з назвою VehicleDescriptionAttribute.
+Першим кроком у створенні власного атрибута є створення нового класу, похідного від System.Attribute. Дотримуючись автомобільної теми, що використовується в цій книзі, створимо новий проект C# Class Library з назвою AttributedCarLibrary в рішені AttributeExploration. 
+Ця збірка визначить кілька транспортних засобів, кожен з яких описується за допомогою спеціального атрибута з назвою VehicleDescriptionAttribute, наступним чином:
 
 ```cs
 namespace AttributedCarLibrary;
-
+// A custom attribute.
 public sealed class VehicleDescriptionAttribute : Attribute
 {
-    public string? Description { get; set; }
+    public string Description { get; set; } = null!;
 
     public VehicleDescriptionAttribute(string description)
     {
         Description = description;
     }
 
-    public VehicleDescriptionAttribute(){}
+    public VehicleDescriptionAttribute()
+    {
+    }
 }
 ```
-VehicleDescriptionAttribute зберігає частину рядкових даних за допомогою автоматичної властивості (Description). Крім того, що цей клас походить від System.Attribute, у цьому визначенні класу немає нічого унікального. З міркувань безпеки вважається найкращою практикою .NET розробляти всі спеціальні атрибути як sealed (запечатаний). 
+Як бачите, VehicleDescriptionAttribute зберігає фрагмент рядкових даних за допомогою автоматичної властивості (Description). Окрім того факту, що цей клас походить від System.Attribute, у визначенні цього класу немає нічого унікального.
 
-Тепер коли ми маємо клас власного атрібути ми можемо використовувати його роблячи аннотації інших класів. 
+    З міркувань безпеки вважається найкращою практикою .NET розробляти всі користувацькі атрибути як sealed. Фактично, як Visual Studio, так і Visual Studio Code надають фрагмент коду з назвою Attribute, який створюватиме новий клас, похідний від System.Attribute, у вашому вікні коду. Ви можете розгорнути будь-який фрагмент, ввівши його назву та натиснувши клавішу Tab.
+
+## Застосування користувацьких атрибутів
+
+Оскільки VehicleDescriptionAttribute походить від System.Attribute, тепер ви можете анотувати свої транспортні засоби на свій розсуд. Оскільки VehicleDescriptionAttribute походить від System.Attribute, тепер ви можете анотувати свої транспортні засоби на свій розсуд. Для тестування додайте такі класи до вашої нової бібліотеки класів:
 
 ```cs
 namespace AttributedCarLibrary;
 
-// Use "named property" 
-[VehicleDescription(Description ="My rocking Harley")]
-internal class Morotcycle
+// Assign description using a "named property."
+[VehicleDescription(Description = "My rocking Harley")]
+public class Motorcycle
 {
 }
 ```
@@ -140,55 +166,49 @@ namespace AttributedCarLibrary;
 
 [Obsolete("Use another vehicle!")]
 [VehicleDescription("The old gray mare, she ain't what she used to be...")]
-internal class HorseAndBuggy
+public class HorseAndBuggy
 {
 }
 ```
 ```cs
-namespace AttributedCarLibrary;
 
 [VehicleDescription("A very long, slow, but feature-rich auto")]
-internal class Winnebago
+public class Winnebago
 {
 }
 ```
-Зверніть увагу, що для Motorcycle призначається опис за допомогою нового фрагмента синтаксису атрибута, який називається іменованою властивістю. У конструкторі першого атрибута [VehicleDescription] ви встановлюєте основні рядкові дані за допомогою властивості Description. Типи HorseAndBuggy і Winnebago не використовують синтаксис іменованих властивостей і просто передають рядкові дані через спеціальний конструктор.
 
+## Синтаксис іменованої властивості
+Зверніть увагу, що опису мотоцикла присвоюється опис за допомогою нового фрагмента синтаксису атрибута, який називається іменованою властивістю. У конструкторі першого атрибута [VehicleDescription] ви встановлюєте базові рядкові дані за допомогою властивості Description. Якщо зовнішній агент використовує цей атрибут, значення передається у властивість Description (синтаксис іменованої властивості є допустимим, лише якщо атрибут надає властивість .NET, на яку можна записувати). 
+На відміну від цього, типи HorseAndBuggy та Winnebago не використовують синтаксис іменованих властивостей і просто передають рядкові дані через власний конструктор. У будь-якому випадку, після компіляції збірки AttributedCarLibrary ви можете використовувати ildasm.exe для перегляду введених описів метаданих для вашого типу. Наприклад, нижче показано вбудований опис класу Winnebago:
 
-### Встановлення обмеження використання атрибутів.
+```
+// CustomAttribute #1
+// -------------------------------------------------------
+//   CustomAttribute Type: 06000005
+//   CustomAttributeName: AttributedCarLibrary.VehicleDescriptionAttribute :: instance void .ctor(class System.String)
+//   Length: 45
+//   Value : 01 00 28 41 20 76 65 72  79 20 6c 6f 6e 67 2c 20 >  (A very long, <
+//         : 73 6c 6f 77 2c 20 62 75  74 20 66 65 61 74 75 72 >slow, but feature<
+//         : 65 2d 72 69 63 68 20 61  75 74 6f 00 00          >e-rich auto     <
+//   ctor args: ('A very long, slow, but feature-rich auto')                                                                                    
+```
 
-За замовчуванням користувальницькі атрибути можна застосовувати майже до будь-якого аспекту вашого коду (методи, класи, властивості тощо). Таким чином, якщо це має сенс, ви можете використовувати VehicleDescription для визначення методів, властивостей або полів.
+# Обмеження використання атрибутів
+
+За замовчуванням, власні атрибути можна застосовувати практично до будь-якого аспекту вашого коду (методів, класів, властивостей тощо). Таким чином, якщо це мало сенс, ви могли б використовувати VehicleDescription для кваліфікації методів, властивостей або полів (серед іншого).
 
 ```cs
-internal class Winnebago
+[VehicleDescription("A very long, slow, but feature-rich auto")]
+public class Winnebago
 {
     [VehicleDescription("My rocking CD player")]
     public void PlayMusic(bool On)
     {
-        //...
     }
 }
 ```
-У деяких випадках це саме та поведінка, яка вам потрібна. Однак в інших випадках ви можете створити спеціальний атрибут, який можна застосувати лише до вибраних елементів коду.Якщо ви хочете обмежити область дії спеціального атрибута, вам потрібно буде застосувати атрибут [AttributeUsage] до визначення вашого спеціального атрибута.
-
-```cs
-// This time, we are using the AttributeUsage attribute
-// to annotate our custom attribute.
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false)]
-public sealed class VehicleDescriptionAttribute :Attribute
-{
-    public string? Description { get; set; }
-
-    public VehicleDescriptionAttribute(string description)
-    {
-        Description = description;
-    }
-
-    public VehicleDescriptionAttribute(){}
-}
-
-```
-Якщо ви хочете обмежити область дії спеціального атрибута, вам потрібно буде застосувати атрибут [AttributeUsage] до визначення вашого спеціального атрибута. Атрибут [AttributeUsage] дозволяє надавати будь-яку комбінацію значень (за допомогою операції OR) з enum AttributeTargets.
+У деяких випадках саме така поведінка вам потрібна. Однак, в інших випадках вам може знадобитися створити власний атрибут, який можна застосовувати лише до вибраних елементів коду. Якщо ви хочете обмежити область дії власного атрибута, вам потрібно застосувати атрибут [AttributeUsage] до визначення вашого власного атрибута. Атрибут [AttributeUsage] дозволяє вам передавати будь-яку комбінацію значень (через операцію OR) з переліку AttributeTargets :
 
 ```cs
 // This enumeration defines the possible targets of an attribute.
@@ -200,18 +220,27 @@ public enum AttributeTargets
   Property, ReturnValue, Struct
 }
 ```
-Крім того, [AttributeUsage] також дозволяє додатково встановити іменовану властивість (AllowMultiple), яка вказує, чи можна застосувати атрибут більше одного разу до того самого елемента (за замовчуванням false). Крім того, [AttributeUsage] дозволяє встановити, чи слід атрибут успадковувати похідними класами за допомогою властивості Inherited (за умовчанням встановлено true).
+Крім того, [AttributeUsage] також дозволяє вам за бажанням встановити іменовану властивість (AllowMultiple), яка вказує, чи можна застосовувати атрибут більше одного разу до одного елемента (значення за замовчуванням — false). Також, [AttributeUsage] дозволяє встановити, чи має атрибут успадковуватися похідними класами, використовуючи властивість Inherited named (за замовчуванням – true).
+Щоб встановити, що атрибут [VehicleDescription] може бути застосований лише один раз до класу або структури, можна оновити визначення VehicleDescriptionAttribute наступним чином:
 
-При цьому, якщо розробник намагався застосувати атрибут [VehicleDescription] до будь-чого, окрім класу чи структури, йому видається помилка під час компіляції. В класі Winnebago виникне помилка ослількі атребут не годиться для полів. 
-
-### Використання атрибутів для валідації.
-
-Атрібути це додадкові метадані яки можна додадти до існуючих і потім використовувати. 
-Створемо нове рішення з проектом під назвою AttributeForValidation.
-Додамо клас атрібута який характеризуватиме вікові рамки.
-
-AttributeForValidation\AgeValidationAttribute.cs
 ```cs
+// This time, we are using the AttributeUsage attribute
+// to annotate our custom attribute.
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false)]
+public sealed class VehicleDescriptionAttribute : System.Attribute
+{
+...
+}
+```
+Таким чином, якщо розробник намагався застосувати атрибут [VehicleDescription] до чогось, окрім класу чи структури, йому виникала помилка під час компіляції. В класі Winnebago виникне помилка ослількі атребут не годиться для полів.
+
+## Використання атрибутів для валідації.
+
+Атрібути це додадкові метадані яки можна додадти до існуючих і потім використовувати. Створемо новий проект під назвою AttributeForValidation. Додамо клас атрібута який характеризуватиме вікові рамки.
+
+```cs
+namespace AttributeForValidation;
+
 internal class AgeValidationAttribute : Attribute
 {
     public int From { get; set; } = 0;
@@ -230,9 +259,10 @@ internal class AgeValidationAttribute : Attribute
 ```
 Додамо клас до якого застосовується атрібут.
 
-AgeValidationAttribute\Warrior.cs
 ```cs
-[AgeValidation(25,60)]
+namespace AttributeForValidation;
+
+[AgeValidation(25, 60)]
 internal class Warrior
 {
     public string Name { get; set; }
@@ -244,14 +274,12 @@ internal class Warrior
         Age = age;
     }
 }
-
 ```
-В цьому класі за допомогою атрібуту ми додаємо метедані які зберігабть дані про межі віку.
+Створимо в Program.cs метод який буде перевіряти чи відповідає властивість Age даним встановленим в атрибуті.
 
-Створимо метод який буде перевіряти чи відповідає властивість Age даним встановленим в атрибуті.
-
-AttributeForValidation\Program.cs
 ```cs
+using AttributeForValidation;
+
 static bool AgeValidationForWarrior(Warrior warrior)
 {
     Type typeWarrior = warrior.GetType();
@@ -267,12 +295,13 @@ static bool AgeValidationForWarrior(Warrior warrior)
     }
     return true;
 }
+
 ```
-Метод GetCustomAttributes повертає object[] тому використовується foreach і оператор мриведеня типу is.
+
+Метод GetCustomAttributes повертає object[] тому використовується foreach і оператор приведеня типу is.
 
 Додамо метода який буде робить запит і відповідати.
 
-AttributeForValidation\Program.cs
 ```cs
 static void IsAsWarriorAgeAppropriate(Warrior warrior)
 {
@@ -281,10 +310,8 @@ static void IsAsWarriorAgeAppropriate(Warrior warrior)
     Console.WriteLine($"{warrior.Name} {warrior.Age} as a warrior {result} age appropriate.");
 }
 ```
-
 Тепер перевіремо ці методи на об'єктах.
 
-AttributeForValidation\Program.cs
 ```cs
 void WarriorValidation()
 {
@@ -295,7 +322,6 @@ void WarriorValidation()
     Warrior julia = new("Julia", 23);
 
     IsAsWarriorAgeAppropriate(julia);
-
 }
 WarriorValidation();
 ```
@@ -305,183 +331,150 @@ Julia 23 as a warrior is not age appropriate.
 ```
 Таким чином стоврюючи власні атрибути і використовуючи GetCustomAttributes можна виконувати валідацію об'єктів.
 
-## Атрібути рівня збірки.
+# Атрибути рівня збірки
 
-Також можна застосувати атрибути до всіх типів у певній збірці за допомогою тегу [assembly:]. Наприклад, припустимо, що ви хочете переконатися, що кожен публічний член кожного публічного типу, визначеного у вашій збірці, сумісний із CLS. Для цього просто додайте наступний атрибут рівня складання у верхній частині будь-якого файлу вихідного коду C#, як це (поза будь-якими оголошеннями простору імен):
+Також можна застосовувати атрибути до всіх типів у заданій збірці за допомогою тегу [assembly:]. Наприклад, припустимо, що ви хочете переконатися, що кожен публічний член кожного публічного типу, визначеного у вашій збірці, сумісний з CLS. Для цього просто додайте наступний атрибут рівня збірки на початку будь-якого файлу вихідного коду C#, ось так (поза будь-якими оголошеннями простору імен):
 
 ```cs
-[assembly: CLSCompliant]
+[assembly: CLSCompliant(true)]
 namespace AttributedCarLibrary;
-///...
 ```
-Усі атрибути рівня збірки або модуля мають бути перераховані попереду і за межами будь-якої області простору імен.
+    Усі атрибути рівня збірки або модуля мають бути перелічені поза межами будь-якої області видимості простору імен.
 
-### Використання окремого файлу для атрибутів збірки.
+## Використання окремого файлу для атрибутів збірки
 
-Інший підхід полягає в додаванні нового файлу до вашого проекту з іменем, подібним до AssemblyAttributes.cs (буде працювати будь-яке ім’я, але це ім’я передає призначення файлу) і розміщення ваших атрибутів рівня збірки в цьому файлі. Розміщення атрибутів в окремому файлі полегшить іншим розробникам пошук атрибутів, застосованих до проекту. 
-У .NET є дві важливі зміни. По-перше, файл AssemblyInfo.cs тепер автоматично генерується з властивостей проекту і не призначений для використання розробником. Друга (і пов’язана) зміна полягає в тому, що багато попередніх атрибутів рівня збірки (версія, компанія тощо) було замінено властивостями у файлі проекту.
-
-Створемо файл AssemblyAttributes.cs
+Інший підхід полягає в тому, щоб додати до вашого проекту новий файл з назвою, подібною до AssemblyAttributes.cs (будь-яка назва підійде, але вона передає призначення файлу) та розмістити атрибути рівня збірки в цьому файлі. Розміщення атрибутів в окремому файлі полегшить іншим розробникам пошук атрибутів, застосованих до проєкту. Створіть новий файл з назвою AssemblyAttributes.cs та оновіть його відповідно до наступного:
 
 ```cs
-// List 'using' statements first.
 // Now list any assembly- or module-level attributes.
 // Enforce CLS compliance for all public types in this
 // assembly.
 [assembly: CLSCompliant(true)]
 ```
-Якщо ви зараз додасте фрагмент коду, який виходить за межі специфікації CLS,  вам буде видано попередження компілятора.
+Якщо ви тепер додасте фрагмент коду, який виходить за межі специфікації CLS (наприклад, відкриту точку непідписаних даних), вам буде видано попередження компілятора.
 
 ```cs
-public  class Winnebago
+public class Winnebago
 {
-    //[VehicleDescription("My rocking CD player")]
-
-    public ulong notCompliant; // ... Type is not CLS-compiant
-    public void PlayMusic(bool On)
-    {
-        //...
-    }
-
+    public ulong NotCompliant;
+    //...
 }
 ```
 
-### Використання файлу проекту для атрибутів збірки.
+## Використання файлу проекту для атрибутів збірки
 
-Ми вже розлядали використання атрибутів на рівні проекту коли розглядали відкритя доступу до внутрішнього типу зовнішнім збіркам.
-
-```
-<ItemGroup>
-  <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-    <_Parameter1>CarClient</_Parameter1>
-  </AssemblyAttribute>
-</ItemGroup>
-```
-Існує підступ, оскільки таким чином можна використовувати лише однорядкові атрибути параметрів. Це стосується властивостей, які можна встановити на вкладці «Package» у властивостях проекту.
-
-Встановимо деякі властивості (наприклад, Authors, Description), клацнувши правою кнопкою миші  проект у провіднику рішень, вибравши «Properties», а потім клацнувши «Package».
-
-Файл проекту вигляджатиме.
-```
-<Project Sdk="Microsoft.NET.Sdk">
-
+Як показано в главі "Створення та налаштування бібліотек класів" з InternalsVisibleToAttribute, атрибути збірки також можна додавати до файлу проекту. Є один нюанс: таким чином можна використовувати лише атрибути параметрів з одним рядком. Це стосується властивостей, які можна встановити на вкладці «Packeg» у властивостях проекту.
+Спробуйте встановити деякі властивості (наприклад, Автори, Опис), клацнувши правою кнопкою миші на проекті в Solution Explorer, вибравши Properties, а потім клацнувши Package. Також додайте InternalsVisibleToAttribute, як ви робили. Тепер ваш файл проекту виглядатиме приблизно так:
+```xml
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Authors>Alex</Authors>
-    <Company>MySoft</Company>
-    <Description>This is a simple car library with attributes</Description>
+    <Title>IamExploringAttributes</Title>
+    <Authors>Alex Po</Authors>
+    <Company>BusinessSoft</Company>
+    <Product>VehileLibrary</Product>
   </PropertyGroup>
-
-</Project>
 ```
+Після компіляції проєкту перейдіть до каталогу \obj\Debug\netX.0 та знайдіть файл AttributedCarLibrary.AssemblyInfo.cs. Відкрийте його, і ви побачите ці властивості як атрибути (на жаль, у цьому форматі вони не дуже читабельні).
 
-Після компіляції відкриємо файл AttributedCarLibrary.AssemblyInfo.cs file. в папці ...obj\Debug\netX.0
-
-```
-//------------------------------------------------------------------------------
-// <auto-generated>
-//     This code was generated by a tool.
-//     Runtime Version:4.0.30319.42000
-//
-//     Changes to this file may cause incorrect behavior and will be lost if
-//     the code is regenerated.
-// </auto-generated>
-//------------------------------------------------------------------------------
-
-using System;
-using System.Reflection;
-
-[assembly: System.Reflection.AssemblyCompanyAttribute("MySoft")]
+```cs
+[assembly: System.Reflection.AssemblyCompanyAttribute("BusinessSoft")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
-[assembly: System.Reflection.AssemblyDescriptionAttribute("This is a simple car library with attributes")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+aa91760d8aee83c77f36eb3f33746f4da60a1baa")]
-[assembly: System.Reflection.AssemblyProductAttribute("AttributedCarLibrary")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+73f108779031b863507e5f6bf900f2d723b1d047")]
+[assembly: System.Reflection.AssemblyProductAttribute("VehileLibrary")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AttributedCarLibrary")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
-
-// Generated by the MSBuild WriteCodeFragment class.
 ```
-Ви побачите властивості проекту як атрибути (на жаль, не дуже читабельні в цьому форматі). Як останнє заключне зауваження щодо атрибутів збірки, ви можете вимкнути створення класу AssemblyInfo.cs, якщо хочете самостійно керувати процесом.
+Як останнє зауваження щодо атрибутів збірки, ви можете вимкнути генерацію класу AssemblyInfo.cs, якщо хочете керувати процесом самостійно.
 
-## Рефлексія атрибутів за допомогою раннього зв’язування.
+# Рефлексія атрибутів за допомогою раннього зв'язування.
 
-Атрибут є абсолютно марним, доки інше програмне забезпечення не рефлексує його значення. Після виявлення даного атрибута ця частина програмного забезпечення може вжити будь-які необхідні дії. Тепер, як і будь-яка програма, ця «інша частина програмного забезпечення» може виявити наявність спеціального атрибута за допомогою раннього або пізнього зв’язування. Якщо ви хочете використовувати раннє зв’язування, вам знадобиться, щоб клієнтська програма мала визначення атрибута під час компіляції (у цьому випадку VehicleDescriptionAttribute). З огляду на те, що збірка AttributedCarLibrary визначила цей спеціальний атрибут як публічний клас, раннє зв’язування є найкращим варіантом.
+Пам’ятайте, що атрибут є абсолютно марним, доки інший програмний компонент не визначить його значення. Після виявлення певного атрибута ця програма може вжити будь-яких необхідних дій. Тепер, як і будь-яка програма, цей «інший фрагмент програмного забезпечення» може виявити наявність спеціально створенного атрибута за допомогою раннього або пізнього зв'язування. Якщо ви хочете використовувати раннє зв'язування, вам знадобиться, щоб клієнтська програма мала визначення відповідного атрибута під час компіляції (у цьому випадку VehicleDescriptionAttribute). Враховуючи, що збірка AttributedCarLibrary визначила цей користувацький атрибут як публічний клас, раннє зв'язування є найкращим варіантом.
 
-Створимо кліенську частину VehicleDescriptionAttributeReader та додаво посиланя на бібіліотеку AttributedCarLibrary.
+Щоб проілюструвати процес рефлексії користувацьких атрибутів, додайте до рішення новий проект консольного застосунку C# з назвою VehicleDescriptionAttributeReader. Далі додайте посилання на проект AttributedCarLibrary. 
+Це все можно зробити за допомогою CLI вкаталозі рішення:
+
+```
+dotnet new console -n VehicleDescriptionAttributeReader
+dotnet sln add .\VehicleDescriptionAttributeReader
+dotnet add VehicleDescriptionAttributeReader reference .\AttributedCarLibrary
+```
+Оновіть файл Program.cs за допомогою наступного коду:
 
 ```cs
 using AttributedCarLibrary;
-
-void ReflectOnAttributesUsingEarlyBinding()
+static void ReflectOnAttributesUsingEarlyBinding() 
 {
+    // Get a Type representing the Winnebago.
     Type type = typeof(Winnebago);
-    Console.WriteLine($"We have type {type}\n");
 
     object[] customAttributes = type.GetCustomAttributes(false);
 
-    foreach (VehicleDescriptionAttribute item in customAttributes)
+    // Print the description.
+    foreach (VehicleDescriptionAttribute customAttribute in customAttributes)
     {
-        Console.WriteLine("\t"+item.Description);
+        Console.WriteLine($"{type}\t{customAttribute.Description}");
     }
-
 }
 ReflectOnAttributesUsingEarlyBinding();
 ```
 ```
-We have type AttributedCarLibrary.Winnebago
-
-        A very long, slow, but feature-rich auto
-
+AttributedCarLibrary.Winnebago  A very long, slow, but feature-rich auto
 ```
-Метод Type.GetCustomAttributes() повертає масив об’єктів, який представляє всі атрибути, застосовані до члена, представленого типом (параметр Boolean контролює, чи повинен пошук продовжуватися вгору по ланцюжку успадкування).
+Метод Type.GetCustomAttributes() повертає масив об'єктів, який представляє всі атрибути, застосовані до члена, представленого типом Type (логічний параметр визначає, чи слід розширювати пошук угору по ланцюжку успадкування). Після отримання списку атрибутів, переберіть кожен екземпляр класу VehicleDescriptionAttribute та виведіть значення, отримане властивістю Description.
 
-## Рефлексія атрибутів за допомогою пізнього зв’язування.
+# Рефлексія атрибутів за допомогою пізнього зв'язування
 
-У попередньому прикладі використовувалося раннє зв’язування для друку даних опису автомобіля для типу Winnebago. Це стало можливим, оскільки тип класу VehicleDescriptionAttribute було визначено як відкритий член у збірці AttributedCarLibrary. Також можна використовувати динамічне завантаження та пізнє зв’язування для відображення атрибутів.
+У попередньому прикладі використовувалося раннє зв'язування для виведення даних опису транспортного засобу для типу Winnebago. Це стало можливим завдяки тому, що тип класу VehicleDescriptionAttribute був визначений як публічний член у збірці AttributedCarLibrary. Також можливо використовувати динамічне завантаження та пізнє зв'язування для відображення атрибутів.
 
-Створимо нове рішеня з проектом AttributeReaderLateBinding
+Додайте до рішення новий проект під назвою AttributeReaderLateBinding запустіть і скопіюйте AttributedCarLibrary.dll до папки проекту (або \bin\Debug\netX.0, якщо використовується Visual Studio).
+
 
 ```cs
 using System.Reflection;
 
-void ReflectAttributesUsingLateBinding()
+static void ReflectAttributesUsingLateBinding()
 {
-	try
-	{
-		Assembly assembly = Assembly.LoadFrom("AttributedCarLibrary");
+    try
+    {
+        // Load the local copy of AttributedCarLibrary.
+        Assembly asm = Assembly.LoadFrom("AttributedCarLibrary");
 
-		Type? vehicleDesctiption = assembly.GetType("AttributedCarLibrary.VehicleDescriptionAttribute");
-		Console.WriteLine(vehicleDesctiption);
+        // Get type info of VehicleDescriptionAttribute.
+        Type vehicleDesc = asm.GetType("AttributedCarLibrary.VehicleDescriptionAttribute");
 
-        PropertyInfo? propertyInfoVehileDesc = vehicleDesctiption?.GetProperty("Description");
-        Console.WriteLine(propertyInfoVehileDesc);
+        // Get type info of the Description property.
+        PropertyInfo propDesc = vehicleDesc.GetProperty("Description");
 
-        Type[] types = assembly.GetTypes();
-		foreach (Type type in types)
-		{
-			object[] objects = type.GetCustomAttributes(vehicleDesctiption, false);
-			foreach (object obj in objects)
-			{
-                Console.WriteLine($"{type} - {propertyInfoVehileDesc?.GetValue(obj,null)}");
+        // Get all types in the assembly.
+        Type[] types = asm.GetTypes();
+
+        foreach (var type in types)
+        {
+            object[] objects = type.GetCustomAttributes(vehicleDesc, true);
+            // Iterate over each VehicleDescriptionAttribute and print
+            // the description using late binding.
+            foreach (object o in objects)
+            {
+                Console.WriteLine($"{type.Name}: {propDesc?.GetValue(o, null)}\n");
             }
         }
-	}
-	catch (Exception ex)
-	{
+    }
+    catch (Exception ex)
+    {
         Console.WriteLine(ex.Message);
     }
+
 }
 ReflectAttributesUsingLateBinding();
 ```
 ```
-AttributedCarLibrary.VehicleDescriptionAttribute
-System.String Description
-AttributedCarLibrary.HorseAndBuggy - The old gray mare, she ain't what she used to be...
-AttributedCarLibrary.Morotcycle - My rocking Harley
-AttributedCarLibrary.Winnebago - A very long, slow, but feature-rich auto
-```
+HorseAndBuggy: The old gray mare, she ain't what she used to be...
 
-Єдиним цікавим моментом є використання методу PropertyInfo.GetValue(), який використовується для запуску засобу доступу до властивості.
+Motorcycle: My rocking Harley
+
+Winnebago: A very long, slow, but feature-rich auto
+```
+Якщо ви змогли слідкувати за прикладами в цієї глави, цей код має бути (більш-менш) зрозумілим без пояснень. Єдиним цікавим моментом є використання методу PropertyInfo.GetValue(), який використовується для запуску аксессора властивості.

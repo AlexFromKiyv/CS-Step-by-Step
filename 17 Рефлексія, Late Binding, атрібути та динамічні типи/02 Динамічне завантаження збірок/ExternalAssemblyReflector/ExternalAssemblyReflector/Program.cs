@@ -1,33 +1,12 @@
 ﻿using System.Reflection;
 
-void Start()
+const string FILEPATH = @"D:\Temp\CarLibrary";
+void Run()
 {
-    string? assemblyName = "";
-    Assembly? assembly = null;
-    do
-    {
-        Console.Clear();
-        Console.Write("Enter the name of the assembly to evaluate: ");
-        assemblyName = Console.ReadLine();
-
-        if (assemblyName == null) assemblyName = "";
-
-        try
-        {
-
-            assembly = Assembly.LoadFrom(assemblyName);
-            WriteTypesInAssembly(assembly);
-
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-            Console.ReadKey();
-        }
-
-    } while (true);
+    Assembly assembly = Assembly.LoadFrom(FILEPATH);
+    WriteTypesInAssembly(assembly);
 }
-//Start();
+//Run();
 
 void WriteTypesInAssembly(Assembly assembly)
 {
@@ -38,11 +17,9 @@ void WriteTypesInAssembly(Assembly assembly)
     {
         Console.WriteLine(type);
     }
-
-    Console.ReadKey();
 }
 
-void UseAsseblyLoad()
+void UseAssemblyLoad()
 {
     try
     {
@@ -62,4 +39,4 @@ void UseAsseblyLoad()
         Console.WriteLine(ex.Message);
     }
 }
-//UseAsseblyLoad();
+UseAssemblyLoad();

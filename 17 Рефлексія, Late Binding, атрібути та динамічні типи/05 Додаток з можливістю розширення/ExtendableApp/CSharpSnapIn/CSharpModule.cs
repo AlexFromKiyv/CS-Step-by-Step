@@ -1,7 +1,7 @@
 ﻿using CommonSnappableTypes;
 
 namespace CSharpSnapIn;
-[CompanyInfo(CompanyName ="MuCompany",CompanyUrl ="www.mycompany.com")]
+[CompanyInfo(CompanyName = "FooSoft", CompanyUrl = "www.FooSoft.com")]
 public class CSharpModule : IAppFunctionality
 {
     void IAppFunctionality.DoIt()
