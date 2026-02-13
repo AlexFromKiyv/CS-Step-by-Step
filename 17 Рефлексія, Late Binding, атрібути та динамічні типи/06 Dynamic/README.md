@@ -66,7 +66,7 @@ System.String
 System.String
 System.String
 ```
-Що робить динамічну змінну значно відмінністю від змінної, оголошеної неявно або через посилання System.Object, це те, що вона не є строго типізованою. Іншими словами, динамічні дані не типізуються статично. Що стосується компілятора C#,  точці даних, оголошеній за допомогою динамічного ключового слова, можна призначити будь-яке початкове значення взагалі та можна перепризначити будь-яке нове значення протягом її життя.
+Що робить динамічну змінну значно відмінністю від змінної, оголошеної неявно або через посилання System.Object, це те, що вона не є строго типізованою. Іншими словами, динамічні дані не типізуються статично. Що стосується компілятора C#, точці даних, оголошеній за допомогою динамічного ключового слова, можна призначити будь-яке початкове значення взагалі та можна перепризначити будь-яке нове значення протягом її життя.
 
 ```cs
 static void UseDynamic()
@@ -132,6 +132,7 @@ IDE дозволить вам ввести будь-яке ім’я члена,
 DynamicKeyword\VeryDynamic.cs
 ```cs
 namespace DynamicKeyword;
+
 internal class VeryDynamic
 {
     private static dynamic _fild;
@@ -161,11 +162,11 @@ static void UseVeryDynamic()
 
     veryDynamic.Property = 10;
     dynamic result = veryDynamic.Method(veryDynamic.Property);
-    Write(result);
+    Console.Write(result);
 
     veryDynamic.Property = "Julia";
     result = veryDynamic.Method(veryDynamic.Property);
-    Write(result);
+    Console.Write(result);
 
     static void Write(dynamic value)
     {
@@ -246,7 +247,7 @@ void Run()
     Assembly? assembly = null;
     try
     {
-        assembly = Assembly.LoadFrom(@"D:\CarLibrary");
+        assembly = Assembly.LoadFrom(@"D:\Temp\CarLibrary");
     }
     catch (Exception ex)
     {
@@ -295,7 +296,7 @@ void RunWithDynamic()
     Assembly? assembly = null;
     try
     {
-        assembly = Assembly.LoadFrom(@"D:\CarLibrary");
+        assembly = Assembly.LoadFrom(@"D:\Temp\CarLibrary");
     }
     catch (Exception ex)
     {
@@ -356,9 +357,9 @@ public class SimpleMath
     <Exec Command="copy $(TargetPath) $(SolutionDir)LateBindingWithDynamic\$(OutDir)$(TargetFileName) /Y" />
   </Target>
 ```
-Побачите в папці виконувальних файлів (... Debug\netX.0) проекту файл MyMath.dll
+Після побудови бібіліотеки, побачите в папці виконувальних файлів (... Debug\netX.0) проекту файл MyMath.dll
 
-Тепер повернемося до проекту LateBindingWithDynamic. Додайте метод , який викликає метод Add() за допомогою типових викликів API рефлексії. 
+В проекті LateBindingWithDynamic додайте метод , який викликає метод Add() за допомогою типових викликів API рефлексії. 
 
 LateBindingWithDynamic\Program.cs
 
@@ -418,13 +419,13 @@ AddWithDynamic();
 ```
 3
 ```
-Використовуючи ключове слово dynamic, ви заощадили собі чимало роботи. З динамічно визначеними даними вам більше не потрібно вручну пакувати аргументи як масив об’єктів, запитувати метадані збірки або встановлювати інші подібні деталі. Якщо ви створюєте програму, яка активно використовує динамічне завантаження та пізнє зв’язування,економія коду збільшиться.
+Використовуючи ключове слово dynamic, ви заощадили собі чимало роботи. З динамічно визначеними даними вам більше не потрібно вручну пакувати аргументи як масив об’єктів, запитувати метадані збірки або встановлювати інші подібні деталі. Якщо ви створюєте програму, яка активно використовує динамічне завантаження та пізнє зв’язування, економія коду збільшиться.
 
-## ExpandoObject та DynamicObject.
+# ExpandoObject та DynamicObject.
 
 В просторі імен System.Dynamic є класи яки дозволяють стоврювати код в манері схожій на Javascript.
 
-### ExpandoObject
+## ExpandoObject
 
 Існує можливість створювати динамічні об'єкти.
 
@@ -462,7 +463,7 @@ Lucy 33
 ```
 Властивості та методи створюються на льоту. 
 
-### DynamicObject
+## DynamicObject
 
 Цей клас також дозаоляє створювати динамічні об'єкти але з посиленим контролем. Для використаня треба створити клас нашадок від DynamicObject та реалізувати низьку методів.
 
@@ -531,9 +532,9 @@ void TestOurClass()
 TestOurClass();
 ```
 
-## DLR та IronPython
+# DLR та IronPython
 
-### Запуск скрипта на Python.
+## Запуск скрипта на Python.
 
 Існують сфери в який використаня динамічних язиків програмуваня корисно. Наприклад написання клієнських сценарієв. Крім того існуючи бібіліотеки на Phayton які мають функціонал якого нема в .Net.
 
@@ -564,7 +565,7 @@ Hi, girl
 
 Об'єкт який виконує скрип має тип ScriptEngine і приналежить простору імен Microsoft.Scripting.Hosting
 
-### Взаємодія з скриптом. ScriptScope
+## Взаємодія з скриптом. ScriptScope
 
 За допомогою класу ScriptScope є можливість взаємодіяти з скриптом Python
 

@@ -33,7 +33,7 @@
 
 ## Створення багатопроектного рішення ExtendableApp за допомогою CLI
 
-До цього моменту більшість програм були окремими проектами, за кількома винятками (як попередній). Це було зроблено для того, щоб приклади були простими та зосередженими. Однак у реальній розробці ви зазвичай працюєте з кількома проектами разом в одному рішенні.
+До цього моменту більшість програм були окремими проектами, за кількома винятками. Це було зроблено для того, щоб приклади були простими та зосередженими. Однак у реальній розробці ви зазвичай працюєте з кількома проектами разом в одному рішенні.
 
 ## Створення рішення та проектів за допомогою CLI
 
@@ -188,12 +188,22 @@ do
 
 } while (true);
 
-void LoadExternalModule(string? typeName)
+void LoadExternalModule(string? assemblyName)
 {
-    Console.WriteLine(typeName);
+    Console.WriteLine($"\tI use {assemblyName}");
 }
 
 ```
+```
+Enter a snapin to load:CSharpSnapIn
+```
+```
+        I use CSharpSnapIn
+
+Enter a snapin to load:
+
+```
+
 
 Метод LoadExternalModule() виконує такі завдання:
 
@@ -216,7 +226,7 @@ void LoadExternalModule(string? assemblyName)
     {
         // Dynamically load the selected assembly.
         theSnapInAsm = Assembly.LoadFrom(assemblyName);
-        Console.WriteLine($"\tI loded assembly: {theSnapInAsm} loded"  );
+        Console.WriteLine($"\tI loded assembly: {theSnapInAsm}"  );
 
         // Get all IAppFunctionality compatible classes in assembly.
         var theClassTypes =
@@ -273,3 +283,44 @@ You have just used the C# snap-in!
 More info about FooSoft can be found at www.FooSoft.com
 ```
 Зверніть увагу, що хоча C# чутливий до регістру, під час використання відображення регістр не має значення. Як CSharpSnapIn, так і csharpsnapin працюють однаково добре.
+
+Ви можете додати ще одну бібліотеку наприклад з назвою MyModule. Додати клас з реалізацією інтерфейсу IAppFunctionality.
+
+```cs
+using CommonSnappableTypes;
+
+namespace MyModule;
+[CompanyInfo(CompanyName = "MySoft", CompanyUrl = "www.MySoft.com")]
+public class MyModule : IAppFunctionality
+{
+    public void DoIt()
+    {
+        Console.WriteLine("I want to make it different."  );
+    }
+}
+```
+Змінити файл проекту
+
+```xml
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="copy $(TargetPath) $(SolutionDir)MyExtendableApp\$(OutDir)$(TargetFileName) /Y" />
+  </Target>
+```
+Перебудуйте бібліотеку.
+Не змініючи розширюваний додаток використати вашу реалізацію.
+```
+        I use MyModule
+        I loded assembly: MyModule, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null loded
+        I find class MyModule.MyModule
+I want to do it different.
+More info about MySoft can be found at www.MySoft.com
+
+Enter a snapin to load:CSharpSnapIn
+        I use CSharpSnapIn
+        I loded assembly: CSharpSnapIn, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null loded
+        I find class CSharpSnapIn.CSharpModule
+You have just used the C# snap-in!
+More info about FooSoft can be found at www.FooSoft.com
+
+Enter a snapin to load:
+```

@@ -31,7 +31,7 @@ void LoadExternalModule(string? assemblyName)
     {
         // Dynamically load the selected assembly.
         theSnapInAsm = Assembly.LoadFrom(assemblyName);
-        Console.WriteLine($"\tI loded assembly: {theSnapInAsm}"  );
+        Console.WriteLine($"\tI loded assembly: {theSnapInAsm} loded");
 
         // Get all IAppFunctionality compatible classes in assembly.
         var theClassTypes =

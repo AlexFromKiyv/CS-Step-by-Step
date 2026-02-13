@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Reflection;
 using System.Xml;
 
-void StartViewer()
+static void Run()
 {
 	string enteredType = string.Empty;
 	do
@@ -20,10 +20,10 @@ void StartViewer()
         Console.ReadKey();
     } while (true);
 }
-//StartViewer();
+Run();
 
 
-void InvestigateTheType(string typeName)
+static void InvestigateTheType(string typeName)
 {
     Type? type = Type.GetType(typeName);
     if (type == null)
@@ -40,7 +40,7 @@ void InvestigateTheType(string typeName)
     ListInterfaces(type);
 }
 
-void AboutType(Type type)
+static void AboutType(Type type)
 {
     Console.WriteLine();
     Console.WriteLine($"Is type class:{type.IsClass}");
@@ -50,7 +50,7 @@ void AboutType(Type type)
     Console.WriteLine($"Base type:{type.BaseType}");
 }
 
-void ListFilds(Type type)
+static void ListFilds(Type type)
 {
     Console.WriteLine("\nFilds");
 
@@ -63,7 +63,7 @@ void ListFilds(Type type)
     }  
 }
 
-void ListProperties(Type type)
+static void ListProperties(Type type)
 {
     Console.WriteLine("\nProperties");
 
@@ -77,7 +77,7 @@ void ListProperties(Type type)
 }
 
 
-void ListMethods(Type type)
+static void ListMethods(Type type)
 {
     Console.WriteLine("Methods");
 
@@ -101,7 +101,7 @@ void ListMethods(Type type)
     //}
 }
 
-void AboutMethod(MethodInfo methodInfo)
+static void AboutMethod(MethodInfo methodInfo)
 {
     string? nameOfTheReturnType = methodInfo.ReturnType.FullName;
     string nameOfTheParameters = "(";
@@ -114,7 +114,7 @@ void AboutMethod(MethodInfo methodInfo)
     Console.WriteLine($"{nameOfTheReturnType} {methodInfo.Name} {nameOfTheParameters}");
 }
 
-void ListInterfaces(Type type)
+static void ListInterfaces(Type type)
 {
     Console.WriteLine("Interfaces");
 
@@ -128,7 +128,7 @@ void ListInterfaces(Type type)
     }
 }
 
-void HowGetStaticType()
+static void HowGetStaticType()
 {
     Type type = typeof(Console);
     Console.WriteLine($"We want to investigate the type:{type}");
@@ -136,7 +136,7 @@ void HowGetStaticType()
 }
 //HowGetStaticType();
 
-void ReflectionOfType(Type type)
+static void ReflectionOfType(Type type)
 {
     AboutType(type);
     ListFilds(type);

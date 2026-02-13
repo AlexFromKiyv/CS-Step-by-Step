@@ -15,7 +15,6 @@
 
 ## Споживачі атрибутів
 
-Споживачі атрибутів
 Як ви могли здогадатися, .NET постачається з численними утилітами, які дійсно шукають різні атрибути. Сам компілятор C# (csc.exe) був попередньо запрограмований на виявлення наявності різних атрибутів під час циклу компіляції. Наприклад, якщо компілятор C# виявляє атрибут [CLSCompliant], він автоматично перевіряє елемент з атрибутом, щоб переконатися, що він надає доступ лише до конструкцій, сумісних з CLS. Іншим прикладом, якщо компілятор C# виявляє елемент з атрибутом [Obsolete], він відображатиме попередження компілятора.
 Окрім інструментів розробки, численні методи в бібліотеках базових класів .NET попередньо запрограмовані для відображення певних атрибутів. У наступній главі представлено серіалізацію XML та JSON, обидві з яких використовують атрибути для керування процесом серіалізації.
 Зрештою, ви можете вільно створювати застосунки, запрограмовані на врахування ваших власних атрибутів, а також будь-яких атрибутів у бібліотеках базових класів .NET. Роблячи це, ви по суті можете створити набір «ключових слів», які розуміються певним набором збірок.
@@ -45,7 +44,7 @@ public class Motorcycle
 ```
     Атрибут застосовується до «наступного» елемента.
 
-На цьому етапі не варто турбуватися про сам процес серіалізації об'єктів (знову ж таки, деталі розглядаються в іншій главі). Просто зверніть увагу, що коли ви хочете застосувати атрибут, ім'я атрибута затиснуте в квадратних дужках.
+Коли ви хочете застосувати атрибут, ім'я атрибута затиснуте в квадратних дужках.
 Як ви можете здогадатися, одному елементу можна приписати кілька атрибутів. Припустимо, у вас є застарілий тип класу C# (HorseAndBuggy), якому було присвоєно власний простір імен XML. Кодова база з часом змінилася, і тепер клас вважається застарілим для поточної розробки. Замість того, щоб видаляти визначення класу з вашої кодової бази (і ризикувати зламати існуюче програмне забезпечення), ви можете позначити клас атрибутом [Obsolete]. Щоб застосувати кілька атрибутів до одного елемента, просто використовуйте список, розділений комами, ось так:
 
 ```cs
@@ -124,7 +123,7 @@ Visual Studio та Visual Studio Code також допомагають з Intel
 
 # Створення власних атрибутів
 
-Першим кроком у створенні власного атрибута є створення нового класу, похідного від System.Attribute. Дотримуючись автомобільної теми, що використовується в цій книзі, створимо новий проект C# Class Library з назвою AttributedCarLibrary в рішені AttributeExploration. 
+Першим кроком у створенні власного атрибута є створення нового класу, похідного від System.Attribute. Дотримуючись автомобільної теми, створимо новий проект C# Class Library з назвою AttributedCarLibrary в рішені AttributeExploration. 
 Ця збірка визначить кілька транспортних засобів, кожен з яких описується за допомогою спеціального атрибута з назвою VehicleDescriptionAttribute, наступним чином:
 
 ```cs
@@ -232,11 +231,11 @@ public sealed class VehicleDescriptionAttribute : System.Attribute
 ...
 }
 ```
-Таким чином, якщо розробник намагався застосувати атрибут [VehicleDescription] до чогось, окрім класу чи структури, йому виникала помилка під час компіляції. В класі Winnebago виникне помилка ослількі атребут не годиться для полів.
+Таким чином, якщо розробник намагався застосувати атрибут [VehicleDescription] до чогось, окрім класу чи структури, йому виникала помилка під час компіляції. В класі Winnebago виникне помилка ослількі атребут не годиться для методів.
 
 ## Використання атрибутів для валідації.
 
-Атрібути це додадкові метадані яки можна додадти до існуючих і потім використовувати. Створемо новий проект під назвою AttributeForValidation. Додамо клас атрібута який характеризуватиме вікові рамки.
+Атрібути це додадкові метадані яки можна додадти до існуючих і потім використовувати. Створемо новий проект консольного додадку під назвою AttributeForValidation. Додамо клас атрібута який характеризуватиме вікові рамки.
 
 ```cs
 namespace AttributeForValidation;
@@ -279,31 +278,27 @@ internal class Warrior
 
 ```cs
 using AttributeForValidation;
+using System.Reflection;
 
 static bool AgeValidationForWarrior(Warrior warrior)
 {
     Type typeWarrior = warrior.GetType();
 
-    var attributes = typeWarrior.GetCustomAttributes(false);
+    AgeValidationAttribute? attribute = typeWarrior.GetCustomAttribute<AgeValidationAttribute>();    
 
-    foreach (Attribute attribute in attributes)
+    if (attribute != null)
     {
-        if (attribute is AgeValidationAttribute ageValidationAttribute)
-        {
-            return ageValidationAttribute.From <= warrior.Age && warrior.Age < ageValidationAttribute.To;
-        }
+        return attribute.From <= warrior.Age && warrior.Age < attribute.To;
     }
     return true;
 }
 
 ```
 
-Метод GetCustomAttributes повертає object[] тому використовується foreach і оператор приведеня типу is.
-
 Додамо метода який буде робить запит і відповідати.
 
 ```cs
-static void IsAsWarriorAgeAppropriate(Warrior warrior)
+static void IsWarriorAgeAppropriate(Warrior warrior)
 {
     string result = AgeValidationForWarrior(warrior) ? "is" : "is not";
 
@@ -317,11 +312,11 @@ void WarriorValidation()
 {
     Warrior max = new("Max", 58);
 
-    IsAsWarriorAgeAppropriate(max);
+    IsWarriorAgeAppropriate(max);
 
     Warrior julia = new("Julia", 23);
 
-    IsAsWarriorAgeAppropriate(julia);
+    IsWarriorAgeAppropriate(julia);
 }
 WarriorValidation();
 ```
@@ -333,7 +328,7 @@ Julia 23 as a warrior is not age appropriate.
 
 # Атрибути рівня збірки
 
-Також можна застосовувати атрибути до всіх типів у заданій збірці за допомогою тегу [assembly:]. Наприклад, припустимо, що ви хочете переконатися, що кожен публічний член кожного публічного типу, визначеного у вашій збірці, сумісний з CLS. Для цього просто додайте наступний атрибут рівня збірки на початку будь-якого файлу вихідного коду C#, ось так (поза будь-якими оголошеннями простору імен):
+Також можна застосовувати атрибути до всіх типів у заданій збірці за допомогою тегу [assembly:]. Наприклад, припустимо, що ви хочете переконатися, що кожен публічний член кожного публічного типу, визначеного у вашій збірці, сумісний з CLS. Для цього просто додайте наступний атрибут рівня збірки на початку будь-якого файлу вихідного коду C#, ось так (за будь-якими оголошеннями простору імен):
 
 ```cs
 [assembly: CLSCompliant(true)]
@@ -394,7 +389,7 @@ public class Winnebago
 Пам’ятайте, що атрибут є абсолютно марним, доки інший програмний компонент не визначить його значення. Після виявлення певного атрибута ця програма може вжити будь-яких необхідних дій. Тепер, як і будь-яка програма, цей «інший фрагмент програмного забезпечення» може виявити наявність спеціально створенного атрибута за допомогою раннього або пізнього зв'язування. Якщо ви хочете використовувати раннє зв'язування, вам знадобиться, щоб клієнтська програма мала визначення відповідного атрибута під час компіляції (у цьому випадку VehicleDescriptionAttribute). Враховуючи, що збірка AttributedCarLibrary визначила цей користувацький атрибут як публічний клас, раннє зв'язування є найкращим варіантом.
 
 Щоб проілюструвати процес рефлексії користувацьких атрибутів, додайте до рішення новий проект консольного застосунку C# з назвою VehicleDescriptionAttributeReader. Далі додайте посилання на проект AttributedCarLibrary. 
-Це все можно зробити за допомогою CLI вкаталозі рішення:
+Це все можно зробити за допомогою CLI в каталозі рішення:
 
 ```
 dotnet new console -n VehicleDescriptionAttributeReader
@@ -405,32 +400,41 @@ dotnet add VehicleDescriptionAttributeReader reference .\AttributedCarLibrary
 
 ```cs
 using AttributedCarLibrary;
-static void ReflectOnAttributesUsingEarlyBinding() 
+static void ReflectOnAttributesUsingEarlyBinding()
 {
     // Get a Type representing the Winnebago.
-    Type type = typeof(Winnebago);
+    Type type = typeof(HorseAndBuggy);
 
     object[] customAttributes = type.GetCustomAttributes(false);
 
     // Print the description.
-    foreach (VehicleDescriptionAttribute customAttribute in customAttributes)
+    foreach (var customAttribute in customAttributes)
     {
-        Console.WriteLine($"{type}\t{customAttribute.Description}");
+        Console.Write(customAttribute);
+
+        if (customAttribute is VehicleDescriptionAttribute vehicleDescriptionAttribute )
+        {
+            Console.Write($"\t{vehicleDescriptionAttribute.Description}");
+        }
+        else
+        {
+            Console.WriteLine();
+        }    
     }
 }
 ReflectOnAttributesUsingEarlyBinding();
 ```
 ```
-AttributedCarLibrary.Winnebago  A very long, slow, but feature-rich auto
+System.ObsoleteAttribute
+AttributedCarLibrary.VehicleDescriptionAttribute        The old gray mare, she ain't what she used to be...
 ```
 Метод Type.GetCustomAttributes() повертає масив об'єктів, який представляє всі атрибути, застосовані до члена, представленого типом Type (логічний параметр визначає, чи слід розширювати пошук угору по ланцюжку успадкування). Після отримання списку атрибутів, переберіть кожен екземпляр класу VehicleDescriptionAttribute та виведіть значення, отримане властивістю Description.
 
 # Рефлексія атрибутів за допомогою пізнього зв'язування
 
-У попередньому прикладі використовувалося раннє зв'язування для виведення даних опису транспортного засобу для типу Winnebago. Це стало можливим завдяки тому, що тип класу VehicleDescriptionAttribute був визначений як публічний член у збірці AttributedCarLibrary. Також можливо використовувати динамічне завантаження та пізнє зв'язування для відображення атрибутів.
+У попередньому прикладі використовувалося раннє зв'язування для виведення даних опису транспортного засобу для типу. Це стало можливим завдяки тому, що тип класу VehicleDescriptionAttribute був визначений як публічний член у збірці AttributedCarLibrary. Також можливо використовувати динамічне завантаження та пізнє зв'язування для відображення атрибутів.
 
 Додайте до рішення новий проект під назвою AttributeReaderLateBinding запустіть і скопіюйте AttributedCarLibrary.dll до папки проекту (або \bin\Debug\netX.0, якщо використовується Visual Studio).
-
 
 ```cs
 using System.Reflection;

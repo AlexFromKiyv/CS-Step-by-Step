@@ -313,7 +313,6 @@ TypeDef #2 (02000003)
 
 ```cs
 using CarLibrary;
-using ExamineTypeClass;
 using System.Reflection;
 
 void ObtainTypeUseObjectGetType()
@@ -361,23 +360,27 @@ System.RuntimeType
 Нехай в проекті ExamineTypeClass є клас.
 
 ```cs
-    internal class Person
+namespace ExamineTypeClass;
+
+internal class Person
+{
+    public int PersonId { get; set; }
+    public string FirstName { get; set; } = string.Empty;
+    public string LastName { get; set; } = string.Empty;
+
+    private double _selary;
+
+    public void ChangeSelary(double selary)
     {
-        public int PersonId { get; set; }
-        public string FirstName { get; set; } = string.Empty;
-        public string LastName { get; set; } = string.Empty;
-
-        private double _selary;
-
-        public void ChangeSelary(double selary)
-        {
-            _selary = selary;
-        }
+        _selary = selary;
     }
+}
 ```
 Використаємо метод Type.GetType() для отриманя внутрішніх і зовнишніх типів.
 
 ```cs
+using ExamineTypeClass;
+
 void ObtainTypeUseTypeGetType()
 {
 
@@ -390,7 +393,6 @@ void ObtainTypeUseTypeGetType()
 
     Console.WriteLine(type);
     Console.WriteLine(type?.GetType());
-
 }
 ObtainTypeUseTypeGetType();
 ```
@@ -414,9 +416,9 @@ void UseGetMemebers()
 {
     Type type = typeof(Person);
 
-    var members = type.GetMembers();
+    MemberInfo[] members = type.GetMembers();
 
-    foreach (var member in members)
+    foreach (MemberInfo member in members)
     {
         Console.WriteLine($"{member.DeclaringType}   {member.MemberType}   {member.Name}");
     }
@@ -450,13 +452,13 @@ void UseGetMemebersWithBindingFlags()
 {
     Type type = typeof(Person);
 
-    var members = type.GetMembers(
-        BindingFlags.DeclaredOnly | 
-        BindingFlags.Instance | 
-        BindingFlags.NonPublic | 
+    MemberInfo[] members = type.GetMembers(
+        BindingFlags.DeclaredOnly |
+        BindingFlags.Instance |
+        BindingFlags.NonPublic |
         BindingFlags.Public);
 
-    foreach (var member in members)
+    foreach (MemberInfo member in members)
     {
         Console.WriteLine($"{member.DeclaringType}   {member.MemberType}   {member.Name}");
     }
@@ -494,12 +496,12 @@ ExamineTypeClass.Person   Field   _selary
 Також можна отримати члени по назві.
 
 ```cs
-void GetOneMember()
+oid GetOneMember()
 {
     Type type = typeof(Person);
 
-    var changeSaleries = type.GetMember("ChangeSelary");
-    foreach (var member in changeSaleries)
+    MemberInfo[] changeSaleries = type.GetMember("ChangeSelary");
+    foreach (MemberInfo member in changeSaleries)
     {
         Console.WriteLine($"{member.DeclaringType}   {member.MemberType}   {member.Name}");
     }
@@ -519,7 +521,7 @@ ExamineTypeClass.Person   Method   ChangeSelary
 SimpleTypeViewer\Program.cs
 
 ```cs
-static void StartViewer()
+static void Run()
 {
 	string enteredType = string.Empty;
 	do
@@ -536,7 +538,7 @@ static void StartViewer()
         Console.ReadKey();
     } while (true);
 }
-StartViewer();
+Run();
 
 static void InvestigateTheType(string typeName)
 {
@@ -565,7 +567,7 @@ Sorry, can't find type!
 Дані про тип можна отриматити за допоимогою властивостей екземпляра класу Type.
 
 ```cs
-void AboutType(Type type)
+static void AboutType(Type type)
 {
     Console.WriteLine();
     Console.WriteLine($"Is type class:{type.IsClass}");
@@ -578,7 +580,7 @@ void AboutType(Type type)
 Зміненмо метод InvestigateTheType який викликатиме новий метод та протестуємо.
 
 ```cs
-void InvestigateTheType(string typeName)
+static void InvestigateTheType(string typeName)
 {
     Type? type = Type.GetType(typeName);
     if (type == null)
@@ -605,29 +607,29 @@ Base type:System.Object
 Поля та властивості можна отримати за допомогою відповідних методів типу Type.
 
 ```cs
-void ListFilds(Type type)
+static void ListFilds(Type type)
 {
     Console.WriteLine("\nFilds");
 
     var filds = from f in type.GetFields()
                 orderby f.Name
                 select f;
-    foreach (var f in filds)
+    foreach (FieldInfo f in filds)
     {
-        Console.WriteLine("\t"+f.Name);
-    }    
+        Console.WriteLine("\t" + f.Name);
+    }
 }
 
-void ListProperties(Type type)
+static void ListProperties(Type type)
 {
     Console.WriteLine("\nProperties");
 
     var properties = from p in type.GetProperties()
                      orderby p.Name
                      select p;
-    foreach (var p in properties)
+    foreach (PropertyInfo p in properties)
     {
-        Console.WriteLine("\t"+p.Name);
+        Console.WriteLine("\t" + p.Name);
     }
 }
 
@@ -782,7 +784,7 @@ Interfaces
 Знімемо коментарі з усіх методів шо працюівли окремо і протестуємо роботу.
 
 ```cs
-void InvestigateTheType(string typeName)
+static void InvestigateTheType(string typeName)
 {
     Type? type = Type.GetType(typeName);
     if (type == null)
@@ -883,7 +885,7 @@ Interfaces
 Крім назви методів класу ми можемо отримати їх додадкові дані. Зробемо невеликі зміни методу ListMethods.
 
 ```cs
-void ListMethods(Type type)
+static void ListMethods(Type type)
 {
     Console.WriteLine("Methods");
 
@@ -898,7 +900,7 @@ void ListMethods(Type type)
 
 }
 
-void AboutMethod(MethodInfo methodInfo)
+static void AboutMethod(MethodInfo methodInfo)
 {
     string? nameOfTheReturnType = methodInfo.ReturnType.FullName;
     string nameOfTheParameters = "(";
@@ -944,6 +946,8 @@ System.Single Abs (System.Single value)
 System.Double Acos (System.Double d)
 System.Double Acosh (System.Double d)
 System.Double Asin (System.Double d)
+...
+
 ```
 
 Тип MethodInfo надає властивість ReturnType і метод GetParameters() для того аби отримати тип повернення та типи вхідних параметрів. 
@@ -953,7 +957,7 @@ System.Double Asin (System.Double d)
 
 ```cs
 
-void ListMethods(Type type)
+static void ListMethods(Type type)
 {
     Console.WriteLine("Methods");
 

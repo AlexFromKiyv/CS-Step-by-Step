@@ -65,7 +65,6 @@ using System.Reflection.Emit;
 ### Визначення метаданих збірки.
 
 ```cs
-
 static AssemblyBuilder CreateHelloWorldAssemblyBuilder()
 {
     AssemblyName assemblyName = new AssemblyName
@@ -203,7 +202,7 @@ static AssemblyBuilder CreateHelloWorldAssemblyBuilder()
         CallingConventions.Standard,
         constructorArgs);
 
-    ILGenerator constructorILGen = constructorBuilder.GetILGenerator();
+    ILGenerator constructorIl = constructorBuilder.GetILGenerator();
 
     return builder;
 }
