@@ -764,7 +764,7 @@ public class Driver : BaseEntity
 
         //...
 
-        public DbSet<Driver> Drivers { get; set; }
+        public DbSet<Driver> Drivers { get; set; } = new List<Driver>();
     
         //...
     }    
@@ -2157,14 +2157,97 @@ dotnet ef migrations has-pending-model-changes
 No changes have been made to the model since the last migration.
 ```
 
+## Викорисатання запиту
+
+Маючи властивість: 
+
+```cs
+public DbSet<CarMakeViewModel> CarMakeViewModels { get; set; }
+```
+Ми можемо використавувати її як зазвичай
+
+```cs
+static void UsingCarMakeViewModels()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var query = context.CarMakeViewModels;
+    Console.WriteLine(query.ToQueryString());
+
+    var records = query.ToList();
+
+    foreach( var record in records)
+    {
+        Console.WriteLine(
+            record.CarId+"\t"+
+            record.PetName+"\t"+
+            record.Make + "\t" +
+            record.Color + "\t" +
+            record.IsDrivable);
+    }
+}
+UsingCarMakeViewModels();
+```
+```
+
+                SELECT m.Id MakeId, m.Name Make, i.Id CarId, i.IsDrivable,
+                   i.Display, i.DateBuilt, i.Color, i.PetName
+                FROM dbo.Makes m
+                INNER JOIN dbo.Inventory i ON i.MakeId = m.Id
+
+1       Zippy   VW      Black   True
+2       Rusty   Ford    Rust    True
+3       Mel     Saab    Black   True
+4       Clunker Yugo    Yellow  True
+5       Bimmer  BMW     Black   True
+6       Hank    BMW     Green   True
+7       Pinky   BMW     Pink    True
+8       Pete    Pinto   Black   True
+9       Brownie Yugo    Brown   True
+10      Lemon   VW      Rust    False
+11      Snuppy  VW      White   True
+```
+
 Механізмами, з якими можна використовувати типи запитів, є методи FromSqlRaw() і FromSqlInterpolated(). Вони будуть детально розглянуті в наступному розділі, але ось короткий огляд:
 
 ```cs
-var records = context.CarMakeViewModel.FromSqlRaw(
+static void UsingCarMakeViewModelsWithFromSqlRaw()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+
+    var query = context.CarMakeViewModels.FromSqlRaw(
     @" SELECT m.Id MakeId, m.Name Make, i.Id CarId, i.IsDrivable,
         i.Display, i.DateBuilt, i.Color, i.PetName
         FROM dbo.Makes m
-        INNER JOIN dbo.Inventory i ON i.MakeId = m.Id ");
+        INNER JOIN dbo.Inventory i ON i.MakeId = m.Id
+        WHERE MakeId = 1");
+    Console.WriteLine(query.ToQueryString());
+
+    var records = query.ToList();
+
+    foreach( var record in records)
+    {
+        Console.WriteLine(
+            record.CarId+"\t"+
+            record.PetName+"\t"+
+            record.Make + "\t" +
+            record.Color + "\t" +
+            record.IsDrivable);
+    }
+}
+UsingCarMakeViewModelsWithFromSqlRaw();
+```
+
+```
+ SELECT m.Id MakeId, m.Name Make, i.Id CarId, i.IsDrivable,
+        i.Display, i.DateBuilt, i.Color, i.PetName
+        FROM dbo.Makes m
+        INNER JOIN dbo.Inventory i ON i.MakeId = m.Id
+        WHERE MakeId = 1
+
+1       Zippy   VW      Black   True
+10      Lemon   VW      Rust    False
+11      Snuppy  VW      White   True
 ```
 
 ## Гнучке відображення Query/Table
