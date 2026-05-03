@@ -9,8 +9,9 @@ public class MakeRepo : TemporalTableBaseRepo<Make>, IMakeRepo
     public MakeRepo(DbContextOptions<ApplicationDbContext> options) : base(options)
     {
     }
+
     internal IOrderedQueryable<Make> BuildQuery() =>
-    Table.OrderBy(m => m.Name);
+        Table.OrderBy(m => m.Name);
 
     public override IEnumerable<Make> GetAll() =>
     BuildQuery();

@@ -1,10 +1,12 @@
-﻿namespace AutoLot.Models.Entities;
+﻿
+namespace AutoLot.Models.Entities;
 
 [Index("CustomerId", Name = "IX_CreditRisks_CustomerId")]
 [EntityTypeConfiguration(typeof(CreditRiskConfiguration))]
 public partial class CreditRisk : BaseEntity
 {
     public Person PersonInformation { get; set; } = new Person();
+
     public int CustomerId { get; set; }
 
     [ForeignKey(nameof(CustomerId))]

@@ -1,13 +1,30 @@
 ﻿using AutoLot.Models.Entities.Configuration;
 using AutoLot.Models.ViewModels;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
 
 namespace AutoLot.Dal.EfStructures;
 
 public partial class ApplicationDbContext : DbContext
 {
+    public virtual DbSet<Car> Cars { get; set; }
+
+    public virtual DbSet<Driver> Drivers { get; set; }
+
+    public virtual DbSet<CarDriver> CarsToDrivers { get; set; }
+
+    public virtual DbSet<Radio> Radios { get; set; }
+
+    public virtual DbSet<CreditRisk> CreditRisks { get; set; }
+
+    public virtual DbSet<Customer> Customers { get; set; }
+
+    public virtual DbSet<CustomerOrderViewModel> CustomerOrderViewModels { get; set; }
+
+    public virtual DbSet<Make> Makes { get; set; }
+
+    public virtual DbSet<Order> Orders { get; set; }
+
+    public virtual DbSet<SeriLogEntry> SeriLogEntries { get; set; }
+
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)
     {
@@ -62,48 +79,17 @@ public partial class ApplicationDbContext : DbContext
         }
     }
 
-
-    public virtual DbSet<CreditRisk> CreditRisks { get; set; }
-
-    public virtual DbSet<Customer> Customers { get; set; }
-
-    public virtual DbSet<Car> Cars { get; set; }
-
-    public virtual DbSet<Make> Makes { get; set; }
-
-    public virtual DbSet<Order> Orders { get; set; }
-
-    public virtual DbSet<Driver> Drivers { get; set; }
-
-    public virtual DbSet<CarDriver> CarsToDrivers { get; set; }
-
-    public virtual DbSet<Radio> Radios { get; set; }
-
-    public virtual DbSet<SeriLogEntry> SeriLogEntries { get; set; }
-
-    public virtual DbSet<CustomerOrderViewModel> CustomerOrderViewModels { get; set; }
-
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+
         new CarConfiguration().Configure(modelBuilder.Entity<Car>());
-
         new DriverConfiguration().Configure(modelBuilder.Entity<Driver>());
-
         new CarDriverConfiguration().Configure(modelBuilder.Entity<CarDriver>());
-
-        new RadioConfiguration().Configure(modelBuilder.Entity<Radio>());
-
         new CustomerConfiguration().Configure(modelBuilder.Entity<Customer>());
-
         new MakeConfiguration().Configure(modelBuilder.Entity<Make>());
-
         new CreditRiskConfiguration().Configure(modelBuilder.Entity<CreditRisk>());
-
         new OrderConfiguration().Configure(modelBuilder.Entity<Order>());
-
         new SeriLogEntryConfiguration().Configure(modelBuilder.Entity<SeriLogEntry>());
-
         new CustomerOrderViewModelConfiguration().Configure(modelBuilder.Entity<CustomerOrderViewModel>());
 
         OnModelCreatingPartial(modelBuilder);
@@ -112,9 +98,11 @@ public partial class ApplicationDbContext : DbContext
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
 
     // DB Functions
+
     [DbFunction("udf_CountOfMakes", Schema = "dbo")]
     public static int InventoryCountFor(int makeId)
         => throw new NotSupportedException();
+
     [DbFunction("udtf_GetCarsForMake", Schema = "dbo")]
     public IQueryable<Car> GetCarsFor(int makeId)
         => FromExpression(() => GetCarsFor(makeId));
@@ -153,5 +141,4 @@ public partial class ApplicationDbContext : DbContext
             throw new CustomException("An error occurred updating the database", ex);
         }
     }
-
 }

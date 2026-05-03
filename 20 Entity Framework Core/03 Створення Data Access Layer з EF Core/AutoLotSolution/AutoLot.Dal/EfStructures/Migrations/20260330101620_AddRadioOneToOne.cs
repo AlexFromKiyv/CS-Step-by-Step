@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -20,11 +19,7 @@ namespace AutoLot.Dal.EfStructures.Migrations
                     HasTweeters = table.Column<bool>(type: "bit", nullable: false),
                     HasSubWoofers = table.Column<bool>(type: "bit", nullable: false),
                     RadioId = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    InventoryId = table.Column<int>(type: "int", nullable: false),
-                    PeriodEnd = table.Column<DateTime>(type: "datetime2", nullable: false)
-                        .Annotation("SqlServer:TemporalIsPeriodEndColumn", true),
-                    PeriodStart = table.Column<DateTime>(type: "datetime2", nullable: false)
-                        .Annotation("SqlServer:TemporalIsPeriodStartColumn", true)
+                    InventoryId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -32,15 +27,11 @@ namespace AutoLot.Dal.EfStructures.Migrations
                     table.ForeignKey(
                         name: "FK_Radios_Inventory_InventoryId",
                         column: x => x.InventoryId,
+                        principalSchema: "dbo",
                         principalTable: "Inventory",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("SqlServer:IsTemporal", true)
-                .Annotation("SqlServer:TemporalHistoryTableName", "RadiosAudit")
-                .Annotation("SqlServer:TemporalHistoryTableSchema", null)
-                .Annotation("SqlServer:TemporalPeriodEndColumnName", "PeriodEnd")
-                .Annotation("SqlServer:TemporalPeriodStartColumnName", "PeriodStart");
+                });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Radios_CarId",
@@ -53,12 +44,7 @@ namespace AutoLot.Dal.EfStructures.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Radios")
-                .Annotation("SqlServer:IsTemporal", true)
-                .Annotation("SqlServer:TemporalHistoryTableName", "RadiosAudit")
-                .Annotation("SqlServer:TemporalHistoryTableSchema", null)
-                .Annotation("SqlServer:TemporalPeriodEndColumnName", "PeriodEnd")
-                .Annotation("SqlServer:TemporalPeriodStartColumnName", "PeriodStart");
+                name: "Radios");
         }
     }
 }

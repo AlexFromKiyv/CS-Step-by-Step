@@ -7,7 +7,6 @@ public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<Applicati
         var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
         string connectionString = @"Server=(localdb)\mssqllocaldb;Database=AutoLot;Trusted_Connection=True;ConnectRetryCount=0";
         optionsBuilder.UseSqlServer(connectionString);
-        //Console.WriteLine(connectionString);
         return new ApplicationDbContext(optionsBuilder.Options);
     }
 }

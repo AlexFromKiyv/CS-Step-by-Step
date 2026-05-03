@@ -7,6 +7,7 @@ public partial class Order : BaseEntity
 {
     public int CustomerId { get; set; }
     public int CarId { get; set; }
+
     [ForeignKey(nameof(CarId))]
     [InverseProperty(nameof(Car.Orders))]
     public virtual Car CarNavigation { get; set; } = null!;

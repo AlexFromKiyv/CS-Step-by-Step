@@ -1,6 +1,6 @@
 ﻿namespace AutoLot.Models.Entities;
 
-[Table("InventoryToDrivers")]
+[Table("InventoryToDrivers", Schema ="dbo")]
 [EntityTypeConfiguration(typeof(CarDriverConfiguration))]
 public class CarDriver : BaseEntity
 {

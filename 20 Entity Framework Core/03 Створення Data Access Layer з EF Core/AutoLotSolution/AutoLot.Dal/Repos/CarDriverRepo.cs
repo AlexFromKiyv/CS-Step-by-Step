@@ -8,10 +8,12 @@ public class CarDriverRepo : TemporalTableBaseRepo<CarDriver>, ICarDriverRepo
     internal CarDriverRepo(DbContextOptions<ApplicationDbContext> options) : base(options)
     {
     }
+
     internal IIncludableQueryable<CarDriver, Driver> BuildBaseQuery()
     => Table.Include(cd => cd.CarNavigation).Include(cd => cd.DriverNavigation);
+
     public override IEnumerable<CarDriver> GetAll()
-    => BuildBaseQuery();
+        => BuildBaseQuery();
     public override IEnumerable<CarDriver> GetAllIgnoreQueryFilters()
         => BuildBaseQuery().IgnoreQueryFilters();
     public override CarDriver? Find(int id)

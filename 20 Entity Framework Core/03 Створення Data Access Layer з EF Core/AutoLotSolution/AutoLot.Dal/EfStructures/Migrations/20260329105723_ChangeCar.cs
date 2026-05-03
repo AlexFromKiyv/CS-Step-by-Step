@@ -19,16 +19,17 @@ namespace AutoLot.Dal.EfStructures.Migrations
                 name: "TimeStamp",
                 table: "Inventory");
 
-            migrationBuilder.AlterTable(
-                name: "Inventory")
-                .Annotation("SqlServer:IsTemporal", true)
-                .Annotation("SqlServer:TemporalHistoryTableName", "InventoryAudit")
-                .Annotation("SqlServer:TemporalHistoryTableSchema", null)
-                .Annotation("SqlServer:TemporalPeriodEndColumnName", "PeriodEnd")
-                .Annotation("SqlServer:TemporalPeriodStartColumnName", "PeriodStart");
+            migrationBuilder.EnsureSchema(
+                name: "dbo");
+
+            migrationBuilder.RenameTable(
+                name: "Inventory",
+                newName: "Inventory",
+                newSchema: "dbo");
 
             migrationBuilder.AddColumn<DateTime>(
                 name: "DateBuilt",
+                schema: "dbo",
                 table: "Inventory",
                 type: "datetime2",
                 nullable: true,
@@ -36,35 +37,22 @@ namespace AutoLot.Dal.EfStructures.Migrations
 
             migrationBuilder.AddColumn<bool>(
                 name: "IsDrivable",
+                schema: "dbo",
                 table: "Inventory",
                 type: "bit",
                 nullable: false,
                 defaultValue: true);
 
-            migrationBuilder.AddColumn<DateTime>(
-                name: "PeriodEnd",
-                table: "Inventory",
-                type: "datetime2",
-                nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified))
-                .Annotation("SqlServer:TemporalIsPeriodEndColumn", true);
-
-            migrationBuilder.AddColumn<DateTime>(
-                name: "PeriodStart",
-                table: "Inventory",
-                type: "datetime2",
-                nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified))
-                .Annotation("SqlServer:TemporalIsPeriodStartColumn", true);
-
             migrationBuilder.AddColumn<decimal>(
                 name: "Price",
+                schema: "dbo",
                 table: "Inventory",
                 type: "decimal(18,2)",
                 nullable: true);
 
             migrationBuilder.AddColumn<string>(
                 name: "Display",
+                schema: "dbo",
                 table: "Inventory",
                 type: "nvarchar(max)",
                 nullable: false,
@@ -73,6 +61,7 @@ namespace AutoLot.Dal.EfStructures.Migrations
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Inventory_Makes_MakeId",
+                schema: "dbo",
                 table: "Inventory",
                 column: "MakeId",
                 principalTable: "Makes",
@@ -84,41 +73,33 @@ namespace AutoLot.Dal.EfStructures.Migrations
         {
             migrationBuilder.DropForeignKey(
                 name: "FK_Inventory_Makes_MakeId",
+                schema: "dbo",
                 table: "Inventory");
 
             migrationBuilder.DropColumn(
                 name: "Display",
+                schema: "dbo",
                 table: "Inventory");
 
             migrationBuilder.DropColumn(
                 name: "DateBuilt",
+                schema: "dbo",
                 table: "Inventory");
 
             migrationBuilder.DropColumn(
                 name: "IsDrivable",
+                schema: "dbo",
                 table: "Inventory");
-
-            migrationBuilder.DropColumn(
-                name: "PeriodEnd",
-                table: "Inventory")
-                .Annotation("SqlServer:TemporalIsPeriodEndColumn", true);
-
-            migrationBuilder.DropColumn(
-                name: "PeriodStart",
-                table: "Inventory")
-                .Annotation("SqlServer:TemporalIsPeriodStartColumn", true);
 
             migrationBuilder.DropColumn(
                 name: "Price",
+                schema: "dbo",
                 table: "Inventory");
 
-            migrationBuilder.AlterTable(
-                name: "Inventory")
-                .OldAnnotation("SqlServer:IsTemporal", true)
-                .OldAnnotation("SqlServer:TemporalHistoryTableName", "InventoryAudit")
-                .OldAnnotation("SqlServer:TemporalHistoryTableSchema", null)
-                .OldAnnotation("SqlServer:TemporalPeriodEndColumnName", "PeriodEnd")
-                .OldAnnotation("SqlServer:TemporalPeriodStartColumnName", "PeriodStart");
+            migrationBuilder.RenameTable(
+                name: "Inventory",
+                schema: "dbo",
+                newName: "Inventory");
 
             migrationBuilder.AddColumn<byte[]>(
                 name: "TimeStamp",

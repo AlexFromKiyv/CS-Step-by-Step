@@ -11,12 +11,11 @@ public class DriverRepo : BaseRepo<Driver>, IDriverRepo
     }
 
     internal IOrderedQueryable<Driver> BuildQuery() =>
-    Table
-    .OrderBy(d => d.PersonInformation.LastName)
-    .OrderBy(d => d.PersonInformation.FirstName);
+        Table.OrderBy(d => d.PersonInformation.LastName)
+        .OrderBy(d => d.PersonInformation.FirstName);
 
     public override IEnumerable<Driver> GetAll() =>
-    BuildQuery();
+        BuildQuery();
     public override IEnumerable<Driver> GetAllIgnoreQueryFilters() =>
         BuildQuery().IgnoreQueryFilters();
 

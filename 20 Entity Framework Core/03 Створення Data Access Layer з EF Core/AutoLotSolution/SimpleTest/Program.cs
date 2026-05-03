@@ -1,9 +1,11 @@
 ﻿using AutoLot.Dal.EfStructures;
 using AutoLot.Dal.Initialization;
 using AutoLot.Dal.Repos;
+using AutoLot.Dal.Repos.Interfaces;
 using AutoLot.Models.Entities;
 using AutoLot.Models.Entities.Owned;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 static void Run()
 {
@@ -36,13 +38,12 @@ static void Run()
                 Test_Make_Car(); Test_Make_Car(); Test_Car_Driver();
                 Test_Car_Radio(); Test_Customer(); Test_CreditRisk();
                 Test_Order(); Test_CustomerOrderViewModel(); Test_DB_Functions();
-                Test_CarRepo(); Test_InitializeData(); Test_ClearAndSeedData();
                 break;
             case 1: Test_Make_Car(); break;
             case 2: Test_Car_Driver(); break;
             case 3: Test_Car_Radio(); break;
             case 4: Test_Customer(); break;
-            case 5: Test_Make_Car(); break;
+            case 5: Test_Make(); break;
             case 6: Test_CreditRisk(); break;
             case 7: Test_Order(); break;
             case 8: Test_CustomerOrderViewModel(); break;
@@ -59,41 +60,56 @@ static void Run()
 Run();
 
 
-static void Test_Make_Car()
+static void Create_Make_Car(ApplicationDbContext context)
 {
-    var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
     // Create data
-
-    Make make = new Make() { Name = "VW" };
+    Make make = new() 
+    { 
+        Name = "VW" 
+    };
     context.Makes.Add(make);
 
-    Car car = new() { MakeNavigation = make, Color = "Grey", PetName = "Wolf" };
+    Car car = new()
+    {
+        MakeNavigation = make,
+        Color = "Grey",
+        PetName = "Wolf",
+        Price = "500",
+    };
     context.Cars.Add(car);
-
     context.SaveChanges();
-
+}
+static void Read_Make_Car(ApplicationDbContext context)
+{
     // Read data
 
     var makes = context.Makes;
-    foreach (var make1 in makes)
+    foreach (var make in makes)
     {
-        Console.WriteLine($"{make1.Id} {make1.Name}");
+        Console.WriteLine($"{make.Id}\t{make.Name}");
     }
 
     var cars = context.Cars;
-    foreach (var car1 in cars)
+    foreach (var car in cars)
     {
-        Console.WriteLine(car1);
+        Console.WriteLine(car);
     }
+}
+
+static void Test_Make_Car()
+{
+    var context = new ApplicationDbContextFactory().CreateDbContext(null);
+    Create_Make_Car(context);
+    Read_Make_Car(context);
 }
 //Test_Make_Car();
 
-static int Test_Car_Driver_Create()
+static int Create_Car_Driver()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
-    Make make = new Make() { Name = "VW" };
+    Make make = new() { Name = "VW" };
     context.Makes.Add(make);
     Car? car = new() { MakeNavigation = make, Color = "Black", PetName = "Wolf" };
     context.Cars.Add(car);
@@ -108,7 +124,7 @@ static int Test_Car_Driver_Create()
     context.SaveChanges();
 
     Console.WriteLine(car);
-    Console.WriteLine($"{driver.Id} {driver.PersonInformation.FullName}");
+    Console.WriteLine($"{driver.Id}\t{driver.PersonInformation.FullName}");
 
     return car.Id;
 }
@@ -117,18 +133,19 @@ static void Test_Car_Driver()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
 
-    int id = Test_Car_Driver_Create();
+    int carId = Create_Car_Driver();
 
     Car car = context.Cars.Include(c => c.MakeNavigation)
         .Include(c => c.CarDrivers)
         .ThenInclude(cd => cd.DriverNavigation)
-        .Where(c => c.Id == id)
+        .Where(c => c.Id == carId)
         .Single();
 
     Driver? driver = car.Drivers.First();
 
+    Console.WriteLine("\tFrom DB");
     Console.WriteLine(car);
-    Console.WriteLine($"{driver.Id} {driver.PersonInformation.FullName}");
+    Console.WriteLine($"{driver.Id}\t{driver.PersonInformation.FullName}");
 }
 //Test_Car_Driver();
 
@@ -144,7 +161,7 @@ static void Test_Car_Radio()
     {
         HasTweeters = true,
         HasSubWoofers = true,
-        RadioId = "RDV23451",
+        RadioId = "KissFM",
     };
     context.Cars.Add(car);
     context.SaveChanges();
@@ -155,10 +172,11 @@ static void Test_Car_Radio()
         .Single();
 
     var radio = car_1.RadioNavigation;
-    Console.WriteLine($"{radio.Id} {radio.RadioId}");
+    Console.WriteLine($"{radio.Id}\t{radio.RadioId}");
     Console.WriteLine(radio.CarNavigation);
 }
 //Test_Car_Radio();
+
 
 static void Test_Customer()
 {
@@ -173,7 +191,7 @@ static void Test_Customer()
     context.SaveChanges();
 
     Customer customer_1 = context.Customers.Single(c => c.Id == customer.Id);
-    Console.WriteLine($"{customer_1.Id} {customer_1.PersonInformation.FullName}");
+    Console.WriteLine($"{customer_1.Id}\t{customer_1.PersonInformation.FullName}");
 }
 //Test_Customer();
 
@@ -185,7 +203,7 @@ static void Test_Make()
     context.SaveChanges();
 
     Make make_1 = context.Makes.Single(m => m.Id == make.Id);
-    Console.WriteLine($"{make_1.Id} {make_1.Name}");
+    Console.WriteLine($"{make_1.Id}\t{make_1.Name}");
 }
 //Test_Make();
 
@@ -243,16 +261,25 @@ static void Test_Order()
         .Include(o => o.CarNavigation)
         .ThenInclude(c => c.MakeNavigation)
         .Include(o => o.CustomerNavigation)
-        .Single(o => o.Id == 1);
+        .Single(o => o.Id == order.Id);
+
+    Car? car1 = order_1.CarNavigation;
 
     Console.WriteLine($"" +
-        $"Car: {order_1.CarNavigation.Id}\t" +
-        $"{order_1.CarNavigation.Color}\t{order_1.CarNavigation.PetName}\t" +
-        $"{order_1.CarNavigation.MakeName}\n" +
-        $"Customer: {order_1.CustomerNavigation.PersonInformation.FirstName}\t" +
+        $"Car: {order_1.CarNavigation}\n" +
+        $"Customer: {order_1.CustomerNavigation.Id}\t" +
+        $"{order_1.CustomerNavigation.PersonInformation.FirstName}\t" +
         $"{order_1.CustomerNavigation.PersonInformation.LastName}");
 
 }
+//Test_Order();
+
+//Test_Make_Car();
+//Test_Car_Driver();
+//Test_Car_Radio();
+//Test_Customer();
+//Test_Make();
+//Test_CreditRisk();
 //Test_Order();
 
 static void Test_CustomerOrderViewModel()
@@ -264,6 +291,7 @@ static void Test_CustomerOrderViewModel()
         Console.WriteLine(customerOrder.FullDetail);
     }
 }
+//Test_Order();
 //Test_CustomerOrderViewModel();
 
 static void Test_DB_Functions()
@@ -291,21 +319,51 @@ static void Test_DB_Functions()
 static void Test_CarRepo()
 {
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
-    CarRepo carRepo = new(context);
+    CarRepo carRepo = new CarRepo(context);
 
-    Make make = new Make() { Name = "VW" };
-    Car car = new() { MakeNavigation = make, Color = "White", PetName = "Electron" };
-    carRepo.Add(car, true);
+    //Add
+    Make? make = new Make() { Name = "Electron" };
+    Car? car = new() { MakeNavigation = make, Color = "White", PetName = "El" };
+    carRepo.Add(car);
 
-    int id = carRepo.Table.Max(c => c.Id);
+    int id = car.Id;
+    context.ChangeTracker.Clear();
 
-    ShowCars(carRepo.GetAll()); Console.WriteLine();
-    ShowCars(carRepo.GetAllBy(id)); Console.WriteLine();
+    //Read
+    car = carRepo.Find(id);
+    Console.WriteLine(car);
     Console.WriteLine(carRepo.GetPetName(id)); Console.WriteLine();
-    Console.WriteLine(carRepo.Find(id));
 
-    static void ShowCars(IEnumerable<Car> cars)
+    //Update
+    if (car != null)
     {
+        car.PetName = "Ell";
+        carRepo.Update(car);
+    }
+
+    //Read
+    ShowCars(carRepo.GetAll(), "carRepo.GetAll()"); Console.WriteLine();
+
+    if (car != null)
+    {
+        ShowCars(carRepo.GetAllBy(car.MakeId), "carRepo.GetAllBy(car.MakeId)"); Console.WriteLine();
+    }
+    //Delete
+    if (car != null)
+    {
+        carRepo.Delete(car);
+    }
+    Console.WriteLine(car);
+    if(car != null)
+    {
+        Console.WriteLine(context.Entry(car).State);
+    }
+    Console.WriteLine(carRepo.Find(id) == null);
+
+    static void ShowCars(IEnumerable<Car> cars,string title)
+    {
+        Console.WriteLine($"\n\t{title}\n");
+
         foreach (var car in cars)
         {
             Console.WriteLine(car);
@@ -325,3 +383,4 @@ static void Test_ClearAndSeedData()
     var context = new ApplicationDbContextFactory().CreateDbContext(null);
     SampleDataInitializer.ClearAndSeedData(context);
 }
+

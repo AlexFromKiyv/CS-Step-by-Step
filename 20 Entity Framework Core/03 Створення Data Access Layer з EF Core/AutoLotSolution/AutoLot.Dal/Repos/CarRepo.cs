@@ -8,15 +8,22 @@ public class CarRepo : TemporalTableBaseRepo<Car>, ICarRepo
     public CarRepo(DbContextOptions<ApplicationDbContext> options) : base(options)
     {
     }
+
     internal IOrderedQueryable<Car> BuildBaseQuery() =>
-    Table.Include(c => c.MakeNavigation).OrderBy(c => c.PetName);
-    public IEnumerable<Car> GetAllBy(int makeId) =>
-    BuildBaseQuery().Where(c => c.MakeId == makeId);
+    Table.Include(c => c.MakeNavigation).OrderBy(c => c.Id);
+
+    public override IEnumerable<Car> GetAll()
+        => BuildBaseQuery();
+    public override IEnumerable<Car> GetAllIgnoreQueryFilters()
+        => BuildBaseQuery().IgnoreQueryFilters();
     public override Car? Find(int id) =>
     Table.IgnoreQueryFilters()
     .Where(c => c.Id == id)
     .Include(c => c.MakeNavigation)
     .FirstOrDefault();
+
+    public IEnumerable<Car> GetAllBy(int makeId) =>
+        BuildBaseQuery().Where(c => c.MakeId == makeId);
 
     public string GetPetName(int id)
     {
@@ -38,5 +45,4 @@ public class CarRepo : TemporalTableBaseRepo<Car>, ICarRepo
         ExecuteParameterizedQuery(sqlQuery, [parameterId, parameterName]);
         return (string)parameterName.Value;
     }
-
 }

@@ -1,5 +1,4 @@
-﻿
-namespace AutoLot.Models.ViewModels;
+﻿namespace AutoLot.Models.ViewModels;
 
 public class TemporalViewModel<T> where T : BaseEntity, new()
 {

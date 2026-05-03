@@ -22,7 +22,7 @@ public abstract class TemporalTableBaseRepo<T> : BaseRepo<T>, ITemporalTableBase
     });
 
     public IEnumerable<TemporalViewModel<T>> GetAllHistory() =>
-    ExecuteQuery(Table.TemporalAll());
+        ExecuteQuery(Table.TemporalAll());
     public IEnumerable<TemporalViewModel<T>> GetAllHistoryAsOf(DateTime dateTime) =>
         ExecuteQuery(Table.TemporalAsOf(ConvertToUtc(dateTime)));
     public IEnumerable<TemporalViewModel<T>> GetHistoryBetween(DateTime startDateTime, DateTime endDateTime) =>
@@ -33,4 +33,5 @@ public abstract class TemporalTableBaseRepo<T> : BaseRepo<T>, ITemporalTableBase
     public IEnumerable<TemporalViewModel<T>> GetHistoryFromTo(
         DateTime startDateTime, DateTime endDateTime)
         => ExecuteQuery(Table.TemporalFromTo(ConvertToUtc(startDateTime), ConvertToUtc(endDateTime)));
+
 }

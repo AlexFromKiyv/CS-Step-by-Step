@@ -12,15 +12,15 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AutoLot.Dal.EfStructures.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250805134820_AddRadioOneToOne")]
-    partial class AddRadioOneToOne
+    [Migration("20260330093019_AddCarDriverManyToMany")]
+    partial class AddCarDriverManyToMany
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.8")
+                .HasAnnotation("ProductVersion", "8.0.25")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -79,11 +79,11 @@ namespace AutoLot.Dal.EfStructures.Migrations
 
                     b.HasIndex(new[] { "MakeId" }, "IX_Inventory_MakeId");
 
-                    b.ToTable("Inventory");
+                    b.ToTable("Inventory", "dbo");
 
                     b.ToTable(tb => tb.IsTemporal(ttb =>
                             {
-                                ttb.UseHistoryTable("InventoryAudit");
+                                ttb.UseHistoryTable("InventoryAudit", "dbo");
                                 ttb
                                     .HasPeriodStart("PeriodStart")
                                     .HasColumnName("PeriodStart");
@@ -122,11 +122,11 @@ namespace AutoLot.Dal.EfStructures.Migrations
 
                     b.HasIndex("DriverId");
 
-                    b.ToTable("InventoryToDrivers");
+                    b.ToTable("InventoryToDrivers", "dbo");
 
                     b.ToTable(tb => tb.IsTemporal(ttb =>
                             {
-                                ttb.UseHistoryTable("InventoryToDriversAudit");
+                                ttb.UseHistoryTable("InventoryToDriversAudit", "dbo");
                                 ttb
                                     .HasPeriodStart("PeriodStart")
                                     .HasColumnName("PeriodStart");
@@ -294,58 +294,6 @@ namespace AutoLot.Dal.EfStructures.Migrations
                     b.ToTable("Orders");
                 });
 
-            modelBuilder.Entity("AutoLot.Models.Entities.Radio", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CarId")
-                        .HasColumnType("int")
-                        .HasColumnName("InventoryId");
-
-                    b.Property<bool>("HasSubWoofers")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("HasTweeters")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("PeriodEnd")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("PeriodEnd");
-
-                    b.Property<DateTime>("PeriodStart")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("PeriodStart");
-
-                    b.Property<string>("RadioId")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex(new[] { "CarId" }, "IX_Radios_CarId")
-                        .IsUnique();
-
-                    b.ToTable("Radios");
-
-                    b.ToTable(tb => tb.IsTemporal(ttb =>
-                            {
-                                ttb.UseHistoryTable("RadiosAudit");
-                                ttb
-                                    .HasPeriodStart("PeriodStart")
-                                    .HasColumnName("PeriodStart");
-                                ttb
-                                    .HasPeriodEnd("PeriodEnd")
-                                    .HasColumnName("PeriodEnd");
-                            }));
-                });
-
             modelBuilder.Entity("AutoLot.Models.Entities.Car", b =>
                 {
                     b.HasOne("AutoLot.Models.Entities.Make", "MakeNavigation")
@@ -448,25 +396,11 @@ namespace AutoLot.Dal.EfStructures.Migrations
                     b.Navigation("Customer");
                 });
 
-            modelBuilder.Entity("AutoLot.Models.Entities.Radio", b =>
-                {
-                    b.HasOne("AutoLot.Models.Entities.Car", "CarNavigation")
-                        .WithOne("RadioNavigation")
-                        .HasForeignKey("AutoLot.Models.Entities.Radio", "CarId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CarNavigation");
-                });
-
             modelBuilder.Entity("AutoLot.Models.Entities.Car", b =>
                 {
                     b.Navigation("CarDrivers");
 
                     b.Navigation("Orders");
-
-                    b.Navigation("RadioNavigation")
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("AutoLot.Models.Entities.Customer", b =>

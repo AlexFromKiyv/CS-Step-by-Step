@@ -85,13 +85,13 @@ public static class SampleDataInitializer
                 try
                 {
                     var metaData = context.Model.FindEntityType(typeof(TEntity).FullName);
-                    string sqlON = $"SET IDENTITY_INSERT {metaData.GetSchema()}.{metaData.GetTableName()} ON";
-                    string sqlOFF = $"SET IDENTITY_INSERT {metaData.GetSchema()}.{metaData.GetTableName()} OFF";
+                    string sqlIDENTITY_INSERT_ON = $"SET IDENTITY_INSERT {metaData.GetSchema()}.{metaData.GetTableName()} ON";
+                    string sqlIDENTITY_INSERT_OFF = $"SET IDENTITY_INSERT {metaData.GetSchema()}.{metaData.GetTableName()} OFF";
 
-                    context.Database.ExecuteSqlRaw(sqlON);
+                    context.Database.ExecuteSqlRaw(sqlIDENTITY_INSERT_ON);
                     table.AddRange(records);
                     context.SaveChanges();
-                    context.Database.ExecuteSqlRaw(sqlOFF);
+                    context.Database.ExecuteSqlRaw(sqlIDENTITY_INSERT_OFF);
 
                     transaction.Commit();
                 }
@@ -114,4 +114,5 @@ public static class SampleDataInitializer
         ClearData(context);
         SeedData(context);
     }
+
 }

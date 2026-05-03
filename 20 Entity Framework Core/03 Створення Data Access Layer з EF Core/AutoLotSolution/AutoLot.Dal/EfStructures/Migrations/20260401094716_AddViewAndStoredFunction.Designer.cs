@@ -4,6 +4,7 @@ using AutoLot.Dal.EfStructures;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AutoLot.Dal.EfStructures.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260401094716_AddViewAndStoredFunction")]
+    partial class AddViewAndStoredFunction
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -166,7 +169,7 @@ namespace AutoLot.Dal.EfStructures.Migrations
 
                     b.HasIndex(new[] { "CustomerId" }, "IX_CreditRisks_CustomerId");
 
-                    b.ToTable("CreditRisks", (string)null);
+                    b.ToTable("CreditRisks");
                 });
 
             modelBuilder.Entity("AutoLot.Models.Entities.Customer", b =>
@@ -185,7 +188,7 @@ namespace AutoLot.Dal.EfStructures.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Customers", (string)null);
+                    b.ToTable("Customers");
                 });
 
             modelBuilder.Entity("AutoLot.Models.Entities.Driver", b =>
@@ -204,7 +207,7 @@ namespace AutoLot.Dal.EfStructures.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Drivers", (string)null);
+                    b.ToTable("Drivers");
                 });
 
             modelBuilder.Entity("AutoLot.Models.Entities.Make", b =>
@@ -238,7 +241,7 @@ namespace AutoLot.Dal.EfStructures.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Makes", (string)null);
+                    b.ToTable("Makes");
 
                     b.ToTable(tb => tb.IsTemporal(ttb =>
                             {
@@ -292,7 +295,7 @@ namespace AutoLot.Dal.EfStructures.Migrations
                     b.HasIndex(new[] { "CustomerId", "CarId" }, "IX_Orders_CustomerId_CarId")
                         .IsUnique();
 
-                    b.ToTable("Orders", (string)null);
+                    b.ToTable("Orders");
 
                     b.ToTable(tb => tb.IsTemporal(ttb =>
                             {
@@ -350,7 +353,7 @@ namespace AutoLot.Dal.EfStructures.Migrations
                     b.HasIndex(new[] { "CarId" }, "IX_Radios_CarId")
                         .IsUnique();
 
-                    b.ToTable("Radios", (string)null);
+                    b.ToTable("Radios");
 
                     b.ToTable(tb => tb.IsTemporal(ttb =>
                             {
@@ -524,7 +527,7 @@ namespace AutoLot.Dal.EfStructures.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_CreditRisks_Customers");
 
-                    b.OwnsOne("AutoLot.Models.Entities.CreditRisk.PersonInformation#AutoLot.Models.Entities.Owned.Person", "PersonInformation", b1 =>
+                    b.OwnsOne("AutoLot.Models.Entities.Owned.Person", "PersonInformation", b1 =>
                         {
                             b1.Property<int>("CreditRiskId")
                                 .HasColumnType("int");
@@ -550,7 +553,7 @@ namespace AutoLot.Dal.EfStructures.Migrations
 
                             b1.HasKey("CreditRiskId");
 
-                            b1.ToTable("CreditRisks", (string)null);
+                            b1.ToTable("CreditRisks");
 
                             b1.WithOwner()
                                 .HasForeignKey("CreditRiskId");
@@ -564,7 +567,7 @@ namespace AutoLot.Dal.EfStructures.Migrations
 
             modelBuilder.Entity("AutoLot.Models.Entities.Customer", b =>
                 {
-                    b.OwnsOne("AutoLot.Models.Entities.Customer.PersonInformation#AutoLot.Models.Entities.Owned.Person", "PersonInformation", b1 =>
+                    b.OwnsOne("AutoLot.Models.Entities.Owned.Person", "PersonInformation", b1 =>
                         {
                             b1.Property<int>("CustomerId")
                                 .HasColumnType("int");
@@ -590,7 +593,7 @@ namespace AutoLot.Dal.EfStructures.Migrations
 
                             b1.HasKey("CustomerId");
 
-                            b1.ToTable("Customers", (string)null);
+                            b1.ToTable("Customers");
 
                             b1.WithOwner()
                                 .HasForeignKey("CustomerId");
@@ -602,7 +605,7 @@ namespace AutoLot.Dal.EfStructures.Migrations
 
             modelBuilder.Entity("AutoLot.Models.Entities.Driver", b =>
                 {
-                    b.OwnsOne("AutoLot.Models.Entities.Driver.PersonInformation#AutoLot.Models.Entities.Owned.Person", "PersonInformation", b1 =>
+                    b.OwnsOne("AutoLot.Models.Entities.Owned.Person", "PersonInformation", b1 =>
                         {
                             b1.Property<int>("DriverId")
                                 .HasColumnType("int");
@@ -628,7 +631,7 @@ namespace AutoLot.Dal.EfStructures.Migrations
 
                             b1.HasKey("DriverId");
 
-                            b1.ToTable("Drivers", (string)null);
+                            b1.ToTable("Drivers");
 
                             b1.WithOwner()
                                 .HasForeignKey("DriverId");
