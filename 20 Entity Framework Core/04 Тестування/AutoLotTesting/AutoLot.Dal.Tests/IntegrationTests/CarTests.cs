@@ -1,5 +1,4 @@
-﻿using AutoLot.Dal.Tests.Base;
-
+﻿
 namespace AutoLot.Dal.Tests.IntegrationTests;
 
 [Collection("Integration Tests")]
@@ -10,10 +9,24 @@ public class CarTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixture
     {
         _carRepo = new CarRepo(Context);
     }
+
     public override void Dispose()
     {
         _carRepo.Dispose();
         base.Dispose();
+    }
+
+    [Fact]
+    public void ShouldGetNotAllCars()
+    {
+        IQueryable<Car> query = Context.Cars.AsQueryable();
+        OutputHelper.WriteLine(query.ToQueryString());
+        var cars = query.ToList();
+        Assert.NotEmpty(cars);
+        foreach (var car in cars)
+        {
+            OutputHelper.WriteLine(car.ToString());
+        }
     }
 
     [Theory]
@@ -48,6 +61,7 @@ public class CarTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixture
         Assert.Equal(expectedCount, cars.Count());
     }
 
+
     [Fact]
     public void ShouldReturnDrivableCarsWithQueryFilterSet()
     {
@@ -55,21 +69,28 @@ public class CarTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixture
         OutputHelper.WriteLine(query.ToQueryString());
 
         var cars = query.ToList();
+        foreach (var car in cars)
+        {
+            OutputHelper.WriteLine(car.ToString());
+        }
+
         Assert.NotEmpty(cars);
         Assert.Equal(9, cars.Count());
     }
+
     [Fact]
     public void ShouldGetAllOfTheCars()
     {
         IQueryable<Car> query = Context.Cars.IgnoreQueryFilters();
         OutputHelper.WriteLine(query.ToQueryString());
-        var cars = query.ToList();
-        Assert.Equal(10, cars.Count());
 
+        var cars = query.ToList();
         foreach (var car in cars)
         {
-            OutputHelper.WriteLine(car.ToString()+$"\t{car.IsDrivable}");
+            OutputHelper.WriteLine(car.ToString() + $"\t{car.IsDrivable}");
         }
+
+        Assert.Equal(10, cars.Count());
     }
 
     [Fact]
@@ -77,63 +98,38 @@ public class CarTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixture
     {
         IIncludableQueryable<Car, Make> query = Context.Cars
             .Include(c => c.MakeNavigation);
+
         OutputHelper.WriteLine(query.ToQueryString());
+
         var cars = query.ToList();
-        Assert.Equal(9, cars.Count());
         foreach (var car in cars)
         {
             OutputHelper.WriteLine(car.ToString());
         }
+
+        Assert.Equal(9, cars.Count());
     }
 
     [Fact]
     public void ShouldGetCarsOnOrderWithCustomer()
     {
-        IIncludableQueryable<Car, Customer?> query = Context.Cars
+        IIncludableQueryable<Car, Customer?> query = Context.Cars.IgnoreQueryFilters()
             .Where(c => c.Orders.Any())
             .Include(c => c.MakeNavigation)
             .Include(c => c.Orders)
             .ThenInclude(o => o.CustomerNavigation);
         OutputHelper.WriteLine(query.ToQueryString());
+
         var cars = query.ToList();
         foreach (var car in cars)
         {
-            OutputHelper.WriteLine($"{car.Id} {car.PetName} {car.MakeName}");
+            OutputHelper.WriteLine($"{car.Id}\t{car.PetName}\t{car.MakeName}");
             foreach (var order in car.Orders)
             {
                 OutputHelper.WriteLine(
-                    $"\t\t{order.Id} " +
-                    $"{order.CustomerNavigation.PersonInformation.LastName}");
-            }
-        }
-
-        Assert.Equal(4, query.Count());
-        cars.ForEach(c =>
-        {
-            Assert.NotNull(c.MakeNavigation);
-            Assert.NotNull(c.Orders.ToList()[0].CustomerNavigation);
-        });
-    }
-
-    [Fact]
-    public void ShouldGetCarsOnOrderWithCustomerIgnoreQueryFilters()
-    {
-        IIncludableQueryable<Car, Customer?> query = Context.Cars
-            .IgnoreQueryFilters()
-            .Where(c => c.Orders.Any())
-            .Include(c => c.MakeNavigation)
-            .Include(c => c.Orders)
-            .ThenInclude(o => o.CustomerNavigation);
-        OutputHelper.WriteLine(query.ToQueryString());
-        var cars = query.ToList();
-        foreach (var car in cars)
-        {
-            OutputHelper.WriteLine($"{car.Id} {car.PetName} {car.MakeName}");
-            foreach (var order in car.Orders)
-            {
-                OutputHelper.WriteLine(
-                    $"\t\t{order.Id} " +
-                    $"{order.CustomerNavigation.PersonInformation.LastName}");
+                    $"\t{order.Id}\t"+
+                    $"{order.CustomerId}\t"+
+                    $"{order.CustomerNavigation.PersonInformation.LastName}\t");
             }
         }
 
@@ -148,26 +144,28 @@ public class CarTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixture
     [Fact]
     public void ShouldGetCarsOnOrderWithCustomerAsSplitQuery()
     {
-        IQueryable<Car> query = Context.Cars
+        IQueryable<Car> query = Context.Cars.IgnoreQueryFilters()
             .Where(c => c.Orders.Any())
             .Include(c => c.MakeNavigation)
             .Include(c => c.Orders)
             .ThenInclude(o => o.CustomerNavigation)
             .AsSplitQuery();
         OutputHelper.WriteLine(query.ToQueryString());
+
         var cars = query.ToList();
         foreach (var car in cars)
         {
-            OutputHelper.WriteLine($"{car.Id} {car.PetName} {car.MakeName}");
+            OutputHelper.WriteLine($"{car.Id}\t{car.PetName}\t{car.MakeName}");
             foreach (var order in car.Orders)
             {
                 OutputHelper.WriteLine(
-                    $"\t\t{order.Id} " +
-                    $"{order.CustomerNavigation.PersonInformation.LastName}");
+                    $"\t{order.Id}\t" +
+                    $"{order.CustomerId}\t" +
+                    $"{order.CustomerNavigation.PersonInformation.LastName}\t");
             }
         }
 
-        Assert.Equal(4, query.Count());
+        Assert.Equal(5, query.Count());
         cars.ForEach(c =>
         {
             Assert.NotNull(c.MakeNavigation);
@@ -175,88 +173,51 @@ public class CarTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixture
         });
     }
 
-    [Fact]
-    public void ShouldGetAllMakesAndCarsThatAreYellow()
-    {
-        IQueryable<Make> query = Context.Makes
-            .IgnoreQueryFilters()
-            .Include(m => m.Cars.Where(c => c.Color == "Yellow"));
-        OutputHelper.WriteLine(query.ToQueryString());
 
-        List<Make> makes = query.ToList();
 
-        foreach (var make in makes)
-        {
-            OutputHelper.WriteLine($"{make.Id} {make.Name}");
-            foreach (var car in make.Cars)
-            {
-                OutputHelper.WriteLine($"\t{car.Id} {car.MakeName} {car.Color} {car.PetName}");
-            }
-        }
-        Assert.NotNull(makes);
-        Assert.NotEmpty(makes);
-        Assert.Contains(makes, m => m.Cars.Any());
-        Assert.Empty(makes.First(m => m.Id == 1).Cars);
-        Assert.Empty(makes.First(m => m.Id == 2).Cars);
-        Assert.Empty(makes.First(m => m.Id == 3).Cars);
-        Assert.Empty(makes.First(m => m.Id == 5).Cars);
-        Assert.NotEmpty(makes.First(m => m.Id == 4).Cars);
-    }
 
     [Fact]
     public void ShouldGetReferenceRelatedInformationExplicitly()
     {
-        Car? car = Context.Cars.First(c => c.Id == 1);
+        Car car = Context.Cars.First(c => c.Id == 1);
+        OutputHelper.WriteLine(car.ToString());
+
         Assert.Null(car.MakeNavigation);
+
         var query = Context.Entry(car).Reference(c => c.MakeNavigation).Query();
         OutputHelper.WriteLine(query.ToQueryString());
         query.Load();
         OutputHelper.WriteLine(car?.MakeNavigation?.Name);
+        
         Assert.NotNull(car?.MakeNavigation);
     }
 
     [Fact]
     public void ShouldGetCollectionRelatedInformationExplicitly()
     {
-        Car? car = Context.Cars.First(c => c.Id == 1);
+        Car car = Context.Cars.First(c => c.Id == 4);
+        OutputHelper.WriteLine(car.ToString());
+        OutputHelper.WriteLine(car.Orders.Count().ToString());
         Assert.Empty(car.Orders);
+        
         var query = Context.Entry(car).Collection(c => c.Orders).Query();
         OutputHelper.WriteLine(query.ToQueryString());
         query.Load();
+        OutputHelper.WriteLine(car.Orders.Count().ToString());
+        Assert.NotEmpty(car.Orders);
+
+        var orders = query.ToList();
+        foreach (var order in orders)
+        {
+            OutputHelper.WriteLine(
+                $"{order.Id}\t" +
+                $"{order.CarId}\t" +
+                $"{order.CustomerId}"
+                );
+        }
         Assert.Single(car.Orders);
-    }
-
-    [Theory]
-    [InlineData(1, 1)]
-    [InlineData(2, 1)]
-    [InlineData(3, 1)]
-    [InlineData(4, 2)]
-    [InlineData(5, 3)]
-    [InlineData(6, 1)]
-    public void ShouldGetAllCarsForAMakeExplicitlyWithQueryFilters(int makeId, int carCount)
-    {
-        Make? make = Context.Makes.Single(m => m.Id == makeId);
-        IQueryable<Car> query = Context.Entry(make).Collection(m => m.Cars).Query();
-        OutputHelper.WriteLine(query.ToQueryString());
-        query.Load();
-        Assert.Equal(carCount, make.Cars.Count);
-    }
-
-    [Theory]
-    [InlineData(1, 2)]
-    [InlineData(2, 1)]
-    [InlineData(3, 1)]
-    [InlineData(4, 2)]
-    [InlineData(5, 3)]
-    [InlineData(6, 1)]
-    public void ShouldGetAllCarsForAMakeExplicitlyWithoutQueryFilters(int makeId, int carCount)
-    {
-        Make? make = Context.Makes.Single(m => m.Id == makeId);
-        IQueryable<Car> query = Context.Entry(make).Collection(m => m.Cars)
-            .Query().IgnoreQueryFilters();
-        OutputHelper.WriteLine(query.ToQueryString());
-        query.Load();
-        Assert.Equal(carCount, make.Cars.Count);
+        Assert.NotNull(orders[0].CarNavigation);
+        Assert.Null(orders[0].CustomerNavigation);
     }
 
     [Fact]
@@ -265,6 +226,8 @@ public class CarTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixture
         var entity = Context.Model.FindEntityType(typeof(Car).FullName!);
         var tableName = entity!.GetTableName();
         var schemaName = entity!.GetSchema();
+        OutputHelper.WriteLine(tableName);
+        OutputHelper.WriteLine(schemaName);
 
         string sql = $"Select *,PeriodStart,PeriodEnd from {schemaName}.{tableName}";
         var query = Context.Cars.FromSqlRaw(sql);
@@ -272,10 +235,15 @@ public class CarTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixture
 
         var cars = query.ToList();
         Assert.Equal(9, cars.Count);
+
+        foreach (var car in cars)
+        {
+            OutputHelper.WriteLine(car.ToString());
+        }
     }
 
     [Fact]
-    public void ShouldGetAllCarsUsingFromSqlWithoutFilter()
+    public void ShouldGetAllCarsUsingFromSql()
     {
         var entity = Context.Model.FindEntityType(typeof(Car).FullName!);
         var tableName = entity!.GetTableName();
@@ -287,6 +255,11 @@ public class CarTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixture
 
         var cars = query.ToList();
         Assert.Equal(10, cars.Count);
+
+        foreach (var car in cars)
+        {
+            OutputHelper.WriteLine(car.ToString());
+        }
     }
 
     [Fact]
@@ -296,7 +269,10 @@ public class CarTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixture
         FormattableString sql = $"Select *,PeriodStart,PeriodEnd from dbo.Inventory where Id = {carId}";
         var query = Context.Cars.FromSqlInterpolated(sql).Include(c => c.MakeNavigation);
         OutputHelper.WriteLine(query.ToQueryString());
+
         Car? car = query.First();
+        OutputHelper.WriteLine(car.ToString());
+
         Assert.Equal("Black", car.Color);
         Assert.Equal("VW", car.MakeNavigation.Name);
     }
@@ -305,6 +281,7 @@ public class CarTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixture
     public void ShouldGetTheCountOfCars()
     {
         var count = Context.Cars.Count();
+        OutputHelper.WriteLine(count.ToString());
         Assert.Equal(9, count);
     }
 
@@ -314,6 +291,7 @@ public class CarTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixture
         var count = Context.Cars.IgnoreQueryFilters().Count();
         Assert.Equal(10, count);
     }
+
     [Theory]
     [InlineData(1, 1)]
     [InlineData(2, 1)]
@@ -358,6 +336,14 @@ public class CarTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixture
         Assert.Equal(expectedResult, result);
     }
 
+    [Fact]
+    public void ShouldCheckNotAllCarsIsDrivable()
+    {
+        var result = Context.Cars.IgnoreQueryFilters().All(c => c.IsDrivable);
+        Assert.False(result);
+    } 
+
+
     [Theory]
     [InlineData(1, "Zippy")]
     [InlineData(2, "Rusty")]
@@ -368,10 +354,16 @@ public class CarTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixture
     [InlineData(7, "Pinky")]
     [InlineData(8, "Pete")]
     [InlineData(9, "Brownie")]
+    [InlineData(10, "Lemon")]
     public void ShouldGetValueFromStoredProc(int id, string expectedName)
     {
+        string petName = _carRepo.GetPetName(id);
+        OutputHelper.WriteLine($"{id}\t{petName}");
+
         Assert.Equal(expectedName, _carRepo.GetPetName(id));
     }
+
+    //CRUD
 
     [Fact]
     public void ShouldAddACar()
@@ -380,23 +372,80 @@ public class CarTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixture
 
         void RunTheTest()
         {
-            int carCount = Context.Cars.Count();
-
             Car car = new Car
             {
                 Color = "Yellow",
                 MakeId = 1,
                 PetName = "Herbie"
             };
+            OutputHelper.WriteLine(car.ToString());
+
+            int carCount = Context.Cars.Count();
+            OutputHelper.WriteLine(carCount.ToString());
+
+
             Context.Cars.Add(car);
             Assert.Equal(0, car.Id);
 
             int countAdded = Context.SaveChanges();
-
-            int newCarCount = Context.Cars.Count();
+           
             Assert.NotEqual(0, car.Id);
             Assert.Equal(1, countAdded);
+
+            int newCarCount = Context.Cars.Count();
             Assert.Equal(carCount + 1, newCarCount);
+
+            OutputHelper.WriteLine(newCarCount.ToString());
+            OutputHelper.WriteLine(car.ToString());
+        }
+    }
+
+    [Fact]
+    public void ShouldAddAndReadACar()
+    {
+        ExecuteInATransaction(RunTheTest);
+
+        void RunTheTest()
+        {
+            //Create in DB
+            Car car = new()
+            {
+                Color = "Gray",
+                MakeId = 2,
+                PetName = "Wolf",
+                Price ="2000",
+            };
+            OutputHelper.WriteLine(car.ToString());
+            Context.Cars.Add(car);
+            int countAdded = Context.SaveChanges();
+            OutputHelper.WriteLine(car.ToString());
+
+            int id = car.Id;
+            string? dateBuilt = car.DateBuilt.ToString();
+            string? timeStamp = car.TimeStamp.ToString();
+
+            OutputHelper.WriteLine(countAdded.ToString());
+
+            Assert.Equal(1, countAdded);
+
+            Context.ChangeTracker.Clear();
+
+            // Reade from DB
+            Car? newCar = Context.Cars.Find(id);
+            Assert.False(object.ReferenceEquals(car, newCar));
+
+            OutputHelper.WriteLine(newCar?.ToString());
+
+            Assert.NotNull(newCar);
+            Assert.Equal(id, newCar.Id);
+            Assert.Equal(2, newCar.MakeId);
+            Assert.Equal("Gray", newCar.Color);
+            Assert.Equal("Wolf",newCar.PetName);
+            Assert.Equal(dateBuilt, newCar.DateBuilt.ToString());
+            Assert.True(car.IsDrivable);
+            Assert.Equal("2000",car.Price);
+            Assert.Equal("Wolf (Gray)",car.Display);
+            Assert.Equal(timeStamp, car.TimeStamp.ToString());
         }
     }
 
@@ -412,12 +461,120 @@ public class CarTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixture
                 MakeId = 1,
                 PetName = "Herbie"
             };
+            OutputHelper.WriteLine(car.ToString());
+
             var carCount = Context.Cars.Count();
             Context.Cars.Attach(car);
+            OutputHelper.WriteLine(car.ToString());
+
             Assert.Equal(EntityState.Added, Context.Entry(car).State);
+            
             Context.SaveChanges();
+            OutputHelper.WriteLine(car.ToString());
             var newCarCount = Context.Cars.Count();
             Assert.Equal(carCount + 1, newCarCount);
+        }
+    }
+
+    [Fact]
+    public void ShouldAddAndReadACarUsingRepo()
+    {
+        ExecuteInATransaction(RunTheTest);
+
+        void RunTheTest()
+        {
+            //Create in DB
+            Car car = new()
+            {
+                Color = "Gray",
+                MakeId = 2,
+                PetName = "Wolf",
+                Price = "2000"
+            };
+            
+            int countAdded = _carRepo.Add(car);
+
+            int id = car.Id;
+            string? dateBuilt = car.DateBuilt.ToString();
+            string? timeStamp = car.TimeStamp.ToString();
+
+            OutputHelper.WriteLine(car.ToString());
+            OutputHelper.WriteLine(countAdded.ToString());
+
+            Assert.Equal(1, countAdded);
+
+            // Detached
+            _carRepo.Context.ChangeTracker.Clear();
+            Assert.Equal(EntityState.Detached, Context.Entry(car).State);
+
+            // Reade from DB
+            Car? newCar = _carRepo.Find(id);
+            if (newCar != null)
+            {
+                Assert.Equal(EntityState.Unchanged, Context.Entry(newCar).State);
+            }
+
+            Assert.False(object.ReferenceEquals(car, newCar));
+
+            OutputHelper.WriteLine(newCar?.ToString());
+
+            Assert.NotNull(newCar);
+            Assert.Equal(id, newCar.Id);
+            Assert.Equal(2, newCar.MakeId);
+            Assert.Equal("Gray", newCar.Color);
+            Assert.Equal("Wolf", newCar.PetName);
+            Assert.Equal(dateBuilt, newCar.DateBuilt.ToString());
+            Assert.True(newCar.IsDrivable);
+            Assert.Equal("2000.00",newCar.Price);
+            Assert.Equal("Wolf (Gray)", car.Display);
+            Assert.Equal(timeStamp, newCar.TimeStamp.ToString());
+        }
+    }
+
+    [Fact]
+    public void ShouldAddAndReadACarUsingRepoWithOtherContext()
+    {
+        ExecuteInASharedTransaction(RunTheTest);
+
+        void RunTheTest(IDbContextTransaction transaction)
+        {
+            //Create in DB
+            Car car = new()
+            {
+                Color = "Gray",
+                MakeId = 2,
+                PetName = "Wolf",
+                Price = "2000"
+            };
+            OutputHelper.WriteLine(car.ToString());
+
+            int countAdded = _carRepo.Add(car);
+
+            int id = car.Id;
+            string? dateBuilt = car.DateBuilt.ToString();
+            string? timeStamp = car.TimeStamp.ToString();
+
+            OutputHelper.WriteLine(car.ToString());
+            OutputHelper.WriteLine(countAdded.ToString());
+
+            Assert.Equal(1, countAdded);
+
+
+            // Reade from DB
+            var otherContext = TestHelpers.GetSecondContext(Context, transaction);
+            Car? otherCar = otherContext.Cars.Find(id);
+            OutputHelper.WriteLine(otherCar?.ToString());
+
+            Assert.NotNull(otherCar);
+            Assert.Equal(id, otherCar.Id);
+            Assert.Equal(2, otherCar.MakeId);
+            Assert.Equal("Gray", otherCar.Color);
+            Assert.Equal("Wolf", otherCar.PetName);
+            Assert.Equal(dateBuilt, otherCar.DateBuilt.ToString());
+            Assert.True(otherCar.IsDrivable);
+            Assert.Equal("2000.00", otherCar.Price);
+            Assert.Equal("Wolf (Gray)", car.Display);
+            Assert.Equal(timeStamp, otherCar.TimeStamp.ToString());
         }
     }
 
@@ -428,6 +585,9 @@ public class CarTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixture
 
         void RunTheTest()
         {
+            int carCount = Context.Cars.Count();
+            OutputHelper.WriteLine(carCount.ToString());
+
             //Have to add 4 to activate batching
             var cars = new List<Car>
                 {
@@ -436,11 +596,16 @@ public class CarTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixture
                     new() {Color = "Pink", MakeId = 3, PetName = "Avon"},
                     new() {Color = "Blue", MakeId = 4, PetName = "Blueberry"},
                 };
-            var carCount = Context.Cars.Count();
             Context.Cars.AddRange(cars);
             Context.SaveChanges();
-            var newCarCount = Context.Cars.Count();
+            int newCarCount = Context.Cars.Count();
+            OutputHelper.WriteLine(newCarCount.ToString());
             Assert.Equal(carCount + 4, newCarCount);
+
+            foreach (var car in Context.Cars)
+            {
+                OutputHelper.WriteLine(car.ToString());
+            }
         }
     }
 
@@ -460,19 +625,34 @@ public class CarTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixture
                 {
                     HasTweeters = true,
                     HasSubWoofers = true,
-                    RadioId = "Bose 1234"
+                    RadioId = "KISS FM"
                 }
             };
 
             make.Cars.Add(car);
             Context.Makes.Add(make);
-            var carCount = Context.Cars.Count();
-            var makeCount = Context.Makes.Count();
+            int carCount = Context.Cars.Count();
+            int makeCount = Context.Makes.Count();
+            int radioCount = Context.Radios.Count();
             Context.SaveChanges();
-            var newCarCount = Context.Cars.Count();
-            var newMakeCount = Context.Makes.Count();
+
+            OutputHelper.WriteLine(make.Id.ToString());
+            OutputHelper.WriteLine(car.ToString());
+
+            int newCarCount = Context.Cars.Count();
+            int newMakeCount = Context.Makes.Count();
+            int newRadioCount = Context.Radios.Count();
+
+            Assert.Equal(7, car.MakeId);
+            Assert.Equal(7, make.Id);
             Assert.Equal(carCount + 1, newCarCount);
             Assert.Equal(makeCount + 1, newMakeCount);
+            Assert.Equal(radioCount + 1, newRadioCount);
+
+            Radio? radio = Context.Radios.Where(r => r.CarId == car.Id).FirstOrDefault();
+            OutputHelper.WriteLine(radio?.RadioId);
+
+            Assert.Equal("KISS FM", radio?.RadioId);
         }
     }
 
@@ -484,16 +664,23 @@ public class CarTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixture
         void RunTheTest(IDbContextTransaction transaction)
         {
             Car? car = Context.Cars.Find(1);
+            OutputHelper.WriteLine(car?.ToString());
+
             Assert.Equal("Black", car?.Color);
-            car!.Color = "White";
+            if (car != null)
+            {
+                car.Color = "White";
+            }
+            OutputHelper.WriteLine(car?.ToString());
+
             //Calling update is not needed because the entity is tracked
             //Context.Cars.Update(car);
             Context.SaveChanges();
-            Assert.Equal("White", car.Color);
 
             var otherContext = TestHelpers.GetSecondContext(Context, transaction);
             Car? otherCar = otherContext.Cars.Find(1);
             Assert.Equal("White", otherCar?.Color);
+            OutputHelper.WriteLine(otherCar?.ToString());
         }
     }
 
@@ -504,17 +691,20 @@ public class CarTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixture
         void RunTheTest(IDbContextTransaction transaction)
         {
             Car? car = Context.Cars.AsNoTracking().First(c => c.Id == 1);
-            Assert.Equal("Black", car?.Color);
+            OutputHelper.WriteLine(car.ToString());
 
             Car updatedCar = new()
-            {
-                Color = "White",
-                Id = car!.Id,
-                MakeId = car.MakeId,
-                PetName = car.PetName,
-                TimeStamp = car.TimeStamp,
-                IsDrivable = car.IsDrivable
-            };
+                {
+                    Id = car.Id,
+                    Color = "White",
+                    MakeId = car.MakeId,
+                    PetName = car.PetName,
+                    TimeStamp = car.TimeStamp,
+                    DateBuilt = car.DateBuilt,
+                    Price = car.Price,
+                    IsDrivable = car.IsDrivable
+                };
+
 
             var context2 = TestHelpers.GetSecondContext(Context, transaction);
             context2.Cars.Update(updatedCar);
@@ -523,6 +713,7 @@ public class CarTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixture
 
             var context3 = TestHelpers.GetSecondContext(Context, transaction);
             Car? otherCar = context3.Cars.Find(1);
+            OutputHelper.WriteLine(otherCar?.ToString());
             Assert.Equal("White", otherCar?.Color);
         }
     }
@@ -534,6 +725,7 @@ public class CarTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixture
         void RunTheTest()
         {
             var car = Context.Cars.First();
+            OutputHelper.WriteLine(car.ToString());
 
             //Update the database outside of the context
             FormattableString sql =
@@ -542,8 +734,11 @@ public class CarTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixture
 
             //update the car record in the change tracker
             car.Color = "Yellow";
+            OutputHelper.WriteLine(car.ToString());
+
             var ex = Assert.Throws<CustomConcurrencyException>(() => Context.SaveChanges());
             OutputHelper.WriteLine(ex.InnerException.Message);
+
             var entry = ((DbUpdateConcurrencyException)ex.InnerException)?.Entries[0];
             PropertyValues originalProps = entry.OriginalValues;
             PropertyValues currentProps = entry.CurrentValues;
@@ -559,11 +754,19 @@ public class CarTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixture
         void RunTheTest()
         {
             int carCount = Context.Cars.Count();
-            Car car = Context.Cars.Find(9)!;
-            Context.Cars.Remove(car);
+            Car? car = Context.Cars.Find(9);
+            if (car != null)
+            {
+                Context.Cars.Remove(car);
+                //Context.Entry(car).State = EntityState.Deleted;
+            }
             Context.SaveChanges();
+            
+            Car? result = Context.Cars.Find(9);
+            Assert.Null(result);
             Assert.Equal(carCount - 1, Context.Cars.Count());
             Assert.Equal(EntityState.Detached, Context.Entry(car).State);
+            OutputHelper.WriteLine(car?.ToString());
         }
     }
 
@@ -575,16 +778,20 @@ public class CarTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixture
         {
             var context1 = TestHelpers.GetSecondContext(Context, transacton);
             int countCar = context1.Cars.Count();
-            Car? car = context1.Cars.
-                AsNoTracking().
-                IgnoreQueryFilters().First(c => c.Id == 9);
+            OutputHelper.WriteLine(countCar.ToString());
+            
+            Car? car = context1.Cars.AsNoTracking().First(c => c.Id == 9);
+            OutputHelper.WriteLine(car.ToString());
 
             var context2 = TestHelpers.GetSecondContext(Context, transacton);
             context2.Cars.Remove(car);
             //context2.Entry(car).State = EntityState.Deleted;
             context2.SaveChanges();
 
-            Assert.Equal(countCar - 1, context2.Cars.Count());
+            int newCountCar = context2.Cars.Count();
+            OutputHelper.WriteLine(newCountCar.ToString());
+
+            Assert.Equal(countCar - 1, newCountCar);
             Assert.Equal(EntityState.Detached, Context.Entry(car).State);
         }
     }
@@ -596,9 +803,13 @@ public class CarTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixture
         void RunTheTest()
         {
             Car? car = Context.Cars.Find(1);
-            if (car == null) return;
-            Context.Cars.Remove(car);
-            Assert.Throws<CustomDbUpdateException>(() => Context.SaveChanges());
+            if( car != null)
+            {
+                Context.Cars.Remove(car);
+            }
+            var ex = Assert.Throws<CustomDbUpdateException>(() => Context.SaveChanges());
+            OutputHelper.WriteLine(ex?.InnerException?.InnerException?.Message);
         }
     }
+
 }

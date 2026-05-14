@@ -1,6 +1,4 @@
-﻿using AutoLot.Dal.Tests.Base;
-
-namespace AutoLot.Dal.Tests.IntegrationTests;
+﻿namespace AutoLot.Dal.Tests.IntegrationTests;
 
 [Collection("Integration Tests")]
 public class OrderTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixture>
@@ -16,13 +14,26 @@ public class OrderTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixtu
         _repo.Dispose();
         base.Dispose();
     }
+
     [Fact]
     public void ShouldGetAllOrdersExceptFiltered()
     {
-        var query = Context.Orders;
+        var query = Context.Orders
+            .Include(o=>o.CustomerNavigation)
+            .Include(o=>o.CarNavigation);
+
         OutputHelper.WriteLine(query.ToQueryString());
 
         var orders = query.ToList();
+        foreach (var order in orders) 
+        {
+            OutputHelper.WriteLine(
+                order.Id + "\t" +
+                order.CustomerId + "\t" +
+                order.CarId+"\t"+
+                order.CarNavigation?.IsDrivable);
+        }
+
         Assert.NotEmpty(orders);
         Assert.Equal(4, orders.Count);
     }
@@ -34,10 +45,17 @@ public class OrderTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixtu
         OutputHelper.WriteLine(query.ToQueryString());
 
         var orders = query.ToList();
+        foreach (var order in orders)
+        {
+            OutputHelper.WriteLine(
+                order.Id + "\t" +
+                order.CustomerId + "\t" +
+                order.CarId + "\t" +
+                order.CarNavigation?.IsDrivable);
+        }
+
         Assert.NotEmpty(orders);
         Assert.Equal(5, orders.Count);
     }
-
-
 
 }

@@ -6,11 +6,12 @@ public abstract class BaseTest : IDisposable
 
     protected readonly ApplicationDbContext Context;
 
+    protected readonly ITestOutputHelper OutputHelper;
+
     public virtual void Dispose()
     {
         Context.Dispose();
     }
-    protected readonly ITestOutputHelper OutputHelper;
 
     protected BaseTest(ITestOutputHelper outputHelper)
     {
@@ -29,6 +30,7 @@ public abstract class BaseTest : IDisposable
             transaction.Rollback();
         });
     }
+
     protected void ExecuteInASharedTransaction(Action<IDbContextTransaction> actionToExecute)
     {
         var strategy = Context.Database.CreateExecutionStrategy();
@@ -40,4 +42,5 @@ public abstract class BaseTest : IDisposable
             transaction.Rollback();
         });
     }
+
 }
