@@ -440,12 +440,12 @@ public class CarTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixture
             Assert.Equal(id, newCar.Id);
             Assert.Equal(2, newCar.MakeId);
             Assert.Equal("Gray", newCar.Color);
-            Assert.Equal("Wolf",newCar.PetName);
+            Assert.Equal("Wolf", newCar.PetName);
             Assert.Equal(dateBuilt, newCar.DateBuilt.ToString());
-            Assert.True(car.IsDrivable);
-            Assert.Equal("2000",car.Price);
-            Assert.Equal("Wolf (Gray)",car.Display);
-            Assert.Equal(timeStamp, car.TimeStamp.ToString());
+            Assert.True(newCar.IsDrivable);
+            Assert.Equal("2000.00", newCar.Price);
+            Assert.Equal("Wolf (Gray)", newCar.Display);
+            Assert.Equal(timeStamp, newCar.TimeStamp.ToString());
         }
     }
 

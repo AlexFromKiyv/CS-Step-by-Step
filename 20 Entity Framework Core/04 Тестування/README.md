@@ -211,15 +211,26 @@ public static class TestHelpers
 
 ### Перевіремо методи 
 
-В класі SampleTests додамо.
+В класі SampleTests.
 
 ```cs
+public class SampleTests(ITestOutputHelper outputHelper)
+{
+    protected readonly ITestOutputHelper OutputHelper = outputHelper;
+
     [Fact]
     public void GetContextWithoutParametrs()
     {
-        ApplicationDbContext context = TestHelpers.GetContext(TestHelpers.GetConfiguration);
+        IConfiguration configuration = TestHelpers.GetConfiguration;
+        ApplicationDbContext context = TestHelpers.GetContext(configuration);
+
+        string? connectionString = configuration.GetConnectionString("AutoLot");
         string? providerName = context.Database.ProviderName;
-        Assert.Equal("Microsoft.EntityFrameworkCore.SqlServer", providerName);        
+
+        OutputHelper.WriteLine(connectionString);
+        OutputHelper.WriteLine(providerName);
+       
+        Assert.Equal("Microsoft.EntityFrameworkCore.SqlServer", providerName);
         Assert.NotNull(context);
     }
 
@@ -229,8 +240,13 @@ public static class TestHelpers
         ApplicationDbContext context1 = TestHelpers.GetContext(TestHelpers.GetConfiguration);
         IDbContextTransaction transaction = context1.Database.BeginTransaction();
         ApplicationDbContext context = TestHelpers.GetSecondContext(context1, transaction);
+        
+        context.Model.GetEntityTypes().ToList()
+            .ForEach(e => OutputHelper.WriteLine(e.Name));
+
         Assert.NotNull(context);
     }
+}
 ```
 
 
@@ -264,12 +280,10 @@ public abstract class BaseTest : IDisposable
         Context = TestHelpers.GetContext(Configuration);
     }
 ```
-Інтерфейс ITestOutputHelper дозволяє записувати вміст у вікно виводу тесту. У разі використання шаблону IDisposable із тестовими фікстурами xUnit екземпляр для цього інтерфейсу можна вставити в конструктор. Додайте захищену змінну лише для читання, щоб утримувати примірник і оновлювати конструктор:
+Екземпляр об'єкта інтерфейса ITestOutputHelper дозволяє записувати вміст у вікно виводу тесту. У разі використання шаблону IDisposable із тестовими фікстурами xUnit екземпляр для цього інтерфейсу можна вставити в конструктор. Додайте захищену змінну лише для читання, щоб утримувати примірник і оновлювати конструктор:
 
 ```cs
     protected readonly ITestOutputHelper OutputHelper;
-
-    //...
 
     protected BaseTest(ITestOutputHelper outputHelper)
     {
@@ -353,7 +367,7 @@ public sealed class EnsureAutoLotDatabaseTestFixture : IDisposable
 [Collection("Integration Tests")]
 ```
 
-Додамо класи в папку IntegrationTests. Успадкувати від BaseTest. В класі CustomerTests реалізуйте інтерфейс IClassFixture\EnsureAutoLotDatabaseTestFixture\>. Додайте конструктор, щоб отримати екземпляр ITestOutputHelper і передати його базовому класу.
+Додамо класи в папку IntegrationTests. Успадкувати від BaseTest. В класі CustomerTests реалізуйте інтерфейс IClassFixture\<EnsureAutoLotDatabaseTestFixture\>. Додайте конструктор, щоб отримати екземпляр ITestOutputHelper і передати його базовому класу.
 
 ```cs
 namespace AutoLot.Dal.Tests.IntegrationTests;
@@ -496,8 +510,10 @@ public class OrderTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixtu
     {
         var query = Context.Customers;
         OutputHelper.WriteLine(query.ToQueryString());
+
         var customers = query.ToList();
         Assert.Equal(5, customers.Count);
+
         foreach (var customer in customers)
         {
             Person? person = customer.PersonInformation;
@@ -526,7 +542,9 @@ public class OrderTests : BaseTest, IClassFixture<EnsureAutoLotDatabaseTestFixtu
     {
         var query = Context.CustomerOrderViewModels;
         OutputHelper.WriteLine(query.ToQueryString());
+        
         var list = query.ToList();
+        
         Assert.NotEmpty(list);
         Assert.Equal(5, list.Count);
 
@@ -562,7 +580,9 @@ Bad	Customer	Lemon	Rust	False
         IQueryable<Car> query = Context.Cars.AsQueryable();
         OutputHelper.WriteLine(query.ToQueryString());
         var cars = query.ToList();
+
         Assert.NotEmpty(cars);
+        
         foreach (var car in cars)
         {
             OutputHelper.WriteLine(car.ToString());
@@ -588,6 +608,13 @@ Bad	Customer	Lemon	Rust	False
 ```cs
         builder.HasQueryFilter(c => c.IsDrivable);
 ```
+Фільтр можна вимкнути.
+
+```cs
+        IQueryable<Car> query = Context.Cars.
+            IgnoreQueryFilters().AsQueryable();
+```
+
 
 # Тест з фільтром записів.
 
@@ -717,10 +744,13 @@ WHERE [c].[LastName] LIKE N'W%' AND [c].[FirstName] LIKE N'M%'
     [Fact]
     public void ShouldGetAllMakes()
     {
-        IQueryable<Make> makes = Context.Makes.Include(m=>m.Cars).IgnoreQueryFilters();
+        IQueryable<Make> query = Context.Makes.Include(m=>m.Cars).IgnoreQueryFilters();
         OutputHelper.WriteLine(query.ToQueryString());
+
         var makes = query.ToList(); 
+        
         Assert.NotEmpty(makes);
+        
         foreach (var make in makes)
         {
             OutputHelper.WriteLine(
@@ -931,7 +961,7 @@ public void ShouldSortByFirstNameThenLastNameUsingReverse()
         }
 
         var customer = Context.Customers.First();
-        OutputHelper.WriteLine($"\n{customer.Id} {customer.PersonInformation.LastName}");
+        OutputHelper.WriteLine($"\n{customer.Id}\t{customer.PersonInformation.LastName}");
         Assert.Equal(1, customer.Id);
     }
 ```
@@ -942,7 +972,7 @@ public void ShouldSortByFirstNameThenLastNameUsingReverse()
 4	Walton
 5	Customer
 
-1 Brenner
+1   Brenner
 ```
 
 Наступний тест демонструє отримання першого запису на основі порядку «last name, first name»:
@@ -992,7 +1022,7 @@ public void ShouldSortByFirstNameThenLastNameUsingReverse()
         Assert.Throws<InvalidOperationException>(() => Context.Customers.First(c => c.Id == 10)); 
     }
 ```
-Assert.Throws() — це особливий тип оператора assert. Він очікує виняток із викинутого коду у виразі. Якщо виняток не генерується, твердження не виконується.
+Assert.Throws() — це особливий тип оператора Assert. Він очікує виняток із викинутого коду у виразі. Якщо виняток не генерується, твердження не виконується.
 
 Під час використання FirstOrDefault() замість винятку результатом є null , якщо дані не повертаються. Цей тест показує створення змінної виразу
 
@@ -1155,7 +1185,6 @@ public void SingleOrDefaultShouldThrowExceptionIfMoreThenOneMatch()
 Щоб вимкнути глобальні фільтри запиту для сутностей у запиті, додайте метод IgnoreQueryFilters() до запиту LINQ. Якщо є кілька сутностей із глобальним фільтром запитів і потрібні деякі фільтри сутностей, їх потрібно додати до методів Where() інструкції LINQ. Додайте такий тест до класу CarTests.cs, який вимикає фільтр запитів і повертає всі записи:
 
 ```cs
-
     [Fact]
     public void ShouldGetAllOfTheCars()
     {
@@ -1217,7 +1246,9 @@ public void SingleOrDefaultShouldThrowExceptionIfMoreThenOneMatch()
         Assert.Equal(4, orders.Count);
     }
 ```
+
 Оскільки навігаційна властивість CarNavigation є обов’язковою навігаційною властивістю, система перекладу запитів використовує INNER JOIN, усуваючи записи Order, у яких Car має значення для IsDrivable false .
+
 ```sql
     SELECT [o].[Id], [o].[CarId], [o].[CustomerId], [o].[PeriodEnd], [o].[PeriodStart], [o].[TimeStamp], [t].[Id], [t].[Color], [t].[DateBuilt], [t].[Display], [t].[IsDrivable], [t].[MakeId], [t].[PeriodEnd], [t].[PeriodStart], [t].[PetName], [t].[Price], [t].[TimeStamp]
     FROM [Orders] AS [o]
@@ -1232,6 +1263,7 @@ public void SingleOrDefaultShouldThrowExceptionIfMoreThenOneMatch()
     3	3	4	True
     4	4	7	True
 ```
+
 Щоб повернути всі записи, додайте IgnoreQueryFilters() до запиту LINQ.
 
 ```cs
@@ -1324,7 +1356,7 @@ public void SingleOrDefaultShouldThrowExceptionIfMoreThenOneMatch()
 
 # Швидке ​​завантаження пов’язаних даних
 
-Сутності, пов’язані за допомогою навігаційних властивостей, можна створити в одному запиті за допомогою швидкого завантаження. Метод Include() вказує на приєднання до пов’язаної сутності, а метод ThenInclude() використовується для наступних з’єднань з іншими сутностями. Обидва ці методи будуть продемонстровані в цих тестах. Коли методи Include()/ThenInclude() транслюються в SQL, обов’язкові зв’язки використовують внутрішнє з’єднання, а необов’язкові – ліве з’єднання.
+Сутності, пов’язані за допомогою навігаційних властивостей, можна створити в одному запиті за допомогою швидкого завантаження. Метод Include() вказує на приєднання до пов’язаної сутності, а метод ThenInclude() використовується для наступних з’єднань з іншими сутностями. Обидва ці методи будуть продемонстровані в цих тестах. Коли методи Include()/ThenInclude() транслюються в SQL, обов’язкові зв’язки використовують INNER з’єднання, а необов’язкові – LEFT з’єднання.
 
 Додайте наступний тест до класу CarTests.cs, щоб показати один Include()
 
@@ -1383,13 +1415,14 @@ public void SingleOrDefaultShouldThrowExceptionIfMoreThenOneMatch()
         var cars = query.ToList();
         foreach (var car in cars)
         {
-            OutputHelper.WriteLine($"{car.Id}\t{car.PetName}\t{car.MakeName}");
+            OutputHelper.WriteLine($"{car.Id}\t{car.PetName}\t{car.MakeName}\t{car.Color}");
             foreach (var order in car.Orders)
             {
                 OutputHelper.WriteLine(
-                    $"\t{order.Id}\t"+
-                    $"{order.CustomerId}\t"+
-                    $"{order.CustomerNavigation.PersonInformation.LastName}\t");
+                    $"\t{order.Id}\t" +
+                    $"{order.CustomerId}\t" +
+                    $"{order.CustomerNavigation.PersonInformation.FirstName}\t" +
+                    $"{order.CustomerNavigation.PersonInformation.LastName}\n");
             }
         }
 
@@ -1404,38 +1437,41 @@ public void SingleOrDefaultShouldThrowExceptionIfMoreThenOneMatch()
 Сформований запит досить об’ємний.
 
 ```sql
-    SELECT [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display], [i].[IsDrivable], [i].[MakeId], [i].[PeriodEnd], [i].[PeriodStart], [i].[PetName], [i].[Price], [i].[TimeStamp], [m].[Id], [m].[Name], [m].[PeriodEnd], [m].[PeriodStart], [m].[TimeStamp], [t0].[Id], [t0].[CarId], [t0].[CustomerId], [t0].[PeriodEnd], [t0].[PeriodStart], [t0].[TimeStamp], [t0].[Id0], [t0].[TimeStamp0], [t0].[FirstName], [t0].[FullName], [t0].[LastName], [t0].[Id1]
+    SELECT [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display], [i].[IsDrivable], [i].[MakeId], [i].[PeriodEnd], [i].[PeriodStart], [i].[PetName], [i].[Price], [i].[TimeStamp], [m].[Id], [m].[Name], [m].[PeriodEnd], [m].[PeriodStart], [m].[TimeStamp], [s].[Id], [s].[CarId], [s].[CustomerId], [s].[PeriodEnd], [s].[PeriodStart], [s].[TimeStamp], [s].[Id0], [s].[TimeStamp0], [s].[FirstName], [s].[FullName], [s].[LastName], [s].[Id1]
     FROM [dbo].[Inventory] AS [i]
     INNER JOIN [Makes] AS [m] ON [i].[MakeId] = [m].[Id]
     LEFT JOIN (
-        SELECT [o0].[Id], [o0].[CarId], [o0].[CustomerId], [o0].[PeriodEnd], [o0].[PeriodStart], [o0].[TimeStamp], [c].[Id] AS [Id0], [c].[TimeStamp] AS [TimeStamp0], [c].[FirstName], [c].[FullName], [c].[LastName], [t1].[Id] AS [Id1]
+        SELECT [o0].[Id], [o0].[CarId], [o0].[CustomerId], [o0].[PeriodEnd], [o0].[PeriodStart], [o0].[TimeStamp], [c].[Id] AS [Id0], [c].[TimeStamp] AS [TimeStamp0], [c].[FirstName], [c].[FullName], [c].[LastName], [i3].[Id] AS [Id1]
         FROM [Orders] AS [o0]
         INNER JOIN (
-            SELECT [i1].[Id], [i1].[IsDrivable]
-            FROM [dbo].[Inventory] AS [i1]
-            WHERE [i1].[IsDrivable] = CAST(1 AS bit)
-        ) AS [t1] ON [o0].[CarId] = [t1].[Id]
+            SELECT [i2].[Id], [i2].[IsDrivable]
+            FROM [dbo].[Inventory] AS [i2]
+            WHERE [i2].[IsDrivable] = CAST(1 AS bit)
+        ) AS [i3] ON [o0].[CarId] = [i3].[Id]
         INNER JOIN [Customers] AS [c] ON [o0].[CustomerId] = [c].[Id]
-        WHERE [t1].[IsDrivable] = CAST(1 AS bit)
-    ) AS [t0] ON [i].[Id] = [t0].[CarId]
+        WHERE [i3].[IsDrivable] = CAST(1 AS bit)
+    ) AS [s] ON [i].[Id] = [s].[CarId]
     WHERE [i].[IsDrivable] = CAST(1 AS bit) AND EXISTS (
         SELECT 1
         FROM [Orders] AS [o]
         INNER JOIN (
-            SELECT [i0].[Id], [i0].[Color], [i0].[DateBuilt], [i0].[Display], [i0].[IsDrivable], [i0].[MakeId], [i0].[PeriodEnd], [i0].[PeriodStart], [i0].[PetName], [i0].[Price], [i0].[TimeStamp]
+            SELECT [i0].[Id], [i0].[IsDrivable]
             FROM [dbo].[Inventory] AS [i0]
             WHERE [i0].[IsDrivable] = CAST(1 AS bit)
-        ) AS [t] ON [o].[CarId] = [t].[Id]
-        WHERE [t].[IsDrivable] = CAST(1 AS bit) AND [i].[Id] = [o].[CarId])
-    ORDER BY [i].[Id], [m].[Id], [t0].[Id], [t0].[Id1]
-    1	Zippy	VW
-        2	2	Walton	
-    4	Clunker	Yugo
-        3	3	Hagen	
-    5	Bimmer	BMW
-        1	1	Brenner	
-    7	Pinky	BMW
-        4	4	Walton	
+        ) AS [i1] ON [o].[CarId] = [i1].[Id]
+        WHERE [i1].[IsDrivable] = CAST(1 AS bit) AND [i].[Id] = [o].[CarId])
+    ORDER BY [i].[Id], [m].[Id], [s].[Id], [s].[Id1]
+    1	Zippy	VW	Black
+        2	2	Matt	Walton
+
+    4	Clunker	Yugo	Yellow
+        3	3	Steve	Hagen
+
+    5	Bimmer	BMW	Black
+        1	1	Dave	Brenner
+
+    7	Pinky	BMW	Pink
+        4	4	Pat	Walton
 ```
 Якщо ви запустите той самий запит без фільтрів, запит стане набагато простішим.
 
@@ -1547,7 +1583,7 @@ public void SingleOrDefaultShouldThrowExceptionIfMoreThenOneMatch()
             .AsSplitQuery();
 ```
 
-# Фільтрування пов’язаних даних
+## Фільтрування пов’язаних даних
 
 Існує можливість фільтрації при включенні властивостей колекції. Додайте наступний тест до класу MakeTests.cs, який демонструє отримання всіх записів Make і жовтих автомобілів:
 
@@ -1679,14 +1715,47 @@ public void SingleOrDefaultShouldThrowExceptionIfMoreThenOneMatch()
     1
     3	4	3
 ```
-Якшо спробувати завантажити непридатний автомобіль тест не пройде.
-
-```cs
-     Car car = Context.Cars.First(c => c.Id == 10);
-```
 
 
 # Завантаження пов’язаних даних та фільтр запитів
+
+Аналогічно попередньому тесту можна маючи завантажений Make, завантажити Cars
+
+```cs
+    [Fact]
+    public void ShouldGetMakesWithCarsExplicitly()
+    {
+        Make? make = Context.Makes.Single(m => m.Id == 1);
+
+        Assert.NotNull(make);
+
+        var query = Context.Entry(make).Collection(m => m.Cars)
+            .Query().IgnoreQueryFilters();
+        OutputHelper.WriteLine(query.ToQueryString());
+        query.Load();
+        var cars = query.ToList();
+
+        Assert.NotEmpty(cars);
+
+        OutputHelper.WriteLine(make.ToString());
+        foreach (var car in cars)
+        {
+            OutputHelper.WriteLine("\t" + car.ToString());
+        }
+    }        
+
+```
+```sql
+    DECLARE @__p_0 int = 1;
+
+    SELECT [i].[Id], [i].[Color], [i].[DateBuilt], [i].[Display], [i].[IsDrivable], [i].[MakeId], [i].[PeriodEnd], [i].[PeriodStart], [i].[PetName], [i].[Price], [i].[TimeStamp]
+    FROM [dbo].[Inventory] AS [i]
+    WHERE [i].[MakeId] = @__p_0
+    1	VW
+        1	Zippy	Black	VW		True	14.05.2026 19:34:54	Zippy (Black)
+        10	Lemon	Rust	VW		False	14.05.2026 19:34:54	Lemon (Rust)
+```
+
 
 Окрім формування запитів, створених під час активного завантаження пов’язаних даних, глобальні фільтри запитів активні під час явного завантаження пов’язаних даних. Виконайте такий тест у класі MakeTests.cs:
 
@@ -1874,7 +1943,7 @@ public void SingleOrDefaultShouldThrowExceptionIfMoreThenOneMatch()
         var schemaName = entity!.GetSchema();
 
         string sql = $"Select *,PeriodStart,PeriodEnd from {schemaName}.{tableName}";
-        var query = Context.Cars.FromSqlRaw(sql).IgnoreQueryFilters();
+        var query = Context.Cars.FromSqlRaw(sql).IgnoreQueryFilters(); //!!!
         OutputHelper.WriteLine(query.ToQueryString());
 
         var cars = query.ToList();
@@ -1908,7 +1977,7 @@ public void SingleOrDefaultShouldThrowExceptionIfMoreThenOneMatch()
     public void ShouldGetOneCarUsingInterpolation()
     {
         int carId = 1;
-        FormattableString sql = $"Select *,PeriodStart,PeriodEnd from dbo.Inventory where Id = {carId}";
+        FormattableString sql = $"Select *, PeriodStart, PeriodEnd from dbo.Inventory where Id = {carId}";
         var query = Context.Cars.FromSqlInterpolated(sql).Include(c => c.MakeNavigation);
         OutputHelper.WriteLine(query.ToQueryString());
 
@@ -2005,7 +2074,7 @@ public void ShouldGetTheCountOfCarsIgnoreQueryFilters()
 
 Методи Any() і All() перевіряють набір записів, щоб перевірити, чи відповідають якісь записи критеріям (Any()), чи всі записи відповідають критеріям (All()).  Глобальні фільтри запитів також впливають на функції методів Any() та All() і можуть бути вимкнені за допомогою IgnoreQueryFilters(). 
 
-Цей перший тест перевіряє, чи є в записах автомобілів певний MakeId:
+Цей перший тест перевіряє, чи є в записах автомобілів з вказаним MakeId:
 
 ```cs
     [Theory]
@@ -2164,7 +2233,6 @@ VALUES (@p0, @p1, @p2, @p3);
 
         void RunTheTest()
         {
-            //Create in DB
             Car car = new()
             {
                 Color = "Gray",
@@ -2173,9 +2241,13 @@ VALUES (@p0, @p1, @p2, @p3);
                 Price ="2000",
             };
             OutputHelper.WriteLine(car.ToString());
+
+            //Create in DB
             Context.Cars.Add(car);
             int countAdded = Context.SaveChanges();
             OutputHelper.WriteLine(car.ToString());
+
+            Assert.Equal(EntityState.Unchanged, Context.Entry(car).State);
 
             int id = car.Id;
             string? dateBuilt = car.DateBuilt.ToString();
@@ -2197,12 +2269,12 @@ VALUES (@p0, @p1, @p2, @p3);
             Assert.Equal(id, newCar.Id);
             Assert.Equal(2, newCar.MakeId);
             Assert.Equal("Gray", newCar.Color);
-            Assert.Equal("Wolf",newCar.PetName);
+            Assert.Equal("Wolf", newCar.PetName);
             Assert.Equal(dateBuilt, newCar.DateBuilt.ToString());
-            Assert.True(car.IsDrivable);
-            Assert.Equal("2000",car.Price);
-            Assert.Equal("Wolf (Gray)",car.Display);
-            Assert.Equal(timeStamp, car.TimeStamp.ToString());
+            Assert.True(newCar.IsDrivable);
+            Assert.Equal("2000.00", newCar.Price);
+            Assert.Equal("Wolf (Gray)", newCar.Display);
+            Assert.Equal(timeStamp, newCar.TimeStamp.ToString());
         }
     }
 ```
@@ -2230,14 +2302,16 @@ VALUES (@p0, @p1, @p2, @p3);
                 MakeId = 1,
                 PetName = "Herbie"
             };
+            OutputHelper.WriteLine(car.ToString());
 
             var carCount = Context.Cars.Count();
             Context.Cars.Attach(car);
+            OutputHelper.WriteLine(car.ToString());
 
             Assert.Equal(EntityState.Added, Context.Entry(car).State);
             
             Context.SaveChanges();
-            
+            OutputHelper.WriteLine(car.ToString());
             var newCarCount = Context.Cars.Count();
             Assert.Equal(carCount + 1, newCarCount);
         }
@@ -2373,7 +2447,7 @@ VALUES (@p0, @p1, @p2, @p3);
 
 ## Додавання кількох записів одночасно
 
-Щоб вставити кілька записів в одну транзакцію, використовуйте метод AddRange() DbSet\<T\>, як показано в цьому нижче. Якшо робити це в ручну на SQL Server треба зробити чотири дії.
+Щоб вставити кілька записів в одну транзакцію, використовуйте метод AddRange() DbSet\<T\>, як показано в цьому нижче. Якшо робити це в ручну на SQL Server треба зробити чотири запити.
 
 ```cs
     [Fact]
@@ -2694,13 +2768,20 @@ OUTPUT INSERTED.[Id], INSERTED.[DateBuilt], INSERTED.[Display], INSERTED.[IsDriv
             var context1 = TestHelpers.GetSecondContext(Context, transacton);
             int countCar = context1.Cars.Count();
             OutputHelper.WriteLine(countCar.ToString());
-            
-            Car? car = context1.Cars.AsNoTracking().First(c => c.Id == 9);
+
+            Car? car = context1.Cars.First(c => c.Id == 9);
+
+            Car deletedCar = new()
+            {
+                Id = 9,
+                TimeStamp = car.TimeStamp,
+            };
+
             OutputHelper.WriteLine(car.ToString());
+            OutputHelper.WriteLine(deletedCar.ToString());
 
             var context2 = TestHelpers.GetSecondContext(Context, transacton);
-            context2.Cars.Remove(car);
-            //context2.Entry(car).State = EntityState.Deleted;
+            context2.Cars.Remove(deletedCar);
             context2.SaveChanges();
 
             int newCountCar = context2.Cars.Count();
@@ -2734,7 +2815,7 @@ EF Core викличе DbUpdateException, коли спроба видалити
                 Context.Cars.Remove(car);
             }
             var ex = Assert.Throws<CustomDbUpdateException>(() => Context.SaveChanges());
-            OutputHelper.WriteLine(ex?.InnerException?.Message);
+            OutputHelper.WriteLine(ex?.InnerException?.InnerException?.Message);
         }
     }
 ```
